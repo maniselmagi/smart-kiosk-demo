@@ -1,0 +1,221 @@
+import { MenuItem, Order, StaffAlert, Feedback } from '../types';
+import { 
+  INITIAL_MENU_ITEMS, 
+  INITIAL_ORDERS, 
+  INITIAL_STAFF_ALERTS, 
+  INITIAL_FEEDBACK 
+} from '../data/initialData';
+
+const STORAGE_KEYS = {
+  MENU_ITEMS: 'orderease_menu_items_v1',
+  ORDERS: 'orderease_orders_v1',
+  STAFF_ALERTS: 'orderease_staff_alerts_v1',
+  FEEDBACK: 'orderease_feedback_v1',
+  ACTIVE_TABLE: 'orderease_active_table_v1',
+  LANGUAGE: 'orderease_language_v1',
+  ACCESSIBILITY: 'orderease_accessibility_v1',
+  LAST_ORDER_ID: 'orderease_last_order_id_v1',
+};
+
+const CHANNEL_NAME = 'orderease_kiosk_sync_channel';
+
+// Cross-tab broadcast channel
+let broadcastChannel: BroadcastChannel | null = null;
+try {
+  if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+    broadcastChannel = new BroadcastChannel(CHANNEL_NAME);
+  }
+} catch {
+  // BroadcastChannel might fail in some restricted iframes
+}
+
+export interface SyncMessage {
+  type: 
+    | 'MENU_UPDATED'
+    | 'ORDER_CREATED'
+    | 'ORDER_UPDATED'
+    | 'ALERT_CREATED'
+    | 'ALERT_RESOLVED'
+    | 'FEEDBACK_ADDED'
+    | 'DATA_RESET';
+  payload?: unknown;
+}
+
+export const storageService = {
+  getMenuItems(): MenuItem[] {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.MENU_ITEMS);
+      if (data) return JSON.parse(data);
+    } catch (e) {
+      console.warn('Storage read failed', e);
+    }
+    this.saveMenuItems(INITIAL_MENU_ITEMS);
+    return INITIAL_MENU_ITEMS;
+  },
+
+  saveMenuItems(items: MenuItem[]) {
+    try {
+      localStorage.setItem(STORAGE_KEYS.MENU_ITEMS, JSON.stringify(items));
+      this.broadcast({ type: 'MENU_UPDATED', payload: items });
+    } catch (e) {
+      console.error(e);
+    }
+  },
+
+  getOrders(): Order[] {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.ORDERS);
+      if (data) return JSON.parse(data);
+    } catch (e) {
+      console.warn(e);
+    }
+    this.saveOrders(INITIAL_ORDERS);
+    return INITIAL_ORDERS;
+  },
+
+  saveOrders(orders: Order[]) {
+    try {
+      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
+      this.broadcast({ type: 'ORDER_UPDATED', payload: orders });
+    } catch (e) {
+      console.error(e);
+    }
+  },
+
+  addOrder(order: Order) {
+    const orders = this.getOrders();
+    const updated = [order, ...orders];
+    try {
+      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(updated));
+      localStorage.setItem(STORAGE_KEYS.LAST_ORDER_ID, order.id);
+      this.broadcast({ type: 'ORDER_CREATED', payload: order });
+    } catch (e) {
+      console.error(e);
+    }
+    return updated;
+  },
+
+  getLastOrderId(): string | null {
+    try {
+      return localStorage.getItem(STORAGE_KEYS.LAST_ORDER_ID);
+    } catch {
+      return null;
+    }
+  },
+
+  updateOrderStatus(orderId: string, status: Order['status']) {
+    const orders = this.getOrders();
+    const updated = orders.map((o) => 
+      o.id === orderId 
+        ? { ...o, status, updatedAt: new Date().toISOString() } 
+        : o
+    );
+    this.saveOrders(updated);
+    return updated;
+  },
+
+  getStaffAlerts(): StaffAlert[] {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.STAFF_ALERTS);
+      if (data) return JSON.parse(data);
+    } catch (e) {
+      console.warn(e);
+    }
+    this.saveStaffAlerts(INITIAL_STAFF_ALERTS);
+    return INITIAL_STAFF_ALERTS;
+  },
+
+  saveStaffAlerts(alerts: StaffAlert[]) {
+    try {
+      localStorage.setItem(STORAGE_KEYS.STAFF_ALERTS, JSON.stringify(alerts));
+      this.broadcast({ type: 'ALERT_CREATED', payload: alerts });
+    } catch (e) {
+      console.error(e);
+    }
+  },
+
+  addStaffAlert(alert: StaffAlert) {
+    const alerts = this.getStaffAlerts();
+    const updated = [alert, ...alerts];
+    this.saveStaffAlerts(updated);
+    return updated;
+  },
+
+  resolveStaffAlert(id: string) {
+    const alerts = this.getStaffAlerts();
+    const updated = alerts.map((a) => a.id === id ? { ...a, status: 'RESOLVED' as const } : a);
+    this.saveStaffAlerts(updated);
+    return updated;
+  },
+
+  getFeedback(): Feedback[] {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.FEEDBACK);
+      if (data) return JSON.parse(data);
+    } catch (e) {
+      console.warn(e);
+    }
+    this.saveFeedback(INITIAL_FEEDBACK);
+    return INITIAL_FEEDBACK;
+  },
+
+  saveFeedback(feedback: Feedback[]) {
+    try {
+      localStorage.setItem(STORAGE_KEYS.FEEDBACK, JSON.stringify(feedback));
+      this.broadcast({ type: 'FEEDBACK_ADDED', payload: feedback });
+    } catch (e) {
+      console.error(e);
+    }
+  },
+
+  addFeedback(item: Feedback) {
+    const current = this.getFeedback();
+    const updated = [item, ...current];
+    this.saveFeedback(updated);
+    return updated;
+  },
+
+  toggleItemAvailability(itemId: string) {
+    const items = this.getMenuItems();
+    const updated = items.map((i) => 
+      i.id === itemId ? { ...i, isAvailable: !i.isAvailable } : i
+    );
+    this.saveMenuItems(updated);
+    return updated;
+  },
+
+  resetAllData() {
+    try {
+      localStorage.setItem(STORAGE_KEYS.MENU_ITEMS, JSON.stringify(INITIAL_MENU_ITEMS));
+      localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(INITIAL_ORDERS));
+      localStorage.setItem(STORAGE_KEYS.STAFF_ALERTS, JSON.stringify(INITIAL_STAFF_ALERTS));
+      localStorage.setItem(STORAGE_KEYS.FEEDBACK, JSON.stringify(INITIAL_FEEDBACK));
+      this.broadcast({ type: 'DATA_RESET' });
+    } catch (e) {
+      console.error(e);
+    }
+  },
+
+  broadcast(message: SyncMessage) {
+    if (broadcastChannel) {
+      try {
+        broadcastChannel.postMessage(message);
+      } catch (err) {
+        console.warn('Broadcast failed', err);
+      }
+    }
+  },
+
+  subscribe(callback: (msg: SyncMessage) => void) {
+    if (broadcastChannel) {
+      const handler = (event: MessageEvent) => {
+        callback(event.data);
+      };
+      broadcastChannel.addEventListener('message', handler);
+      return () => {
+        broadcastChannel?.removeEventListener('message', handler);
+      };
+    }
+    return () => {};
+  }
+};

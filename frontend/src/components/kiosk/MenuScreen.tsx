@@ -1,0 +1,437 @@
+import React, { useState, useMemo } from 'react';
+import { useKiosk } from '../../context/KioskContext';
+import { MenuItem, Category, ComboRecommendation } from '../../types';
+import { INITIAL_COMBOS } from '../../data/initialData';
+import { 
+  Clock, 
+  Flame, 
+  Plus, 
+  Search, 
+  Sparkles, 
+  Check, 
+  AlertCircle, 
+  TrendingUp, 
+  Leaf, 
+  Drumstick 
+} from 'lucide-react';
+
+interface MenuScreenProps {
+  onSelectItem: (item: MenuItem) => void;
+  onOpenCart: () => void;
+  onOpenOrderTracker?: () => void;
+}
+
+export const MenuScreen: React.FC<MenuScreenProps> = ({ 
+  onSelectItem, 
+  onOpenCart,
+  onOpenOrderTracker 
+}) => {
+  const { 
+    menuItems, 
+    cart, 
+    addToCart, 
+    language, 
+    t, 
+    isAccessibilityMode, 
+    currentTrackedOrder 
+  } = useKiosk();
+
+  const [selectedCategory, setSelectedCategory] = useState<Category>('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [dietFilter, setDietFilter] = useState<'all' | 'veg' | 'non-veg'>('all');
+
+  const categories: Category[] = [
+    'All',
+    'Starters',
+    'Main Course',
+    'Breads & Rice',
+    'Beverages',
+    'Desserts',
+  ];
+
+  const getCategoryLabel = (cat: Category) => {
+    switch (cat) {
+      case 'All': return t.allCategories;
+      case 'Starters': return t.starters;
+      case 'Main Course': return t.mainCourse;
+      case 'Breads & Rice': return t.breadsRice;
+      case 'Beverages': return t.beverages;
+      case 'Desserts': return t.desserts;
+      default: return cat;
+    }
+  };
+
+  const filteredItems = useMemo(() => {
+    return menuItems.filter((item) => {
+      // Category filter
+      if (selectedCategory !== 'All' && item.category !== selectedCategory) {
+        return false;
+      }
+      // Diet filter
+      if (dietFilter === 'veg' && !item.isVeg) return false;
+      if (dietFilter === 'non-veg' && item.isVeg) return false;
+
+      // Search query
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        const matchName = item.name.toLowerCase().includes(query);
+        const matchTamil = item.nameTamil.toLowerCase().includes(query);
+        const matchDesc = item.description.toLowerCase().includes(query);
+        return matchName || matchTamil || matchDesc;
+      }
+
+      return true;
+    });
+  }, [menuItems, selectedCategory, dietFilter, searchQuery]);
+
+  // Handle adding combo deal to cart
+  const handleAddCombo = (combo: ComboRecommendation) => {
+    const itemsToAdd = menuItems.filter((m) => combo.itemIds.includes(m.id));
+    itemsToAdd.forEach((item) => {
+      addToCart(item, 'Medium', ['Combo Special'], 'Served together', 1);
+    });
+  };
+
+  return (
+    <div className="pb-28">
+      
+      {/* Active Order Notice Banner (if kitchen is cooking an active order) */}
+      {currentTrackedOrder && currentTrackedOrder.status !== 'COMPLETED' && (
+        <div className="max-w-7xl mx-auto px-4 md:px-8 pt-4">
+          <div 
+            onClick={onOpenOrderTracker}
+            className="cursor-pointer bg-gradient-to-r from-brand-600 to-amber-600 rounded-2xl p-3 md:p-4 text-white shadow-lg flex items-center justify-between gap-4 hover:shadow-xl transition-all"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center font-bold text-sm">
+                #{currentTrackedOrder.orderNumber}
+              </div>
+              <div>
+                <div className="font-extrabold text-sm md:text-base flex items-center gap-2">
+                  <span>{t.orderProgress}:</span>
+                  <span className="px-2 py-0.5 rounded-full bg-white text-brand-700 text-xs font-black uppercase tracking-wider">
+                    {currentTrackedOrder.status === 'NEW' && t.statusReceived}
+                    {currentTrackedOrder.status === 'PREPARING' && t.statusPreparing}
+                    {currentTrackedOrder.status === 'READY' && t.statusReady}
+                  </span>
+                </div>
+                <p className="text-xs text-white/90">
+                  Estimated kitchen prep: ~{currentTrackedOrder.estimatedPrepTime} {t.min} • Tap to view live progress
+                </p>
+              </div>
+            </div>
+            <button className="px-4 py-2 rounded-xl bg-white text-brand-700 font-extrabold text-xs shadow-sm hover:bg-brand-50 transition-colors shrink-0">
+              Track Order →
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content Area */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-6">
+        
+        {/* Recommended AI Combo Pairing Card */}
+        {INITIAL_COMBOS.length > 0 && (
+          <div className="mb-6 bg-gradient-to-r from-amber-500/10 via-brand-500/10 to-orange-500/10 border border-brand-200/80 rounded-3xl p-4 md:p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5 w-full md:w-auto">
+              <div className="w-12 h-12 rounded-2xl bg-brand-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-brand-500/30">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-black uppercase tracking-wider text-brand-700 bg-brand-100/80 px-2 py-0.5 rounded-md">
+                    {t.recommendedForYou}
+                  </span>
+                  <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
+                    {t.saveDiscount} ₹{INITIAL_COMBOS[0].savings}
+                  </span>
+                </div>
+                <h4 className="text-base md:text-lg font-black text-slate-900 mt-1">
+                  {language === 'ta' ? INITIAL_COMBOS[0].titleTamil : INITIAL_COMBOS[0].title}
+                </h4>
+                <p className="text-xs text-slate-500">
+                  Curated chef pairing for today's lunch rush
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+              <div className="text-right">
+                <span className="text-xs text-slate-400 line-through mr-1.5">
+                  ₹{INITIAL_COMBOS[0].originalPrice}
+                </span>
+                <span className="text-xl font-black text-brand-600 font-display">
+                  ₹{INITIAL_COMBOS[0].comboPrice}
+                </span>
+              </div>
+              <button
+                onClick={() => handleAddCombo(INITIAL_COMBOS[0])}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white font-extrabold text-xs shadow-md shadow-brand-500/25 active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+                <span>{t.addCombo}</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Search & Dietary Filters Bar */}
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 mb-6">
+          
+          {/* Search Bar */}
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder={t.searchMenu}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white border border-slate-200/80 text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 shadow-sm transition-all"
+            />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 hover:text-slate-600"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+
+          {/* Veg / Non-Veg Quick Toggles */}
+          <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-2xl border border-slate-200/60 self-start md:self-auto">
+            <button
+              onClick={() => setDietFilter('all')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                dietFilter === 'all'
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setDietFilter('veg')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                dietFilter === 'veg'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'text-emerald-700 hover:bg-emerald-50'
+              }`}
+            >
+              <Leaf className="w-3.5 h-3.5" />
+              <span>{t.veg}</span>
+            </button>
+            <button
+              onClick={() => setDietFilter('non-veg')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                dietFilter === 'non-veg'
+                  ? 'bg-rose-600 text-white shadow-sm'
+                  : 'text-rose-700 hover:bg-rose-50'
+              }`}
+            >
+              <Drumstick className="w-3.5 h-3.5" />
+              <span>{t.nonVeg}</span>
+            </button>
+          </div>
+
+        </div>
+
+        {/* Horizontal Category Pill Tabs (Tablet scrollable) */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-3 mb-6 -mx-4 px-4 md:mx-0 md:px-0">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-5 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all duration-200 border active:scale-95 ${
+                selectedCategory === cat
+                  ? 'bg-slate-900 text-white border-slate-900 shadow-md'
+                  : 'bg-white text-slate-600 border-slate-200/80 hover:bg-slate-50 hover:text-slate-900 shadow-sm'
+              }`}
+            >
+              {getCategoryLabel(cat)}
+            </button>
+          ))}
+        </div>
+
+        {/* Food Items Grid - Optimized for Tablets & Desktops */}
+        {filteredItems.length === 0 ? (
+          <div className="text-center py-16 bg-white rounded-3xl border border-dashed border-slate-200 p-8">
+            <AlertCircle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+            <h4 className="text-lg font-bold text-slate-700 mb-1">
+              No dishes found
+            </h4>
+            <p className="text-xs text-slate-400 mb-4">
+              Try adjusting your search query or dietary filter.
+            </p>
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedCategory('All');
+                setDietFilter('all');
+              }}
+              className="px-4 py-2 rounded-xl bg-brand-500 text-white text-xs font-bold hover:bg-brand-600 transition-colors"
+            >
+              Reset Filters
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+            {filteredItems.map((item) => {
+              const inCartCount = cart
+                .filter((c) => c.menuItemId === item.id)
+                .reduce((acc, c) => acc + c.quantity, 0);
+
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => item.isAvailable && onSelectItem(item)}
+                  className={`group relative bg-white rounded-3xl border transition-all duration-300 overflow-hidden flex flex-col justify-between cursor-pointer ${
+                    !item.isAvailable
+                      ? 'opacity-65 border-slate-200 grayscale-[0.4]'
+                      : 'border-slate-200/80 hover:border-brand-400/80 hover:shadow-kiosk hover:-translate-y-0.5'
+                  }`}
+                >
+                  
+                  {/* Food Image Container */}
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      loading="lazy"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+
+                    {/* Gradient Overlay for badges */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none" />
+
+                    {/* Top Badges: Veg/Non-Veg & Spice */}
+                    <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                      <span className={`w-5 h-5 rounded-md flex items-center justify-center p-0.5 border shadow-sm ${
+                        item.isVeg 
+                          ? 'bg-white border-emerald-600 text-emerald-600' 
+                          : 'bg-white border-rose-600 text-rose-600'
+                      }`}>
+                        <span className={`w-2 h-2 rounded-full ${item.isVeg ? 'bg-emerald-600' : 'bg-rose-600'}`} />
+                      </span>
+
+                      {item.isSpicy && (
+                        <span className="flex items-center gap-0.5 px-2 py-0.5 rounded-md bg-rose-500/90 text-white text-[10px] font-bold shadow-sm backdrop-blur-xs">
+                          <Flame className="w-3 h-3" />
+                          <span>Spicy</span>
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Top Right: Preparation Time Badge */}
+                    <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-xl bg-black/65 backdrop-blur-md text-white text-xs font-semibold shadow-sm">
+                      <Clock className="w-3.5 h-3.5 text-amber-300" />
+                      <span>{item.prepTimeMinutes} {t.min}</span>
+                    </div>
+
+                    {/* Bottom overlay: Popularity tag */}
+                    <div className="absolute bottom-2.5 left-3 flex items-center gap-1 text-[11px] font-bold text-white drop-shadow-md">
+                      <TrendingUp className="w-3.5 h-3.5 text-brand-400" />
+                      <span>{item.popularityText}</span>
+                    </div>
+
+                    {/* Sold out overlay if unavailable */}
+                    {!item.isAvailable && (
+                      <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center">
+                        <span className="px-4 py-1.5 rounded-xl bg-red-600 text-white font-black text-sm uppercase tracking-wider shadow-lg">
+                          {t.soldOut}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Food Content Card */}
+                  <div className="p-4 md:p-5 flex-1 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-baseline justify-between gap-2 mb-1">
+                        <h3 className="font-extrabold text-base md:text-lg text-slate-900 group-hover:text-brand-600 transition-colors">
+                          {language === 'ta' ? item.nameTamil : item.name}
+                        </h3>
+                        <span className="font-extrabold text-lg md:text-xl text-brand-600 font-display shrink-0">
+                          ₹{item.price}
+                        </span>
+                      </div>
+
+                      <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-4">
+                        {language === 'ta' ? item.descriptionTamil : item.description}
+                      </p>
+                    </div>
+
+                    {/* Bottom Action Bar */}
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-100 mt-auto">
+                      <div className="text-[11px] font-semibold text-slate-400">
+                        {item.calories} kcal • {item.allergens.join(', ')}
+                      </div>
+
+                      {item.isAvailable ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectItem(item);
+                          }}
+                          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-extrabold transition-all active:scale-95 ${
+                            inCartCount > 0
+                              ? 'bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100'
+                              : 'bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-500/20'
+                          }`}
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>{inCartCount > 0 ? `${inCartCount} in cart` : t.add}</span>
+                        </button>
+                      ) : (
+                        <span className="text-xs font-bold text-red-500 px-3 py-1 rounded-lg bg-red-50">
+                          {t.soldOut}
+                        </span>
+                      )}
+                    </div>
+
+                  </div>
+
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+      </div>
+
+      {/* Floating Bottom Cart Bar for Tablet Quick Access */}
+      {cart.length > 0 && (
+        <div className="fixed bottom-4 left-4 right-4 max-w-lg mx-auto z-30 animate-in slide-in-from-bottom-4 duration-300">
+          <div 
+            onClick={onOpenCart}
+            className="cursor-pointer bg-slate-950 text-white rounded-3xl p-3.5 px-5 shadow-2xl border border-slate-800 flex items-center justify-between hover:bg-slate-900 transition-all active:scale-98"
+          >
+            <div className="flex items-center gap-3">
+              <span className="w-8 h-8 rounded-full bg-brand-500 text-white font-extrabold flex items-center justify-center text-xs shadow-md">
+                {cart.reduce((a, b) => a + b.quantity, 0)}
+              </span>
+              <div>
+                <span className="text-xs text-slate-400 uppercase font-semibold">{t.cart}</span>
+                <p className="text-sm font-extrabold text-white">
+                  {cart.length} {cart.length === 1 ? 'Dish' : 'Dishes'} Selected
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="text-lg font-black text-brand-400 font-display">
+                ₹{cart.reduce((a, b) => a + b.price * b.quantity, 0)}
+              </span>
+              <button className="px-4 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-black transition-colors">
+                {t.proceedToCheckout} →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+};
+
+export default MenuScreen;

@@ -1,0 +1,116 @@
+=== PAGE 1 ===
+CUSTOMER PROJECT PROPOSAL
+ Smart Table-Side Self-Ordering Kiosk
+ A connected ordering, payment, kitchen and analytics experience for dine-in restaurants
+Prepared for: Customer / Restaurant Management
+Prepared by: Project Development Team
+Proposal version: 1.0
+1. Executive Summary
+We propose to develop a production-ready table-side self-ordering platform that allows restaurant guests to
+browse a visual menu, customize dishes, place orders, track preparation status and complete payment directly
+from a kiosk/table device. The platform will also provide restaurant staff and management with operational visibility
+through kitchen and management interfaces.
+The solution is designed as a phased rollout: pilot deployment, restaurant-wide deployment, operational
+optimization and data-driven improvement.
+2. Business Objectives
+ Reduce guest waiting time for order taking and payment.
+ Reduce errors caused by handwritten or verbal orders.
+ Give guests a visual menu with photos, prices, preparation time and customization options.
+ Route orders directly to the kitchen workflow.
+ Provide real-time visibility into sales, menu performance and guest feedback.
+ Improve table turnover and support higher-value orders through relevant recommendations.
+ Create a scalable foundation that can support multiple tables, outlets and future integrations.
+3. Proposed Solution Scope
+Guest / Kiosk Experience
+ Visual menu with high-resolution dish images.
+ Dish details including price, preparation time and spice level.
+ Dish customization and special preferences.
+ Cart and order review before confirmation.
+ Table-aware ordering.
+ Order status visibility during preparation.
+ Payment at the table.
+ Split-bill support.
+ Optional tipping.
+
+
+=== PAGE 2 ===
+ Digital receipt through SMS or email.
+ Multilingual menu capability.
+ Allergen, nutrition and dietary indicators.
+ Call-waiter functionality.
+ Accessibility mode.
+ Post-meal rating and feedback.
+Kitchen / Staff Operations
+ Real-time incoming order display.
+ Order status management from received through preparation and completion.
+ Preparation-time updates.
+ Sold-out item control.
+ Kitchen-to-kiosk synchronization.
+ Staff assistance notifications from tables.
+Management & Analytics
+ Sales trend monitoring.
+ Best- and worst-selling dish analysis.
+ Performance by day, time slot and table.
+ Item-level profitability visibility, subject to availability of ingredient-cost data.
+ Guest feedback monitoring.
+ Peak-hour analysis for staffing and inventory planning.
+ Operational dashboard for restaurant management.
+
+
+=== PAGE 3 ===
+4. End-to-End Business Flow
+1. Guest Orders — Guest browses dishes, views photos, preparation time and customization options, then places
+the order.
+2. Kitchen Receives — The order is routed to the kitchen workflow for preparation.
+3. Meal Prepared — Kitchen staff update the order status as preparation progresses.
+4. Guest Pays — The guest completes payment and, where applicable, selects tip or split-bill options.
+5. Data Syncs — Order, payment and feedback information becomes available to authorized management
+interfaces.
+5. Delivery Approach
+Phase 1: Pilot
+Deploy the solution to a limited number of tables and validate the guest, kitchen and payment workflows.
+Phase 2: Full Rollout
+Expand deployment across the restaurant and train operational staff.
+Phase 3: Optimize
+Improve menu content, preparation-time accuracy, operational workflows and payment experience based on pilot
+data.
+Phase 4: Scale Insights
+Use dashboard data to support menu, staffing and operational decisions.
+6. Quality, Security & Reliability
+ Role-based access for guest, kitchen/staff and management functions.
+ Secure authentication and authorization for management functions.
+ Protected payment processing through an appropriate payment provider.
+ Auditability of important operational actions.
+ Error handling and recovery for temporary network interruptions.
+ Monitoring and logging for production operations.
+ Backup and recovery strategy for business-critical data.
+ Production testing covering kiosk, kitchen and management workflows.
+7. Assumptions & Items to Confirm
+ Final kiosk/table hardware model and operating environment.
+ Restaurant count, number of tables and expected concurrent users.
+ Payment gateway/provider and settlement requirements.
+ Kitchen display/printer/POS integration requirements.
+ SMS/email provider requirements.
+ Required languages and menu-management process.
+ Tax, invoice and receipt requirements.
+ Whether the first release is for a single restaurant or a multi-outlet platform.
+
+
+=== PAGE 4 ===
+ Branding, UI/UX and menu content supplied by the customer.
+ Final project timeline and commercial scope after technical discovery.
+8. Expected Business Outcomes
+ Faster ordering and payment experience.
+ Fewer manual order-entry errors.
+ Better visibility into restaurant performance.
+ More consistent kitchen order flow.
+ Improved opportunity for add-on and combo sales.
+ A foundation for future restaurant automation and analytics.
+9. Next Step
+We recommend beginning with a short discovery and technical validation phase. This phase will confirm the
+hardware environment, payment flow, kitchen/POS integration requirements, operational rules, security
+requirements and pilot scope before final development estimates are committed.
+Note: This proposal is based on the supplied Smart Table-Side Self-Ordering Kiosk product concept. Commercial pricing, exact
+delivery dates and third-party integration costs should be finalized after technical discovery.
+
+

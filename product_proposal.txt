@@ -1,0 +1,225 @@
+=== PAGE 1 ===
+OE
+P R O D U C T  P R O P O S A L
+Smart Table-Side
+Self-Ordering Kiosk
+A connected ordering, payment, and analytics experience for every table
+Prepared for restaurant management review  •  2026
+
+=== PAGE 2 ===
+Why Dine-In Ordering Needs an Upgrade
+Manual, paper-driven ordering is slow, error-prone, and gives owners no visibility into performance.
+T O D A Y ' S  P A I N  P O I N T S
+✗ Guests wait for staff to take every order
+✗ Handwritten or verbal orders lead to mistakes
+✗ No visual reference — guests order blind from text menus
+✗ Owners lack real-time visibility into sales or feedback
+✗ Peak-hour staff shortages slow table turnover
+H O W  T H E  K I O S K  S O L V E S  I T
+✓ Guests order directly at the table, the moment they're 
+ready
+✓ Digital orders route straight to the kitchen — no 
+transcription errors
+✓ Full-image menu shows exactly what will arrive
+✓ Every order feeds a live sales & feedback dashboard
+✓ Staff focus on service and hospitality, not order-taking
+OrderEase  |  Table-Side Self-Ordering Kiosk 2
+
+=== PAGE 3 ===
+What Is the Kiosk?
+Butter Chicken
+Prep 12 min  •  Ordered 48x today
+Paneer Tikka
+Prep 9 min  •  Spice: Medium
+P A Y  N O W
+A dedicated ordering tablet mounted at every table, giving guests full control from 
+browsing to payment.
+• Order independently
+Guests browse, customize, and place orders without waiting for staff availability.
+• Stay informed
+Every dish is shown with real photos, pricing, prep time, and spice options before ordering.
+• Pay instantly
+Bills are settled at the table the moment guests are ready — no waiting for a check.
+• Power the business
+Every interaction becomes data the restaurant can use to improve operations.
+OrderEase  |  Table-Side Self-Ordering Kiosk 3
+
+=== PAGE 4 ===
+Core Ordering Features
+Everything a guest needs to order confidently, without assistance
+1 Full Dish Imagery
+High-resolution photos for every menu item, so guests see exactly what 
+they're ordering before they commit.
+2 Live Prep Time
+Each dish shows an estimated cooking time, updated by the kitchen in 
+real time during busy periods.
+3 Order Popularity
+A running count of how many times each dish has been ordered helps 
+guests spot today's favorites.
+4 Spice Level Selector
+A simple mild-to-extra-hot slider sends the exact spice preference 
+straight to the kitchen ticket.
+OrderEase  |  Table-Side Self-Ordering Kiosk 4
+
+=== PAGE 5 ===
+Integrated, Frictionless Payment
+Guests settle the bill at their own pace — no waiting to flag down a server
+1
+Card, UPI & Wallets
+Accepts major cards, UPI, and 
+digital wallets through a secure, 
+PCI-compliant gateway.
+2
+Split the Bill
+Guests can divide the total evenly 
+or by item across everyone at the 
+table.
+3
+Optional Tipping
+A quick tip prompt appears at 
+checkout with preset and custom 
+amount options.
+4
+Instant Digital Receipt
+Receipts are sent by SMS or email 
+the moment payment is confirmed 
+— no paper needed.
+OrderEase  |  Table-Side Self-Ordering Kiosk 5
+
+=== PAGE 6 ===
+Every Order Becomes Business Insight
+Kiosk data feeds a management dashboard for sales, profitability, and guest feedback
+✓ Sales Trend Analysis
+Track best- and worst-selling dishes by day, time slot, and table.
+✓ Profitability by Item
+Compare ingredient cost against price to flag low-margin menu items.
+✓ Guest Feedback Capture
+Collect post-meal ratings and comments to catch issues early.
+✓ Peak-Hour Planning
+See ordering patterns to plan staffing and inventory more accurately.
+S A M P L E  D A S H B O A R D  V I E W
+148
+121
+96
+88
+74
+Butter Chicken
+Paneer Tikka
+Veg Biryani
+Masala Dosa
+Cold Coffee
+OrderEase  |  Table-Side Self-Ordering Kiosk 6
+
+=== PAGE 7 ===
+Additional Features to Strengthen the Kiosk
+Recommended enhancements beyond the core ordering experience
+1
+Multilingual Menu
+Toggle between regional and international 
+languages for diverse guests.
+2
+Allergen & Nutrition Tags
+Clear icons flag allergens, calories, and 
+dietary categories per dish.
+3
+AI Combo Suggestions
+Smart upsell prompts recommend pairings 
+based on the current order.
+4
+Call-Waiter Button
+One tap alerts staff for assistance without 
+leaving the table.
+5
+Loyalty & Rewards
+Guests earn and redeem points directly 
+through the kiosk.
+6
+Live Kitchen Sync
+Sold-out items are auto-removed the 
+moment the kitchen marks them 
+unavailable.
+7
+Post-Meal Feedback
+A quick rating prompt appears after 
+payment to capture guest sentiment.
+8
+Accessibility Mode
+Large-text and voice-guided navigation for 
+all guests.
+OrderEase  |  Table-Side Self-Ordering Kiosk 7
+
+=== PAGE 8 ===
+How It Works, End to End
+From tap to table to dashboard, in one connected flow
+1
+Guest Orders
+Browses photos, prep time & spice 
+level on the kiosk
+2
+Kitchen Receives
+Order routes instantly to the kitchen 
+display system
+3
+Meal Prepared
+Status updates in real time as the dish 
+is cooked
+4
+Guest Pays
+Bill is settled on the kiosk with tip & 
+split options
+5
+Data Syncs
+Order & feedback data flows to the 
+analytics dashboard
+OrderEase  |  Table-Side Self-Ordering Kiosk 8
+
+=== PAGE 9 ===
+Benefits at a Glance
+What the restaurant stands to gain from table-side self-ordering
+★
+Faster Table Turnover
+Guests order and pay 
+independently, shortening the dine-
+in cycle.
+★
+Fewer Order Errors
+Digital tickets remove mishearing 
+and handwriting mistakes.
+★
+Higher Average Order Value
+Visual menus and combo prompts 
+encourage add-on purchases.
+★
+Data-Driven Decisions
+Owners see real sales, margin, and 
+feedback trends — not guesswork.
+OrderEase  |  Table-Side Self-Ordering Kiosk 9
+
+=== PAGE 10 ===
+Suggested Rollout Roadmap
+A phased approach to minimize disruption to daily service
+Phase 1
+Pilot
+Install kiosks on a few tables, gather 
+staff & guest feedback
+Phase 2
+Full Rollout
+Deploy kiosks restaurant-wide with 
+on-site staff training
+Phase 3
+Optimize
+Refine menu content, prep-time 
+accuracy, and payment flow
+Phase 4
+Scale Insights
+Use dashboard data to guide menu 
+and staffing decisions
+OrderEase  |  Table-Side Self-Ordering Kiosk 10
+
+=== PAGE 11 ===
+Let's Build a Smarter
+Dining Experience
+Ready to pilot table-side self-ordering — happy to walk through hardware options,
+integration timelines, and expected costs in detail.
+Q u e s t i o n s  &  D i s c u s s i o n
+

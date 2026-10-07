@@ -1,7 +1,7 @@
 # OrderEase — Smart Table-Side Self-Ordering Kiosk
 ### Customer Presentation Demo Prototype (Proposal Review 2026)
 
-[![Cloud Demo Status](https://img.shields.io/badge/Demo-Cloud_Active-success?style=for-the-badge&logo=fastapi)](https://orderease-kiosk-live.loca.lt)
+[![Cloud Demo Status](https://img.shields.io/badge/Demo-Cloud_Active-success?style=for-the-badge&logo=fastapi)](https://chubby-mice-fail.loca.lt)
 [![Stack](https://img.shields.io/badge/Frontend-React_19_+_TypeScript_+_Vite-blue?style=for-the-badge&logo=react)](https://react.dev)
 [![Styling](https://img.shields.io/badge/Styling-Tailwind_CSS-38bdf8?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com)
 [![Backend](https://img.shields.io/badge/Backend-Python_FastAPI-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
@@ -12,7 +12,7 @@
 
 | Demo Screen | Direct Public HTTPS Link | Purpose |
 | :--- | :--- | :--- |
-| **Presentation Hub** | **[Launch Cloud Demo](https://orderease-kiosk-live.loca.lt)** | Main entry point linking Kiosk, Kitchen, and Dashboard |
+| **Presentation Hub** | **[Launch Cloud Demo (https://chubby-mice-fail.loca.lt)](https://chubby-mice-fail.loca.lt)** | Main entry point linking Kiosk, Kitchen, and Dashboard |
 | **Customer Kiosk** | Direct via Demo Top Bar (`Customer Kiosk` button) | Table 12 ordering tablet experience |
 | **Kitchen Display (KDS)** | Direct via Demo Top Bar (`Kitchen KDS` button) | Real-time tickets & preparation line |
 | **Management Dashboard** | Direct via Demo Top Bar (`Management` button) | Sales KPIs, peak hours & profitability margins |

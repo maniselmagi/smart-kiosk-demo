@@ -1,23 +1,23 @@
 # OrderEase — Smart Table-Side Self-Ordering Kiosk
 ### Customer Presentation Demo Prototype (Proposal Review 2026)
 
-[![Cloud Demo Status](https://img.shields.io/badge/Demo-Cloud_Active-success?style=for-the-badge&logo=fastapi)](https://chubby-mice-fail.loca.lt)
+[![Cloud Demo Status](https://img.shields.io/badge/Demo-Cloudflare_Active-success?style=for-the-badge&logo=cloudflare)](https://occasions-excessive-affairs-counting.trycloudflare.com)
 [![Stack](https://img.shields.io/badge/Frontend-React_19_+_TypeScript_+_Vite-blue?style=for-the-badge&logo=react)](https://react.dev)
 [![Styling](https://img.shields.io/badge/Styling-Tailwind_CSS-38bdf8?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com)
 [![Backend](https://img.shields.io/badge/Backend-Python_FastAPI-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
 
 ---
 
-## 🌐 Live Cloud Demo Access
+## 🌐 Live Public Cloud Demo Access (Open Anywhere)
 
 | Demo Screen | Direct Public HTTPS Link | Purpose |
 | :--- | :--- | :--- |
-| **Presentation Hub** | **[Launch Cloud Demo (https://chubby-mice-fail.loca.lt)](https://chubby-mice-fail.loca.lt)** | Main entry point linking Kiosk, Kitchen, and Dashboard |
-| **Customer Kiosk** | Direct via Demo Top Bar (`Customer Kiosk` button) | Table 12 ordering tablet experience |
-| **Kitchen Display (KDS)** | Direct via Demo Top Bar (`Kitchen KDS` button) | Real-time tickets & preparation line |
-| **Management Dashboard** | Direct via Demo Top Bar (`Management` button) | Sales KPIs, peak hours & profitability margins |
+| **🚀 Presentation Hub** | **[https://occasions-excessive-affairs-counting.trycloudflare.com](https://occasions-excessive-affairs-counting.trycloudflare.com)** | Main entry point linking Kiosk, Kitchen, and Dashboard |
+| **📱 Customer Kiosk** | Direct via Demo Top Bar (`Customer Kiosk` button) | Table 12 ordering tablet experience |
+| **👨‍🍳 Kitchen Display (KDS)** | Direct via Demo Top Bar (`Kitchen KDS` button) | Real-time tickets & preparation line |
+| **📊 Management Dashboard** | Direct via Demo Top Bar (`Management` button) | Sales KPIs, peak hours & profitability margins |
 
-> **Note for First Visit**: If the tunnel service presents a friendly security reminder screen, enter the tunnel gateway IP: **`223.185.23.48`** to access the demo.
+> **Direct Access**: Accessible from any smartphone, tablet, laptop, iPad, or desktop worldwide with no password or installation required.
 
 ---
 

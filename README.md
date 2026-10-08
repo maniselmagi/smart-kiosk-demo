@@ -74,8 +74,14 @@ EXECUTIVE DASHBOARD (KPIs, Peak-Hour analysis, Profitability & Reviews)
 
 - **Restaurant Tablet Native**: Specially styled for **8", 10", 11", and 12" tablets** with large touch targets (min 48px), comfortable spacing, readable typography, and tactile feedback.
 - **Landscape & Portrait Modes**: Seamless layout adaptation for table-docked tablets and mobile browsers.
+- **☀️ Dark Mode & Light Mode**: 1-click instant theme toggle with custom color tuning for bright dining rooms and intimate ambient dinner service.
 - **Accessibility Mode (A11y)**: 1-tap high-contrast mode with larger text scaling and high legibility for low-vision diners.
-- **Multilingual Support**: Real-time bilingual toggle between **English** and **Tamil (தமிழ்)** across all menus, buttons, and callouts.
+- **Multilingual 5-Language Engine**: Real-time 5-language switcher across menus, dishes, spice options, and receipts:
+  - 🇬🇧 **English** (`en`)
+  - 🇮🇳 **Tamil** (`ta` - தமிழ்)
+  - 🇮🇳 **Hindi** (`hi` - हिंदी)
+  - 🇮🇳 **Telugu** (`te` - తెలుగు)
+  - 🇪🇸 **Spanish** (`es` - Español)
 
 ---
 

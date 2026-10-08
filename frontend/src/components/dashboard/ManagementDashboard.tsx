@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 export const ManagementDashboard: React.FC = () => {
-  const { feedbacks, menuItems, activeOrders, setView, tableNumber } = useKiosk();
+  const { feedbacks, menuItems, activeOrders, setView, tableNumber, isStandaloneRole } = useKiosk();
 
   // Authentication demo toggle
   const [isAuthenticated, setIsAuthenticated] = useState(true);
@@ -150,12 +150,14 @@ export const ManagementDashboard: React.FC = () => {
             ))}
           </div>
 
-          <button
-            onClick={() => setView('kiosk')}
-            className="px-4 py-2 rounded-xl bg-brand-50 border border-brand-200 text-brand-700 text-xs font-bold hover:bg-brand-100 transition-colors"
-          >
-            Switch to Kiosk (T{tableNumber}) →
-          </button>
+          {!isStandaloneRole && (
+            <button
+              onClick={() => setView('hub')}
+              className="px-4 py-2 rounded-xl bg-brand-50 border border-brand-200 text-brand-700 text-xs font-bold hover:bg-brand-100 transition-colors"
+            >
+              Back to Hub →
+            </button>
+          )}
         </div>
       </div>
 

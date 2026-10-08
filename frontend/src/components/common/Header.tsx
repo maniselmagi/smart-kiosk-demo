@@ -33,7 +33,8 @@ export const Header: React.FC<HeaderProps> = ({
     t,
     staffAlerts,
     currentTrackedOrder,
-    setView
+    setView,
+    isStandaloneRole
   } = useKiosk();
 
   const [isWaiterModalOpen, setIsWaiterModalOpen] = useState(false);
@@ -65,9 +66,15 @@ export const Header: React.FC<HeaderProps> = ({
             )}
 
             <div 
-              onClick={() => setView('hub')}
+              onClick={() => {
+                if (showBack && onBackToWelcome) {
+                  onBackToWelcome();
+                } else if (!isStandaloneRole) {
+                  setView('hub');
+                }
+              }}
               className="flex items-center gap-2.5 cursor-pointer group"
-              title="Return to Demo Hub"
+              title="OrderEase Table Kiosk"
             >
               <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-amber-500 flex items-center justify-center text-white shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform">
                 <UtensilsCrossed className="w-5 h-5" />

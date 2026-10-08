@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
-import { 
+import type { 
   MenuItem, 
   CartItem, 
   Order, 
@@ -11,9 +11,12 @@ import {
 import { storageService, SyncMessage } from '../services/storageService';
 import { translations, Language, TranslationDictionary } from '../utils/translations';
 
+export type ViewType = 'hub' | 'kiosk' | 'kitchen' | 'dashboard';
+
 interface KioskContextType {
-  view: 'hub' | 'kiosk' | 'kitchen' | 'dashboard';
-  setView: (view: 'hub' | 'kiosk' | 'kitchen' | 'dashboard') => void;
+  view: ViewType;
+  setView: (view: ViewType) => void;
+  isStandaloneRole: boolean;
   tableNumber: number;
   setTableNumber: (table: number) => void;
   language: Language;
@@ -59,9 +62,48 @@ interface KioskContextType {
 
 const KioskContext = createContext<KioskContextType | undefined>(undefined);
 
+const parseRouteFromLocation = (): { view: ViewType; isStandalone: boolean; table: number } => {
+  if (typeof window === 'undefined') {
+    return { view: 'hub', isStandalone: false, table: 12 };
+  }
+
+  const path = window.location.pathname.toLowerCase();
+  const searchParams = new URLSearchParams(window.location.search);
+  const roleParam = (searchParams.get('role') || searchParams.get('view') || searchParams.get('mode') || '').toLowerCase();
+  const tableParam = parseInt(searchParams.get('table') || '');
+  const demoParam = searchParams.get('demo') === 'true';
+
+  let view: ViewType = 'hub';
+  let isStandalone = false;
+
+  if (path.includes('/kiosk') || roleParam === 'kiosk' || roleParam === 'customer') {
+    view = 'kiosk';
+    isStandalone = !demoParam;
+  } else if (path.includes('/kitchen') || path.includes('/kds') || roleParam === 'kitchen' || roleParam === 'kds') {
+    view = 'kitchen';
+    isStandalone = !demoParam;
+  } else if (path.includes('/management') || path.includes('/admin') || path.includes('/dashboard') || roleParam === 'management' || roleParam === 'dashboard' || roleParam === 'admin') {
+    view = 'dashboard';
+    isStandalone = !demoParam;
+  } else if (path.includes('/hub') || roleParam === 'hub') {
+    view = 'hub';
+    isStandalone = false;
+  } else {
+    // Default root path: hub
+    view = 'hub';
+    isStandalone = false;
+  }
+
+  const table = tableParam > 0 ? tableParam : 12;
+  return { view, isStandalone, table };
+};
+
 export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [view, setView] = useState<'hub' | 'kiosk' | 'kitchen' | 'dashboard'>('hub');
-  const [tableNumber, setTableNumber] = useState<number>(12);
+  const initialRoute = useMemo(() => parseRouteFromLocation(), []);
+
+  const [view, setViewState] = useState<ViewType>(initialRoute.view);
+  const [isStandaloneRole, setIsStandaloneRole] = useState<boolean>(initialRoute.isStandalone);
+  const [tableNumber, setTableNumber] = useState<number>(initialRoute.table);
   const [language, setLanguage] = useState<Language>('en');
   const [isAccessibilityMode, setIsAccessibilityMode] = useState<boolean>(false);
   const [menuItems, setMenuItems] = useState<MenuItem[]>(() => storageService.getMenuItems());
@@ -77,6 +119,48 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setTimeout(() => {
       setToastMessage((prev) => (prev === msg ? null : prev));
     }, 3500);
+  }, []);
+
+  // Sync route on popstate (browser back/forward)
+  useEffect(() => {
+    const handlePopState = () => {
+      const route = parseRouteFromLocation();
+      setViewState(route.view);
+      setIsStandaloneRole(route.isStandalone);
+      if (route.table) setTableNumber(route.table);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Update view and browser URL path
+  const setView = useCallback((nextView: ViewType) => {
+    setViewState(nextView);
+    try {
+      let path = '/';
+      if (nextView === 'kiosk') path = '/kiosk';
+      else if (nextView === 'kitchen') path = '/kitchen';
+      else if (nextView === 'dashboard') path = '/management';
+      else path = '/';
+
+      const currentUrl = new URL(window.location.href);
+      currentUrl.pathname = path;
+      // remove query param view/role if path matches
+      currentUrl.searchParams.delete('view');
+      currentUrl.searchParams.delete('role');
+      window.history.pushState({}, '', currentUrl.toString());
+
+      // If navigated from Hub, keep standalone flag aligned
+      if (nextView !== 'hub') {
+        const demoParam = currentUrl.searchParams.get('demo') === 'true';
+        setIsStandaloneRole(!demoParam);
+      } else {
+        setIsStandaloneRole(false);
+      }
+    } catch (e) {
+      console.warn(e);
+    }
   }, []);
 
   // Broadcast & multi-tab synchronization listener
@@ -114,7 +198,6 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Synchronize active order tracked on kiosk
   const currentTrackedOrder = useMemo(() => {
     if (!currentTrackedOrderId) {
-      // Find latest order for current table if exists
       const tableOrder = activeOrders.find((o) => o.tableNumber === tableNumber && o.status !== 'COMPLETED');
       return tableOrder || null;
     }
@@ -301,6 +384,7 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       value={{
         view,
         setView,
+        isStandaloneRole,
         tableNumber,
         setTableNumber,
         language,

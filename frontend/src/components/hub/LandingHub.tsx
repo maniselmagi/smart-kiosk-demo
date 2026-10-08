@@ -8,13 +8,12 @@ import {
   Clock, 
   Sparkles, 
   Layers, 
-  Split, 
-  Languages, 
-  ShieldCheck, 
   TrendingUp, 
   CheckCircle2, 
-  Flame, 
-  UtensilsCrossed 
+  UtensilsCrossed,
+  ExternalLink,
+  ShieldCheck,
+  Smartphone
 } from 'lucide-react';
 
 export const LandingHub: React.FC = () => {
@@ -30,12 +29,12 @@ export const LandingHub: React.FC = () => {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-brand-500/10 blur-[120px] pointer-events-none rounded-full" />
 
       {/* Main Container */}
-      <div className="relative max-w-6xl mx-auto px-4 py-12 md:py-20 flex flex-col items-center">
+      <div className="relative max-w-6xl mx-auto px-4 py-10 md:py-16 flex flex-col items-center">
         
         {/* Top Proposal Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/60 text-xs font-semibold text-brand-300 mb-6 shadow-inner">
           <Sparkles className="w-3.5 h-3.5 text-brand-400" />
-          <span>Product Proposal Prototype • Restaurant Review 2026</span>
+          <span>Product Proposal Prototype • Dedicated URLs for Each Role</span>
         </div>
 
         {/* Hero Title */}
@@ -49,20 +48,26 @@ export const LandingHub: React.FC = () => {
             </span>
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-black tracking-tight text-white font-display uppercase leading-tight mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tight text-white font-display uppercase leading-tight mb-4">
             Smart Table-Side <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-amber-300 to-brand-500">
               Self-Ordering Kiosk
             </span>
           </h1>
 
-          <p className="text-lg md:text-xl text-slate-300 font-normal leading-relaxed max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-slate-300 font-normal leading-relaxed max-w-2xl mx-auto">
             A connected ordering, kitchen, and analytics experience for modern dine-in restaurants.
           </p>
         </div>
 
+        {/* Dedicated URL Role Routing Notice */}
+        <div className="w-full max-w-4xl bg-brand-500/10 border border-brand-500/30 rounded-2xl p-4 mb-8 text-center text-xs text-brand-200">
+          <span className="font-bold text-white">Three Distinct Dedicated URLs: </span>
+          Customer Kiosk (<code className="bg-black/40 px-1.5 py-0.5 rounded text-amber-300">/kiosk</code>), Kitchen Display (<code className="bg-black/40 px-1.5 py-0.5 rounded text-amber-300">/kitchen</code>), and Management Dashboard (<code className="bg-black/40 px-1.5 py-0.5 rounded text-amber-300">/management</code>). The customer kiosk shows only customer ordering with no other information.
+        </div>
+
         {/* Core 5-Stage Workflow Bar */}
-        <div className="w-full max-w-4xl bg-slate-800/50 backdrop-blur-md rounded-2xl border border-slate-700/60 p-4 mb-12 shadow-xl">
+        <div className="w-full max-w-4xl bg-slate-800/50 backdrop-blur-md rounded-2xl border border-slate-700/60 p-4 mb-10 shadow-xl">
           <div className="text-center text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
             Connected Business Flow
           </div>
@@ -108,28 +113,28 @@ export const LandingHub: React.FC = () => {
                 <span className="text-xs font-bold uppercase tracking-wider text-brand-400">
                   Guest Experience
                 </span>
-                <span className="text-xs bg-slate-700/80 text-slate-300 px-2 py-0.5 rounded-full font-semibold">
-                  Table {tableNumber}
+                <span className="text-xs bg-brand-500/20 text-brand-300 border border-brand-500/30 px-2 py-0.5 rounded-full font-bold">
+                  /kiosk
                 </span>
               </div>
               <h3 className="text-2xl font-bold font-display text-white mb-2">
                 Customer Kiosk
               </h3>
               <p className="text-slate-400 text-sm leading-relaxed mb-4">
-                Tablet touch interface for guests: full food imagery, live prep time, spice selector, AI combos, digital receipt, split bill, and call waiter.
+                Dedicated tablet interface for diners: visual food menu, spice level, AI combos, split bill, payment, and waiter call. Shows <strong>NO</strong> administrative or other information.
               </p>
               
               {/* Quick Table Selector */}
-              <div className="flex items-center gap-1.5 mb-6 text-xs text-slate-400">
-                <span>Select Table:</span>
+              <div className="flex items-center gap-1.5 mb-5 text-xs text-slate-400">
+                <span>Table:</span>
                 {[4, 8, 12, 16].map((num) => (
                   <button
                     key={num}
                     onClick={() => setTableNumber(num)}
-                    className={`px-2 py-1 rounded-md font-bold transition-colors ${
+                    className={`px-2.5 py-1 rounded-md font-bold transition-colors ${
                       tableNumber === num 
                         ? 'bg-brand-600 text-white' 
-                        : 'bg-slate-750 text-slate-300 hover:bg-slate-700'
+                        : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                     }`}
                   >
                     #{num}
@@ -138,13 +143,23 @@ export const LandingHub: React.FC = () => {
               </div>
             </div>
 
-            <button
-              onClick={() => setView('kiosk')}
-              className="w-full py-3.5 px-4 rounded-2xl bg-brand-500 hover:bg-brand-600 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-brand-500/25 active:scale-98 group-hover:gap-3"
-            >
-              <span>Launch Customer Kiosk</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <div className="space-y-2 pt-2 border-t border-slate-700/60">
+              <button
+                onClick={() => setView('kiosk')}
+                className="w-full py-3.5 px-4 rounded-2xl bg-brand-500 hover:bg-brand-600 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-brand-500/25 active:scale-98 group-hover:gap-3 cursor-pointer"
+              >
+                <span>Open Customer Kiosk</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+              
+              <button
+                onClick={() => window.open(`/kiosk?table=${tableNumber}`, '_blank')}
+                className="w-full py-2 px-3 rounded-xl bg-slate-700/60 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Open /kiosk in New Tab</span>
+              </button>
+            </div>
           </div>
 
           {/* 2. Kitchen Display */}
@@ -157,22 +172,20 @@ export const LandingHub: React.FC = () => {
                 <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
                   Kitchen Operations
                 </span>
-                {pendingOrders > 0 && (
-                  <span className="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full font-bold animate-pulse">
-                    {pendingOrders} Active
-                  </span>
-                )}
+                <span className="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold">
+                  /kitchen
+                </span>
               </div>
               <h3 className="text-2xl font-bold font-display text-white mb-2">
                 Kitchen Display (KDS)
               </h3>
               <p className="text-slate-400 text-sm leading-relaxed mb-4">
-                Real-time tickets screen for chef: New → Preparing → Ready → Served. Manage prep times, receive instant table waiter calls, and toggle sold-out dishes.
+                Responsive order management screen for chefs: New → Preparing → Ready → Served. Touch-responsive across mobile, tablets, and kitchen monitors with sold-out controls.
               </p>
 
-              <div className="flex items-center gap-2 mb-6 text-xs text-slate-400">
+              <div className="flex items-center gap-2 mb-5 text-xs text-slate-400">
                 <span className="flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5 text-amber-400" /> Real-time status sync
+                  <Clock className="w-3.5 h-3.5 text-amber-400" /> {pendingOrders} Active Orders
                 </span>
                 {pendingAlerts > 0 && (
                   <span className="text-amber-400 font-semibold">
@@ -182,13 +195,23 @@ export const LandingHub: React.FC = () => {
               </div>
             </div>
 
-            <button
-              onClick={() => setView('kitchen')}
-              className="w-full py-3.5 px-4 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-amber-600/25 active:scale-98 group-hover:gap-3"
-            >
-              <span>Open Kitchen Display</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <div className="space-y-2 pt-2 border-t border-slate-700/60">
+              <button
+                onClick={() => setView('kitchen')}
+                className="w-full py-3.5 px-4 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-amber-600/25 active:scale-98 group-hover:gap-3 cursor-pointer"
+              >
+                <span>Open Kitchen Display</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <button
+                onClick={() => window.open('/kitchen', '_blank')}
+                className="w-full py-2 px-3 rounded-xl bg-slate-700/60 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Open /kitchen in New Tab</span>
+              </button>
+            </div>
           </div>
 
           {/* 3. Management Dashboard */}
@@ -201,18 +224,18 @@ export const LandingHub: React.FC = () => {
                 <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
                   Business Intelligence
                 </span>
-                <span className="text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 px-2 py-0.5 rounded-full font-bold">
-                  Live KPIs
+                <span className="text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full font-bold">
+                  /management
                 </span>
               </div>
               <h3 className="text-2xl font-bold font-display text-white mb-2">
                 Management Dashboard
               </h3>
               <p className="text-slate-400 text-sm leading-relaxed mb-4">
-                Actionable analytics for restaurant owners: sales by day & hour, peak-hour rush planning, dish margin profitability (38%–58%), and live guest feedback.
+                Executive analytics for owners: sales by hour, peak-hour rush planning, dish margin profitability (38%–58%), and live customer review stream.
               </p>
 
-              <div className="flex items-center gap-2 mb-6 text-xs text-slate-400">
+              <div className="flex items-center gap-2 mb-5 text-xs text-slate-400">
                 <span className="flex items-center gap-1">
                   <TrendingUp className="w-3.5 h-3.5 text-indigo-400" /> ₹48,620 Today's Sales
                 </span>
@@ -220,77 +243,48 @@ export const LandingHub: React.FC = () => {
               </div>
             </div>
 
-            <button
-              onClick={() => setView('dashboard')}
-              className="w-full py-3.5 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-600/25 active:scale-98 group-hover:gap-3"
-            >
-              <span>Open Management Dashboard</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
+            <div className="space-y-2 pt-2 border-t border-slate-700/60">
+              <button
+                onClick={() => setView('dashboard')}
+                className="w-full py-3.5 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-600/25 active:scale-98 group-hover:gap-3 cursor-pointer"
+              >
+                <span>Open Management Dashboard</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
 
-        </div>
-
-        {/* Presentation Pro Tip: Multi-Window Sync */}
-        <div className="w-full max-w-4xl bg-slate-900/90 border border-brand-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-brand-500/20 text-brand-400 flex items-center justify-center shrink-0">
-              <Layers className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-white">
-                Presenter Pro-Tip: Dual Window Demonstration
-              </h4>
-              <p className="text-xs text-slate-400">
-                Open Kiosk in one browser window and Kitchen KDS in another window side-by-side to showcase zero-latency live synchronization.
-              </p>
+              <button
+                onClick={() => window.open('/management', '_blank')}
+                className="w-full py-2 px-3 rounded-xl bg-slate-700/60 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Open /management in New Tab</span>
+              </button>
             </div>
           </div>
-          <button
-            onClick={() => window.open(window.location.href, '_blank')}
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-750 transition-colors shrink-0"
-          >
-            Launch 2nd Window
-          </button>
+
         </div>
 
         {/* Feature Checkpoints from Product Proposal */}
-        <div className="mt-12 w-full max-w-5xl border-t border-slate-800 pt-8">
+        <div className="w-full max-w-5xl border-t border-slate-800 pt-8">
           <div className="text-xs uppercase tracking-wider text-slate-500 font-bold mb-4 text-center">
-            Comprehensive Customer Proposal Capabilities Included
+            Proposal Capabilities & Dedicated URL Architecture
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs text-slate-300">
             <div className="flex items-center gap-2 bg-slate-900/50 p-2.5 rounded-xl border border-slate-800">
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Full Visual Menu & Prep Time</span>
+              <span>Dedicated /kiosk Endpoint</span>
             </div>
             <div className="flex items-center gap-2 bg-slate-900/50 p-2.5 rounded-xl border border-slate-800">
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>4-Level Spice Customizer</span>
+              <span>Dedicated /kitchen Endpoint</span>
             </div>
             <div className="flex items-center gap-2 bg-slate-900/50 p-2.5 rounded-xl border border-slate-800">
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Split Bill & Tip Support</span>
+              <span>Dedicated /management Endpoint</span>
             </div>
             <div className="flex items-center gap-2 bg-slate-900/50 p-2.5 rounded-xl border border-slate-800">
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Digital Receipt & SMS/Email</span>
-            </div>
-            <div className="flex items-center gap-2 bg-slate-900/50 p-2.5 rounded-xl border border-slate-800">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>English & Tamil Multilingual</span>
-            </div>
-            <div className="flex items-center gap-2 bg-slate-900/50 p-2.5 rounded-xl border border-slate-800">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Sold-Out Real-time Sync</span>
-            </div>
-            <div className="flex items-center gap-2 bg-slate-900/50 p-2.5 rounded-xl border border-slate-800">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Call Waiter Alert Matrix</span>
-            </div>
-            <div className="flex items-center gap-2 bg-slate-900/50 p-2.5 rounded-xl border border-slate-800">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>High-Contrast Accessibility Mode</span>
+              <span>Responsive KDS on All Screens</span>
             </div>
           </div>
         </div>

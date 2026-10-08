@@ -11,7 +11,20 @@ import {
 } from 'lucide-react';
 
 export const DemoNavigation: React.FC = () => {
-  const { view, setView, resetDemoData, tableNumber, activeOrders, staffAlerts } = useKiosk();
+  const { 
+    view, 
+    setView, 
+    resetDemoData, 
+    tableNumber, 
+    activeOrders, 
+    staffAlerts, 
+    isStandaloneRole 
+  } = useKiosk();
+
+  // Hide the presentation bar when visiting standalone roles like customer kiosk
+  if (isStandaloneRole && view !== 'hub') {
+    return null;
+  }
 
   const pendingOrdersCount = activeOrders.filter((o) => o.status !== 'COMPLETED').length;
   const pendingAlertsCount = staffAlerts.filter((a) => a.status === 'PENDING').length;
@@ -110,13 +123,13 @@ export const DemoNavigation: React.FC = () => {
 
           <button
             onClick={() => {
-              window.open(window.location.href, '_blank');
+              window.open('/kitchen', '_blank');
             }}
             className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors text-[11px]"
-            title="Open in new window to test live tablet-to-kitchen sync across dual screens"
+            title="Open Kitchen KDS in new window to test live tablet-to-kitchen sync"
           >
             <ExternalLink className="w-3 h-3" />
-            <span className="hidden md:inline">Open 2nd Tab</span>
+            <span className="hidden md:inline">Open Kitchen Window</span>
           </button>
         </div>
 

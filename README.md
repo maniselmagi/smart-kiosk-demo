@@ -10,14 +10,16 @@
 
 ## 🌐 Live Public Cloud Demo Access (Open Anywhere)
 
-| Demo Screen | Direct Public HTTPS Link | Purpose |
-| :--- | :--- | :--- |
-| **🚀 Presentation Hub** | **[https://occasions-excessive-affairs-counting.trycloudflare.com](https://occasions-excessive-affairs-counting.trycloudflare.com)** | Main entry point linking Kiosk, Kitchen, and Dashboard |
-| **📱 Customer Kiosk** | Direct via Demo Top Bar (`Customer Kiosk` button) | Table 12 ordering tablet experience |
-| **👨‍🍳 Kitchen Display (KDS)** | Direct via Demo Top Bar (`Kitchen KDS` button) | Real-time tickets & preparation line |
-| **📊 Management Dashboard** | Direct via Demo Top Bar (`Management` button) | Sales KPIs, peak hours & profitability margins |
+Each role has its own **dedicated, isolated URL** so customers and staff only see what they are supposed to see:
 
-> **Direct Access**: Accessible from any smartphone, tablet, laptop, iPad, or desktop worldwide with no password or installation required.
+| Dedicated Portal | Direct Public Cloud URL | Isolation & Responsiveness |
+| :--- | :--- | :--- |
+| **📱 Customer Kiosk** | **[https://occasions-excessive-affairs-counting.trycloudflare.com/kiosk](https://occasions-excessive-affairs-counting.trycloudflare.com/kiosk)** | **Completely isolated**: Shows ONLY table ordering. Demo switcher bar and admin info are hidden. |
+| **📊 Management Dashboard** | **[https://occasions-excessive-affairs-counting.trycloudflare.com/management](https://occasions-excessive-affairs-counting.trycloudflare.com/management)** | **Management-only view**: Revenue, peak hours, menu gross margins (38%–58%), and diner reviews. |
+| **👨‍🍳 Kitchen Display (KDS)** | **[https://occasions-excessive-affairs-counting.trycloudflare.com/kitchen](https://occasions-excessive-affairs-counting.trycloudflare.com/kitchen)** | **Fully responsive**: Optimized for 8"–12" tablets and mobile phones with touch-friendly ticket stages & sold-out controls. |
+| **🚀 Presentation Hub** | **[https://occasions-excessive-affairs-counting.trycloudflare.com/hub](https://occasions-excessive-affairs-counting.trycloudflare.com/hub)** | Portal overview linking all screens with 1-click open in new tab. |
+
+> **Direct Access**: Accessible from any smartphone, tablet, iPad, laptop, or desktop worldwide with no password or installation required.
 
 ---
 

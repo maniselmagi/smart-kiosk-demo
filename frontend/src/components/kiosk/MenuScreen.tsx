@@ -3,12 +3,16 @@ import { useKiosk } from '../../context/KioskContext';
 import { MenuItem, Category, ComboRecommendation } from '../../types';
 import { INITIAL_COMBOS } from '../../data/initialData';
 import { 
+  getLocalizedItemName, 
+  getLocalizedItemDescription, 
+  getLocalizedComboTitle 
+} from '../../utils/translations';
+import { 
   Clock, 
   Flame, 
   Plus, 
   Search, 
   Sparkles, 
-  Check, 
   AlertCircle, 
   TrendingUp, 
   Leaf, 
@@ -32,7 +36,6 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
     addToCart, 
     language, 
     t, 
-    isAccessibilityMode, 
     currentTrackedOrder 
   } = useKiosk();
 
@@ -71,13 +74,16 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
       if (dietFilter === 'veg' && !item.isVeg) return false;
       if (dietFilter === 'non-veg' && item.isVeg) return false;
 
-      // Search query
+      // Search query across all available languages
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchName = item.name.toLowerCase().includes(query);
-        const matchTamil = item.nameTamil.toLowerCase().includes(query);
+        const matchTamil = (item.nameTamil || '').toLowerCase().includes(query);
+        const matchHindi = (item.nameHindi || '').toLowerCase().includes(query);
+        const matchTelugu = (item.nameTelugu || '').toLowerCase().includes(query);
+        const matchSpanish = (item.nameSpanish || '').toLowerCase().includes(query);
         const matchDesc = item.description.toLowerCase().includes(query);
-        return matchName || matchTamil || matchDesc;
+        return matchName || matchTamil || matchHindi || matchTelugu || matchSpanish || matchDesc;
       }
 
       return true;
@@ -132,35 +138,35 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
         
         {/* Recommended AI Combo Pairing Card */}
         {INITIAL_COMBOS.length > 0 && (
-          <div className="mb-6 bg-gradient-to-r from-amber-500/10 via-brand-500/10 to-orange-500/10 border border-brand-200/80 rounded-3xl p-4 md:p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="mb-6 bg-gradient-to-r from-amber-500/10 via-brand-500/10 to-orange-500/10 dark:from-slate-900 dark:via-slate-850 dark:to-slate-900 border border-brand-200/80 dark:border-brand-900/40 rounded-3xl p-4 md:p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
             <div className="flex items-center gap-3.5 w-full md:w-auto">
               <div className="w-12 h-12 rounded-2xl bg-brand-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-brand-500/30">
                 <Sparkles className="w-6 h-6" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-black uppercase tracking-wider text-brand-700 bg-brand-100/80 px-2 py-0.5 rounded-md">
+                  <span className="text-xs font-black uppercase tracking-wider text-brand-700 dark:text-brand-300 bg-brand-100/80 dark:bg-brand-950/80 px-2 py-0.5 rounded-md border border-brand-200/60 dark:border-brand-800/60">
                     {t.recommendedForYou}
                   </span>
-                  <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/60">
+                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200/60 dark:border-emerald-800/60">
                     {t.saveDiscount} ₹{INITIAL_COMBOS[0].savings}
                   </span>
                 </div>
-                <h4 className="text-base md:text-lg font-black text-slate-900 mt-1">
-                  {language === 'ta' ? INITIAL_COMBOS[0].titleTamil : INITIAL_COMBOS[0].title}
+                <h4 className="text-base md:text-lg font-black text-slate-900 dark:text-white mt-1">
+                  {getLocalizedComboTitle(INITIAL_COMBOS[0], language)}
                 </h4>
-                <p className="text-xs text-slate-500">
-                  Curated chef pairing for today's lunch rush
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Curated chef pairing for today's dining rush
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3 w-full md:w-auto justify-end">
               <div className="text-right">
-                <span className="text-xs text-slate-400 line-through mr-1.5">
+                <span className="text-xs text-slate-400 dark:text-slate-500 line-through mr-1.5">
                   ₹{INITIAL_COMBOS[0].originalPrice}
                 </span>
-                <span className="text-xl font-black text-brand-600 font-display">
+                <span className="text-xl font-black text-brand-600 dark:text-brand-400 font-display">
                   ₹{INITIAL_COMBOS[0].comboPrice}
                 </span>
               </div>
@@ -180,18 +186,18 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
           
           {/* Search Bar */}
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
             <input
               type="text"
               placeholder={t.searchMenu}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white border border-slate-200/80 text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 shadow-sm transition-all"
+              className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-sm font-medium text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 shadow-sm transition-all"
             />
             {searchQuery && (
               <button 
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 hover:text-slate-600"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
               >
                 Clear
               </button>
@@ -199,13 +205,13 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
           </div>
 
           {/* Veg / Non-Veg Quick Toggles */}
-          <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-2xl border border-slate-200/60 self-start md:self-auto">
+          <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-850 p-1 rounded-2xl border border-slate-200/60 dark:border-slate-800 self-start md:self-auto">
             <button
               onClick={() => setDietFilter('all')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 dietFilter === 'all'
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-800'
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
               }`}
             >
               All
@@ -215,7 +221,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 dietFilter === 'veg'
                   ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'text-emerald-700 hover:bg-emerald-50'
+                  : 'text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
               }`}
             >
               <Leaf className="w-3.5 h-3.5" />
@@ -226,7 +232,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 dietFilter === 'non-veg'
                   ? 'bg-rose-600 text-white shadow-sm'
-                  : 'text-rose-700 hover:bg-rose-50'
+                  : 'text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40'
               }`}
             >
               <Drumstick className="w-3.5 h-3.5" />
@@ -244,8 +250,8 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
               onClick={() => setSelectedCategory(cat)}
               className={`px-5 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all duration-200 border active:scale-95 ${
                 selectedCategory === cat
-                  ? 'bg-slate-900 text-white border-slate-900 shadow-md'
-                  : 'bg-white text-slate-600 border-slate-200/80 hover:bg-slate-50 hover:text-slate-900 shadow-sm'
+                  ? 'bg-slate-900 dark:bg-brand-600 text-white border-slate-900 dark:border-brand-600 shadow-md'
+                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200/80 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white shadow-sm'
               }`}
             >
               {getCategoryLabel(cat)}
@@ -255,12 +261,12 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
 
         {/* Food Items Grid - Optimized for Tablets & Desktops */}
         {filteredItems.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-3xl border border-dashed border-slate-200 p-8">
-            <AlertCircle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <h4 className="text-lg font-bold text-slate-700 mb-1">
+          <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 p-8">
+            <AlertCircle className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+            <h4 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">
               No dishes found
             </h4>
-            <p className="text-xs text-slate-400 mb-4">
+            <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">
               Try adjusting your search query or dietary filter.
             </p>
             <button
@@ -281,19 +287,22 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                 .filter((c) => c.menuItemId === item.id)
                 .reduce((acc, c) => acc + c.quantity, 0);
 
+              const localizedName = getLocalizedItemName(item, language);
+              const localizedDesc = getLocalizedItemDescription(item, language);
+
               return (
                 <div
                   key={item.id}
                   onClick={() => item.isAvailable && onSelectItem(item)}
-                  className={`group relative bg-white rounded-3xl border transition-all duration-300 overflow-hidden flex flex-col justify-between cursor-pointer ${
+                  className={`group relative bg-white dark:bg-slate-900 rounded-3xl border transition-all duration-300 overflow-hidden flex flex-col justify-between cursor-pointer ${
                     !item.isAvailable
-                      ? 'opacity-65 border-slate-200 grayscale-[0.4]'
-                      : 'border-slate-200/80 hover:border-brand-400/80 hover:shadow-kiosk hover:-translate-y-0.5'
+                      ? 'opacity-65 border-slate-200 dark:border-slate-800 grayscale-[0.4]'
+                      : 'border-slate-200/80 dark:border-slate-800 hover:border-brand-400/80 dark:hover:border-brand-500/80 hover:shadow-kiosk hover:-translate-y-0.5'
                   }`}
                 >
                   
                   {/* Food Image Container */}
-                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100">
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
                     <img
                       src={item.image}
                       alt={item.name}
@@ -348,22 +357,22 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                   <div className="p-4 md:p-5 flex-1 flex flex-col justify-between">
                     <div>
                       <div className="flex items-baseline justify-between gap-2 mb-1">
-                        <h3 className="font-extrabold text-base md:text-lg text-slate-900 group-hover:text-brand-600 transition-colors">
-                          {language === 'ta' ? item.nameTamil : item.name}
+                        <h3 className="font-extrabold text-base md:text-lg text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
+                          {localizedName}
                         </h3>
-                        <span className="font-extrabold text-lg md:text-xl text-brand-600 font-display shrink-0">
+                        <span className="font-extrabold text-lg md:text-xl text-brand-600 dark:text-brand-400 font-display shrink-0">
                           ₹{item.price}
                         </span>
                       </div>
 
-                      <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed mb-4">
-                        {language === 'ta' ? item.descriptionTamil : item.description}
+                      <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-4">
+                        {localizedDesc}
                       </p>
                     </div>
 
                     {/* Bottom Action Bar */}
-                    <div className="flex items-center justify-between pt-3 border-t border-slate-100 mt-auto">
-                      <div className="text-[11px] font-semibold text-slate-400">
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800 mt-auto">
+                      <div className="text-[11px] font-semibold text-slate-400 dark:text-slate-500">
                         {item.calories} kcal • {item.allergens.join(', ')}
                       </div>
 
@@ -375,7 +384,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                           }}
                           className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-extrabold transition-all active:scale-95 ${
                             inCartCount > 0
-                              ? 'bg-brand-50 text-brand-700 border border-brand-200 hover:bg-brand-100'
+                              ? 'bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800 hover:bg-brand-100'
                               : 'bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-500/20'
                           }`}
                         >
@@ -383,7 +392,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                           <span>{inCartCount > 0 ? `${inCartCount} in cart` : t.add}</span>
                         </button>
                       ) : (
-                        <span className="text-xs font-bold text-red-500 px-3 py-1 rounded-lg bg-red-50">
+                        <span className="text-xs font-bold text-red-500 px-3 py-1 rounded-lg bg-red-50 dark:bg-red-950/50">
                           {t.soldOut}
                         </span>
                       )}
@@ -404,7 +413,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
         <div className="fixed bottom-4 left-4 right-4 max-w-lg mx-auto z-30 animate-in slide-in-from-bottom-4 duration-300">
           <div 
             onClick={onOpenCart}
-            className="cursor-pointer bg-slate-950 text-white rounded-3xl p-3.5 px-5 shadow-2xl border border-slate-800 flex items-center justify-between hover:bg-slate-900 transition-all active:scale-98"
+            className="cursor-pointer bg-slate-950 dark:bg-slate-900 text-white rounded-3xl p-3.5 px-5 shadow-2xl border border-slate-800 flex items-center justify-between hover:bg-slate-900 dark:hover:bg-slate-800 transition-all active:scale-98"
           >
             <div className="flex items-center gap-3">
               <span className="w-8 h-8 rounded-full bg-brand-500 text-white font-extrabold flex items-center justify-center text-xs shadow-md">
@@ -419,10 +428,10 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="text-lg font-black text-brand-400 font-display">
-                ₹{cart.reduce((a, b) => a + b.price * b.quantity, 0)}
+              <span className="text-base font-extrabold text-white font-display">
+                ₹{cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)}
               </span>
-              <button className="px-4 py-2 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-black transition-colors">
+              <button className="px-4 py-2 rounded-2xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs shadow-md transition-colors">
                 {t.proceedToCheckout} →
               </button>
             </div>

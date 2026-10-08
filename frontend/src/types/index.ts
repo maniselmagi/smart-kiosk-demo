@@ -11,7 +11,10 @@ export type Category =
 export interface MenuItem {
   id: string;
   name: string;
-  nameTamil: string;
+  nameTamil?: string;
+  nameHindi?: string;
+  nameTelugu?: string;
+  nameSpanish?: string;
   category: Category;
   price: number;
   costPrice: number;
@@ -20,7 +23,10 @@ export interface MenuItem {
   popularityText: string;
   orderedTodayCount: number;
   description: string;
-  descriptionTamil: string;
+  descriptionTamil?: string;
+  descriptionHindi?: string;
+  descriptionTelugu?: string;
+  descriptionSpanish?: string;
   image: string;
   isVeg: boolean;
   isSpicy: boolean;
@@ -89,7 +95,10 @@ export interface Feedback {
 export interface ComboRecommendation {
   id: string;
   title: string;
-  titleTamil: string;
+  titleTamil?: string;
+  titleHindi?: string;
+  titleTelugu?: string;
+  titleSpanish?: string;
   itemIds: string[];
   originalPrice: number;
   comboPrice: number;

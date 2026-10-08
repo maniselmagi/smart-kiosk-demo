@@ -7,9 +7,7 @@ import {
   Minus, 
   ShoppingBag, 
   ArrowRight, 
-  Sparkles, 
-  Flame, 
-  Receipt 
+  Flame 
 } from 'lucide-react';
 
 interface CartDrawerModalProps {
@@ -40,21 +38,21 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-end bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
-        className="w-full max-w-md h-full bg-white shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-300"
+        className="w-full max-w-md h-full bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-300 border-l border-slate-100 dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}
       >
         
         {/* Drawer Header */}
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+        <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-brand-50 dark:bg-brand-950 text-brand-600 dark:text-brand-400 flex items-center justify-center font-bold">
               <ShoppingBag className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-extrabold text-lg text-slate-900 font-display">
+              <h3 className="font-extrabold text-lg text-slate-900 dark:text-white font-display">
                 {t.yourCart}
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Table {tableNumber} • {cart.reduce((a, b) => a + b.quantity, 0)} Items
               </p>
             </div>
@@ -72,7 +70,7 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
             )}
             <button
               onClick={onClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -83,13 +81,13 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
           {cart.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400">
-              <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4 text-slate-300">
+              <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4 text-slate-300 dark:text-slate-600">
                 <ShoppingBag className="w-8 h-8" />
               </div>
-              <h4 className="text-base font-bold text-slate-700 mb-1">
+              <h4 className="text-base font-bold text-slate-700 dark:text-slate-200 mb-1">
                 {t.emptyCart}
               </h4>
-              <p className="text-xs text-slate-400 max-w-xs mb-6">
+              <p className="text-xs text-slate-400 dark:text-slate-500 max-w-xs mb-6">
                 {t.emptyCartSubtitle}
               </p>
               <button
@@ -103,7 +101,7 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
             cart.map((item) => (
               <div
                 key={item.cartItemId}
-                className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-start gap-3 transition-all"
+                className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 flex items-start gap-3 transition-all"
               >
                 {/* Item Thumbnail */}
                 <img
@@ -115,27 +113,27 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline justify-between gap-1 mb-1">
-                    <h4 className="font-extrabold text-sm text-slate-900 truncate">
+                    <h4 className="font-extrabold text-sm text-slate-900 dark:text-white truncate">
                       {item.name}
                     </h4>
-                    <span className="font-black text-sm text-slate-900 shrink-0 font-display">
+                    <span className="font-black text-sm text-slate-900 dark:text-brand-400 shrink-0 font-display">
                       ₹{item.price * item.quantity}
                     </span>
                   </div>
 
                   {/* Spice and Customization meta */}
-                  <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500 mb-2.5">
-                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-amber-100/80 text-amber-800 font-bold">
-                      <Flame className="w-2.5 h-2.5 text-brand-600" />
+                  <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 mb-2.5">
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-amber-100/80 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 font-bold">
+                      <Flame className="w-2.5 h-2.5 text-brand-600 dark:text-brand-400" />
                       {item.spiceLevel}
                     </span>
                     {item.customizations.map((c) => (
-                      <span key={c} className="px-1.5 py-0.5 rounded bg-slate-200/70 text-slate-700 font-medium">
+                      <span key={c} className="px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium">
                         {c}
                       </span>
                     ))}
                     {item.specialInstructions && (
-                      <span className="italic text-slate-400 block w-full text-[10px]">
+                      <span className="italic text-slate-400 dark:text-slate-400 block w-full text-[10px]">
                         "{item.specialInstructions}"
                       </span>
                     )}
@@ -143,19 +141,19 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
 
                   {/* Stepper & Delete */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center bg-white rounded-xl border border-slate-200 p-0.5 shadow-2xs">
+                    <div className="flex items-center bg-white dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600 p-0.5 shadow-2xs">
                       <button
                         onClick={() => updateCartQuantity(item.cartItemId, -1)}
-                        className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors"
+                        className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
                       >
                         <Minus className="w-3.5 h-3.5" />
                       </button>
-                      <span className="w-7 text-center font-bold text-xs text-slate-800">
+                      <span className="w-7 text-center font-bold text-xs text-slate-800 dark:text-white">
                         {item.quantity}
                       </span>
                       <button
                         onClick={() => updateCartQuantity(item.cartItemId, 1)}
-                        className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors"
+                        className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
                       >
                         <Plus className="w-3.5 h-3.5" />
                       </button>
@@ -163,7 +161,7 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
 
                     <button
                       onClick={() => removeFromCart(item.cartItemId)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
                       title="Remove item"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -177,27 +175,27 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
 
         {/* Drawer Footer Billing Summary */}
         {cart.length > 0 && (
-          <div className="p-5 bg-slate-50 border-t border-slate-200 space-y-3">
+          <div className="p-5 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 space-y-3">
             
             <div className="space-y-1.5 text-xs">
-              <div className="flex items-center justify-between text-slate-500">
+              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
                 <span>{t.subtotal}</span>
-                <span className="font-semibold text-slate-700">₹{cartSubtotal}</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-200">₹{cartSubtotal}</span>
               </div>
-              <div className="flex items-center justify-between text-slate-500">
+              <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
                 <span>{t.taxGst}</span>
-                <span className="font-semibold text-slate-700">₹{cartTax}</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-200">₹{cartTax}</span>
               </div>
-              <div className="flex items-center justify-between text-base font-black text-slate-900 pt-1.5 border-t border-slate-200">
+              <div className="flex items-center justify-between text-base font-black text-slate-900 dark:text-white pt-1.5 border-t border-slate-200 dark:border-slate-800">
                 <span>{t.total}</span>
-                <span className="text-xl text-brand-600 font-display">₹{cartGrandTotal}</span>
+                <span className="text-xl text-brand-600 dark:text-brand-400 font-display">₹{cartGrandTotal}</span>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2 pt-1">
               <button
                 onClick={onClose}
-                className="py-3 px-3 rounded-2xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 transition-colors"
+                className="py-3 px-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
               >
                 {t.continueOrdering}
               </button>

@@ -15,11 +15,22 @@ import {
   Lock, 
   MessageSquare, 
   Sparkles, 
-  CheckCircle2 
+  CheckCircle2,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 export const ManagementDashboard: React.FC = () => {
-  const { feedbacks, menuItems, activeOrders, setView, tableNumber, isStandaloneRole } = useKiosk();
+  const { 
+    feedbacks, 
+    menuItems, 
+    activeOrders, 
+    setView, 
+    tableNumber, 
+    isStandaloneRole,
+    theme,
+    toggleTheme 
+  } = useKiosk();
 
   // Authentication demo toggle
   const [isAuthenticated, setIsAuthenticated] = useState(true);
@@ -58,40 +69,42 @@ export const ManagementDashboard: React.FC = () => {
     { name: 'Cold Coffee Frappé', price: 140, cost: 58, margin: 58, category: 'Beverage', rating: 'High Profit' },
     { name: 'Crispy Masala Dosa', price: 160, cost: 72, margin: 55, category: 'Main', rating: 'High Profit' },
     { name: 'Veg Dum Biryani', price: 240, cost: 117, margin: 51, category: 'Main', rating: 'Healthy' },
-    { name: 'Paneer Tikka', price: 280, cost: 162, margin: 42, category: 'Starter', rating: 'Balanced' },
-    { name: 'Butter Chicken', price: 320, cost: 198, margin: 38, category: 'Main', rating: 'Volume Driver' },
+    { name: 'Chicken Dum Biryani', price: 310, cost: 175, margin: 44, category: 'Main', rating: 'Popular' },
+    { name: 'Paneer Tikka', price: 280, cost: 162, margin: 42, category: 'Starter', rating: 'Popular' },
+    { name: 'Butter Chicken', price: 320, cost: 198, margin: 38, category: 'Main', rating: 'Volume Leader' },
   ];
 
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-white rounded-3xl p-8 shadow-2xl">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center mb-4">
+        <div className="w-full max-w-md bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-2xl border border-slate-200 dark:border-slate-700">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-600/30">
             <Lock className="w-6 h-6" />
           </div>
-          <h2 className="text-2xl font-black text-slate-900 font-display mb-1">
-            Manager Access
+          <h2 className="text-xl font-bold text-center text-slate-900 dark:text-white mb-2">
+            Management Portal
           </h2>
-          <p className="text-xs text-slate-500 mb-6">
-            Demo credentials pre-filled for customer presentation
+          <p className="text-xs text-slate-500 dark:text-slate-400 text-center mb-6">
+            Sign in with demo credentials: <code>admin_demo</code> / <code>demo123</code>
           </p>
+
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-slate-600">Username</label>
+              <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Username</label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full mt-1 p-3 rounded-xl border border-slate-200 text-xs font-medium"
+                className="w-full mt-1 p-3 rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-white text-xs font-medium"
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-slate-600">Password</label>
+              <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Password</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full mt-1 p-3 rounded-xl border border-slate-200 text-xs font-medium"
+                className="w-full mt-1 p-3 rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-white text-xs font-medium"
               />
             </div>
             <button
@@ -107,10 +120,10 @@ export const ManagementDashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 p-4 md:p-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-4 md:p-8 transition-colors duration-200">
       
       {/* Top Header */}
-      <div className="max-w-7xl mx-auto pb-8 border-b border-slate-200 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto pb-8 border-b border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black shadow-lg shadow-indigo-600/20">
@@ -118,31 +131,32 @@ export const ManagementDashboard: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl md:text-3xl font-black font-display tracking-tight text-slate-900">
+                <h1 className="text-2xl md:text-3xl font-black font-display tracking-tight text-slate-900 dark:text-white">
                   Restaurant Executive Dashboard
                 </h1>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
+                <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60 text-xs font-bold">
                   Synced Live
                 </span>
               </div>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Data insights powered by OrderEase Table Kiosks • Dining Room 1
               </p>
             </div>
           </div>
         </div>
 
-        {/* Range Selector & Role */}
-        <div className="flex items-center gap-2 self-start md:self-auto">
-          <div className="bg-white p-1 rounded-2xl border border-slate-200 shadow-xs flex items-center">
+        {/* Range Selector, Theme Toggle & Back to Hub */}
+        <div className="flex items-center gap-2 self-start md:self-auto flex-wrap">
+          {/* Time range pills */}
+          <div className="bg-white dark:bg-slate-900 p-1 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center">
             {(['today', 'week', 'month'] as const).map((r) => (
               <button
                 key={r}
                 onClick={() => setSelectedRange(r)}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold capitalize transition-all ${
                   selectedRange === r
-                    ? 'bg-slate-900 text-white shadow-sm'
-                    : 'text-slate-500 hover:text-slate-900'
+                    ? 'bg-slate-900 dark:bg-indigo-600 text-white shadow-sm'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 {r}
@@ -150,10 +164,23 @@ export const ManagementDashboard: React.FC = () => {
             ))}
           </div>
 
+          {/* Theme Toggle Button */}
+          <button
+            onClick={toggleTheme}
+            className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-amber-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shadow-xs active:scale-95"
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-4 h-4 text-amber-400" />
+            ) : (
+              <Moon className="w-4 h-4 text-slate-600" />
+            )}
+          </button>
+
           {!isStandaloneRole && (
             <button
               onClick={() => setView('hub')}
-              className="px-4 py-2 rounded-xl bg-brand-50 border border-brand-200 text-brand-700 text-xs font-bold hover:bg-brand-100 transition-colors"
+              className="px-4 py-2 rounded-xl bg-brand-50 dark:bg-slate-900 border border-brand-200 dark:border-slate-800 text-brand-700 dark:text-brand-400 text-xs font-bold hover:bg-brand-100 dark:hover:bg-slate-800 transition-colors"
             >
               Back to Hub →
             </button>
@@ -167,20 +194,20 @@ export const ManagementDashboard: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           
           {/* KPI 1: Today's Sales */}
-          <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-sm flex flex-col justify-between">
+          <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between text-slate-400 mb-2">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500">
+              <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Today's Sales
               </span>
-              <span className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+              <span className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/40">
                 <DollarSign className="w-4 h-4" />
               </span>
             </div>
             <div>
-              <div className="text-3xl font-black text-slate-900 font-display">
+              <div className="text-3xl font-black text-slate-900 dark:text-white font-display">
                 ₹48,620
               </div>
-              <div className="flex items-center gap-1.5 mt-2 text-xs text-emerald-600 font-bold">
+              <div className="flex items-center gap-1.5 mt-2 text-xs text-emerald-600 dark:text-emerald-400 font-bold">
                 <ArrowUpRight className="w-3.5 h-3.5" />
                 <span>+18.4% vs yesterday</span>
               </div>
@@ -188,20 +215,20 @@ export const ManagementDashboard: React.FC = () => {
           </div>
 
           {/* KPI 2: Total Orders */}
-          <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-sm flex flex-col justify-between">
+          <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between text-slate-400 mb-2">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500">
+              <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Total Orders
               </span>
-              <span className="p-2 rounded-xl bg-blue-50 text-blue-600">
+              <span className="p-2 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40">
                 <UtensilsCrossed className="w-4 h-4" />
               </span>
             </div>
             <div>
-              <div className="text-3xl font-black text-slate-900 font-display">
+              <div className="text-3xl font-black text-slate-900 dark:text-white font-display">
                 148
               </div>
-              <div className="flex items-center gap-1.5 mt-2 text-xs text-blue-600 font-bold">
+              <div className="flex items-center gap-1.5 mt-2 text-xs text-blue-600 dark:text-blue-400 font-bold">
                 <ArrowUpRight className="w-3.5 h-3.5" />
                 <span>+12 orders from kiosk upsells</span>
               </div>
@@ -209,20 +236,20 @@ export const ManagementDashboard: React.FC = () => {
           </div>
 
           {/* KPI 3: Average Order Value (AOV) */}
-          <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-sm flex flex-col justify-between">
+          <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between text-slate-400 mb-2">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500">
+              <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Average Order Value
               </span>
-              <span className="p-2 rounded-xl bg-amber-50 text-amber-600">
+              <span className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900/40">
                 <TrendingUp className="w-4 h-4" />
               </span>
             </div>
             <div>
-              <div className="text-3xl font-black text-slate-900 font-display">
+              <div className="text-3xl font-black text-slate-900 dark:text-white font-display">
                 ₹328
               </div>
-              <div className="flex items-center gap-1.5 mt-2 text-xs text-amber-600 font-bold">
+              <div className="flex items-center gap-1.5 mt-2 text-xs text-amber-600 dark:text-amber-400 font-bold">
                 <ArrowUpRight className="w-3.5 h-3.5" />
                 <span>+24% vs traditional paper menu</span>
               </div>
@@ -230,21 +257,21 @@ export const ManagementDashboard: React.FC = () => {
           </div>
 
           {/* KPI 4: Customer Rating */}
-          <div className="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-sm flex flex-col justify-between">
+          <div className="p-6 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between text-slate-400 mb-2">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500">
+              <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Guest Satisfaction
               </span>
-              <span className="p-2 rounded-xl bg-amber-50 text-amber-500">
-                <Star className="w-4 h-4 fill-amber-500" />
+              <span className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950 text-amber-500 dark:text-amber-400 border border-amber-100 dark:border-amber-900/40">
+                <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
               </span>
             </div>
             <div>
-              <div className="text-3xl font-black text-slate-900 font-display flex items-baseline gap-1.5">
+              <div className="text-3xl font-black text-slate-900 dark:text-white font-display flex items-baseline gap-1.5">
                 <span>{avgRating}</span>
-                <span className="text-base text-slate-400 font-medium">/ 5.0</span>
+                <span className="text-base text-slate-400 dark:text-slate-500 font-medium">/ 5.0</span>
               </div>
-              <div className="flex items-center gap-1.5 mt-2 text-xs text-emerald-600 font-bold">
+              <div className="flex items-center gap-1.5 mt-2 text-xs text-emerald-600 dark:text-emerald-400 font-bold">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>96% positive sentiment</span>
               </div>
@@ -254,39 +281,39 @@ export const ManagementDashboard: React.FC = () => {
         </div>
 
         {/* Section: Peak-Hour Analysis Chart */}
-        <div className="p-6 md:p-8 rounded-3xl bg-white border border-slate-200/80 shadow-sm">
+        <div className="p-6 md:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-lg md:text-xl font-black font-display text-slate-900">
+                <h3 className="text-lg md:text-xl font-black font-display text-slate-900 dark:text-white">
                   Peak-Hour Dining Activity & Kitchen Load
                 </h3>
-                <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[11px] font-bold">
+                <span className="px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/60 text-[11px] font-bold">
                   Proposal Req #29
                 </span>
               </div>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Hourly order distribution from 10:00 AM to 10:00 PM highlighting staff scheduling needs
               </p>
             </div>
 
             <div className="flex items-center gap-4 text-xs font-bold">
-              <span className="flex items-center gap-1.5 text-slate-600">
-                <span className="w-3 h-3 rounded-full bg-slate-300" /> Normal Volume
+              <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+                <span className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700" /> Normal Volume
               </span>
-              <span className="flex items-center gap-1.5 text-brand-600">
+              <span className="flex items-center gap-1.5 text-brand-600 dark:text-brand-400">
                 <span className="w-3 h-3 rounded-full bg-brand-500" /> Rush Peak Hour
               </span>
             </div>
           </div>
 
           {/* Bar Chart Visualization */}
-          <div className="h-64 flex items-end gap-2 sm:gap-4 pt-8 pb-2 border-b border-slate-200">
+          <div className="h-64 flex items-end gap-2 sm:gap-4 pt-8 pb-2 border-b border-slate-200 dark:border-slate-800">
             {hourlyData.map((slot) => {
               const heightPercent = Math.round((slot.orders / maxHourlyOrders) * 100);
               return (
                 <div key={slot.hour} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
-                  <span className="text-[10px] font-bold text-slate-400 group-hover:text-slate-900 transition-colors opacity-0 group-hover:opacity-100">
+                  <span className="text-[10px] font-bold text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors opacity-0 group-hover:opacity-100">
                     {slot.orders}
                   </span>
                   <div
@@ -294,7 +321,7 @@ export const ManagementDashboard: React.FC = () => {
                     className={`w-full rounded-t-xl transition-all duration-300 relative ${
                       slot.isPeak
                         ? 'bg-gradient-to-t from-brand-600 to-amber-500 shadow-md shadow-brand-500/20'
-                        : 'bg-slate-200 hover:bg-slate-300'
+                        : 'bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700'
                     }`}
                   >
                     {slot.isPeak && (
@@ -303,7 +330,7 @@ export const ManagementDashboard: React.FC = () => {
                       </span>
                     )}
                   </div>
-                  <span className="text-[11px] font-bold text-slate-500 truncate w-full text-center">
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 truncate w-full text-center">
                     {slot.hour}
                   </span>
                 </div>
@@ -311,9 +338,9 @@ export const ManagementDashboard: React.FC = () => {
             })}
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center justify-between text-xs text-slate-500">
-            <span>Primary Lunch Peak: <strong>12:00 PM – 2:00 PM</strong> (64 orders)</span>
-            <span>Primary Dinner Rush: <strong>7:30 PM – 9:00 PM</strong> (74 orders)</span>
+          <div className="mt-4 flex flex-wrap items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <span>Primary Lunch Peak: <strong className="text-slate-700 dark:text-slate-200">12:00 PM – 2:00 PM</strong> (64 orders)</span>
+            <span>Primary Dinner Rush: <strong className="text-slate-700 dark:text-slate-200">7:30 PM – 9:00 PM</strong> (74 orders)</span>
           </div>
         </div>
 
@@ -321,18 +348,18 @@ export const ManagementDashboard: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
           {/* Column 1: Top-Selling Dishes */}
-          <div className="p-6 md:p-8 rounded-3xl bg-white border border-slate-200/80 shadow-sm flex flex-col justify-between">
+          <div className="p-6 md:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-black font-display text-slate-900">
+                  <h3 className="text-lg font-black font-display text-slate-900 dark:text-white">
                     Top-Selling Dishes Today
                   </h3>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Ranked by guest popularity & kiosk order frequency
                   </p>
                 </div>
-                <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-xl">
+                <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/60 dark:border-indigo-800/60 px-2.5 py-1 rounded-xl">
                   Proposal Req #26
                 </span>
               </div>
@@ -345,28 +372,28 @@ export const ManagementDashboard: React.FC = () => {
                   { rank: 4, name: 'Crispy Masala Dosa', count: 65, revenue: 10400, pct: 95 },
                   { rank: 5, name: 'Cold Coffee Frappé', count: 58, revenue: 8120, pct: 85 },
                 ].map((item) => (
-                  <div key={item.rank} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70">
+                  <div key={item.rank} className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-750">
                     <div className="flex items-center justify-between mb-1.5">
                       <div className="flex items-center gap-2.5">
-                        <span className="w-6 h-6 rounded-lg bg-slate-900 text-white text-xs font-black flex items-center justify-center">
+                        <span className="w-6 h-6 rounded-lg bg-slate-900 dark:bg-slate-700 text-white text-xs font-black flex items-center justify-center">
                           {item.rank}
                         </span>
-                        <span className="font-extrabold text-sm text-slate-900">
+                        <span className="font-extrabold text-sm text-slate-900 dark:text-white">
                           {item.name}
                         </span>
                       </div>
                       <div className="text-right">
-                        <span className="font-black text-sm text-slate-900 font-display">
+                        <span className="font-black text-sm text-slate-900 dark:text-white font-display">
                           ₹{item.revenue.toLocaleString()}
                         </span>
-                        <span className="text-[11px] text-slate-400 block">
+                        <span className="text-[11px] text-slate-400 dark:text-slate-500 block">
                           {item.count} orders
                         </span>
                       </div>
                     </div>
 
                     {/* Progress bar */}
-                    <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                       <div
                         style={{ width: `${item.pct}%` }}
                         className="h-full bg-brand-500 rounded-full"
@@ -379,18 +406,18 @@ export const ManagementDashboard: React.FC = () => {
           </div>
 
           {/* Column 2: Item Profitability & Gross Margin */}
-          <div className="p-6 md:p-8 rounded-3xl bg-white border border-slate-200/80 shadow-sm flex flex-col justify-between">
+          <div className="p-6 md:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-black font-display text-slate-900">
+                  <h3 className="text-lg font-black font-display text-slate-900 dark:text-white">
                     Dish Profitability & Margin Analysis
                   </h3>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Menu engineering metrics: Price vs Ingredient COGS
                   </p>
                 </div>
-                <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-xl">
+                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-800/60 px-2.5 py-1 rounded-xl">
                   Proposal Req #27
                 </span>
               </div>
@@ -398,7 +425,7 @@ export const ManagementDashboard: React.FC = () => {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-slate-200 text-slate-400 font-extrabold uppercase tracking-wider">
+                    <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500 font-extrabold uppercase tracking-wider">
                       <th className="pb-3">Dish</th>
                       <th className="pb-3 text-right">Price</th>
                       <th className="pb-3 text-right">Cost</th>
@@ -406,26 +433,26 @@ export const ManagementDashboard: React.FC = () => {
                       <th className="pb-3 text-right">Rating</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {profitabilityDishes.map((dish) => (
-                      <tr key={dish.name} className="hover:bg-slate-50 transition-colors">
-                        <td className="py-3 font-extrabold text-slate-900">
+                      <tr key={dish.name} className="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
+                        <td className="py-3 font-extrabold text-slate-900 dark:text-white">
                           {dish.name}
                         </td>
-                        <td className="py-3 text-right font-bold text-slate-700">
+                        <td className="py-3 text-right font-bold text-slate-700 dark:text-slate-300">
                           ₹{dish.price}
                         </td>
-                        <td className="py-3 text-right text-slate-500">
+                        <td className="py-3 text-right text-slate-500 dark:text-slate-400">
                           ₹{dish.cost}
                         </td>
-                        <td className="py-3 text-right font-black text-emerald-600 font-display">
+                        <td className="py-3 text-right font-black text-emerald-600 dark:text-emerald-400 font-display">
                           {dish.margin}%
                         </td>
                         <td className="py-3 text-right">
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
                             dish.margin >= 50
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : 'bg-amber-100 text-amber-800'
+                              ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200/50 dark:border-emerald-800/50'
+                              : 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-200/50 dark:border-amber-800/50'
                           }`}>
                             {dish.rating}
                           </span>
@@ -436,8 +463,8 @@ export const ManagementDashboard: React.FC = () => {
                 </table>
               </div>
 
-              <div className="mt-6 p-4 rounded-2xl bg-indigo-50/80 border border-indigo-100 text-xs text-indigo-900">
-                <Sparkles className="w-4 h-4 text-indigo-600 inline mr-1.5" />
+              <div className="mt-6 p-4 rounded-2xl bg-indigo-50/80 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/40 text-xs text-indigo-900 dark:text-indigo-200">
+                <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400 inline mr-1.5" />
                 <strong>Recommendation:</strong> Promote Cold Coffee & Masala Dosa via table kiosk combo prompts to lift gross restaurant margins above 52%.
               </div>
             </div>
@@ -446,23 +473,23 @@ export const ManagementDashboard: React.FC = () => {
         </div>
 
         {/* Section: Live Guest Feedback Stream */}
-        <div className="p-6 md:p-8 rounded-3xl bg-white border border-slate-200/80 shadow-sm">
+        <div className="p-6 md:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-lg md:text-xl font-black font-display text-slate-900">
+                <h3 className="text-lg md:text-xl font-black font-display text-slate-900 dark:text-white">
                   Live Guest Feedback Stream
                 </h3>
-                <span className="px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 text-[11px] font-bold">
+                <span className="px-2 py-0.5 rounded-md bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/60 text-[11px] font-bold">
                   Proposal Req #28
                 </span>
               </div>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Direct diner reviews collected via table kiosks after meal settlement
               </p>
             </div>
 
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 text-xs font-black border border-amber-200/80">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950 text-amber-800 dark:text-amber-300 text-xs font-black border border-amber-200/80 dark:border-amber-805">
               <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
               <span>Average {avgRating} / 5.0</span>
             </div>
@@ -472,7 +499,7 @@ export const ManagementDashboard: React.FC = () => {
             {feedbacks.slice(0, 6).map((fb) => (
               <div
                 key={fb.id}
-                className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col justify-between"
+                className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between mb-2">
@@ -481,23 +508,23 @@ export const ManagementDashboard: React.FC = () => {
                         <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                       ))}
                     </div>
-                    <span className="text-[11px] font-bold text-slate-400">
+                    <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500">
                       Table {fb.tableNumber}
                     </span>
                   </div>
 
-                  <p className="text-xs text-slate-700 leading-relaxed font-medium mb-3">
+                  <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed font-medium mb-3">
                     "{fb.comment}"
                   </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-1 pt-2 border-t border-slate-200/60">
+                <div className="flex flex-wrap items-center gap-1 pt-2 border-t border-slate-200/60 dark:border-slate-700/60">
                   {fb.tags.map((tag) => (
-                    <span key={tag} className="px-1.5 py-0.5 rounded bg-white text-[10px] font-semibold text-slate-500 border border-slate-200">
+                    <span key={tag} className="px-1.5 py-0.5 rounded bg-white dark:bg-slate-900 text-[10px] font-semibold text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
                       {tag}
                     </span>
                   ))}
-                  <span className="text-[10px] text-slate-400 ml-auto">
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-auto">
                     {fb.timestamp}
                   </span>
                 </div>

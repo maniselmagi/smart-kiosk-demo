@@ -13,6 +13,7 @@ const STORAGE_KEYS = {
   FEEDBACK: 'orderease_feedback_v1',
   ACTIVE_TABLE: 'orderease_active_table_v1',
   LANGUAGE: 'orderease_language_v1',
+  THEME: 'orderease_theme_v1',
   ACCESSIBILITY: 'orderease_accessibility_v1',
   LAST_ORDER_ID: 'orderease_last_order_id_v1',
 };
@@ -37,6 +38,8 @@ export interface SyncMessage {
     | 'ALERT_CREATED'
     | 'ALERT_RESOLVED'
     | 'FEEDBACK_ADDED'
+    | 'THEME_CHANGED'
+    | 'LANGUAGE_CHANGED'
     | 'DATA_RESET';
   payload?: unknown;
 }
@@ -182,6 +185,44 @@ export const storageService = {
     );
     this.saveMenuItems(updated);
     return updated;
+  },
+
+  getTheme(): 'light' | 'dark' {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.THEME);
+      if (data === 'dark' || data === 'light') return data;
+    } catch (e) {
+      console.warn(e);
+    }
+    return 'light';
+  },
+
+  saveTheme(theme: 'light' | 'dark') {
+    try {
+      localStorage.setItem(STORAGE_KEYS.THEME, theme);
+      this.broadcast({ type: 'THEME_CHANGED', payload: theme });
+    } catch (e) {
+      console.error(e);
+    }
+  },
+
+  getLanguage(): string {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.LANGUAGE);
+      if (data) return data;
+    } catch (e) {
+      console.warn(e);
+    }
+    return 'en';
+  },
+
+  saveLanguage(lang: string) {
+    try {
+      localStorage.setItem(STORAGE_KEYS.LANGUAGE, lang);
+      this.broadcast({ type: 'LANGUAGE_CHANGED', payload: lang });
+    } catch (e) {
+      console.error(e);
+    }
   },
 
   resetAllData() {

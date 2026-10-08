@@ -7,7 +7,9 @@ import {
   RotateCcw, 
   Home, 
   Radio, 
-  ExternalLink 
+  ExternalLink,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 export const DemoNavigation: React.FC = () => {
@@ -18,7 +20,9 @@ export const DemoNavigation: React.FC = () => {
     tableNumber, 
     activeOrders, 
     staffAlerts, 
-    isStandaloneRole 
+    isStandaloneRole,
+    theme,
+    toggleTheme
   } = useKiosk();
 
   // Hide the presentation bar when visiting standalone roles like customer kiosk
@@ -108,6 +112,25 @@ export const DemoNavigation: React.FC = () => {
 
         {/* Right: Quick actions */}
         <div className="flex items-center gap-2">
+          {/* Theme Toggle in Demo Bar */}
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-amber-400 transition-colors text-[11px] border border-slate-800 active:scale-95"
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {theme === 'dark' ? (
+              <>
+                <Sun className="w-3.5 h-3.5 text-amber-400" />
+                <span className="hidden sm:inline">Light</span>
+              </>
+            ) : (
+              <>
+                <Moon className="w-3.5 h-3.5 text-slate-300" />
+                <span className="hidden sm:inline">Dark</span>
+              </>
+            )}
+          </button>
+
           <button
             onClick={() => {
               if (window.confirm('Reset all demo orders, alerts and feedback to pristine sample state?')) {

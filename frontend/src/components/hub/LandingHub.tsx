@@ -13,11 +13,13 @@ import {
   UtensilsCrossed,
   ExternalLink,
   ShieldCheck,
-  Smartphone
+  Smartphone,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 export const LandingHub: React.FC = () => {
-  const { setView, tableNumber, setTableNumber, activeOrders, staffAlerts } = useKiosk();
+  const { setView, tableNumber, setTableNumber, activeOrders, staffAlerts, theme, toggleTheme, language, setLanguage } = useKiosk();
 
   const pendingOrders = activeOrders.filter((o) => o.status !== 'COMPLETED').length;
   const pendingAlerts = staffAlerts.filter((a) => a.status === 'PENDING').length;
@@ -29,12 +31,35 @@ export const LandingHub: React.FC = () => {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-brand-500/10 blur-[120px] pointer-events-none rounded-full" />
 
       {/* Main Container */}
-      <div className="relative max-w-6xl mx-auto px-4 py-10 md:py-16 flex flex-col items-center">
+      <div className="relative max-w-6xl mx-auto px-4 py-8 md:py-14 flex flex-col items-center">
         
-        {/* Top Proposal Badge */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/60 text-xs font-semibold text-brand-300 mb-6 shadow-inner">
-          <Sparkles className="w-3.5 h-3.5 text-brand-400" />
-          <span>Product Proposal Prototype • Dedicated URLs for Each Role</span>
+        {/* Top Controls: Theme & Languages */}
+        <div className="w-full flex items-center justify-between mb-6 flex-wrap gap-3">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/60 text-xs font-semibold text-brand-300 shadow-inner">
+            <Sparkles className="w-3.5 h-3.5 text-brand-400" />
+            <span>Product Proposal Prototype • Dedicated URLs for Each Role</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-xs font-bold text-amber-400 hover:bg-slate-700 transition-all active:scale-95"
+              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {theme === 'dark' ? (
+                <>
+                  <Sun className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="hidden sm:inline">Light Mode</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="w-3.5 h-3.5 text-slate-300" />
+                  <span className="hidden sm:inline">Dark Mode</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Hero Title */}

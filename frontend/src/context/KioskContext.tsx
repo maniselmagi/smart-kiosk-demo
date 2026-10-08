@@ -21,6 +21,9 @@ interface KioskContextType {
   setTableNumber: (table: number) => void;
   language: Language;
   setLanguage: (lang: Language) => void;
+  theme: 'light' | 'dark';
+  setTheme: (theme: 'light' | 'dark') => void;
+  toggleTheme: () => void;
   isAccessibilityMode: boolean;
   toggleAccessibility: () => void;
   t: TranslationDictionary;
@@ -104,9 +107,50 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [view, setViewState] = useState<ViewType>(initialRoute.view);
   const [isStandaloneRole, setIsStandaloneRole] = useState<boolean>(initialRoute.isStandalone);
   const [tableNumber, setTableNumber] = useState<number>(initialRoute.table);
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguageState] = useState<Language>(() => {
+    const saved = storageService.getLanguage();
+    if (saved === 'ta' || saved === 'hi' || saved === 'te' || saved === 'es' || saved === 'en') {
+      return saved as Language;
+    }
+    return 'en';
+  });
+  const [theme, setThemeState] = useState<'light' | 'dark'>(() => storageService.getTheme());
   const [isAccessibilityMode, setIsAccessibilityMode] = useState<boolean>(false);
   const [menuItems, setMenuItems] = useState<MenuItem[]>(() => storageService.getMenuItems());
+
+  const setLanguage = useCallback((lang: Language) => {
+    setLanguageState(lang);
+    storageService.saveLanguage(lang);
+  }, []);
+
+  const setTheme = useCallback((newTheme: 'light' | 'dark') => {
+    setThemeState(newTheme);
+    storageService.saveTheme(newTheme);
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setThemeState((prev) => {
+      const next = prev === 'light' ? 'dark' : 'light';
+      storageService.saveTheme(next);
+      return next;
+    });
+  }, []);
+
+  // Synchronize HTML element classes for Tailwind dark: variants
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const root = document.documentElement;
+      if (theme === 'dark') {
+        root.classList.add('dark');
+        root.classList.remove('light');
+        root.setAttribute('data-theme', 'dark');
+      } else {
+        root.classList.remove('dark');
+        root.classList.add('light');
+        root.setAttribute('data-theme', 'light');
+      }
+    }
+  }, [theme]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [activeOrders, setActiveOrders] = useState<Order[]>(() => storageService.getOrders());
   const [currentTrackedOrderId, setCurrentTrackedOrderId] = useState<string | null>(() => storageService.getLastOrderId());
@@ -180,6 +224,16 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           break;
         case 'FEEDBACK_ADDED':
           setFeedbacks(storageService.getFeedback());
+          break;
+        case 'THEME_CHANGED':
+          if (msg.payload === 'light' || msg.payload === 'dark') {
+            setThemeState(msg.payload);
+          }
+          break;
+        case 'LANGUAGE_CHANGED':
+          if (typeof msg.payload === 'string') {
+            setLanguageState(msg.payload as Language);
+          }
           break;
         case 'DATA_RESET':
           setMenuItems(storageService.getMenuItems());
@@ -389,6 +443,9 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setTableNumber,
         language,
         setLanguage,
+        theme,
+        setTheme,
+        toggleTheme,
         isAccessibilityMode,
         toggleAccessibility,
         t,

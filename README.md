@@ -1,7 +1,7 @@
 # OrderEase — Smart Table-Side Self-Ordering Kiosk
 ### Customer Presentation Demo Prototype (Proposal Review 2026)
 
-[![Cloud Demo Status](https://img.shields.io/badge/Demo-Cloudflare_Active-success?style=for-the-badge&logo=cloudflare)](https://occasions-excessive-affairs-counting.trycloudflare.com)
+[![Cloud Demo Status](https://img.shields.io/badge/Demo-Cloudflare_Active-success?style=for-the-badge&logo=cloudflare)](https://speech-allocation-intersection-pee.trycloudflare.com)
 [![Stack](https://img.shields.io/badge/Frontend-React_19_+_TypeScript_+_Vite-blue?style=for-the-badge&logo=react)](https://react.dev)
 [![Styling](https://img.shields.io/badge/Styling-Tailwind_CSS-38bdf8?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com)
 [![Backend](https://img.shields.io/badge/Backend-Python_FastAPI-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
@@ -14,10 +14,10 @@ Each role has its own **dedicated, isolated URL** so customers and staff only se
 
 | Dedicated Portal | Direct Public Cloud URL | Isolation & Responsiveness |
 | :--- | :--- | :--- |
-| **📱 Customer Kiosk** | **[https://occasions-excessive-affairs-counting.trycloudflare.com/kiosk](https://occasions-excessive-affairs-counting.trycloudflare.com/kiosk)** | **Completely isolated**: Shows ONLY table ordering. Demo switcher bar and admin info are hidden. |
-| **📊 Management Dashboard** | **[https://occasions-excessive-affairs-counting.trycloudflare.com/management](https://occasions-excessive-affairs-counting.trycloudflare.com/management)** | **Management-only view**: Revenue, peak hours, menu gross margins (38%–58%), and diner reviews. |
-| **👨‍🍳 Kitchen Display (KDS)** | **[https://occasions-excessive-affairs-counting.trycloudflare.com/kitchen](https://occasions-excessive-affairs-counting.trycloudflare.com/kitchen)** | **Fully responsive**: Optimized for 8"–12" tablets and mobile phones with touch-friendly ticket stages & sold-out controls. |
-| **🚀 Presentation Hub** | **[https://occasions-excessive-affairs-counting.trycloudflare.com/hub](https://occasions-excessive-affairs-counting.trycloudflare.com/hub)** | Portal overview linking all screens with 1-click open in new tab. |
+| **📱 Customer Kiosk** | **[https://speech-allocation-intersection-pee.trycloudflare.com/kiosk](https://speech-allocation-intersection-pee.trycloudflare.com/kiosk)** | **Completely isolated**: Shows ONLY table ordering. Demo switcher bar and admin info are hidden. |
+| **📊 Management Dashboard** | **[https://speech-allocation-intersection-pee.trycloudflare.com/management](https://speech-allocation-intersection-pee.trycloudflare.com/management)** | **Management-only view**: Revenue, peak hours, menu gross margins (38%–58%), and diner reviews. |
+| **👨‍🍳 Kitchen Display (KDS)** | **[https://speech-allocation-intersection-pee.trycloudflare.com/kitchen](https://speech-allocation-intersection-pee.trycloudflare.com/kitchen)** | **Fully responsive**: Optimized for 8"–12" tablets and mobile phones with touch-friendly ticket stages & sold-out controls. |
+| **🚀 Presentation Hub** | **[https://speech-allocation-intersection-pee.trycloudflare.com/hub](https://speech-allocation-intersection-pee.trycloudflare.com/hub)** | Portal overview linking all screens with 1-click open in new tab. |
 
 > **Direct Access**: Accessible from any smartphone, tablet, iPad, laptop, or desktop worldwide with no password or installation required.
 

@@ -71,6 +71,7 @@ const parseRouteFromLocation = (): { view: ViewType; isStandalone: boolean; tabl
   }
 
   const path = window.location.pathname.toLowerCase();
+  const hash = window.location.hash.toLowerCase();
   const searchParams = new URLSearchParams(window.location.search);
   const roleParam = (searchParams.get('role') || searchParams.get('view') || searchParams.get('mode') || '').toLowerCase();
   const tableParam = parseInt(searchParams.get('table') || '');
@@ -79,16 +80,16 @@ const parseRouteFromLocation = (): { view: ViewType; isStandalone: boolean; tabl
   let view: ViewType = 'hub';
   let isStandalone = false;
 
-  if (path.includes('/kiosk') || roleParam === 'kiosk' || roleParam === 'customer') {
+  if (path.includes('/kiosk') || hash.includes('kiosk') || roleParam === 'kiosk' || roleParam === 'customer') {
     view = 'kiosk';
     isStandalone = !demoParam;
-  } else if (path.includes('/kitchen') || path.includes('/kds') || roleParam === 'kitchen' || roleParam === 'kds') {
+  } else if (path.includes('/kitchen') || path.includes('/kds') || hash.includes('kitchen') || hash.includes('kds') || roleParam === 'kitchen' || roleParam === 'kds') {
     view = 'kitchen';
     isStandalone = !demoParam;
-  } else if (path.includes('/management') || path.includes('/admin') || path.includes('/dashboard') || roleParam === 'management' || roleParam === 'dashboard' || roleParam === 'admin') {
+  } else if (path.includes('/management') || path.includes('/admin') || path.includes('/dashboard') || hash.includes('management') || hash.includes('admin') || hash.includes('dashboard') || roleParam === 'management' || roleParam === 'dashboard' || roleParam === 'admin') {
     view = 'dashboard';
     isStandalone = !demoParam;
-  } else if (path.includes('/hub') || roleParam === 'hub') {
+  } else if (path.includes('/hub') || hash.includes('hub') || roleParam === 'hub') {
     view = 'hub';
     isStandalone = false;
   } else {
@@ -151,6 +152,23 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     }
   }, [theme]);
+
+  // Synchronize route if user navigates back/forward or changes hash
+  useEffect(() => {
+    const handleUrlChange = () => {
+      const parsed = parseRouteFromLocation();
+      setViewState(parsed.view);
+      setIsStandaloneRole(parsed.isStandalone);
+      if (parsed.table > 0) setTableNumber(parsed.table);
+    };
+
+    window.addEventListener('popstate', handleUrlChange);
+    window.addEventListener('hashchange', handleUrlChange);
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      window.removeEventListener('hashchange', handleUrlChange);
+    };
+  }, []);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [activeOrders, setActiveOrders] = useState<Order[]>(() => storageService.getOrders());
   const [currentTrackedOrderId, setCurrentTrackedOrderId] = useState<string | null>(() => storageService.getLastOrderId());

@@ -110,6 +110,21 @@ export interface TranslationDictionary {
   managementDashboard: string;
   customerKiosk: string;
   demoModeBanner: string;
+  selectLanguage: string;
+  chooseLanguagePrompt: string;
+  continueInLanguage: string;
+  selectLanguageTitle: string;
+  morningBreakfast: string;
+  lunchAfternoon: string;
+  dinnerEvening: string;
+  morningHours: string;
+  lunchHours: string;
+  dinnerHours: string;
+  autoTimeBadge: string;
+  switchMealDemo: string;
+  onlyServedIn: string;
+  changeLanguage: string;
+  allDay: string;
 }
 
 export const translations: Record<Language, TranslationDictionary> = {
@@ -205,6 +220,21 @@ export const translations: Record<Language, TranslationDictionary> = {
     managementDashboard: "Manager Dashboard",
     customerKiosk: "Customer Kiosk",
     demoModeBanner: "Interactive Demo Prototype — Click between Kiosk, Kitchen & Dashboard anytime",
+    selectLanguage: "Select Your Language",
+    chooseLanguagePrompt: "Please choose your preferred language to begin ordering",
+    continueInLanguage: "Continue",
+    selectLanguageTitle: "Choose Language / மொழியைத் தேர்ந்தெடுக்கவும்",
+    morningBreakfast: "Morning (Breakfast)",
+    lunchAfternoon: "Lunch Menu",
+    dinnerEvening: "Dinner Menu",
+    morningHours: "6:00 AM - 11:30 AM",
+    lunchHours: "11:30 AM - 4:30 PM",
+    dinnerHours: "4:30 PM - 11:00 PM",
+    autoTimeBadge: "Active Now",
+    switchMealDemo: "Switch Meal Time (Demo)",
+    onlyServedIn: "Served during",
+    changeLanguage: "Change Language",
+    allDay: "All Day",
   },
   ta: {
     welcomeTo: "வணக்கம்",
@@ -298,6 +328,21 @@ export const translations: Record<Language, TranslationDictionary> = {
     managementDashboard: "மேலாளர் டாஷ்போர்டு",
     customerKiosk: "வாடிக்கையாளர் கியோஸ்க்",
     demoModeBanner: "நேரலை டெமோ — கியோஸ்க், சமையலறை மற்றும் டாஷ்போர்டை எப்போது வேண்டுமானாலும் பார்க்கலாம்",
+    selectLanguage: "உங்கள் மொழியைத் தேர்ந்தெடுக்கவும்",
+    chooseLanguagePrompt: "ஆர்டர் செய்ய தொடங்குவதற்கு உங்கள் விருப்பமான மொழியைத் தேர்ந்தெடுக்கவும்",
+    continueInLanguage: "தொடரவும்",
+    selectLanguageTitle: "மொழியினைத் தேர்வு செய்க",
+    morningBreakfast: "காலை உணவு (Breakfast)",
+    lunchAfternoon: "மதிய உணவு (Lunch)",
+    dinnerEvening: "இரவு உணவு (Dinner)",
+    morningHours: "காலை 6:00 - 11:30",
+    lunchHours: "பிற்பகல் 11:30 - 4:30",
+    dinnerHours: "இரவு 4:30 - 11:00",
+    autoTimeBadge: "தற்போது கிடைக்கும் உணவு",
+    switchMealDemo: "உணவு நேரத்தை மாற்றுக (Demo)",
+    onlyServedIn: "வழங்கப்படும் நேரம்",
+    changeLanguage: "மொழியை மாற்றுக",
+    allDay: "முழு நாளும்",
   },
   hi: {
     welcomeTo: "स्वागत है",
@@ -391,6 +436,21 @@ export const translations: Record<Language, TranslationDictionary> = {
     managementDashboard: "प्रबंधक डैशबोर्ड",
     customerKiosk: "ग्राहक कियोस्क",
     demoModeBanner: "इंटरएक्टिव डेमो प्रोटोटाइप — कियोस्क, किचन और डैशबोर्ड के बीच कभी भी स्विच करें",
+    selectLanguage: "अपनी भाषा चुनें",
+    chooseLanguagePrompt: "ऑर्डर शुरू करने के लिए कृपया अपनी पसंदीदा भाषा चुनें",
+    continueInLanguage: "आगे बढ़ें",
+    selectLanguageTitle: "भाषा का चयन करें",
+    morningBreakfast: "सुबह का नाश्ता (Breakfast)",
+    lunchAfternoon: "दोपहर का भोजन (Lunch)",
+    dinnerEvening: "रात का खाना (Dinner)",
+    morningHours: "सुबह 6:00 - 11:30",
+    lunchHours: "दोपहर 11:30 - 4:30",
+    dinnerHours: "शाम 4:30 - रात 11:00",
+    autoTimeBadge: "वर्तमान में सक्रिय मेनू",
+    switchMealDemo: "भोजन का समय बदलें (Demo)",
+    onlyServedIn: "परोसने का समय",
+    changeLanguage: "भाषा बदलें",
+    allDay: "पूरे दिन",
   },
   te: {
     welcomeTo: "స్వాగతం",
@@ -484,6 +544,21 @@ export const translations: Record<Language, TranslationDictionary> = {
     managementDashboard: "మేనేజర్ డ్యాష్‌బోర్డ్",
     customerKiosk: "కస్టమర్ కియోస్క్",
     demoModeBanner: "ఇంటరాక్టివ్ డెమో ప్రోటోటైప్ — కియోస్క్, కిచెన్ మరియు డ్యాష్‌బోర్డ్ మధ్య ఎప్పుడైనా మారవచ్చు",
+    selectLanguage: "మీ భాషను ఎంచుకోండి",
+    chooseLanguagePrompt: "ఆర్డరింగ్ ప్రారంభించడానికి దయచేసి మీ భాషను ఎంచుకోండి",
+    continueInLanguage: "కొనసాగించండి",
+    selectLanguageTitle: "భాషను ఎంచుకోండి",
+    morningBreakfast: "ఉదయం అల్పాహారం (Breakfast)",
+    lunchAfternoon: "మధ్యాహ్న భोజనం (Lunch)",
+    dinnerEvening: "రాత్రి భోజనం (Dinner)",
+    morningHours: "ఉదయం 6:00 - 11:30",
+    lunchHours: "మధ్యాహ్నం 11:30 - 4:30",
+    dinnerHours: "సాయంత్రం 4:30 - రాత్రి 11:00",
+    autoTimeBadge: "ప్రస్తుత సమయ మెనూ",
+    switchMealDemo: "భోజన సమయం మార్చండి (Demo)",
+    onlyServedIn: "వడ్డించే సమయం",
+    changeLanguage: "భాష మార్చండి",
+    allDay: "రోజంతా",
   },
   es: {
     welcomeTo: "Bienvenido a",
@@ -577,6 +652,21 @@ export const translations: Record<Language, TranslationDictionary> = {
     managementDashboard: "Panel de Gerencia",
     customerKiosk: "Quiosco de Cliente",
     demoModeBanner: "Prototipo Demo Interactivo — Alterne entre Quiosco, Cocina y Gerencia",
+    selectLanguage: "Seleccione su idioma",
+    chooseLanguagePrompt: "Por favor elija su idioma preferido para comenzar a ordenar",
+    continueInLanguage: "Continuar",
+    selectLanguageTitle: "Elegir Idioma / Select Language",
+    morningBreakfast: "Desayuno (Mañana)",
+    lunchAfternoon: "Menú de Almuerzo",
+    dinnerEvening: "Menú de Cena",
+    morningHours: "6:00 AM - 11:30 AM",
+    lunchHours: "11:30 AM - 4:30 PM",
+    dinnerHours: "4:30 PM - 11:00 PM",
+    autoTimeBadge: "Menú Activo Ahora",
+    switchMealDemo: "Cambiar Horario de Comida (Demo)",
+    onlyServedIn: "Servido durante",
+    changeLanguage: "Cambiar Idioma",
+    allDay: "Todo el día",
   }
 };
 

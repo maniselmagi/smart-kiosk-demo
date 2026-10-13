@@ -39,7 +39,8 @@ export const Header: React.FC<HeaderProps> = ({
     t,
     staffAlerts,
     setView,
-    isStandaloneRole
+    isStandaloneRole,
+    setIsLanguageModalOpen
   } = useKiosk();
 
   const [isWaiterModalOpen, setIsWaiterModalOpen] = useState(false);
@@ -208,6 +209,16 @@ export const Header: React.FC<HeaderProps> = ({
                         </span>
                       </button>
                     ))}
+                    <button
+                      onClick={() => {
+                        setIsLangMenuOpen(false);
+                        setIsLanguageModalOpen(true);
+                      }}
+                      className="w-full mt-1 pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] font-bold text-brand-600 dark:text-brand-400 hover:underline flex items-center justify-center gap-1.5 py-1"
+                    >
+                      <Globe className="w-3 h-3" />
+                      <span>{t.changeLanguage} →</span>
+                    </button>
                   </div>
                 </div>
               )}

@@ -6,12 +6,28 @@ import type {
   StaffAlert, 
   Feedback, 
   SpiceLevel, 
-  OrderStatus 
+  OrderStatus,
+  MealTime
 } from '../types';
 import { storageService, SyncMessage } from '../services/storageService';
 import { translations, Language, TranslationDictionary } from '../utils/translations';
 
 export type ViewType = 'hub' | 'kiosk' | 'kitchen' | 'dashboard';
+
+export const getAutoMealTime = (): MealTime => {
+  const now = new Date();
+  const hour = now.getHours() + now.getMinutes() / 60;
+  // Morning (Breakfast): 6:00 AM - 11:30 AM (11.5)
+  // Lunch: 11:30 AM - 4:30 PM (16.5)
+  // Dinner: 4:30 PM - 11:59 PM & night
+  if (hour >= 6 && hour < 11.5) {
+    return 'morning';
+  } else if (hour >= 11.5 && hour < 16.5) {
+    return 'lunch';
+  } else {
+    return 'dinner';
+  }
+};
 
 interface KioskContextType {
   view: ViewType;
@@ -21,11 +37,17 @@ interface KioskContextType {
   setTableNumber: (table: number) => void;
   language: Language;
   setLanguage: (lang: Language) => void;
+  isLanguageModalOpen: boolean;
+  setIsLanguageModalOpen: (open: boolean) => void;
   theme: 'light' | 'dark';
   setTheme: (theme: 'light' | 'dark') => void;
   toggleTheme: () => void;
   isAccessibilityMode: boolean;
   toggleAccessibility: () => void;
+  mealTime: MealTime;
+  setMealTime: (meal: MealTime) => void;
+  isAutoMealTime: boolean;
+  setIsAutoMealTime: (auto: boolean) => void;
   t: TranslationDictionary;
   menuItems: MenuItem[];
   cart: CartItem[];
@@ -115,13 +137,30 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
     return 'en';
   });
+  const [isLanguageModalOpen, setIsLanguageModalOpen] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const selected = sessionStorage.getItem('orderease_language_selected_v2');
+      return !selected;
+    }
+    return true;
+  });
   const [theme, setThemeState] = useState<'light' | 'dark'>(() => storageService.getTheme());
   const [isAccessibilityMode, setIsAccessibilityMode] = useState<boolean>(false);
   const [menuItems, setMenuItems] = useState<MenuItem[]>(() => storageService.getMenuItems());
+  const [mealTime, setMealTimeState] = useState<MealTime>(() => getAutoMealTime());
+  const [isAutoMealTime, setIsAutoMealTime] = useState<boolean>(true);
+
+  const setMealTime = useCallback((meal: MealTime) => {
+    setMealTimeState(meal);
+    setIsAutoMealTime(false);
+  }, []);
 
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
     storageService.saveLanguage(lang);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('orderease_language_selected_v2', 'true');
+    }
   }, []);
 
   const setTheme = useCallback((newTheme: 'light' | 'dark') => {
@@ -461,11 +500,17 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setTableNumber,
         language,
         setLanguage,
+        isLanguageModalOpen,
+        setIsLanguageModalOpen,
         theme,
         setTheme,
         toggleTheme,
         isAccessibilityMode,
         toggleAccessibility,
+        mealTime,
+        setMealTime,
+        isAutoMealTime,
+        setIsAutoMealTime,
         t,
         menuItems,
         cart,

@@ -36,7 +36,11 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
     addToCart, 
     language, 
     t, 
-    currentTrackedOrder 
+    currentTrackedOrder,
+    mealTime,
+    setMealTime,
+    isAutoMealTime,
+    setIsAutoMealTime
   } = useKiosk();
 
   const [selectedCategory, setSelectedCategory] = useState<Category>('All');
@@ -66,15 +70,22 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
 
   const filteredItems = useMemo(() => {
     return menuItems.filter((item) => {
-      // Category filter
+      // 1. Time-based meal filtering: morning foods in morning, lunch foods in lunch, dinner foods in dinner
+      if (item.mealTimes && item.mealTimes.length > 0) {
+        if (!item.mealTimes.includes(mealTime)) {
+          return false;
+        }
+      }
+
+      // 2. Category filter
       if (selectedCategory !== 'All' && item.category !== selectedCategory) {
         return false;
       }
-      // Diet filter
+      // 3. Diet filter
       if (dietFilter === 'veg' && !item.isVeg) return false;
       if (dietFilter === 'non-veg' && item.isVeg) return false;
 
-      // Search query across all available languages
+      // 4. Search query across all available languages
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchName = item.name.toLowerCase().includes(query);
@@ -88,7 +99,15 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
 
       return true;
     });
-  }, [menuItems, selectedCategory, dietFilter, searchQuery]);
+  }, [menuItems, mealTime, selectedCategory, dietFilter, searchQuery]);
+
+  // Filter combos to those matching the active meal time
+  const relevantCombos = useMemo(() => {
+    return INITIAL_COMBOS.filter((combo) => {
+      const matched = menuItems.filter((m) => combo.itemIds.includes(m.id));
+      return matched.some((m) => m.mealTimes && m.mealTimes.includes(mealTime));
+    });
+  }, [menuItems, mealTime]);
 
   // Handle adding combo deal to cart
   const handleAddCombo = (combo: ComboRecommendation) => {
@@ -136,8 +155,80 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
       {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 pt-6">
         
-        {/* Recommended AI Combo Pairing Card */}
-        {INITIAL_COMBOS.length > 0 && (
+        {/* Interactive Meal Time Bar: Morning (Breakfast) | Lunch | Dinner */}
+        <div className="mb-6 p-4 md:p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-sm shrink-0 ${
+              mealTime === 'morning' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/70 dark:text-amber-300' :
+              mealTime === 'lunch' ? 'bg-orange-100 text-orange-700 dark:bg-orange-950/70 dark:text-orange-300' :
+              'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300'
+            }`}>
+              {mealTime === 'morning' && '🌅'}
+              {mealTime === 'lunch' && '☀️'}
+              {mealTime === 'dinner' && '🌙'}
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-black text-lg md:text-xl text-slate-900 dark:text-white">
+                  {mealTime === 'morning' && t.morningBreakfast}
+                  {mealTime === 'lunch' && t.lunchAfternoon}
+                  {mealTime === 'dinner' && t.dinnerEvening}
+                </h3>
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5 border border-emerald-200/60 dark:border-emerald-800/60">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  {isAutoMealTime ? t.autoTimeBadge : 'Demo Selected'}
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                {mealTime === 'morning' && `${t.morningHours} • Showing only morning dishes (Dosas, Idli-Vada, Poori, Coffee & Chai)`}
+                {mealTime === 'lunch' && `${t.lunchHours} • Showing only lunch dishes (Grand Meals Thali, Biryani, Naan & Lassi)`}
+                {mealTime === 'dinner' && `${t.dinnerHours} • Showing only dinner dishes (Butter Chicken, Tandoori Tikka, Biryani & Desserts)`}
+              </p>
+            </div>
+          </div>
+
+          {/* Time Slot Switcher Buttons (allows testing morning, lunch, and dinner anytime) */}
+          <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1.5 rounded-2xl border border-slate-200/60 dark:border-slate-700 w-full lg:w-auto overflow-x-auto">
+            <button
+              onClick={() => setMealTime('morning')}
+              className={`flex-1 lg:flex-initial px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+                mealTime === 'morning'
+                  ? 'bg-amber-500 text-white shadow-md shadow-amber-500/25 scale-[1.02]'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700'
+              }`}
+            >
+              <span>🌅</span>
+              <span>{t.morningBreakfast}</span>
+            </button>
+
+            <button
+              onClick={() => setMealTime('lunch')}
+              className={`flex-1 lg:flex-initial px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+                mealTime === 'lunch'
+                  ? 'bg-orange-500 text-white shadow-md shadow-orange-500/25 scale-[1.02]'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700'
+              }`}
+            >
+              <span>☀️</span>
+              <span>{t.lunchAfternoon}</span>
+            </button>
+
+            <button
+              onClick={() => setMealTime('dinner')}
+              className={`flex-1 lg:flex-initial px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+                mealTime === 'dinner'
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25 scale-[1.02]'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700'
+              }`}
+            >
+              <span>🌙</span>
+              <span>{t.dinnerEvening}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Recommended AI Combo Pairing Card (Filtered to active meal time) */}
+        {relevantCombos.length > 0 && (
           <div className="mb-6 bg-gradient-to-r from-amber-500/10 via-brand-500/10 to-orange-500/10 dark:from-slate-900 dark:via-slate-850 dark:to-slate-900 border border-brand-200/80 dark:border-brand-900/40 rounded-3xl p-4 md:p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
             <div className="flex items-center gap-3.5 w-full md:w-auto">
               <div className="w-12 h-12 rounded-2xl bg-brand-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-brand-500/30">
@@ -149,14 +240,14 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                     {t.recommendedForYou}
                   </span>
                   <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200/60 dark:border-emerald-800/60">
-                    {t.saveDiscount} ₹{INITIAL_COMBOS[0].savings}
+                    {t.saveDiscount} ₹{relevantCombos[0].savings}
                   </span>
                 </div>
                 <h4 className="text-base md:text-lg font-black text-slate-900 dark:text-white mt-1">
-                  {getLocalizedComboTitle(INITIAL_COMBOS[0], language)}
+                  {getLocalizedComboTitle(relevantCombos[0], language)}
                 </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Curated chef pairing for today's dining rush
+                  Curated chef pairing for {mealTime === 'morning' ? 'breakfast' : mealTime === 'lunch' ? 'lunch' : 'dinner'} dining
                 </p>
               </div>
             </div>
@@ -164,14 +255,14 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             <div className="flex items-center gap-3 w-full md:w-auto justify-end">
               <div className="text-right">
                 <span className="text-xs text-slate-400 dark:text-slate-500 line-through mr-1.5">
-                  ₹{INITIAL_COMBOS[0].originalPrice}
+                  ₹{relevantCombos[0].originalPrice}
                 </span>
                 <span className="text-xl font-black text-brand-600 dark:text-brand-400 font-display">
-                  ₹{INITIAL_COMBOS[0].comboPrice}
+                  ₹{relevantCombos[0].comboPrice}
                 </span>
               </div>
               <button
-                onClick={() => handleAddCombo(INITIAL_COMBOS[0])}
+                onClick={() => handleAddCombo(relevantCombos[0])}
                 className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white font-extrabold text-xs shadow-md shadow-brand-500/25 active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
               >
                 <Plus className="w-4 h-4" />

@@ -1,5 +1,7 @@
 export type SpiceLevel = 'Mild' | 'Medium' | 'Hot' | 'Extra Hot';
 
+export type MealTime = 'morning' | 'lunch' | 'dinner';
+
 export type Category = 
   | 'All'
   | 'Starters'
@@ -16,6 +18,7 @@ export interface MenuItem {
   nameTelugu?: string;
   nameSpanish?: string;
   category: Category;
+  mealTimes: MealTime[]; // Morning (Breakfast), Lunch, Dinner
   price: number;
   costPrice: number;
   marginPercent: number;

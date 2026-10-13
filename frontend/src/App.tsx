@@ -13,6 +13,7 @@ import { OrderTrackerModal } from './components/kiosk/OrderTrackerModal';
 import { FeedbackModal } from './components/kiosk/FeedbackModal';
 import { KitchenDisplay } from './components/kitchen/KitchenDisplay';
 import { ManagementDashboard } from './components/dashboard/ManagementDashboard';
+import { LanguageSelectionModal } from './components/kiosk/LanguageSelectionModal';
 import { MenuItem, Order } from './types';
 
 const MainAppContent: React.FC = () => {
@@ -21,7 +22,9 @@ const MainAppContent: React.FC = () => {
     setView, 
     toastMessage, 
     currentTrackedOrder, 
-    setCurrentTrackedOrder 
+    setCurrentTrackedOrder,
+    isLanguageModalOpen,
+    setIsLanguageModalOpen
   } = useKiosk();
 
   // Kiosk inner sub-screen state
@@ -126,6 +129,12 @@ const MainAppContent: React.FC = () => {
       <FeedbackModal
         isOpen={isFeedbackOpen}
         onClose={() => setIsFeedbackOpen(false)}
+      />
+
+      <LanguageSelectionModal
+        isOpen={isLanguageModalOpen && view === 'kiosk'}
+        onClose={() => setIsLanguageModalOpen(false)}
+        onConfirm={() => setIsLanguageModalOpen(false)}
       />
 
     </div>

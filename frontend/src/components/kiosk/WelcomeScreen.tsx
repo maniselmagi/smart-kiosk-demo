@@ -134,55 +134,12 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onStart }) => {
           {t.welcomeSubtitle}
         </p>
 
-        {/* STEP 1: FIRST PREFERENCE — LANGUAGE SELECTION SECTION */}
-        <div className="w-full max-w-xl mb-7 p-4 sm:p-5 rounded-3xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-2 border-brand-500/30 dark:border-brand-500/20 shadow-xl shadow-brand-500/10">
-          <div className="flex items-center justify-between mb-3 px-1">
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded-md bg-brand-600 text-[11px] font-black uppercase tracking-wider text-white">
-                Step 1
-              </span>
-              <span className="font-extrabold text-sm md:text-base text-slate-900 dark:text-white">
-                {t.selectLanguageTitle}
-              </span>
-            </div>
-            <span className="text-xs text-brand-600 dark:text-brand-400 font-bold hidden sm:inline">
-              First Preference
-            </span>
-          </div>
-
-          {/* 5 Language Touch Tiles */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-            {AVAILABLE_LANGUAGES.map((lang) => {
-              const isSelected = language === lang.code;
-              return (
-                <button
-                  key={lang.code}
-                  onClick={() => setLanguage(lang.code)}
-                  className={`p-2.5 sm:p-3 rounded-2xl border-2 transition-all flex flex-col items-center justify-center text-center cursor-pointer ${
-                    isSelected
-                      ? 'border-brand-600 bg-brand-600 text-white shadow-md shadow-brand-600/30 scale-[1.02]'
-                      : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:border-brand-300 dark:hover:border-slate-700'
-                  }`}
-                >
-                  <span className="text-xl sm:text-2xl mb-1">{lang.flag}</span>
-                  <span className="font-black text-xs sm:text-sm tracking-tight leading-tight">
-                    {lang.nativeLabel}
-                  </span>
-                  <span className={`text-[10px] mt-0.5 ${isSelected ? 'text-brand-100' : 'text-slate-400'}`}>
-                    {lang.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
         {/* Big Touch-Friendly Start Ordering Button */}
         <button
           onClick={onStart}
-          className="group relative inline-flex items-center justify-center gap-4 px-10 py-5 rounded-2xl bg-gradient-to-r from-brand-600 via-brand-500 to-amber-500 text-white font-extrabold text-xl md:text-2xl shadow-xl shadow-brand-500/30 hover:shadow-brand-500/40 active:scale-95 transition-all duration-200 cursor-pointer"
+          className="group relative inline-flex items-center justify-center gap-4 px-10 py-5 rounded-2xl bg-gradient-to-r from-brand-600 via-brand-500 to-amber-500 text-white font-extrabold text-xl md:text-2xl shadow-xl shadow-brand-500/30 hover:shadow-brand-500/40 active:scale-95 transition-all duration-200 cursor-pointer mt-4"
         >
-          <span>{t.startOrdering} ({AVAILABLE_LANGUAGES.find(l => l.code === language)?.nativeLabel})</span>
+          <span>{t.startOrdering}</span>
           <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center group-hover:translate-x-1 transition-transform">
             <ArrowRight className="w-6 h-6 text-white" />
           </div>

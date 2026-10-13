@@ -155,8 +155,8 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
       {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 pt-6">
         
-        {/* Interactive Meal Time Bar: Morning (Breakfast) | Lunch | Dinner */}
-        <div className="mb-6 p-4 md:p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        {/* Automated Time-Based Menu Banner (Strictly Automatic — No manual choose type) */}
+        <div className="mb-6 p-4 md:p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-sm shrink-0 ${
               mealTime === 'morning' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/70 dark:text-amber-300' :
@@ -176,54 +176,21 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                 </h3>
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5 border border-emerald-200/60 dark:border-emerald-800/60">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  {isAutoMealTime ? t.autoTimeBadge : 'Demo Selected'}
+                  {t.autoTimeBadge}
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                {mealTime === 'morning' && `${t.morningHours} • Showing only morning dishes (Dosas, Idli-Vada, Poori, Coffee & Chai)`}
-                {mealTime === 'lunch' && `${t.lunchHours} • Showing only lunch dishes (Grand Meals Thali, Biryani, Naan & Lassi)`}
-                {mealTime === 'dinner' && `${t.dinnerHours} • Showing only dinner dishes (Butter Chicken, Tandoori Tikka, Biryani & Desserts)`}
+                {mealTime === 'morning' && `${t.morningHours} • Morning breakfast dishes automatically served`}
+                {mealTime === 'lunch' && `${t.lunchHours} • Lunch dishes automatically served`}
+                {mealTime === 'dinner' && `${t.dinnerHours} • Dinner dishes automatically served`}
               </p>
             </div>
           </div>
 
-          {/* Time Slot Switcher Buttons (allows testing morning, lunch, and dinner anytime) */}
-          <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 p-1.5 rounded-2xl border border-slate-200/60 dark:border-slate-700 w-full lg:w-auto overflow-x-auto">
-            <button
-              onClick={() => setMealTime('morning')}
-              className={`flex-1 lg:flex-initial px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
-                mealTime === 'morning'
-                  ? 'bg-amber-500 text-white shadow-md shadow-amber-500/25 scale-[1.02]'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700'
-              }`}
-            >
-              <span>🌅</span>
-              <span>{t.morningBreakfast}</span>
-            </button>
-
-            <button
-              onClick={() => setMealTime('lunch')}
-              className={`flex-1 lg:flex-initial px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
-                mealTime === 'lunch'
-                  ? 'bg-orange-500 text-white shadow-md shadow-orange-500/25 scale-[1.02]'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700'
-              }`}
-            >
-              <span>☀️</span>
-              <span>{t.lunchAfternoon}</span>
-            </button>
-
-            <button
-              onClick={() => setMealTime('dinner')}
-              className={`flex-1 lg:flex-initial px-4 py-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
-                mealTime === 'dinner'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25 scale-[1.02]'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-700'
-              }`}
-            >
-              <span>🌙</span>
-              <span>{t.dinnerEvening}</span>
-            </button>
+          {/* Automatic Live Time Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200/70 dark:border-slate-700 shadow-xs">
+            <Clock className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
+            <span>Automatic Time-Based Menu</span>
           </div>
         </div>
 

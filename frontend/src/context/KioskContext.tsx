@@ -176,6 +176,18 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
   }, []);
 
+  // Continuously synchronize meal time automatically based on system clock
+  useEffect(() => {
+    const updateAutoMeal = () => {
+      const autoMeal = getAutoMealTime();
+      setMealTimeState(autoMeal);
+    };
+
+    updateAutoMeal();
+    const timer = setInterval(updateAutoMeal, 10000); // Automatically updates menu when time transitions
+    return () => clearInterval(timer);
+  }, []);
+
   // Synchronize HTML element classes for Tailwind dark: variants
   useEffect(() => {
     if (typeof document !== 'undefined') {

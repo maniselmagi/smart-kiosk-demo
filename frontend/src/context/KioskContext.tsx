@@ -137,13 +137,7 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
     return 'en';
   });
-  const [isLanguageModalOpen, setIsLanguageModalOpen] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      const selected = sessionStorage.getItem('orderease_language_selected_v2');
-      return !selected;
-    }
-    return true;
-  });
+  const [isLanguageModalOpen, setIsLanguageModalOpen] = useState<boolean>(false);
   const [theme, setThemeState] = useState<'light' | 'dark'>(() => storageService.getTheme());
   const [isAccessibilityMode, setIsAccessibilityMode] = useState<boolean>(false);
   const [menuItems, setMenuItems] = useState<MenuItem[]>(() => storageService.getMenuItems());

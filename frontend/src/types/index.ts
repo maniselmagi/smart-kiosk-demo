@@ -8,7 +8,9 @@ export type Category =
   | 'Main Course'
   | 'Breads & Rice'
   | 'Beverages'
-  | 'Desserts';
+  | 'Desserts'
+  | 'Combo'
+  | 'Signature';
 
 export interface MenuItem {
   id: string;
@@ -34,6 +36,8 @@ export interface MenuItem {
   isVeg: boolean;
   isSpicy: boolean;
   isAvailable: boolean;
+  isSignature?: boolean; // Hotel Signature specialty dish
+  isCombo?: boolean; // Combo meal set
   rating: number;
   calories: number;
   allergens: string[];

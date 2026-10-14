@@ -1,23 +1,23 @@
 import React, { useState, useMemo } from 'react';
 import { useKiosk } from '../../context/KioskContext';
-import { MenuItem, Category, ComboRecommendation } from '../../types';
-import { INITIAL_COMBOS } from '../../data/initialData';
+import { MenuItem, Category } from '../../types';
 import { 
   getLocalizedItemName, 
-  getLocalizedItemDescription, 
-  getLocalizedComboTitle 
+  getLocalizedItemDescription 
 } from '../../utils/translations';
 import { 
   Clock, 
   Flame, 
   Plus, 
   Search, 
-  Sparkles, 
   AlertCircle, 
   TrendingUp, 
   Leaf, 
-  Drumstick 
+  Drumstick,
+  Crown,
+  Tag
 } from 'lucide-react';
+import { PromoAdBanner } from './PromoAdBanner';
 
 interface MenuScreenProps {
   onSelectItem: (item: MenuItem) => void;
@@ -27,27 +27,24 @@ interface MenuScreenProps {
 
 export const MenuScreen: React.FC<MenuScreenProps> = ({ 
   onSelectItem, 
-  onOpenCart,
+  onOpenCart: _onOpenCart,
   onOpenOrderTracker 
 }) => {
   const { 
     menuItems, 
     cart, 
-    addToCart, 
+    tableNumber: _tableNumber, 
     language, 
     t, 
     currentTrackedOrder,
-    mealTime,
-    setMealTime,
-    isAutoMealTime,
-    setIsAutoMealTime
+    mealTime
   } = useKiosk();
 
   const [selectedCategory, setSelectedCategory] = useState<Category>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [dietFilter, setDietFilter] = useState<'all' | 'veg' | 'non-veg'>('all');
 
-  const categories: Category[] = [
+  const standardCategories: Category[] = [
     'All',
     'Starters',
     'Main Course',
@@ -64,12 +61,14 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
       case 'Breads & Rice': return t.breadsRice;
       case 'Beverages': return t.beverages;
       case 'Desserts': return t.desserts;
+      case 'Combo': return 'Combo';
+      case 'Signature': return 'Signature';
       default: return cat;
     }
   };
 
   const filteredItems = useMemo(() => {
-    return menuItems.filter((item) => {
+    const list = menuItems.filter((item) => {
       // 1. Time-based meal filtering: morning foods in morning, lunch foods in lunch, dinner foods in dinner
       if (item.mealTimes && item.mealTimes.length > 0) {
         if (!item.mealTimes.includes(mealTime)) {
@@ -77,10 +76,15 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
         }
       }
 
-      // 2. Category filter
-      if (selectedCategory !== 'All' && item.category !== selectedCategory) {
-        return false;
+      // 2. Category / Mode filter
+      if (selectedCategory === 'Signature') {
+        if (!item.isSignature) return false;
+      } else if (selectedCategory === 'Combo') {
+        if (!item.isCombo && item.category !== 'Combo') return false;
+      } else if (selectedCategory !== 'All') {
+        if (item.category !== selectedCategory) return false;
       }
+
       // 3. Diet filter
       if (dietFilter === 'veg' && !item.isVeg) return false;
       if (dietFilter === 'non-veg' && item.isVeg) return false;
@@ -99,23 +103,21 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
 
       return true;
     });
+
+    // 5. CRITICAL REQUIREMENT: SORT SIGNATURE DISHES FIRST IN EVERY CATEGORY/HEADLINE!
+    return list.sort((a, b) => {
+      // Signature dishes strictly first
+      if (a.isSignature && !b.isSignature) return -1;
+      if (!a.isSignature && b.isSignature) return 1;
+
+      // Then Combo dishes
+      if (a.isCombo && !b.isCombo) return -1;
+      if (!a.isCombo && b.isCombo) return 1;
+
+      // Then sort by popularity
+      return (b.orderedTodayCount || 0) - (a.orderedTodayCount || 0);
+    });
   }, [menuItems, mealTime, selectedCategory, dietFilter, searchQuery]);
-
-  // Filter combos to those matching the active meal time
-  const relevantCombos = useMemo(() => {
-    return INITIAL_COMBOS.filter((combo) => {
-      const matched = menuItems.filter((m) => combo.itemIds.includes(m.id));
-      return matched.some((m) => m.mealTimes && m.mealTimes.includes(mealTime));
-    });
-  }, [menuItems, mealTime]);
-
-  // Handle adding combo deal to cart
-  const handleAddCombo = (combo: ComboRecommendation) => {
-    const itemsToAdd = menuItems.filter((m) => combo.itemIds.includes(m.id));
-    itemsToAdd.forEach((item) => {
-      addToCart(item, 'Medium', ['Combo Special'], 'Served together', 1);
-    });
-  };
 
   return (
     <div className="pb-28">
@@ -125,7 +127,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
         <div className="max-w-7xl mx-auto px-4 md:px-8 pt-4">
           <div 
             onClick={onOpenOrderTracker}
-            className="cursor-pointer bg-gradient-to-r from-brand-600 to-amber-600 rounded-2xl p-3 md:p-4 text-white shadow-lg flex items-center justify-between gap-4 hover:shadow-xl transition-all"
+            className="cursor-pointer bg-gradient-to-r from-cyan-600 via-teal-600 to-amber-600 rounded-2xl p-3 md:p-4 text-white shadow-lg flex items-center justify-between gap-4 hover:shadow-xl transition-all"
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center font-bold text-sm">
@@ -134,7 +136,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
               <div>
                 <div className="font-extrabold text-sm md:text-base flex items-center gap-2">
                   <span>{t.orderProgress}:</span>
-                  <span className="px-2 py-0.5 rounded-full bg-white text-brand-700 text-xs font-black uppercase tracking-wider">
+                  <span className="px-2 py-0.5 rounded-full bg-white text-cyan-800 text-xs font-black uppercase tracking-wider">
                     {currentTrackedOrder.status === 'NEW' && t.statusReceived}
                     {currentTrackedOrder.status === 'PREPARING' && t.statusPreparing}
                     {currentTrackedOrder.status === 'READY' && t.statusReady}
@@ -145,7 +147,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                 </p>
               </div>
             </div>
-            <button className="px-4 py-2 rounded-xl bg-white text-brand-700 font-extrabold text-xs shadow-sm hover:bg-brand-50 transition-colors shrink-0">
+            <button className="px-4 py-2 rounded-xl bg-white text-cyan-800 font-extrabold text-xs shadow-sm hover:bg-slate-100 transition-colors shrink-0">
               Track Order →
             </button>
           </div>
@@ -153,12 +155,12 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
       )}
 
       {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-5">
         
-        {/* Automated Time-Based Menu Banner (Strictly Automatic — No manual choose type) */}
-        <div className="mb-6 p-4 md:p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        {/* Automated Time-Based Menu Banner */}
+        <div className="mb-5 p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-sm shrink-0 ${
+            <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-2xl shadow-sm shrink-0 ${
               mealTime === 'morning' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/70 dark:text-amber-300' :
               mealTime === 'lunch' ? 'bg-orange-100 text-orange-700 dark:bg-orange-950/70 dark:text-orange-300' :
               'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300'
@@ -187,60 +189,17 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             </div>
           </div>
 
-          {/* Automatic Live Time Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200/70 dark:border-slate-700 shadow-xs">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200/70 dark:border-slate-700 shadow-xs">
             <Clock className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
             <span>Automatic Time-Based Menu</span>
           </div>
         </div>
 
-        {/* Recommended AI Combo Pairing Card (Filtered to active meal time) */}
-        {relevantCombos.length > 0 && (
-          <div className="mb-6 bg-gradient-to-r from-amber-500/10 via-brand-500/10 to-orange-500/10 dark:from-slate-900 dark:via-slate-850 dark:to-slate-900 border border-brand-200/80 dark:border-brand-900/40 rounded-3xl p-4 md:p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
-            <div className="flex items-center gap-3.5 w-full md:w-auto">
-              <div className="w-12 h-12 rounded-2xl bg-brand-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-brand-500/30">
-                <Sparkles className="w-6 h-6" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-black uppercase tracking-wider text-brand-700 dark:text-brand-300 bg-brand-100/80 dark:bg-brand-950/80 px-2 py-0.5 rounded-md border border-brand-200/60 dark:border-brand-800/60">
-                    {t.recommendedForYou}
-                  </span>
-                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200/60 dark:border-emerald-800/60">
-                    {t.saveDiscount} ₹{relevantCombos[0].savings}
-                  </span>
-                </div>
-                <h4 className="text-base md:text-lg font-black text-slate-900 dark:text-white mt-1">
-                  {getLocalizedComboTitle(relevantCombos[0], language)}
-                </h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Curated chef pairing for {mealTime === 'morning' ? 'breakfast' : mealTime === 'lunch' ? 'lunch' : 'dinner'} dining
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-              <div className="text-right">
-                <span className="text-xs text-slate-400 dark:text-slate-500 line-through mr-1.5">
-                  ₹{relevantCombos[0].originalPrice}
-                </span>
-                <span className="text-xl font-black text-brand-600 dark:text-brand-400 font-display">
-                  ₹{relevantCombos[0].comboPrice}
-                </span>
-              </div>
-              <button
-                onClick={() => handleAddCombo(relevantCombos[0])}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white font-extrabold text-xs shadow-md shadow-brand-500/25 active:scale-95 transition-all flex items-center gap-1.5 shrink-0"
-              >
-                <Plus className="w-4 h-4" />
-                <span>{t.addCombo}</span>
-              </button>
-            </div>
-          </div>
-        )}
+        {/* ADVERTISEMENT PORTION: Combo, Festival Offer & Today's Specials */}
+        <PromoAdBanner onSelectCategory={(cat) => setSelectedCategory(cat)} />
 
         {/* Search & Dietary Filters Bar */}
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 mb-6">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 mb-5">
           
           {/* Search Bar */}
           <div className="relative flex-1 max-w-md">
@@ -250,12 +209,12 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
               placeholder={t.searchMenu}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-sm font-medium text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 shadow-sm transition-all"
+              className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-sm font-medium text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 shadow-sm transition-all"
             />
             {searchQuery && (
               <button 
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
               >
                 Clear
               </button>
@@ -266,7 +225,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
           <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-850 p-1 rounded-2xl border border-slate-200/60 dark:border-slate-800 self-start md:self-auto">
             <button
               onClick={() => setDietFilter('all')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 dietFilter === 'all'
                   ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white'
@@ -276,7 +235,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             </button>
             <button
               onClick={() => setDietFilter('veg')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 dietFilter === 'veg'
                   ? 'bg-emerald-600 text-white shadow-sm'
                   : 'text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
@@ -287,7 +246,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             </button>
             <button
               onClick={() => setDietFilter('non-veg')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 dietFilter === 'non-veg'
                   ? 'bg-rose-600 text-white shadow-sm'
                   : 'text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40'
@@ -300,13 +259,15 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
 
         </div>
 
-        {/* Horizontal Category Pill Tabs (Tablet scrollable) */}
+        {/* CATEGORY TABS: All, Starters, Main Course, Breads & Rice, Beverages, Desserts + [COMBO] + [SIGNATURE] */}
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-3 mb-6 -mx-4 px-4 md:mx-0 md:px-0">
-          {categories.map((cat) => (
+          
+          {/* Standard categories */}
+          {standardCategories.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-5 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all duration-200 border active:scale-95 ${
+              className={`px-4 md:px-5 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all duration-200 border active:scale-95 cursor-pointer ${
                 selectedCategory === cat
                   ? 'bg-slate-900 dark:bg-brand-600 text-white border-slate-900 dark:border-brand-600 shadow-md'
                   : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200/80 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white shadow-sm'
@@ -315,9 +276,62 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
               {getCategoryLabel(cat)}
             </button>
           ))}
+
+          {/* HIGHLIGHTED COMBO BUTTON (Green Theme as in mockup) */}
+          <button
+            onClick={() => setSelectedCategory('Combo')}
+            className={`px-5 py-2.5 rounded-2xl font-black text-sm whitespace-nowrap transition-all duration-200 border-2 active:scale-95 flex items-center gap-1.5 shadow-sm cursor-pointer ${
+              selectedCategory === 'Combo'
+                ? 'bg-emerald-500 text-white border-emerald-400 shadow-lg shadow-emerald-500/25 scale-105'
+                : 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-900 dark:text-emerald-300 border-emerald-400/80 hover:bg-emerald-200 dark:hover:bg-emerald-900/60'
+            }`}
+          >
+            <Tag className="w-4 h-4" />
+            <span>Combo</span>
+          </button>
+
+          {/* HIGHLIGHTED SIGNATURE BUTTON (Cyan Signature Theme as in mockup) */}
+          <button
+            onClick={() => setSelectedCategory('Signature')}
+            className={`px-5 py-2.5 rounded-2xl font-black text-sm whitespace-nowrap transition-all duration-200 border-2 active:scale-95 flex items-center gap-1.5 shadow-sm cursor-pointer ${
+              selectedCategory === 'Signature'
+                ? 'bg-cyan-400 text-slate-950 border-cyan-300 shadow-lg shadow-cyan-400/35 scale-105'
+                : 'bg-cyan-100 dark:bg-cyan-950/70 text-cyan-950 dark:text-cyan-200 border-cyan-400/80 hover:bg-cyan-200 dark:hover:bg-cyan-900/60'
+            }`}
+          >
+            <Crown className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+            <span>Signature</span>
+          </button>
+
         </div>
 
-        {/* Food Items Grid - Optimized for Tablets & Desktops */}
+        {/* Active Category Header Feedback */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-black text-slate-900 dark:text-white">
+              {selectedCategory === 'All' && 'All Dishes'}
+              {selectedCategory === 'Starters' && 'Starters & Appetizers'}
+              {selectedCategory === 'Main Course' && 'Main Course Curries'}
+              {selectedCategory === 'Breads & Rice' && 'Breads & Dum Biryani'}
+              {selectedCategory === 'Beverages' && 'Beverages & Drinks'}
+              {selectedCategory === 'Desserts' && 'Royal Desserts'}
+              {selectedCategory === 'Combo' && '🍱 Chef Value Combos'}
+              {selectedCategory === 'Signature' && '👑 Royal Ember Signature Dishes'}
+            </h2>
+            <span className="text-xs font-bold text-slate-400 dark:text-slate-500">
+              ({filteredItems.length} items)
+            </span>
+          </div>
+
+          {selectedCategory !== 'Signature' && selectedCategory !== 'Combo' && (
+            <span className="text-xs text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
+              <Crown className="w-3.5 h-3.5 text-cyan-500" />
+              <span className="hidden sm:inline">Signature dishes served first</span>
+            </span>
+          )}
+        </div>
+
+        {/* Food Items Grid - Signature dishes appear FIRST */}
         {filteredItems.length === 0 ? (
           <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 p-8">
             <AlertCircle className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
@@ -325,7 +339,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
               No dishes found
             </h4>
             <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">
-              Try adjusting your search query or dietary filter.
+              Try adjusting your search query, dietary filter, or choose another category.
             </p>
             <button
               onClick={() => {
@@ -333,7 +347,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                 setSelectedCategory('All');
                 setDietFilter('all');
               }}
-              className="px-4 py-2 rounded-xl bg-brand-500 text-white text-xs font-bold hover:bg-brand-600 transition-colors"
+              className="px-4 py-2 rounded-xl bg-brand-500 text-white text-xs font-bold hover:bg-brand-600 transition-colors cursor-pointer"
             >
               Reset Filters
             </button>
@@ -352,9 +366,13 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                 <div
                   key={item.id}
                   onClick={() => item.isAvailable && onSelectItem(item)}
-                  className={`group relative bg-white dark:bg-slate-900 rounded-3xl border transition-all duration-300 overflow-hidden flex flex-col justify-between cursor-pointer ${
+                  className={`group relative bg-white dark:bg-slate-900 rounded-3xl transition-all duration-300 overflow-hidden flex flex-col justify-between cursor-pointer border ${
                     !item.isAvailable
                       ? 'opacity-65 border-slate-200 dark:border-slate-800 grayscale-[0.4]'
+                      : item.isSignature
+                      ? 'border-cyan-400/80 dark:border-cyan-500/80 ring-2 ring-cyan-400/20 shadow-md shadow-cyan-500/10 hover:shadow-cyan-500/20 hover:-translate-y-1'
+                      : item.isCombo
+                      ? 'border-emerald-400/80 dark:border-emerald-500/80 ring-2 ring-emerald-400/20 shadow-md shadow-emerald-500/10 hover:shadow-emerald-500/20 hover:-translate-y-1'
                       : 'border-slate-200/80 dark:border-slate-800 hover:border-brand-400/80 dark:hover:border-brand-500/80 hover:shadow-kiosk hover:-translate-y-0.5'
                   }`}
                 >
@@ -371,8 +389,8 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                     {/* Gradient Overlay for badges */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none" />
 
-                    {/* Top Badges: Veg/Non-Veg & Spice */}
-                    <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                    {/* Top Left Badges: Veg/Non-Veg, Spice & Signature/Combo */}
+                    <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
                       <span className={`w-5 h-5 rounded-md flex items-center justify-center p-0.5 border shadow-sm ${
                         item.isVeg 
                           ? 'bg-white border-emerald-600 text-emerald-600' 
@@ -380,6 +398,22 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                       }`}>
                         <span className={`w-2 h-2 rounded-full ${item.isVeg ? 'bg-emerald-600' : 'bg-rose-600'}`} />
                       </span>
+
+                      {/* SIGNATURE THEME BADGE (Cyan Theme as in mockup) */}
+                      {item.isSignature && (
+                        <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-cyan-400 text-slate-950 text-[10px] font-black uppercase tracking-wider shadow-sm">
+                          <Crown className="w-3 h-3 text-amber-900" />
+                          <span>Signature</span>
+                        </span>
+                      )}
+
+                      {/* COMBO THEME BADGE (Green Theme as in mockup) */}
+                      {item.isCombo && (
+                        <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-black uppercase tracking-wider shadow-sm">
+                          <Tag className="w-3 h-3" />
+                          <span>Combo</span>
+                        </span>
+                      )}
 
                       {item.isSpicy && (
                         <span className="flex items-center gap-0.5 px-2 py-0.5 rounded-md bg-rose-500/90 text-white text-[10px] font-bold shadow-sm backdrop-blur-xs">
@@ -397,7 +431,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
 
                     {/* Bottom overlay: Popularity tag */}
                     <div className="absolute bottom-2.5 left-3 flex items-center gap-1 text-[11px] font-bold text-white drop-shadow-md">
-                      <TrendingUp className="w-3.5 h-3.5 text-brand-400" />
+                      <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
                       <span>{item.popularityText}</span>
                     </div>
 
@@ -415,10 +449,16 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                   <div className="p-4 md:p-5 flex-1 flex flex-col justify-between">
                     <div>
                       <div className="flex items-baseline justify-between gap-2 mb-1">
-                        <h3 className="font-extrabold text-base md:text-lg text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
+                        <h3 className={`font-extrabold text-base md:text-lg transition-colors ${
+                          item.isSignature 
+                            ? 'text-cyan-950 dark:text-cyan-100 group-hover:text-cyan-600 dark:group-hover:text-cyan-300' 
+                            : 'text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400'
+                        }`}>
                           {localizedName}
                         </h3>
-                        <span className="font-extrabold text-lg md:text-xl text-brand-600 dark:text-brand-400 font-display shrink-0">
+                        <span className={`font-extrabold text-lg md:text-xl font-display shrink-0 ${
+                          item.isSignature ? 'text-amber-600 dark:text-amber-400' : 'text-brand-600 dark:text-brand-400'
+                        }`}>
                           ₹{item.price}
                         </span>
                       </div>
@@ -440,9 +480,11 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                             e.stopPropagation();
                             onSelectItem(item);
                           }}
-                          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-extrabold transition-all active:scale-95 ${
+                          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-extrabold transition-all active:scale-95 cursor-pointer ${
                             inCartCount > 0
-                              ? 'bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800 hover:bg-brand-100'
+                              ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 hover:bg-amber-100'
+                              : item.isSignature
+                              ? 'bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-700 hover:to-teal-700 text-white shadow-md shadow-cyan-500/25'
                               : 'bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-500/20'
                           }`}
                         >
@@ -450,12 +492,11 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                           <span>{inCartCount > 0 ? `${inCartCount} in cart` : t.add}</span>
                         </button>
                       ) : (
-                        <span className="text-xs font-bold text-red-500 px-3 py-1 rounded-lg bg-red-50 dark:bg-red-950/50">
-                          {t.soldOut}
+                        <span className="text-xs font-bold text-slate-400 dark:text-slate-500">
+                          Unavailable
                         </span>
                       )}
                     </div>
-
                   </div>
 
                 </div>
@@ -465,37 +506,6 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
         )}
 
       </div>
-
-      {/* Floating Bottom Cart Bar for Tablet Quick Access */}
-      {cart.length > 0 && (
-        <div className="fixed bottom-4 left-4 right-4 max-w-lg mx-auto z-30 animate-in slide-in-from-bottom-4 duration-300">
-          <div 
-            onClick={onOpenCart}
-            className="cursor-pointer bg-slate-950 dark:bg-slate-900 text-white rounded-3xl p-3.5 px-5 shadow-2xl border border-slate-800 flex items-center justify-between hover:bg-slate-900 dark:hover:bg-slate-800 transition-all active:scale-98"
-          >
-            <div className="flex items-center gap-3">
-              <span className="w-8 h-8 rounded-full bg-brand-500 text-white font-extrabold flex items-center justify-center text-xs shadow-md">
-                {cart.reduce((a, b) => a + b.quantity, 0)}
-              </span>
-              <div>
-                <span className="text-xs text-slate-400 uppercase font-semibold">{t.cart}</span>
-                <p className="text-sm font-extrabold text-white">
-                  {cart.length} {cart.length === 1 ? 'Dish' : 'Dishes'} Selected
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <span className="text-base font-extrabold text-white font-display">
-                ₹{cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)}
-              </span>
-              <button className="px-4 py-2 rounded-2xl bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs shadow-md transition-colors">
-                {t.proceedToCheckout} →
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   );

@@ -81,6 +81,7 @@ const MainAppContent: React.FC = () => {
                   showBack={true}
                   onBackToWelcome={() => setKioskSubScreen('welcome')}
                   onOpenCart={() => setIsCartOpen(true)}
+                  onOpenTrackOrder={() => setIsTrackerOpen(true)}
                 />
 
                 <MenuScreen

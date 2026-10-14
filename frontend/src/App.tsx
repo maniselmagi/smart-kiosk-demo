@@ -14,6 +14,7 @@ import { FeedbackModal } from './components/kiosk/FeedbackModal';
 import { KitchenDisplay } from './components/kitchen/KitchenDisplay';
 import { ManagementDashboard } from './components/dashboard/ManagementDashboard';
 import { LanguageSelectionModal } from './components/kiosk/LanguageSelectionModal';
+import { LanguageEntryScreen } from './components/kiosk/LanguageEntryScreen';
 import { MenuItem, Order } from './types';
 
 const MainAppContent: React.FC = () => {
@@ -27,8 +28,8 @@ const MainAppContent: React.FC = () => {
     setIsLanguageModalOpen
   } = useKiosk();
 
-  // Kiosk inner sub-screen state
-  const [kioskSubScreen, setKioskSubScreen] = useState<'welcome' | 'menu'>('welcome');
+  // Kiosk inner sub-screen state: Page 1 (language) -> Page 2 (welcome) -> Page 3 (menu)
+  const [kioskSubScreen, setKioskSubScreen] = useState<'language' | 'welcome' | 'menu'>('language');
 
   // Modals state
   const [selectedItemForDetail, setSelectedItemForDetail] = useState<MenuItem | null>(null);
@@ -61,9 +62,20 @@ const MainAppContent: React.FC = () => {
 
         {view === 'kiosk' && (
           <div className="flex-1 flex flex-col">
-            {kioskSubScreen === 'welcome' ? (
-              <WelcomeScreen onStart={() => setKioskSubScreen('menu')} />
-            ) : (
+            {kioskSubScreen === 'language' && (
+              <LanguageEntryScreen 
+                onContinue={() => setKioskSubScreen('welcome')} 
+              />
+            )}
+
+            {kioskSubScreen === 'welcome' && (
+              <WelcomeScreen 
+                onStart={() => setKioskSubScreen('menu')} 
+                onChangeLanguage={() => setKioskSubScreen('language')}
+              />
+            )}
+
+            {kioskSubScreen === 'menu' && (
               <div className="flex-1 flex flex-col">
                 <Header
                   showBack={true}
@@ -132,7 +144,7 @@ const MainAppContent: React.FC = () => {
       />
 
       <LanguageSelectionModal
-        isOpen={isLanguageModalOpen && view === 'kiosk'}
+        isOpen={isLanguageModalOpen && view === 'kiosk' && kioskSubScreen === 'menu'}
         onClose={() => setIsLanguageModalOpen(false)}
         onConfirm={() => setIsLanguageModalOpen(false)}
       />

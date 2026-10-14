@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { AVAILABLE_LANGUAGES } from '../../utils/translations';
 import CallWaiterModal from './CallWaiterModal';
+import { HotelBrand } from './HotelBrand';
 
 interface HeaderProps {
   onBackToWelcome?: () => void;
@@ -99,25 +100,10 @@ export const Header: React.FC<HeaderProps> = ({
                   setView('hub');
                 }
               }}
-              className="flex items-center gap-2 md:gap-2.5 cursor-pointer group"
-              title="OrderEase Table Kiosk"
+              className="cursor-pointer group flex items-center"
+              title="Royal Ember Restaurant & Banquet"
             >
-              <div className="w-9 h-9 md:w-10 md:md:h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-amber-500 flex items-center justify-center text-white shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform flex-shrink-0">
-                <UtensilsCrossed className="w-4 h-4 md:w-5 md:h-5" />
-              </div>
-              <div className="leading-tight">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-extrabold tracking-tight text-base md:text-xl font-display text-slate-900 dark:text-white group-hover:text-brand-600 transition-colors">
-                    OrderEase
-                  </span>
-                  <span className="hidden sm:inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300 border border-brand-200/50 dark:border-brand-800/50">
-                    Kiosk
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden lg:block">
-                  Smart Table-Side Experience
-                </p>
-              </div>
+              <HotelBrand size="sm" align="left" showTagline={false} showDescriptor={false} />
             </div>
 
             {/* Table Number Badge */}

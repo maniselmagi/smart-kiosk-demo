@@ -359,9 +359,9 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
             {filteredItems.map((item) => {
-              const inCartCount = cart
-                .filter((c) => c.menuItemId === item.id)
-                .reduce((acc, c) => acc + c.quantity, 0);
+              const inCartItems = cart.filter((c) => c.menuItemId === item.id);
+              const inCartCount = inCartItems.reduce((acc, c) => acc + c.quantity, 0);
+              const inCartTotal = inCartItems.reduce((acc, c) => acc + c.price * c.quantity, 0);
 
               const localizedName = getLocalizedItemName(item, language);
               const localizedDesc = getLocalizedItemDescription(item, language);
@@ -487,15 +487,22 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                         }`}>
                           {localizedName}
                         </h3>
-                        <span className={`font-extrabold text-lg md:text-xl font-display shrink-0 ${
-                          item.isSignature 
-                            ? 'text-cyan-700 dark:text-cyan-300' 
-                            : item.isCombo 
-                            ? 'text-emerald-700 dark:text-emerald-400' 
-                            : 'text-brand-600 dark:text-brand-400'
-                        }`}>
-                          ₹{item.price}
-                        </span>
+                        <div className="text-right shrink-0">
+                          <span className={`font-extrabold text-lg md:text-xl font-display ${
+                            item.isSignature 
+                              ? 'text-cyan-700 dark:text-cyan-300' 
+                              : item.isCombo 
+                              ? 'text-emerald-700 dark:text-emerald-400' 
+                              : 'text-brand-600 dark:text-brand-400'
+                          }`}>
+                            {inCartCount > 1 ? `₹${inCartTotal}` : `₹${item.price}`}
+                          </span>
+                          {inCartCount > 1 && (
+                            <span className="block text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+                              ({inCartCount} in cart)
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-4">
@@ -526,7 +533,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                           }`}
                         >
                           <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                          <span>{inCartCount > 0 ? `${inCartCount} in cart` : t.add}</span>
+                          <span>{inCartCount > 0 ? `${inCartCount} in cart • ₹${inCartTotal}` : t.add}</span>
                         </button>
                       ) : (
                         <span className="text-xs font-bold text-slate-400 dark:text-slate-500">

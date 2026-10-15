@@ -126,27 +126,34 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
               </h2>
             </div>
             
-            {/* Dynamic Price Display */}
+            {/* Dynamic Price Display inside Card (Multiplied by Quantity) */}
             <div className="text-right shrink-0">
               <div className="flex items-baseline gap-2 justify-end">
                 <span className="text-2xl md:text-3xl font-black text-amber-300 font-display">
-                  ₹{unitPrice}
+                  ₹{totalPrice}
                 </span>
                 {extraCost > 0 && (
                   <span className="text-xs md:text-sm font-semibold text-white/60 line-through">
-                    ₹{basePrice}
+                    ₹{basePrice * quantity}
                   </span>
                 )}
               </div>
-              {extraCost > 0 ? (
-                <div className="mt-0.5 inline-flex items-center gap-1 text-[11px] font-bold text-amber-300 bg-black/60 px-2 py-0.5 rounded-full border border-amber-400/30">
-                  <span>+₹{extraCost} add-ons</span>
-                </div>
-              ) : (
-                <span className="text-[11px] text-white/70 block">
-                  Standard Price
-                </span>
-              )}
+              <div className="mt-0.5 flex flex-col items-end gap-1">
+                {quantity > 1 && (
+                  <span className="text-[11px] font-black text-amber-200 bg-black/60 px-2 py-0.5 rounded-full border border-amber-300/30">
+                    ₹{unitPrice} × {quantity}
+                  </span>
+                )}
+                {extraCost > 0 ? (
+                  <div className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-300 bg-black/60 px-2 py-0.5 rounded-full border border-amber-400/30">
+                    <span>+₹{extraCost * quantity} add-ons</span>
+                  </div>
+                ) : quantity === 1 ? (
+                  <span className="text-[11px] text-white/70 block">
+                    Standard Price
+                  </span>
+                ) : null}
+              </div>
             </div>
           </div>
         </div>
@@ -327,7 +334,7 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
 
             <div className="hidden sm:block text-left">
               <div className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                Unit Price
+                {quantity > 1 ? `Unit (×${quantity})` : 'Unit Price'}
               </div>
               <div className="text-sm font-black text-slate-800 dark:text-slate-100 font-display">
                 ₹{unitPrice}

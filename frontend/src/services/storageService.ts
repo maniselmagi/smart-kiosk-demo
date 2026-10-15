@@ -7,7 +7,7 @@ import {
 } from '../data/initialData';
 
 const STORAGE_KEYS = {
-  MENU_ITEMS: 'royal_ember_menu_items_v6',
+  MENU_ITEMS: 'royal_ember_menu_items_v8',
   ORDERS: 'orderease_orders_v1',
   STAFF_ALERTS: 'orderease_staff_alerts_v1',
   FEEDBACK: 'orderease_feedback_v1',
@@ -48,7 +48,12 @@ export const storageService = {
   getMenuItems(): MenuItem[] {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.MENU_ITEMS);
-      if (data) return JSON.parse(data);
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed) && parsed.length >= INITIAL_MENU_ITEMS.length) {
+          return parsed;
+        }
+      }
     } catch (e) {
       console.warn('Storage read failed', e);
     }

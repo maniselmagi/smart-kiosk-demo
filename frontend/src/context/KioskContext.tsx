@@ -10,6 +10,7 @@ import type {
   MealTime
 } from '../types';
 import { storageService, SyncMessage } from '../services/storageService';
+import { INITIAL_MENU_ITEMS } from '../data/initialData';
 import { translations, Language, TranslationDictionary } from '../utils/translations';
 
 export type ViewType = 'hub' | 'kiosk' | 'kitchen' | 'dashboard';
@@ -140,9 +141,26 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isLanguageModalOpen, setIsLanguageModalOpen] = useState<boolean>(false);
   const [theme, setThemeState] = useState<'light' | 'dark'>(() => storageService.getTheme());
   const [isAccessibilityMode, setIsAccessibilityMode] = useState<boolean>(false);
-  const [menuItems, setMenuItems] = useState<MenuItem[]>(() => storageService.getMenuItems());
+  const [menuItems, setMenuItems] = useState<MenuItem[]>(() => {
+    const stored = storageService.getMenuItems();
+    if (stored && stored.length >= INITIAL_MENU_ITEMS.length) {
+      return stored;
+    }
+    return INITIAL_MENU_ITEMS;
+  });
   const [mealTime, setMealTimeState] = useState<MealTime>(() => getAutoMealTime());
   const [isAutoMealTime, setIsAutoMealTime] = useState<boolean>(true);
+
+  // Ensure menuItems updates immediately if fresh items are present in storage or if old cache was smaller
+  useEffect(() => {
+    const fresh = storageService.getMenuItems();
+    if (!fresh || fresh.length < INITIAL_MENU_ITEMS.length) {
+      storageService.saveMenuItems(INITIAL_MENU_ITEMS);
+      setMenuItems(INITIAL_MENU_ITEMS);
+    } else if (fresh.length !== menuItems.length) {
+      setMenuItems(fresh);
+    }
+  }, []);
 
   const setMealTime = useCallback((meal: MealTime) => {
     setMealTimeState(meal);

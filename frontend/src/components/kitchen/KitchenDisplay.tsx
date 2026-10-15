@@ -301,13 +301,16 @@ export const KitchenDisplay: React.FC = () => {
 
                                 {/* Ticket Items List */}
                                 <div className="space-y-2.5 mb-4">
-                                  {order.items.map((item) => (
+                                  {order.items.map((item, itemIdx) => (
                                     <div key={item.cartItemId} className="text-xs">
                                       <div className="flex items-start justify-between gap-1">
-                                        <span className="font-extrabold text-slate-100 leading-snug">
-                                          <span className="text-amber-400 mr-1.5 font-mono text-sm">{item.quantity}×</span>
-                                          {item.name}
-                                        </span>
+                                        <div className="flex items-center gap-1.5 font-extrabold text-slate-100 leading-snug">
+                                          <span className="w-5 h-5 rounded-full bg-slate-800 border border-slate-700 text-amber-400 flex items-center justify-center text-[10px] font-black shrink-0" title={`Serving Sequence #${item.servingPriority || itemIdx + 1}`}>
+                                            #{item.servingPriority || itemIdx + 1}
+                                          </span>
+                                          <span className="text-amber-400 mr-1 font-mono text-sm">{item.quantity}×</span>
+                                          <span>{item.name}</span>
+                                        </div>
                                       </div>
 
                                       {/* Spice and Customization */}

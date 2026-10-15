@@ -117,13 +117,16 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               Order Summary Review
             </span>
             <div className="divide-y divide-slate-200/60 dark:divide-slate-700 max-h-40 overflow-y-auto pr-1">
-              {cart.map((item) => (
+              {cart.map((item, idx) => (
                 <div key={item.cartItemId} className="py-2 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center font-black text-[10px] shrink-0" title={`Serving #${item.servingPriority || idx + 1}`}>
+                      #{item.servingPriority || idx + 1}
+                    </span>
                     <span className="font-extrabold text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-950 w-5 h-5 rounded flex items-center justify-center">
                       {item.quantity}×
                     </span>
-                    <span className="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[200px] md:max-w-xs">
+                    <span className="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[180px] md:max-w-xs">
                       {item.name}
                     </span>
                     <span className="text-[10px] text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950 px-1.5 py-0.5 rounded">

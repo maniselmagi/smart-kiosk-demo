@@ -67,6 +67,7 @@ interface KioskContextType {
   updateCartQuantity: (cartItemId: string, delta: number) => void;
   removeFromCart: (cartItemId: string) => void;
   clearCart: () => void;
+  reorderCart: (newCart: CartItem[]) => void;
   activeOrders: Order[];
   currentTrackedOrder: Order | null;
   setCurrentTrackedOrder: (order: Order | null) => void;
@@ -412,6 +413,14 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setCart([]);
   };
 
+  const reorderCart = (newCart: CartItem[]) => {
+    const prioritized = newCart.map((item, idx) => ({
+      ...item,
+      servingPriority: idx + 1
+    }));
+    setCart(prioritized);
+  };
+
   const cartTotalQuantity = useMemo(() => {
     return cart.reduce((acc, item) => acc + item.quantity, 0);
   }, [cart]);
@@ -443,7 +452,7 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       id: `ORD-${nextOrderNumber}`,
       orderNumber: nextOrderNumber,
       tableNumber,
-      items: [...cart],
+      items: cart.map((c, i) => ({ ...c, servingPriority: c.servingPriority || i + 1 })),
       subtotal: cartSubtotal,
       tax: cartTax,
       tip: tipAmount,
@@ -552,6 +561,7 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         updateCartQuantity,
         removeFromCart,
         clearCart,
+        reorderCart,
         activeOrders,
         currentTrackedOrder,
         setCurrentTrackedOrder: (order) => setCurrentTrackedOrderId(order ? order.id : null),

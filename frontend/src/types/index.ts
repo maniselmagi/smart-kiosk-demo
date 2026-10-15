@@ -57,6 +57,7 @@ export interface CartItem {
   specialInstructions: string;
   image: string;
   isVeg: boolean;
+  servingPriority?: number; // 1, 2, 3... order serving sequence
 }
 
 export type OrderStatus = 'NEW' | 'PREPARING' | 'READY' | 'COMPLETED';

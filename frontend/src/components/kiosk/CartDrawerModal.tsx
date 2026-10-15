@@ -9,6 +9,7 @@ import {
   ArrowRight, 
   Flame 
 } from 'lucide-react';
+import { getSpicePrice, getCustomizationCleanLabel, getCustomizationPrice } from '../../utils/pricingUtils';
 
 interface CartDrawerModalProps {
   isOpen: boolean;
@@ -116,22 +117,39 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
                     <h4 className="font-extrabold text-sm text-slate-900 dark:text-white truncate">
                       {item.name}
                     </h4>
-                    <span className="font-black text-sm text-slate-900 dark:text-brand-400 shrink-0 font-display">
-                      ₹{item.price * item.quantity}
-                    </span>
+                    <div className="text-right shrink-0">
+                      <span className="font-black text-sm text-slate-900 dark:text-brand-400 font-display">
+                        ₹{item.price * item.quantity}
+                      </span>
+                      {item.quantity > 1 && (
+                        <span className="block text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+                          (₹{item.price} each)
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Spice and Customization meta */}
                   <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 mb-2.5">
-                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-amber-100/80 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 font-bold">
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100/80 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 font-bold">
                       <Flame className="w-2.5 h-2.5 text-brand-600 dark:text-brand-400" />
-                      {item.spiceLevel}
+                      <span>{item.spiceLevel}</span>
+                      {getSpicePrice(item.spiceLevel) > 0 && (
+                        <span className="text-[10px] opacity-80">(+₹{getSpicePrice(item.spiceLevel)})</span>
+                      )}
                     </span>
-                    {item.customizations.map((c) => (
-                      <span key={c} className="px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium">
-                        {c}
-                      </span>
-                    ))}
+                    {item.customizations.map((c) => {
+                      const optPrice = getCustomizationPrice(c);
+                      const optLabel = getCustomizationCleanLabel(c);
+                      return (
+                        <span key={c} className="px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium flex items-center gap-1">
+                          <span>{optLabel}</span>
+                          {optPrice > 0 && (
+                            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold">+₹{optPrice}</span>
+                          )}
+                        </span>
+                      );
+                    })}
                     {item.specialInstructions && (
                       <span className="italic text-slate-400 dark:text-slate-400 block w-full text-[10px]">
                         "{item.specialInstructions}"

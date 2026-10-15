@@ -49,6 +49,8 @@ export interface CartItem {
   menuItemId: string;
   name: string;
   price: number;
+  basePrice?: number;
+  customizationTotal?: number;
   quantity: number;
   spiceLevel: SpiceLevel;
   customizations: string[];

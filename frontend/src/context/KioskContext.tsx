@@ -61,7 +61,8 @@ interface KioskContextType {
     spiceLevel: SpiceLevel, 
     customizations: string[], 
     specialInstructions: string, 
-    quantity: number
+    quantity: number,
+    customUnitPrice?: number
   ) => void;
   updateCartQuantity: (cartItemId: string, delta: number) => void;
   removeFromCart: (cartItemId: string) => void;
@@ -350,12 +351,15 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     spiceLevel: SpiceLevel,
     customizations: string[],
     specialInstructions: string,
-    quantity: number
+    quantity: number,
+    customUnitPrice?: number
   ) => {
+    const finalUnitPrice = typeof customUnitPrice === 'number' ? customUnitPrice : item.price;
     const existingIndex = cart.findIndex(
       (c) =>
         c.menuItemId === item.id &&
         c.spiceLevel === spiceLevel &&
+        c.price === finalUnitPrice &&
         JSON.stringify(c.customizations) === JSON.stringify(customizations) &&
         c.specialInstructions.trim() === specialInstructions.trim()
     );
@@ -371,7 +375,9 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         cartItemId: `cart-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         menuItemId: item.id,
         name: item.name,
-        price: item.price,
+        price: finalUnitPrice,
+        basePrice: item.price,
+        customizationTotal: Math.max(0, finalUnitPrice - item.price),
         quantity,
         spiceLevel,
         customizations,

@@ -139,7 +139,9 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
 
             {order.splitBillDetails && (
               <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-[11px] text-slate-600 dark:text-slate-300 font-medium">
-                Split Bill: {order.splitBillDetails.guestCount} Diners (₹{order.splitBillDetails.amountPerGuest} each)
+                {order.splitBillDetails.type === 'items'
+                  ? `Split by Items: ₹${order.splitBillDetails.amountPerGuest} paid (${order.splitBillDetails.guestCount} items)`
+                  : `Split Bill: ${order.splitBillDetails.guestCount} Diners (₹${order.splitBillDetails.amountPerGuest} each)`}
               </div>
             )}
 

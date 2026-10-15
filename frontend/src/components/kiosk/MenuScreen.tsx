@@ -76,13 +76,17 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
         }
       }
 
-      // 2. Category / Mode filter
-      if (selectedCategory === 'Signature') {
-        if (!item.isSignature) return false;
-      } else if (selectedCategory === 'Combo') {
+      // 2. Category / Mode filter - Combo ONLY shows in Combo section
+      if (selectedCategory === 'Combo') {
         if (!item.isCombo && item.category !== 'Combo') return false;
-      } else if (selectedCategory !== 'All') {
-        if (item.category !== selectedCategory) return false;
+      } else {
+        if (item.isCombo || item.category === 'Combo') return false;
+
+        if (selectedCategory === 'Signature') {
+          if (!item.isSignature) return false;
+        } else if (selectedCategory !== 'All') {
+          if (item.category !== selectedCategory) return false;
+        }
       }
 
       // 3. Diet filter

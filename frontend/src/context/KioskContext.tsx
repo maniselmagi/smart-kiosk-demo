@@ -18,12 +18,12 @@ export type ViewType = 'hub' | 'kiosk' | 'kitchen' | 'dashboard';
 export const getAutoMealTime = (): MealTime => {
   const now = new Date();
   const hour = now.getHours() + now.getMinutes() / 60;
-  // Morning (Breakfast): 6:00 AM - 11:30 AM (11.5)
-  // Lunch: 11:30 AM - 4:30 PM (16.5)
-  // Dinner: 4:30 PM - 11:59 PM & night
-  if (hour >= 6 && hour < 11.5) {
+  // Morning (Breakfast): 6:00 AM - 12:00 PM (12.0)
+  // Lunch: 12:00 PM - 5:30 PM (17.5)
+  // Dinner: 5:30 PM - 2:00 AM & late night
+  if (hour >= 6 && hour < 12.0) {
     return 'morning';
-  } else if (hour >= 11.5 && hour < 16.5) {
+  } else if (hour >= 12.0 && hour < 17.5) {
     return 'lunch';
   } else {
     return 'dinner';

@@ -366,17 +366,42 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                 <div
                   key={item.id}
                   onClick={() => item.isAvailable && onSelectItem(item)}
-                  className={`group relative bg-white dark:bg-slate-900 rounded-3xl transition-all duration-300 overflow-hidden flex flex-col justify-between cursor-pointer border ${
+                  className={`group relative rounded-3xl transition-all duration-300 overflow-hidden flex flex-col justify-between cursor-pointer border ${
                     !item.isAvailable
-                      ? 'opacity-65 border-slate-200 dark:border-slate-800 grayscale-[0.4]'
+                      ? 'opacity-65 border-slate-200 dark:border-slate-800 grayscale-[0.4] bg-white dark:bg-slate-900'
                       : item.isSignature
-                      ? 'border-cyan-400/80 dark:border-cyan-500/80 ring-2 ring-cyan-400/20 shadow-md shadow-cyan-500/10 hover:shadow-cyan-500/20 hover:-translate-y-1'
+                      ? 'bg-gradient-to-b from-cyan-50/90 via-cyan-50/40 to-white dark:from-cyan-950/40 dark:via-slate-900 dark:to-slate-900 border-2 border-cyan-400 dark:border-cyan-400 ring-2 ring-cyan-400/25 shadow-lg shadow-cyan-400/15 hover:shadow-cyan-400/30 hover:-translate-y-1'
                       : item.isCombo
-                      ? 'border-emerald-400/80 dark:border-emerald-500/80 ring-2 ring-emerald-400/20 shadow-md shadow-emerald-500/10 hover:shadow-emerald-500/20 hover:-translate-y-1'
-                      : 'border-slate-200/80 dark:border-slate-800 hover:border-brand-400/80 dark:hover:border-brand-500/80 hover:shadow-kiosk hover:-translate-y-0.5'
+                      ? 'bg-gradient-to-b from-emerald-50/90 via-emerald-50/40 to-white dark:from-emerald-950/40 dark:via-slate-900 dark:to-slate-900 border-2 border-emerald-500 dark:border-emerald-500 ring-2 ring-emerald-500/25 shadow-lg shadow-emerald-500/15 hover:shadow-emerald-500/30 hover:-translate-y-1'
+                      : 'bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-brand-400/80 dark:hover:border-brand-500/80 hover:shadow-kiosk hover:-translate-y-0.5'
                   }`}
                 >
                   
+                  {/* Top Distinct Ribbon for Signature and Combo Cards */}
+                  {item.isSignature && (
+                    <div className="bg-cyan-400 text-slate-950 px-4 py-1.5 flex items-center justify-between font-black text-xs tracking-wider uppercase shadow-xs">
+                      <div className="flex items-center gap-1.5">
+                        <Crown className="w-3.5 h-3.5 fill-amber-700 text-amber-900" />
+                        <span>Chef's Signature Dish</span>
+                      </div>
+                      <span className="text-[10px] font-extrabold bg-slate-950/15 px-2 py-0.5 rounded-full">
+                        Royal Special
+                      </span>
+                    </div>
+                  )}
+
+                  {item.isCombo && (
+                    <div className="bg-emerald-500 text-white px-4 py-1.5 flex items-center justify-between font-black text-xs tracking-wider uppercase shadow-xs">
+                      <div className="flex items-center gap-1.5">
+                        <Tag className="w-3.5 h-3.5" />
+                        <span>Chef Value Combo</span>
+                      </div>
+                      <span className="text-[10px] font-extrabold bg-white/20 px-2 py-0.5 rounded-full">
+                        Save Up To ₹120
+                      </span>
+                    </div>
+                  )}
+
                   {/* Food Image Container */}
                   <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
                     <img
@@ -452,12 +477,18 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                         <h3 className={`font-extrabold text-base md:text-lg transition-colors ${
                           item.isSignature 
                             ? 'text-cyan-950 dark:text-cyan-100 group-hover:text-cyan-600 dark:group-hover:text-cyan-300' 
+                            : item.isCombo
+                            ? 'text-emerald-950 dark:text-emerald-100 group-hover:text-emerald-600 dark:group-hover:text-emerald-300'
                             : 'text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400'
                         }`}>
                           {localizedName}
                         </h3>
                         <span className={`font-extrabold text-lg md:text-xl font-display shrink-0 ${
-                          item.isSignature ? 'text-amber-600 dark:text-amber-400' : 'text-brand-600 dark:text-brand-400'
+                          item.isSignature 
+                            ? 'text-cyan-700 dark:text-cyan-300' 
+                            : item.isCombo 
+                            ? 'text-emerald-700 dark:text-emerald-400' 
+                            : 'text-brand-600 dark:text-brand-400'
                         }`}>
                           ₹{item.price}
                         </span>
@@ -480,15 +511,17 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                             e.stopPropagation();
                             onSelectItem(item);
                           }}
-                          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-extrabold transition-all active:scale-95 cursor-pointer ${
+                          className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black transition-all active:scale-95 cursor-pointer ${
                             inCartCount > 0
-                              ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 hover:bg-amber-100'
+                              ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-200 border border-amber-300 dark:border-amber-700 shadow-sm'
                               : item.isSignature
-                              ? 'bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-700 hover:to-teal-700 text-white shadow-md shadow-cyan-500/25'
+                              ? 'bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-md shadow-cyan-400/30 border border-cyan-300'
+                              : item.isCombo
+                              ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/30 border border-emerald-400'
                               : 'bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-500/20'
                           }`}
                         >
-                          <Plus className="w-3.5 h-3.5" />
+                          <Plus className="w-3.5 h-3.5 stroke-[3]" />
                           <span>{inCartCount > 0 ? `${inCartCount} in cart` : t.add}</span>
                         </button>
                       ) : (

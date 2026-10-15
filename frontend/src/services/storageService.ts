@@ -7,7 +7,7 @@ import {
 } from '../data/initialData';
 
 const STORAGE_KEYS = {
-  MENU_ITEMS: 'royal_ember_menu_items_v4',
+  MENU_ITEMS: 'royal_ember_menu_items_v6',
   ORDERS: 'orderease_orders_v1',
   STAFF_ALERTS: 'orderease_staff_alerts_v1',
   FEEDBACK: 'orderease_feedback_v1',

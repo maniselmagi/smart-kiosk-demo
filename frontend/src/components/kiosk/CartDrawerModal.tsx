@@ -227,8 +227,8 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
                     dragOverIndex === index
                       ? 'border-2 border-dashed border-amber-500 bg-amber-50/70 dark:bg-amber-950/40 scale-102 shadow-lg'
                       : isArrangeMode
-                      ? 'animate-jiggle-shake bg-white dark:bg-slate-850 border-2 border-amber-400/90 dark:border-amber-500/90 shadow-md ring-2 ring-amber-400/20 cursor-grab active:cursor-grabbing'
-                      : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200/80 dark:border-slate-700'
+                      ? 'animate-jiggle-shake bg-amber-50/90 dark:bg-slate-800 border-2 border-amber-500 dark:border-amber-400 shadow-md ring-2 ring-amber-400/30 cursor-grab active:cursor-grabbing'
+                      : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200/80 dark:border-slate-700'
                   }`}
                 >
                   
@@ -262,7 +262,7 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline justify-between gap-1 mb-1">
-                      <h4 className="font-extrabold text-sm text-slate-900 dark:text-white truncate">
+                      <h4 className="font-black text-sm text-slate-900 dark:text-white truncate block">
                         {item.name}
                       </h4>
                       <div className="text-right shrink-0">
@@ -336,10 +336,10 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
                           </button>
                         </>
                       ) : (
-                        <div className="w-full flex items-center justify-between bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 rounded-xl border border-amber-300/60 dark:border-amber-800/60">
-                          <span className="text-[11px] font-extrabold text-amber-900 dark:text-amber-200 flex items-center gap-1">
-                            <GripVertical className="w-3.5 h-3.5 text-amber-600" />
-                            <span>Drag or use buttons</span>
+                        <div className="w-full flex items-center justify-between bg-amber-100/90 dark:bg-slate-700/80 px-2.5 py-1.5 rounded-xl border border-amber-300/80 dark:border-slate-600 shadow-2xs">
+                          <span className="text-[11px] font-black text-amber-950 dark:text-amber-200 flex items-center gap-1.5">
+                            <GripVertical className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                            <span>Drag or tap arrows</span>
                           </span>
 
                           {/* Quick Up/Down Buttons for touch or keyboard users */}
@@ -347,18 +347,18 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
                             <button
                               disabled={index === 0}
                               onClick={() => moveItem(index, 'up')}
-                              className="w-6 h-6 rounded-md bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 flex items-center justify-center disabled:opacity-25 hover:bg-amber-500 hover:text-white transition-colors cursor-pointer"
+                              className="w-7 h-7 rounded-lg bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-600 flex items-center justify-center disabled:opacity-20 hover:bg-amber-500 hover:text-white dark:hover:bg-amber-500 transition-colors cursor-pointer shadow-xs"
                               title="Move to earlier serving"
                             >
-                              <ChevronUp className="w-3.5 h-3.5" />
+                              <ChevronUp className="w-4 h-4 stroke-[2.5]" />
                             </button>
                             <button
                               disabled={index === cart.length - 1}
                               onClick={() => moveItem(index, 'down')}
-                              className="w-6 h-6 rounded-md bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 flex items-center justify-center disabled:opacity-25 hover:bg-amber-500 hover:text-white transition-colors cursor-pointer"
+                              className="w-7 h-7 rounded-lg bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-600 flex items-center justify-center disabled:opacity-20 hover:bg-amber-500 hover:text-white dark:hover:bg-amber-500 transition-colors cursor-pointer shadow-xs"
                               title="Move to later serving"
                             >
-                              <ChevronDown className="w-3.5 h-3.5" />
+                              <ChevronDown className="w-4 h-4 stroke-[2.5]" />
                             </button>
                           </div>
                         </div>

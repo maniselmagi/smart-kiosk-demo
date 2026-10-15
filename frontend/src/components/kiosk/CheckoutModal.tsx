@@ -54,8 +54,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     }
   }, [cart]);
 
-  if (!isOpen || cart.length === 0) return null;
-
   // Split equally calculations
   const perGuestShare = Math.ceil(cartGrandTotal / guestCount);
 
@@ -80,6 +78,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     }
     return cartGrandTotal;
   }, [splitMode, payOnlyMyShare, perGuestShare, cartGrandTotal, itemizedTotal]);
+
+  if (!isOpen || cart.length === 0) return null;
 
   const toggleItemSelection = (cartItemId: string) => {
     setSelectedItemIds(prev => 

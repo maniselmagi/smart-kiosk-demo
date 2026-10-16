@@ -155,60 +155,60 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
     <div className="pb-28">
       {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 pt-5">
-        {/* Responsive Quick Action Hero Bar: Track Order & Play Games / News (Replaces old clipped Welcome card for tablets) */}
-        <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 animate-fade-in">
+        {/* Responsive Quick Action Hero Bar: 3 Cards (Track Order, Play Games & News, Call Waiter) */}
+        <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-3.5 animate-fade-in">
           {/* Card 1: Live Track Order */}
           <div 
             onClick={onOpenOrderTracker}
             role="button"
             tabIndex={0}
-            className={`p-3.5 sm:p-4 rounded-3xl border transition-all duration-200 cursor-pointer flex items-center justify-between gap-3 group select-none shadow-xs hover:shadow-md ${
+            className={`p-3.5 rounded-3xl border transition-all duration-200 cursor-pointer flex items-center justify-between gap-2.5 group select-none shadow-xs hover:shadow-md ${
               activeTableOrder 
                 ? 'bg-gradient-to-r from-cyan-500/15 via-teal-500/10 to-emerald-500/15 dark:from-cyan-950/50 dark:via-teal-950/40 dark:to-emerald-950/50 border-cyan-500/40 hover:border-cyan-500/70 shadow-cyan-500/10'
                 : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
             }`}
             title={activeTableOrder ? `Track Order #${activeTableOrder.orderNumber}` : 'View Order Tracking'}
           >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ${
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ${
                 activeTableOrder 
                   ? 'bg-gradient-to-br from-cyan-500 to-teal-600 text-white animate-pulse'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
               }`}>
-                <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
+                <Activity className="w-5 h-5 text-current" />
               </div>
               <div className="min-w-0">
-                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                  <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white font-display truncate">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h4 className="font-black text-sm text-slate-900 dark:text-white font-display truncate">
                     {activeTableOrder 
-                      ? `Track Order #${activeTableOrder.orderNumber}`
+                      ? `Track #${activeTableOrder.orderNumber}`
                       : 'Live Order Tracker'}
                   </h4>
                   {activeTableOrder ? (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1 shrink-0">
+                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1 shrink-0">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
                       {activeTableOrder.status === 'NEW' && 'Received'}
-                      {activeTableOrder.status === 'PREPARING' && 'In Kitchen'}
-                      {activeTableOrder.status === 'READY' && 'Ready to Serve'}
-                      {activeTableOrder.status === 'COMPLETED' && 'Delivered'}
+                      {activeTableOrder.status === 'PREPARING' && 'Kitchen'}
+                      {activeTableOrder.status === 'READY' && 'Ready'}
+                      {activeTableOrder.status === 'COMPLETED' && 'Served'}
                     </span>
                   ) : (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shrink-0">
+                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shrink-0">
                       Table {tableNumber}
                     </span>
                   )}
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
                   {activeTableOrder 
-                    ? `Est. prep: ${activeTableOrder.estimatedPrepTime || 15} mins • Click for live kitchen countdown`
-                    : `Real-time cooking status & delivery countdown for Table ${tableNumber}`}
+                    ? `Est. prep: ${activeTableOrder.estimatedPrepTime || 15}m • Click to track`
+                    : `Kitchen countdown & live status`}
                 </p>
               </div>
             </div>
 
             <button
               type="button"
-              className={`shrink-0 px-3 py-2 rounded-xl text-xs font-black flex items-center gap-1 transition-transform group-hover:translate-x-0.5 cursor-pointer ${
+              className={`shrink-0 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-black flex items-center gap-1 transition-transform group-hover:translate-x-0.5 cursor-pointer ${
                 activeTableOrder
                   ? 'bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-xs'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
@@ -219,65 +219,99 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             </button>
           </div>
 
-          {/* Card 2 Area: Play Games & Live News Lounge + Dedicated Call Waiter */}
-          <div className="flex items-stretch gap-2.5 sm:gap-3">
-            {/* Play Games & Live News Card */}
-            <div 
-              onClick={onOpenEntertainment}
-              role="button"
-              tabIndex={0}
-              className="flex-1 p-3.5 sm:p-4 rounded-3xl border transition-all duration-200 cursor-pointer flex items-center justify-between gap-2.5 sm:gap-3 group select-none shadow-xs hover:shadow-md bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-600/15 dark:from-amber-950/50 dark:via-orange-950/40 dark:to-amber-950/50 border-amber-500/40 hover:border-amber-500/70 shadow-amber-500/10 min-w-0"
-              title="Open Interactive Games & Multi-Language E-Paper Lounge"
-            >
-              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 text-slate-950 flex items-center justify-center shrink-0 shadow-md shadow-amber-500/25 group-hover:rotate-6 transition-transform">
-                  <Gamepad2 className="w-5 h-5 sm:w-6 sm:h-6 text-slate-950" />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                    <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white font-display truncate">
-                      Play Games & News
-                    </h4>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1 shrink-0">
-                      <Sparkles className="w-3 h-3 text-amber-500" />
-                      Lounge
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                    Ludo, Sudoku, Snakes & Ladders & live e-Papers
-                  </p>
-                </div>
+          {/* Card 2: Play Games & Live News Lounge Card */}
+          <div 
+            onClick={onOpenEntertainment}
+            role="button"
+            tabIndex={0}
+            className="p-3.5 rounded-3xl border transition-all duration-200 cursor-pointer flex items-center justify-between gap-2.5 group select-none shadow-xs hover:shadow-md bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-600/15 dark:from-amber-950/50 dark:via-orange-950/40 dark:to-amber-950/50 border-amber-500/40 hover:border-amber-500/70 shadow-amber-500/10 min-w-0"
+            title="Open Interactive Games & Multi-Language E-Paper Lounge"
+          >
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 text-slate-950 flex items-center justify-center shrink-0 shadow-md shadow-amber-500/25 group-hover:rotate-6 transition-transform">
+                <Gamepad2 className="w-5 h-5 text-slate-950" />
               </div>
-
-              <button
-                type="button"
-                className="shrink-0 px-3 py-2 rounded-xl text-xs font-black flex items-center gap-1 transition-transform group-hover:translate-x-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-xs cursor-pointer"
-              >
-                <span>Play</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h4 className="font-black text-sm text-slate-900 dark:text-white font-display truncate">
+                    Play Games & News
+                  </h4>
+                  <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1 shrink-0">
+                    <Sparkles className="w-3 h-3 text-amber-500" />
+                    Lounge
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                  Ludo, Sudoku, Snakes & e-Papers
+                </p>
+              </div>
             </div>
 
-            {/* Dedicated Call Waiter Button nearby Play Game card */}
             <button
               type="button"
-              onClick={() => setIsCallWaiterOpen(true)}
-              className={`shrink-0 px-3.5 sm:px-4 py-3 sm:py-3.5 rounded-3xl border transition-all duration-200 cursor-pointer flex flex-col items-center justify-center gap-1 group select-none shadow-xs hover:shadow-md active:scale-95 ${
-                pendingAlertsForThisTable > 0
-                  ? 'bg-gradient-to-br from-amber-500 to-orange-600 text-white border-amber-500 animate-pulse'
-                  : 'bg-white dark:bg-slate-900 border-amber-400/40 dark:border-amber-600/40 hover:border-amber-500 text-slate-800 dark:text-slate-100 hover:bg-amber-500/5'
-              }`}
-              title={`Call dedicated waiter (${assignedWaiter.fullName}) to Table ${tableNumber}`}
+              className="shrink-0 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-black flex items-center gap-1 transition-transform group-hover:translate-x-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-xs cursor-pointer active:scale-95"
             >
-              <div className="relative">
-                <Bell className={`w-5 h-5 ${pendingAlertsForThisTable > 0 ? 'text-white' : 'text-amber-500 group-hover:rotate-12 transition-transform'}`} />
-                {pendingAlertsForThisTable > 0 && (
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-white animate-ping" />
-                )}
+              <span>Play</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Card 3: Call Waiter & Service Card */}
+          <div 
+            onClick={() => setIsCallWaiterOpen(true)}
+            role="button"
+            tabIndex={0}
+            className={`p-3.5 rounded-3xl border transition-all duration-200 cursor-pointer flex items-center justify-between gap-2.5 group select-none shadow-xs hover:shadow-md ${
+              pendingAlertsForThisTable > 0
+                ? 'bg-gradient-to-r from-amber-500/25 via-orange-500/20 to-rose-500/25 dark:from-amber-950/60 dark:via-orange-950/50 dark:to-rose-950/60 border-amber-500/60 hover:border-amber-500 shadow-amber-500/20 animate-pulse'
+                : 'bg-gradient-to-r from-rose-500/10 via-amber-500/10 to-orange-500/10 dark:from-rose-950/40 dark:via-amber-950/30 dark:to-orange-950/40 border-amber-500/30 hover:border-amber-500/60 hover:shadow-amber-500/10'
+            }`}
+            title={`Call dedicated waiter (${assignedWaiter.fullName}) to Table ${tableNumber}`}
+          >
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ${
+                pendingAlertsForThisTable > 0
+                  ? 'bg-gradient-to-br from-amber-500 to-rose-600 text-white animate-bounce'
+                  : 'bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500 text-white shadow-amber-500/20 group-hover:rotate-12 transition-transform'
+              }`}>
+                <Bell className="w-5 h-5 text-white" />
               </div>
-              <span className="text-[11px] sm:text-xs font-black whitespace-nowrap leading-tight">
-                Call Waiter
-              </span>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h4 className="font-black text-sm text-slate-900 dark:text-white font-display truncate">
+                    Call Waiter
+                  </h4>
+                  <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black border flex items-center gap-1 shrink-0 ${
+                    pendingAlertsForThisTable > 0
+                      ? 'bg-rose-500/20 text-rose-600 dark:text-rose-400 border-rose-500/30'
+                      : 'bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-500/30'
+                  }`}>
+                    {pendingAlertsForThisTable > 0 ? (
+                      <>
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
+                        Alert Sent
+                      </>
+                    ) : (
+                      assignedWaiter.fullName
+                    )}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                  {pendingAlertsForThisTable > 0 ? 'Waiter alerted • Coming to table' : 'Water, cutlery, bill or table help'}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className={`shrink-0 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-black flex items-center gap-1 transition-transform group-hover:translate-x-0.5 cursor-pointer active:scale-95 ${
+                pendingAlertsForThisTable > 0
+                  ? 'bg-gradient-to-r from-rose-500 to-amber-600 text-white shadow-xs'
+                  : 'bg-gradient-to-r from-amber-500 to-rose-500 text-white shadow-xs'
+              }`}
+            >
+              <span>{pendingAlertsForThisTable > 0 ? 'Sent' : 'Call'}</span>
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>

@@ -220,27 +220,16 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
         {/* Action Buttons */}
         <div className="p-4 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex flex-col gap-2.5 shrink-0">
           
-          {/* Helper confirmation status notification if order is pending */}
+          {/* Status banner */}
           {!isConfirmed ? (
-            <div className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-800 dark:text-amber-300">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping shrink-0" />
-                <span>Ticket sent to KDS! Awaiting <strong>Waiter {waiter.name} ({waiter.initial})</strong> or supervisor confirmation...</span>
-              </div>
-              {/* Quick simulation helper for presenter/demo */}
-              <button
-                type="button"
-                onClick={() => updateOrderStatus(order.id, 'PREPARING')}
-                className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 font-black text-[10px] shrink-0 transition-all shadow-xs cursor-pointer"
-                title="Simulate supervisor confirmation in one tap"
-              >
-                ⚡ Confirm as Waiter {waiter.initial}
-              </button>
+            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-800 dark:text-amber-300">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping shrink-0" />
+              <span>Ticket sent to KDS! Waiting for <strong>Waiter {waiter.name} ({waiter.initial})</strong> or supervisor to confirm in Kitchen Display...</span>
             </div>
           ) : (
-            <div className="flex items-center gap-2 p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-[11px] text-emerald-800 dark:text-emerald-300">
+            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-[11px] text-emerald-800 dark:text-emerald-300 animate-in fade-in duration-300">
               <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-              <span>Order confirmed by <strong>Waiter {waiter.name} ({waiter.initial})</strong>! Live cooking status unlocked.</span>
+              <span>Order confirmed in Kitchen! Moving to Preparing — <strong>Live Kitchen Progress</strong> is now ready.</span>
             </div>
           )}
 
@@ -264,25 +253,24 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
               <span>Rate Dining</span>
             </button>
 
-            {/* Live Kitchen Status Button - ONLY enabled once confirmed by waiter/supervisor */}
-            <button
-              onClick={() => {
-                if (!isConfirmed) return;
-                onClose();
-                onTrackOrder();
-              }}
-              disabled={!isConfirmed}
-              className={`flex-1 py-3 px-4 rounded-xl text-xs font-black shadow-md transition-all flex items-center justify-center gap-1.5 ${
-                isConfirmed
-                  ? 'bg-gradient-to-r from-emerald-600 to-brand-600 hover:from-emerald-500 hover:to-brand-500 text-white shadow-emerald-500/25 active:scale-95 cursor-pointer animate-in zoom-in-95'
-                  : 'bg-slate-200 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 border border-slate-300 dark:border-slate-700 cursor-not-allowed opacity-75'
-              }`}
-            >
-              <Clock className={`w-4 h-4 ${!isConfirmed ? 'animate-pulse text-amber-500' : 'text-emerald-200'}`} />
-              <span>
-                {isConfirmed ? 'Live Kitchen Status →' : 'Awaiting Confirmation...'}
-              </span>
-            </button>
+            {/* Live Kitchen Progress button - ONLY shown once confirmed and moved to preparing section in KDS */}
+            {isConfirmed ? (
+              <button
+                onClick={() => {
+                  onClose();
+                  onTrackOrder();
+                }}
+                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-brand-600 hover:from-emerald-500 hover:to-brand-500 text-white text-xs font-black shadow-lg shadow-emerald-500/25 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer animate-in zoom-in-95"
+              >
+                <Clock className="w-4 h-4 text-emerald-200" />
+                <span>Live Kitchen Progress →</span>
+              </button>
+            ) : (
+              <div className="flex-1 py-3 px-3 rounded-xl bg-slate-100 dark:bg-slate-850 text-slate-400 dark:text-slate-500 text-xs font-semibold border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-1.5 cursor-default select-none">
+                <Clock className="w-3.5 h-3.5 animate-pulse text-amber-500" />
+                <span>Awaiting Kitchen Confirmation...</span>
+              </div>
+            )}
           </div>
 
         </div>

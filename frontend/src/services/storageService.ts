@@ -6,7 +6,7 @@ import {
   INITIAL_FEEDBACK 
 } from '../data/initialData';
 
-const STORAGE_KEYS = {
+export const STORAGE_KEYS = {
   MENU_ITEMS: 'royal_ember_menu_items_v9',
   ORDERS: 'orderease_orders_v1',
   STAFF_ALERTS: 'orderease_staff_alerts_v1',
@@ -250,18 +250,67 @@ export const storageService = {
         console.warn('Broadcast failed', err);
       }
     }
+    // Dispatch in the current window for same-tab / same-window instant reactivity
+    if (typeof window !== 'undefined') {
+      try {
+        window.dispatchEvent(new CustomEvent('orderease_local_sync', { detail: message }));
+      } catch {
+        // ignore
+      }
+    }
   },
 
   subscribe(callback: (msg: SyncMessage) => void) {
-    if (broadcastChannel) {
-      const handler = (event: MessageEvent) => {
+    const channelHandler = (event: MessageEvent) => {
+      if (event.data) {
         callback(event.data);
-      };
-      broadcastChannel.addEventListener('message', handler);
-      return () => {
-        broadcastChannel?.removeEventListener('message', handler);
-      };
+      }
+    };
+
+    const localSyncHandler = (event: Event) => {
+      const custom = event as CustomEvent<SyncMessage>;
+      if (custom.detail) {
+        callback(custom.detail);
+      }
+    };
+
+    const storageEventHandler = (event: StorageEvent) => {
+      if (!event.key) return;
+      try {
+        if (event.key === STORAGE_KEYS.ORDERS) {
+          callback({ type: 'ORDER_UPDATED', payload: event.newValue ? JSON.parse(event.newValue) : [] });
+        } else if (event.key === STORAGE_KEYS.MENU_ITEMS) {
+          callback({ type: 'MENU_UPDATED', payload: event.newValue ? JSON.parse(event.newValue) : [] });
+        } else if (event.key === STORAGE_KEYS.STAFF_ALERTS) {
+          callback({ type: 'ALERT_CREATED', payload: event.newValue ? JSON.parse(event.newValue) : [] });
+        } else if (event.key === STORAGE_KEYS.FEEDBACK) {
+          callback({ type: 'FEEDBACK_ADDED', payload: event.newValue ? JSON.parse(event.newValue) : [] });
+        } else if (event.key === STORAGE_KEYS.THEME) {
+          callback({ type: 'THEME_CHANGED', payload: event.newValue });
+        } else if (event.key === STORAGE_KEYS.LANGUAGE) {
+          callback({ type: 'LANGUAGE_CHANGED', payload: event.newValue });
+        }
+      } catch (err) {
+        console.warn('Storage event parse error', err);
+      }
+    };
+
+    if (broadcastChannel) {
+      broadcastChannel.addEventListener('message', channelHandler);
     }
-    return () => {};
+    if (typeof window !== 'undefined') {
+      window.addEventListener('orderease_local_sync', localSyncHandler);
+      window.addEventListener('storage', storageEventHandler);
+    }
+
+    return () => {
+      if (broadcastChannel) {
+        broadcastChannel.removeEventListener('message', channelHandler);
+      }
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('orderease_local_sync', localSyncHandler);
+        window.removeEventListener('storage', storageEventHandler);
+      }
+    };
   }
 };

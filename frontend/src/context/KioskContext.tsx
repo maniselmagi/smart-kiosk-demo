@@ -9,7 +9,7 @@ import type {
   OrderStatus,
   MealTime
 } from '../types';
-import { storageService, SyncMessage } from '../services/storageService';
+import { storageService, SyncMessage, STORAGE_KEYS } from '../services/storageService';
 import { INITIAL_MENU_ITEMS } from '../data/initialData';
 import { translations, Language, TranslationDictionary } from '../utils/translations';
 
@@ -332,13 +332,48 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => unsubscribe();
   }, [showToast]);
 
+  // Continuous 1-second auto-sync pulse so all screens/tabs update automatically without manual page refresh
+  useEffect(() => {
+    let lastOrdersRaw = localStorage.getItem(STORAGE_KEYS.ORDERS) || '';
+    let lastMenuRaw = localStorage.getItem(STORAGE_KEYS.MENU_ITEMS) || '';
+    let lastAlertsRaw = localStorage.getItem(STORAGE_KEYS.STAFF_ALERTS) || '';
+
+    const syncInterval = setInterval(() => {
+      try {
+        const currentOrdersRaw = localStorage.getItem(STORAGE_KEYS.ORDERS) || '';
+        if (currentOrdersRaw && currentOrdersRaw !== lastOrdersRaw) {
+          lastOrdersRaw = currentOrdersRaw;
+          setActiveOrders(JSON.parse(currentOrdersRaw));
+        }
+
+        const currentMenuRaw = localStorage.getItem(STORAGE_KEYS.MENU_ITEMS) || '';
+        if (currentMenuRaw && currentMenuRaw !== lastMenuRaw) {
+          lastMenuRaw = currentMenuRaw;
+          setMenuItems(JSON.parse(currentMenuRaw));
+        }
+
+        const currentAlertsRaw = localStorage.getItem(STORAGE_KEYS.STAFF_ALERTS) || '';
+        if (currentAlertsRaw && currentAlertsRaw !== lastAlertsRaw) {
+          lastAlertsRaw = currentAlertsRaw;
+          setStaffAlerts(JSON.parse(currentAlertsRaw));
+        }
+      } catch (e) {
+        // Safe ignore
+      }
+    }, 1000);
+
+    return () => clearInterval(syncInterval);
+  }, []);
+
   // Synchronize active order tracked on kiosk
   const currentTrackedOrder = useMemo(() => {
     if (!currentTrackedOrderId) {
       const tableOrder = activeOrders.find((o) => o.tableNumber === tableNumber && o.status !== 'COMPLETED');
       return tableOrder || null;
     }
-    return activeOrders.find((o) => o.id === currentTrackedOrderId) || null;
+    const found = activeOrders.find((o) => o.id === currentTrackedOrderId);
+    if (found) return found;
+    return activeOrders.find((o) => o.tableNumber === tableNumber && o.status !== 'COMPLETED') || null;
   }, [activeOrders, currentTrackedOrderId, tableNumber]);
 
   const t = useMemo(() => translations[language], [language]);

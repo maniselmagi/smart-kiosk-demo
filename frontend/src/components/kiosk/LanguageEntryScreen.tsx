@@ -168,7 +168,7 @@ export const LanguageEntryScreen: React.FC<LanguageEntryScreenProps> = ({ onCont
 
       {/* Bottom Version Details */}
       <div className="text-center text-xs text-slate-400 dark:text-slate-500 z-10 pt-4">
-        <span>Royal Ember Table-Side Kiosk System • v1.0 Presentation Build</span>
+        <span>Royal Ember Table-Side Kiosk System</span>
       </div>
     </div>
   );

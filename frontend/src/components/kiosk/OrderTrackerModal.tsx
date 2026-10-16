@@ -31,7 +31,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
   onOpenReceipt, 
   onOpenFeedback 
 }) => {
-  const { t, updateOrderStatus, callWaiter } = useKiosk();
+  const { t, callWaiter } = useKiosk();
 
   // Active delivery countdown timer running in real-time
   const [secondsLeft, setSecondsLeft] = useState<number>(() => {
@@ -286,50 +286,6 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                 </div>
               );
             })}
-          </div>
-
-          {/* Presenter Quick Kitchen Simulator Buttons */}
-          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Presenter Demo Simulator Control:
-              </span>
-              <span className="text-[10px] text-slate-400 dark:text-slate-500">
-                (Simulates Kitchen KDS button clicks)
-              </span>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                onClick={() => updateOrderStatus(order.id, 'PREPARING')}
-                className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all border ${
-                  order.status === 'PREPARING'
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-750'
-                }`}
-              >
-                Cook Preparing
-              </button>
-              <button
-                onClick={() => updateOrderStatus(order.id, 'READY')}
-                className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all border ${
-                  order.status === 'READY'
-                    ? 'bg-emerald-600 text-white border-emerald-600'
-                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-750'
-                }`}
-              >
-                Food Ready
-              </button>
-              <button
-                onClick={() => updateOrderStatus(order.id, 'COMPLETED')}
-                className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all border ${
-                  order.status === 'COMPLETED'
-                    ? 'bg-slate-900 dark:bg-brand-600 text-white border-slate-900 dark:border-brand-600'
-                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-750'
-                }`}
-              >
-                Meal Served
-              </button>
-            </div>
           </div>
 
           {/* Ordered Dishes List */}

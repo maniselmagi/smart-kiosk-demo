@@ -44,7 +44,7 @@ export const DemoNavigation: React.FC = () => {
             <span>Live Cloud Demo</span>
           </div>
           <span className="text-slate-400 hidden lg:inline text-[11px]">
-            Presentation Prototype • Real-time Multi-screen Sync
+            Real-time Multi-screen Sync
           </span>
         </div>
 

@@ -36,7 +36,6 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
     tableNumber: _tableNumber, 
     language, 
     t, 
-    currentTrackedOrder,
     mealTime
   } = useKiosk();
 
@@ -125,39 +124,6 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
 
   return (
     <div className="pb-28">
-      
-      {/* Active Order Notice Banner (if kitchen is cooking an active order) */}
-      {currentTrackedOrder && currentTrackedOrder.status !== 'COMPLETED' && (
-        <div className="max-w-7xl mx-auto px-4 md:px-8 pt-4">
-          <div 
-            onClick={onOpenOrderTracker}
-            className="cursor-pointer bg-gradient-to-r from-cyan-600 via-teal-600 to-amber-600 rounded-2xl p-3 md:p-4 text-white shadow-lg flex items-center justify-between gap-4 hover:shadow-xl transition-all"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center font-bold text-sm">
-                #{currentTrackedOrder.orderNumber}
-              </div>
-              <div>
-                <div className="font-extrabold text-sm md:text-base flex items-center gap-2">
-                  <span>{t.orderProgress}:</span>
-                  <span className="px-2 py-0.5 rounded-full bg-white text-cyan-800 text-xs font-black uppercase tracking-wider">
-                    {currentTrackedOrder.status === 'NEW' && t.statusReceived}
-                    {currentTrackedOrder.status === 'PREPARING' && t.statusPreparing}
-                    {currentTrackedOrder.status === 'READY' && t.statusReady}
-                  </span>
-                </div>
-                <p className="text-xs text-white/90">
-                  Estimated kitchen prep: ~{currentTrackedOrder.estimatedPrepTime} {t.min} • Tap to view live progress
-                </p>
-              </div>
-            </div>
-            <button className="px-4 py-2 rounded-xl bg-white text-cyan-800 font-extrabold text-xs shadow-sm hover:bg-slate-100 transition-colors shrink-0">
-              Track Order →
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 pt-5">
         

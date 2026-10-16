@@ -242,17 +242,6 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
               <span className="hidden sm:inline">Print Receipt</span>
             </button>
 
-            <button
-              onClick={() => {
-                onClose();
-                onOpenFeedback();
-              }}
-              className="px-3.5 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 hover:bg-amber-100 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-              <span>Rate Dining</span>
-            </button>
-
             {/* Live Kitchen Progress button - ONLY shown once confirmed and moved to preparing section in KDS */}
             {isConfirmed ? (
               <button

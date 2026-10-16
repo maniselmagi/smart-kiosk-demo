@@ -12,7 +12,8 @@ import {
   Receipt,
   User,
   Bell,
-  Timer
+  Timer,
+  Gamepad2
 } from 'lucide-react';
 import { getAssignedWaiter } from '../../utils/waiterAssignment';
 
@@ -21,7 +22,8 @@ interface OrderTrackerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenReceipt: () => void;
-  onOpenFeedback: () => void;
+  onOpenEntertainment?: () => void;
+  onOpenFinishMeal?: () => void;
 }
 
 export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ 
@@ -29,7 +31,8 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
   isOpen, 
   onClose, 
   onOpenReceipt, 
-  onOpenFeedback 
+  onOpenEntertainment,
+  onOpenFinishMeal 
 }) => {
   const { t, callWaiter } = useKiosk();
 
@@ -235,6 +238,29 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                 />
               </div>
             </div>
+
+            {/* Play Games & Digital News Lounge CTA */}
+            {onOpenEntertainment && (
+              <div className="pt-2 border-t border-amber-500/20 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">🎮</span>
+                  <span className="text-[11px] font-extrabold text-amber-900 dark:text-amber-300">
+                    Bored waiting? Play Ludo, Sudoku or Read News Shorts!
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onOpenEntertainment();
+                  }}
+                  className="py-1.5 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs shadow-sm flex items-center gap-1 active:scale-95 transition-all cursor-pointer whitespace-nowrap animate-pulse"
+                >
+                  <Gamepad2 className="w-3.5 h-3.5" />
+                  <span>Play Games →</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Stepper Timeline */}
@@ -333,12 +359,12 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
           <button
             onClick={() => {
               onClose();
-              onOpenFeedback();
+              onOpenFinishMeal?.();
             }}
-            className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white text-xs font-black shadow-md shadow-brand-500/25 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+            className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-brand-600 hover:from-emerald-500 hover:to-brand-500 text-white text-xs font-black shadow-md shadow-emerald-500/25 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            <Star className="w-4 h-4 text-amber-200 fill-amber-200" />
-            <span>Leave Guest Feedback →</span>
+            <Sparkles className="w-4 h-4 text-amber-200" />
+            <span>Finish Meal & Tip Waiter {waiter.name} →</span>
           </button>
         </div>
 

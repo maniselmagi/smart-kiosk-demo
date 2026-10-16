@@ -11,6 +11,8 @@ import { CheckoutModal } from './components/kiosk/CheckoutModal';
 import { DigitalReceiptModal } from './components/kiosk/DigitalReceiptModal';
 import { OrderTrackerModal } from './components/kiosk/OrderTrackerModal';
 import { FeedbackModal } from './components/kiosk/FeedbackModal';
+import { CustomerEntertainmentModal } from './components/kiosk/CustomerEntertainmentModal';
+import { FinishMealModal } from './components/kiosk/FinishMealModal';
 import { KitchenDisplay } from './components/kitchen/KitchenDisplay';
 import { ManagementDashboard } from './components/dashboard/ManagementDashboard';
 import { LanguageSelectionModal } from './components/kiosk/LanguageSelectionModal';
@@ -39,6 +41,8 @@ const MainAppContent: React.FC = () => {
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
   const [isTrackerOpen, setIsTrackerOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [isEntertainmentOpen, setIsEntertainmentOpen] = useState(false);
+  const [isFinishMealOpen, setIsFinishMealOpen] = useState(false);
   const [activeCompletedOrder, setActiveCompletedOrder] = useState<Order | null>(null);
 
   // Fresh reactive order from activeOrders so supervisor/waiter status updates sync live
@@ -93,6 +97,7 @@ const MainAppContent: React.FC = () => {
                   onBackToWelcome={() => setKioskSubScreen('welcome')}
                   onOpenCart={() => setIsCartOpen(true)}
                   onOpenTrackOrder={() => setIsTrackerOpen(true)}
+                  onOpenEntertainment={() => setIsEntertainmentOpen(true)}
                 />
 
                 <MenuScreen
@@ -105,6 +110,20 @@ const MainAppContent: React.FC = () => {
           </div>
         )}
       </main>
+
+      {/* Floating "Continue Game" Action Pill (docked at bottom right as requested in user mockup) */}
+      {liveTrackedOrder && liveTrackedOrder.status !== 'COMPLETED' && !isEntertainmentOpen && view === 'kiosk' && kioskSubScreen === 'menu' && (
+        <div className="fixed bottom-6 right-6 z-40 animate-in bounce-in duration-300">
+          <button
+            onClick={() => setIsEntertainmentOpen(true)}
+            className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs shadow-2xl shadow-amber-500/40 border-2 border-white/40 flex items-center gap-2 cursor-pointer transition-all active:scale-95 group"
+          >
+            <span className="text-base group-hover:rotate-12 transition-transform">🎮</span>
+            <span className="font-extrabold tracking-wide">Continue Game</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+          </button>
+        </div>
+      )}
 
       {/* Toast Notification Popup */}
       {toastMessage && (
@@ -139,7 +158,7 @@ const MainAppContent: React.FC = () => {
         isOpen={isReceiptOpen}
         onClose={() => setIsReceiptOpen(false)}
         onTrackOrder={() => setIsTrackerOpen(true)}
-        onOpenFeedback={() => setIsFeedbackOpen(true)}
+        onOpenFeedback={() => setIsFinishMealOpen(true)}
       />
 
       <OrderTrackerModal
@@ -147,7 +166,30 @@ const MainAppContent: React.FC = () => {
         isOpen={isTrackerOpen}
         onClose={() => setIsTrackerOpen(false)}
         onOpenReceipt={() => setIsReceiptOpen(true)}
-        onOpenFeedback={() => setIsFeedbackOpen(true)}
+        onOpenEntertainment={() => setIsEntertainmentOpen(true)}
+        onOpenFinishMeal={() => setIsFinishMealOpen(true)}
+      />
+
+      {/* Table-Side Entertainment Lounge (Ludo, Sudoku, Snakes & Ladders, News Shorts, Music) */}
+      <CustomerEntertainmentModal
+        isOpen={isEntertainmentOpen}
+        onClose={() => setIsEntertainmentOpen(false)}
+        order={liveTrackedOrder}
+        onOpenTracker={() => setIsTrackerOpen(true)}
+        onFinishMeal={() => setIsFinishMealOpen(true)}
+      />
+
+      {/* Final Dining Experience & Waiter Tip Modal */}
+      <FinishMealModal
+        order={liveTrackedOrder}
+        isOpen={isFinishMealOpen}
+        onClose={() => setIsFinishMealOpen(false)}
+        onFinishDiningSuccess={() => {
+          setIsTrackerOpen(false);
+          setIsReceiptOpen(false);
+          setIsEntertainmentOpen(false);
+          setActiveCompletedOrder(null);
+        }}
       />
 
       <FeedbackModal

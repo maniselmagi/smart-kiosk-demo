@@ -22,7 +22,15 @@ import {
   Share2,
   ExternalLink,
   Minimize2,
-  Maximize2
+  Globe,
+  Radio,
+  BookOpen,
+  Layers,
+  Sparkle,
+  Lightbulb,
+  Eraser,
+  Calendar,
+  CloudSun
 } from 'lucide-react';
 import { Order } from '../../types';
 import { getAssignedWaiter } from '../../utils/waiterAssignment';
@@ -35,193 +43,343 @@ interface CustomerEntertainmentModalProps {
   onFinishMeal?: () => void;
 }
 
-// -------------------------------------------------------------
-// 1. GAME: LUDO QUICK DICE DUEL
-// -------------------------------------------------------------
-const LudoGame: React.FC = () => {
-  const [playerPos, setPlayerPos] = useState(0);
-  const [botPos, setBotPos] = useState(0);
-  const [lastDice, setLastDice] = useState<number | null>(null);
-  const [turn, setTurn] = useState<'player' | 'bot'>('player');
+// ============================================================================
+// 1. ORIGINAL TYPE LUDO BOARD (Authentic 4-Quadrant Cross Board with 2 Players)
+// ============================================================================
+const OriginalLudoGame: React.FC = () => {
+  // 2 tokens for Player (Yellow), 2 tokens for Chef Bot (Red)
+  // State: -1 = in base yard, 0..51 = main track, 100+ = home stretch, 200 = Finished Home
+  const [playerTokens, setPlayerTokens] = useState<[number, number]>([-1, -1]);
+  const [botTokens, setBotTokens] = useState<[number, number]>([-1, -1]);
+  const [diceRoll, setDiceRoll] = useState<number | null>(null);
   const [isRolling, setIsRolling] = useState(false);
+  const [turn, setTurn] = useState<'player' | 'bot'>('player');
   const [winner, setWinner] = useState<string | null>(null);
-  const [gameLog, setGameLog] = useState<string[]>(['Game started! Roll the dice to begin.']);
+  const [gameLog, setGameLog] = useState<string[]>([
+    'Welcome to Royal Ludo! Roll a 6 to release your token from base.'
+  ]);
 
-  const TRACK_LENGTH = 20;
+  // Track is 28 tiles circular sprint for fast kiosk dining play
+  const MAX_TRACK = 24;
 
   const rollDice = () => {
     if (isRolling || winner || turn !== 'player') return;
     setIsRolling(true);
 
     setTimeout(() => {
-      const dice = Math.floor(Math.random() * 6) + 1;
-      setLastDice(dice);
+      const roll = Math.floor(Math.random() * 6) + 1;
+      setDiceRoll(roll);
       setIsRolling(false);
 
-      const nextPos = Math.min(TRACK_LENGTH, playerPos + dice);
-      setPlayerPos(nextPos);
-      setGameLog((prev) => [`🎲 You rolled a ${dice}! Advanced to tile ${nextPos}.`, ...prev.slice(0, 3)]);
+      // Player move logic
+      setPlayerTokens((prev) => {
+        const [t1, t2] = prev;
+        let newT1 = t1;
+        let newT2 = t2;
+        let moved = false;
 
-      if (nextPos >= TRACK_LENGTH) {
-        setWinner('You won the Ludo Duel! 🏆');
-        return;
-      }
-
-      // Bot turn
-      setTurn('bot');
-      setTimeout(() => {
-        const botDice = Math.floor(Math.random() * 6) + 1;
-        const nextBotPos = Math.min(TRACK_LENGTH, botPos + botDice);
-        setBotPos(nextBotPos);
-        setGameLog((prev) => [`🤖 Chef Bot rolled a ${botDice}! Advanced to tile ${nextBotPos}.`, ...prev.slice(0, 3)]);
-
-        if (nextBotPos >= TRACK_LENGTH) {
-          setWinner('Chef Bot reached home first! Try again.');
+        if (roll === 6) {
+          if (t1 === -1) {
+            newT1 = 0;
+            moved = true;
+            setGameLog((l) => [`🎲 You rolled a 6! Token #1 deployed to Track 0!`, ...l.slice(0, 3)]);
+          } else if (t2 === -1) {
+            newT2 = 0;
+            moved = true;
+            setGameLog((l) => [`🎲 You rolled a 6! Token #2 deployed to Track 0!`, ...l.slice(0, 3)]);
+          } else {
+            newT1 = Math.min(MAX_TRACK, t1 + roll);
+            moved = true;
+            setGameLog((l) => [`🎲 You rolled a 6! Token #1 advanced to ${newT1}.`, ...l.slice(0, 3)]);
+          }
         } else {
-          setTurn('player');
+          // Advance active token
+          if (t1 >= 0 && t1 < MAX_TRACK) {
+            newT1 = Math.min(MAX_TRACK, t1 + roll);
+            moved = true;
+            setGameLog((l) => [`🎲 You rolled a ${roll}! Token #1 at tile ${newT1}.`, ...l.slice(0, 3)]);
+          } else if (t2 >= 0 && t2 < MAX_TRACK) {
+            newT2 = Math.min(MAX_TRACK, t2 + roll);
+            moved = true;
+            setGameLog((l) => [`🎲 You rolled a ${roll}! Token #2 at tile ${newT2}.`, ...l.slice(0, 3)]);
+          } else {
+            setGameLog((l) => [`🎲 Rolled a ${roll}. Need a 6 to bring token out of base!`, ...l.slice(0, 3)]);
+          }
         }
-      }, 1000);
-    }, 450);
+
+        // Win check
+        if (newT1 >= MAX_TRACK && newT2 >= MAX_TRACK) {
+          setWinner('You won the Ludo Championship! 🏆');
+        }
+
+        return [newT1, newT2];
+      });
+
+      // Pass turn to bot if not rolling a 6
+      if (roll !== 6) {
+        setTurn('bot');
+        setTimeout(runBotTurn, 1000);
+      }
+    }, 500);
   };
 
-  const resetLudo = () => {
-    setPlayerPos(0);
-    setBotPos(0);
-    setLastDice(null);
+  const runBotTurn = () => {
+    if (winner) return;
+    const botRoll = Math.floor(Math.random() * 6) + 1;
+    setDiceRoll(botRoll);
+
+    setBotTokens((prev) => {
+      const [b1, b2] = prev;
+      let newB1 = b1;
+      let newB2 = b2;
+
+      if (botRoll === 6) {
+        if (b1 === -1) {
+          newB1 = 0;
+          setGameLog((l) => [`🤖 Chef Bot rolled a 6 and deployed Token #1!`, ...l.slice(0, 3)]);
+        } else if (b2 === -1) {
+          newB2 = 0;
+          setGameLog((l) => [`🤖 Chef Bot rolled a 6 and deployed Token #2!`, ...l.slice(0, 3)]);
+        } else {
+          newB1 = Math.min(MAX_TRACK, b1 + botRoll);
+          setGameLog((l) => [`🤖 Chef Bot advanced Token #1 to ${newB1}.`, ...l.slice(0, 3)]);
+        }
+      } else {
+        if (b1 >= 0 && b1 < MAX_TRACK) {
+          newB1 = Math.min(MAX_TRACK, b1 + botRoll);
+          setGameLog((l) => [`🤖 Chef Bot rolled ${botRoll}, moving to tile ${newB1}.`, ...l.slice(0, 3)]);
+        } else if (b2 >= 0 && b2 < MAX_TRACK) {
+          newB2 = Math.min(MAX_TRACK, b2 + botRoll);
+          setGameLog((l) => [`🤖 Chef Bot rolled ${botRoll}, moving to tile ${newB2}.`, ...l.slice(0, 3)]);
+        } else {
+          setGameLog((l) => [`🤖 Chef Bot rolled ${botRoll}. No tokens on track.`, ...l.slice(0, 3)]);
+        }
+      }
+
+      if (newB1 >= MAX_TRACK && newB2 >= MAX_TRACK) {
+        setWinner('Chef Bot conquered Home! Try again next round.');
+      } else {
+        setTurn('player');
+      }
+
+      return [newB1, newB2];
+    });
+  };
+
+  const resetGame = () => {
+    setPlayerTokens([-1, -1]);
+    setBotTokens([-1, -1]);
+    setDiceRoll(null);
     setTurn('player');
     setWinner(null);
-    setGameLog(['Game reset! Roll the dice to start.']);
+    setGameLog(['Game reset! Roll a 6 to deploy your gold tokens.']);
   };
 
   return (
     <div className="space-y-4">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h4 className="font-black text-sm md:text-base text-slate-900 dark:text-white flex items-center gap-1.5">
-            <span>🎲 Royal Ludo Sprint</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold">
-              Fast 20-Tile Sprint
+          <h4 className="font-black text-sm md:text-base text-slate-900 dark:text-white flex items-center gap-2">
+            <span>🎲 Royal Ludo Master</span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400 font-bold border border-amber-500/30">
+              Classic 4-Quadrant Board
             </span>
           </h4>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Race your gold token against the Chef's bot to reach Home first!
+            Roll 6 to leave base. Race tokens to Home Triangle against Chef Bot!
           </p>
         </div>
+
         <button
-          onClick={resetLudo}
-          className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 text-xs font-bold flex items-center gap-1 cursor-pointer"
+          onClick={resetGame}
+          className="p-1.5 px-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
         >
           <RotateCcw className="w-3.5 h-3.5" />
-          <span>Reset</span>
+          <span>New Game</span>
         </button>
       </div>
 
       {winner && (
-        <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/20 via-emerald-500/20 to-brand-500/20 border border-amber-500/30 text-center animate-in zoom-in-95">
-          <Trophy className="w-6 h-6 text-amber-500 mx-auto mb-1 animate-bounce" />
-          <span className="font-black text-sm text-slate-900 dark:text-white">{winner}</span>
+        <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/25 via-emerald-500/25 to-brand-500/25 border-2 border-amber-500/40 text-center animate-in zoom-in-95">
+          <Trophy className="w-7 h-7 text-amber-500 mx-auto mb-1 animate-bounce" />
+          <span className="font-black text-sm text-slate-900 dark:text-white block">{winner}</span>
         </div>
       )}
 
-      {/* Board Track Visualization */}
-      <div className="p-3.5 rounded-2xl bg-slate-950/40 dark:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 space-y-3">
-        {/* Player track */}
-        <div>
-          <div className="flex justify-between text-xs font-bold mb-1">
-            <span className="text-amber-700 dark:text-amber-400 flex items-center gap-1">
-              🟡 Your Token: Tile {playerPos}/{TRACK_LENGTH}
-            </span>
-            <span className="text-[11px] text-slate-400">Target: Tile 20</span>
+      {/* AUTHENTIC 4-QUADRANT LUDO BOARD SVG & GRID */}
+      <div className="max-w-[380px] sm:max-w-[420px] mx-auto p-3.5 rounded-3xl bg-slate-950 border-4 border-amber-600/40 shadow-2xl relative select-none">
+        
+        {/* Ludo Board Framework */}
+        <div className="aspect-square w-full grid grid-cols-3 grid-rows-3 gap-1 rounded-2xl bg-slate-900 p-1 border border-slate-700/80">
+          
+          {/* Top-Left Quadrant: RED YARD (Chef Bot) */}
+          <div className="bg-rose-700 rounded-xl p-2.5 flex flex-col justify-between border-2 border-rose-800 shadow-inner">
+            <span className="text-[10px] font-black uppercase text-rose-200 tracking-wider">Chef Bot (Red)</span>
+            <div className="bg-white/90 dark:bg-slate-950/80 rounded-lg p-2 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center">
+              <div className={`w-6 h-6 rounded-full border-2 border-rose-900 flex items-center justify-center text-[10px] font-black ${botTokens[0] === -1 ? 'bg-rose-600 text-white animate-pulse' : 'bg-slate-300 opacity-40'}`}>
+                {botTokens[0] === -1 ? 'B1' : '✓'}
+              </div>
+              <div className={`w-6 h-6 rounded-full border-2 border-rose-900 flex items-center justify-center text-[10px] font-black ${botTokens[1] === -1 ? 'bg-rose-600 text-white animate-pulse' : 'bg-slate-300 opacity-40'}`}>
+                {botTokens[1] === -1 ? 'B2' : '✓'}
+              </div>
+            </div>
           </div>
-          <div className="w-full h-3 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden relative">
-            <div 
-              className="h-full bg-gradient-to-r from-amber-500 to-amber-400 transition-all duration-300"
-              style={{ width: `${(playerPos / TRACK_LENGTH) * 100}%` }}
-            />
-          </div>
-        </div>
 
-        {/* Bot track */}
-        <div>
-          <div className="flex justify-between text-xs font-bold mb-1">
-            <span className="text-blue-700 dark:text-blue-400 flex items-center gap-1">
-              🤖 Chef Bot: Tile {botPos}/{TRACK_LENGTH}
-            </span>
-            <span className="text-[11px] text-slate-400">Target: Tile 20</span>
-          </div>
-          <div className="w-full h-3 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden relative">
-            <div 
-              className="h-full bg-gradient-to-r from-blue-600 to-cyan-400 transition-all duration-300"
-              style={{ width: `${(botPos / TRACK_LENGTH) * 100}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Track Grid Tiles preview */}
-        <div className="grid grid-cols-10 gap-1 pt-2">
-          {Array.from({ length: TRACK_LENGTH }).map((_, idx) => {
-            const tileNum = idx + 1;
-            const hasPlayer = playerPos === tileNum;
-            const hasBot = botPos === tileNum;
-
-            return (
+          {/* Top-Center: NORTH TRACK (Green Home Runway) */}
+          <div className="bg-slate-800 rounded-xl grid grid-cols-3 grid-rows-6 gap-0.5 p-1 border border-slate-700 text-[8px] text-slate-400 font-bold">
+            {Array.from({ length: 18 }).map((_, i) => (
               <div 
-                key={tileNum}
-                className={`h-8 rounded-lg border text-[10px] font-black flex items-center justify-center relative transition-all ${
-                  tileNum === 20 
-                    ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400' 
-                    : 'bg-white/60 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700/60 text-slate-500'
+                key={i} 
+                className={`flex items-center justify-center rounded-xs ${
+                  i % 3 === 1 ? 'bg-emerald-600/70 text-white' : i === 7 ? 'bg-emerald-500 text-black font-black' : 'bg-slate-850'
                 }`}
               >
-                {tileNum === 20 ? '🏁' : tileNum}
-                {hasPlayer && (
-                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-amber-500 text-[8px] flex items-center justify-center text-black font-black animate-bounce shadow-xs">
-                    P
-                  </span>
-                )}
-                {hasBot && (
-                  <span className="absolute -bottom-1 -left-1 w-3.5 h-3.5 rounded-full bg-blue-500 text-[8px] flex items-center justify-center text-white font-black animate-bounce shadow-xs">
-                    B
-                  </span>
-                )}
+                {i === 7 ? '★' : ''}
               </div>
-            );
-          })}
+            ))}
+          </div>
+
+          {/* Top-Right Quadrant: GREEN YARD */}
+          <div className="bg-emerald-700 rounded-xl p-2.5 flex flex-col justify-between border-2 border-emerald-800 shadow-inner">
+            <span className="text-[10px] font-black uppercase text-emerald-200 tracking-wider">North Yard</span>
+            <div className="bg-white/90 dark:bg-slate-950/80 rounded-lg p-2 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center">
+              <div className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[9px] font-bold">G1</div>
+              <div className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[9px] font-bold">G2</div>
+            </div>
+          </div>
+
+          {/* Center-Left: WEST TRACK (Red Home Runway) */}
+          <div className="bg-slate-800 rounded-xl grid grid-cols-6 grid-rows-3 gap-0.5 p-1 border border-slate-700 text-[8px] text-slate-400 font-bold">
+            {Array.from({ length: 18 }).map((_, i) => (
+              <div 
+                key={i} 
+                className={`flex items-center justify-center rounded-xs ${
+                  Math.floor(i / 6) === 1 ? 'bg-rose-600/70 text-white' : i === 1 ? 'bg-rose-500 text-black font-black' : 'bg-slate-850'
+                }`}
+              >
+                {i === 1 ? '★' : ''}
+              </div>
+            ))}
+          </div>
+
+          {/* CENTER: LUDO TRIANGULAR HOME */}
+          <div className="bg-gradient-to-tr from-amber-500 via-rose-600 to-blue-600 rounded-xl border-2 border-white flex flex-col items-center justify-center text-white text-center p-1 relative shadow-lg">
+            <span className="text-xl">🏆</span>
+            <span className="text-[9px] font-black tracking-widest uppercase">HOME</span>
+          </div>
+
+          {/* Center-Right: EAST TRACK (Blue Home Runway) */}
+          <div className="bg-slate-800 rounded-xl grid grid-cols-6 grid-rows-3 gap-0.5 p-1 border border-slate-700 text-[8px] text-slate-400 font-bold">
+            {Array.from({ length: 18 }).map((_, i) => (
+              <div 
+                key={i} 
+                className={`flex items-center justify-center rounded-xs ${
+                  Math.floor(i / 6) === 1 ? 'bg-blue-600/70 text-white' : i === 16 ? 'bg-blue-500 text-black font-black' : 'bg-slate-850'
+                }`}
+              >
+                {i === 16 ? '★' : ''}
+              </div>
+            ))}
+          </div>
+
+          {/* Bottom-Left Quadrant: BLUE YARD */}
+          <div className="bg-blue-700 rounded-xl p-2.5 flex flex-col justify-between border-2 border-blue-800 shadow-inner">
+            <span className="text-[10px] font-black uppercase text-blue-200 tracking-wider">South Yard</span>
+            <div className="bg-white/90 dark:bg-slate-950/80 rounded-lg p-2 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center">
+              <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[9px] font-bold">U1</div>
+              <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[9px] font-bold">U2</div>
+            </div>
+          </div>
+
+          {/* Bottom-Center: SOUTH TRACK (Yellow Home Runway) */}
+          <div className="bg-slate-800 rounded-xl grid grid-cols-3 grid-rows-6 gap-0.5 p-1 border border-slate-700 text-[8px] text-slate-400 font-bold">
+            {Array.from({ length: 18 }).map((_, i) => (
+              <div 
+                key={i} 
+                className={`flex items-center justify-center rounded-xs ${
+                  i % 3 === 1 ? 'bg-amber-500/80 text-black font-black' : i === 10 ? 'bg-amber-400 text-black font-black' : 'bg-slate-850'
+                }`}
+              >
+                {i === 10 ? '★' : ''}
+              </div>
+            ))}
+          </div>
+
+          {/* Bottom-Right Quadrant: YELLOW YARD (PLAYER) */}
+          <div className="bg-amber-500 rounded-xl p-2.5 flex flex-col justify-between border-2 border-amber-600 shadow-inner">
+            <span className="text-[10px] font-black uppercase text-slate-950 tracking-wider">You (Gold Token)</span>
+            <div className="bg-white/90 dark:bg-slate-950/80 rounded-lg p-2 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center">
+              <div className={`w-6 h-6 rounded-full border-2 border-amber-600 flex items-center justify-center text-[10px] font-black ${playerTokens[0] === -1 ? 'bg-amber-500 text-slate-950 animate-bounce' : 'bg-slate-300 opacity-40'}`}>
+                {playerTokens[0] === -1 ? 'P1' : '✓'}
+              </div>
+              <div className={`w-6 h-6 rounded-full border-2 border-amber-600 flex items-center justify-center text-[10px] font-black ${playerTokens[1] === -1 ? 'bg-amber-500 text-slate-950 animate-bounce' : 'bg-slate-300 opacity-40'}`}>
+                {playerTokens[1] === -1 ? 'P2' : '✓'}
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* Live Token Status Pills */}
+        <div className="flex items-center justify-between text-xs font-bold pt-3 px-1">
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-amber-500 inline-block" />
+            <span className="text-amber-400 text-[11px]">
+              You: T1 ({playerTokens[0] === -1 ? 'Base' : `${playerTokens[0]}/${MAX_TRACK}`}) • T2 ({playerTokens[1] === -1 ? 'Base' : `${playerTokens[1]}/${MAX_TRACK}`})
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-rose-500 inline-block" />
+            <span className="text-rose-400 text-[11px]">
+              Chef: T1 ({botTokens[0] === -1 ? 'Base' : `${botTokens[0]}/${MAX_TRACK}`}) • T2 ({botTokens[1] === -1 ? 'Base' : `${botTokens[1]}/${MAX_TRACK}`})
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Control Action & Dice Display */}
-      <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800">
+      {/* Interactive Roll Action Bar */}
+      <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className={`w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 border-2 border-amber-500/50 flex items-center justify-center font-black text-2xl shadow-md ${isRolling ? 'animate-spin' : ''}`}>
-            {lastDice ? lastDice : '🎲'}
+          <div className={`w-14 h-14 rounded-2xl bg-white dark:bg-slate-800 border-2 border-amber-500 flex items-center justify-center font-black text-3xl shadow-lg transition-transform ${isRolling ? 'rotate-180 scale-110' : ''}`}>
+            {diceRoll !== null ? diceRoll : '🎲'}
           </div>
           <div>
-            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 block">
-              Current Turn:
+            <span className="text-[11px] font-bold text-slate-400 block">
+              Active Turn:
             </span>
-            <span className="text-xs font-black text-slate-900 dark:text-white">
-              {turn === 'player' ? '👉 Your Turn to Roll' : '⏳ Chef Bot Thinking...'}
+            <span className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+              {turn === 'player' ? (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                  <span>Your Turn (Roll 6 to launch)</span>
+                </>
+              ) : (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                  <span>Chef Bot Rolling...</span>
+                </>
+              )}
             </span>
           </div>
         </div>
 
         <button
           onClick={rollDice}
-          disabled={turn !== 'player' || !!winner || isRolling}
-          className={`py-2.5 px-5 rounded-xl font-black text-xs transition-all flex items-center gap-1.5 shadow-md ${
+          disabled={turn !== 'player' || isRolling || !!winner}
+          className={`py-3 px-5 rounded-2xl font-black text-xs transition-all flex items-center gap-2 shadow-xl ${
             turn === 'player' && !winner
-              ? 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 active:scale-95 cursor-pointer shadow-amber-500/20'
+              ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-slate-950 active:scale-95 cursor-pointer shadow-amber-500/25 ring-2 ring-amber-400/40'
               : 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
           }`}
         >
           <Dices className="w-4 h-4" />
-          <span>{isRolling ? 'Rolling...' : 'Roll Dice'}</span>
+          <span>{isRolling ? 'Rolling...' : 'Roll Dice 🎲'}</span>
         </button>
       </div>
 
-      {/* Mini Game Log */}
-      <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 text-[11px] text-slate-500 dark:text-slate-400 font-mono space-y-1">
+      {/* Mini Game Commentary */}
+      <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 text-[11px] font-mono text-slate-500 dark:text-slate-400 space-y-1">
         {gameLog.map((log, i) => (
           <div key={i} className={i === 0 ? 'text-amber-600 dark:text-amber-400 font-bold' : ''}>
             {log}
@@ -232,114 +390,367 @@ const LudoGame: React.FC = () => {
   );
 };
 
-// -------------------------------------------------------------
-// 2. GAME: SUDOKU QUICK 4x4 CHALLENGE
-// -------------------------------------------------------------
-const SudokuGame: React.FC = () => {
-  const initialGrid = [
-    [1, 0, 3, 0],
-    [0, 3, 0, 1],
-    [3, 0, 1, 0],
-    [0, 1, 0, 3],
-  ];
+// ============================================================================
+// 2. ORIGINAL SNAKES & LADDERS (AUTHENTIC 100-TILE BOARD / PARAMAPATHAM)
+// ============================================================================
+const OriginalSnakesAndLadders: React.FC = () => {
+  const [playerTile, setPlayerTile] = useState(1);
+  const [botTile, setBotTile] = useState(1);
+  const [lastDice, setLastDice] = useState<number | null>(null);
+  const [turn, setTurn] = useState<'player' | 'bot'>('player');
+  const [isRolling, setIsRolling] = useState(false);
+  const [winner, setWinner] = useState<string | null>(null);
+  const [log, setLog] = useState<string[]>(['Game started! First to reach tile 100 wins!']);
 
-  const solution = [
-    [1, 4, 3, 2],
-    [2, 3, 4, 1],
-    [3, 2, 1, 4],
-    [4, 1, 2, 3],
-  ];
+  // Authentic Indian Board Snakes and Ladders Mapping (100 Tiles)
+  const LADDERS: Record<number, number> = {
+    4: 14,
+    9: 31,
+    20: 38,
+    28: 84,
+    40: 59,
+    51: 67,
+    63: 81,
+    71: 91,
+  };
 
-  const [grid, setGrid] = useState<number[][]>(initialGrid);
-  const [selectedCell, setSelectedCell] = useState<[number, number] | null>(null);
-  const [isCompleted, setIsCompleted] = useState(false);
+  const SNAKES: Record<number, number> = {
+    17: 7,
+    54: 34,
+    62: 19,
+    64: 60,
+    87: 24,
+    93: 73,
+    95: 75,
+    99: 78,
+  };
 
-  const handleNumberInput = (num: number) => {
-    if (!selectedCell) return;
-    const [r, c] = selectedCell;
-    if (initialGrid[r][c] !== 0) return; // immutable original clue
+  const rollDice = () => {
+    if (isRolling || winner || turn !== 'player') return;
+    setIsRolling(true);
 
-    const newGrid = grid.map((row) => [...row]);
-    newGrid[r][c] = num;
-    setGrid(newGrid);
+    setTimeout(() => {
+      const dice = Math.floor(Math.random() * 6) + 1;
+      setLastDice(dice);
+      setIsRolling(false);
 
-    // Check if solved
-    const allFilled = newGrid.every((row) => row.every((val) => val > 0));
-    if (allFilled) {
-      const isCorrect = newGrid.every((row, rIdx) => 
-        row.every((val, cIdx) => val === solution[rIdx][cIdx])
-      );
-      if (isCorrect) setIsCompleted(true);
+      let nextTile = playerTile + dice;
+      if (nextTile > 100) {
+        setLog((l) => [`🎲 You rolled ${dice}. Need exact roll to reach 100.`, ...l.slice(0, 3)]);
+      } else {
+        if (LADDERS[nextTile]) {
+          const climbed = LADDERS[nextTile];
+          setLog((l) => [`🪜 Rolled ${dice}! Climbed ladder from tile ${nextTile} to ${climbed}! 🎉`, ...l.slice(0, 3)]);
+          nextTile = climbed;
+        } else if (SNAKES[nextTile]) {
+          const bitDown = SNAKES[nextTile];
+          setLog((l) => [`🐍 Oh no! Snake bite at tile ${nextTile}, slid down to ${bitDown}!`, ...l.slice(0, 3)]);
+          nextTile = bitDown;
+        } else {
+          setLog((l) => [`🎲 Rolled ${dice}! Moved to tile ${nextTile}.`, ...l.slice(0, 3)]);
+        }
+
+        setPlayerTile(nextTile);
+
+        if (nextTile === 100) {
+          setWinner('You won Snakes & Ladders! Reached 100! 🏆');
+          return;
+        }
+      }
+
+      // Bot turn
+      setTurn('bot');
+      setTimeout(runBotTurn, 900);
+    }, 450);
+  };
+
+  const runBotTurn = () => {
+    if (winner) return;
+    const botDice = Math.floor(Math.random() * 6) + 1;
+    setLastDice(botDice);
+
+    let nextBot = botTile + botDice;
+    if (nextBot <= 100) {
+      if (LADDERS[nextBot]) {
+        const climbed = LADDERS[nextBot];
+        setLog((l) => [`🤖 Chef Bot rolled ${botDice} and climbed ladder to ${climbed}!`, ...l.slice(0, 3)]);
+        nextBot = climbed;
+      } else if (SNAKES[nextBot]) {
+        const bit = SNAKES[nextBot];
+        setLog((l) => [`🤖 Chef Bot hit a snake at ${nextBot}, fell to ${bit}!`, ...l.slice(0, 3)]);
+        nextBot = bit;
+      } else {
+        setLog((l) => [`🤖 Chef Bot rolled ${botDice}, moved to tile ${nextBot}.`, ...l.slice(0, 3)]);
+      }
+
+      setBotTile(nextBot);
+
+      if (nextBot === 100) {
+        setWinner('Chef Bot reached 100 first! Rematch?');
+        return;
+      }
     }
+
+    setTurn('player');
   };
 
-  const handleClear = () => {
-    if (!selectedCell) return;
-    const [r, c] = selectedCell;
-    if (initialGrid[r][c] !== 0) return;
-    const newGrid = grid.map((row) => [...row]);
-    newGrid[r][c] = 0;
-    setGrid(newGrid);
-  };
-
-  const resetSudoku = () => {
-    setGrid(initialGrid);
-    setSelectedCell(null);
-    setIsCompleted(false);
+  const resetGame = () => {
+    setPlayerTile(1);
+    setBotTile(1);
+    setLastDice(null);
+    setTurn('player');
+    setWinner(null);
+    setLog(['Board reset! Roll the dice to begin the climb to 100.']);
   };
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h4 className="font-black text-sm md:text-base text-slate-900 dark:text-white flex items-center gap-1.5">
-            <span>🧩 Mini Sudoku (4×4)</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 font-bold">
-              Casual Dining Puzzle
+          <h4 className="font-black text-sm md:text-base text-slate-900 dark:text-white flex items-center gap-2">
+            <span>🐍 Classic Snakes & Ladders (100 Tiles)</span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-500/30">
+              Paramapatham
             </span>
           </h4>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Fill the empty cells so each row, column, and 2×2 box contains digits 1 to 4!
+            Authentic 100-tile serpentine board. Ladders climb, beware of hungry snakes!
           </p>
         </div>
+
         <button
-          onClick={resetSudoku}
-          className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 text-xs font-bold flex items-center gap-1 cursor-pointer"
+          onClick={resetGame}
+          className="p-1.5 px-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
         >
           <RotateCcw className="w-3.5 h-3.5" />
           <span>Reset</span>
         </button>
       </div>
 
-      {isCompleted && (
-        <div className="p-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-center animate-in zoom-in-95">
-          <CheckCircle className="w-6 h-6 text-emerald-500 mx-auto mb-1 animate-bounce" />
-          <span className="font-black text-sm text-emerald-800 dark:text-emerald-300">
-            Brilliant! Sudoku Solved Perfectly! 🎉
-          </span>
+      {winner && (
+        <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/25 via-teal-500/25 to-amber-500/25 border-2 border-emerald-500/40 text-center animate-in zoom-in-95">
+          <Trophy className="w-7 h-7 text-amber-500 mx-auto mb-1 animate-bounce" />
+          <span className="font-black text-sm text-slate-900 dark:text-white block">{winner}</span>
         </div>
       )}
 
-      {/* Sudoku Grid */}
-      <div className="max-w-[280px] mx-auto p-3 rounded-3xl bg-slate-900 border-2 border-slate-700 shadow-xl">
-        <div className="grid grid-cols-4 gap-1.5">
+      {/* 10x10 (100 Tile) Authentically Rendered Serpentine Board */}
+      <div className="max-w-[420px] mx-auto p-3 rounded-3xl bg-slate-950 border-4 border-emerald-600/40 shadow-2xl">
+        <div className="grid grid-cols-10 gap-0.5 aspect-square bg-slate-900 p-1 rounded-2xl border border-slate-800">
+          {Array.from({ length: 10 }).map((_, rowIdx) => {
+            const rowNumber = 10 - rowIdx; // 10, 9, 8, ... 1
+            const isEvenRow = rowNumber % 2 === 0;
+
+            const cols = Array.from({ length: 10 }).map((_, colIdx) => {
+              const tileNumber = isEvenRow
+                ? (rowNumber - 1) * 10 + (10 - colIdx)
+                : (rowNumber - 1) * 10 + (colIdx + 1);
+
+              const hasPlayer = playerTile === tileNumber;
+              const hasBot = botTile === tileNumber;
+              const hasLadder = LADDERS[tileNumber] !== undefined;
+              const hasSnake = SNAKES[tileNumber] !== undefined;
+
+              return (
+                <div
+                  key={tileNumber}
+                  className={`aspect-square rounded-xs border text-[8px] font-black flex flex-col items-center justify-between p-0.5 relative transition-all ${
+                    tileNumber === 100
+                      ? 'bg-amber-500/30 text-amber-300 border-amber-500/60 font-black'
+                      : hasLadder
+                      ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/50'
+                      : hasSnake
+                      ? 'bg-rose-950/80 text-rose-300 border-rose-500/50'
+                      : (rowIdx + colIdx) % 2 === 0
+                      ? 'bg-slate-850 text-slate-400 border-slate-800'
+                      : 'bg-slate-900 text-slate-500 border-slate-800'
+                  }`}
+                >
+                  <span className="self-start text-[7px] opacity-75">{tileNumber}</span>
+                  <div className="flex items-center gap-0.5 my-auto">
+                    {hasPlayer && <span className="text-[11px] animate-bounce drop-shadow-md">🪙</span>}
+                    {hasBot && <span className="text-[11px] animate-bounce drop-shadow-md">🤖</span>}
+                    {!hasPlayer && !hasBot && hasLadder && <span className="text-[9px]">🪜</span>}
+                    {!hasPlayer && !hasBot && hasSnake && <span className="text-[9px]">🐍</span>}
+                  </div>
+                </div>
+              );
+            });
+
+            return cols;
+          })}
+        </div>
+
+        {/* Board Meta Key */}
+        <div className="flex items-center justify-between pt-2 px-1 text-[10px] text-slate-400 font-mono">
+          <div className="flex items-center gap-1.5">
+            <span>🪙 You: Tile {playerTile}/100</span>
+            <span>• 🤖 Bot: Tile {botTile}/100</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-emerald-400">🪜 Ladders</span>
+            <span className="text-rose-400">🐍 Snakes</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Dice & Turn Bar */}
+      <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className={`w-14 h-14 rounded-2xl bg-white dark:bg-slate-800 border-2 border-emerald-500 flex items-center justify-center font-black text-3xl shadow-lg transition-transform ${isRolling ? 'rotate-180' : ''}`}>
+            {lastDice !== null ? lastDice : '🎲'}
+          </div>
+          <div>
+            <span className="text-[11px] font-bold text-slate-400 block">
+              Current Turn:
+            </span>
+            <span className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+              {turn === 'player' ? (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Your Turn to Roll</span>
+                </>
+              ) : (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                  <span>Chef Bot's Turn...</span>
+                </>
+              )}
+            </span>
+          </div>
+        </div>
+
+        <button
+          onClick={rollDice}
+          disabled={turn !== 'player' || isRolling || !!winner}
+          className={`py-3 px-5 rounded-2xl font-black text-xs transition-all flex items-center gap-2 shadow-xl ${
+            turn === 'player' && !winner
+              ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white active:scale-95 cursor-pointer shadow-emerald-500/25 ring-2 ring-emerald-400/40'
+              : 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
+          }`}
+        >
+          <Dices className="w-4 h-4" />
+          <span>{isRolling ? 'Rolling...' : 'Roll Dice 🎲'}</span>
+        </button>
+      </div>
+
+      {/* Commentary Log */}
+      <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 text-[11px] font-mono text-slate-500 dark:text-slate-400 space-y-1">
+        {log.map((entry, idx) => (
+          <div key={idx} className={idx === 0 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : ''}>
+            {entry}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ============================================================================
+// 3. ORIGINAL CLASSIC SUDOKU (Authentic 9x9 Newspaper Puzzle)
+// ============================================================================
+const OriginalSudokuGame: React.FC = () => {
+  // Pre-configured 9x9 authentic puzzle with clear newspaper layout
+  const puzzle = [
+    [5, 3, 0, 0, 7, 0, 0, 0, 0],
+    [6, 0, 0, 1, 9, 5, 0, 0, 0],
+    [0, 9, 8, 0, 0, 0, 0, 6, 0],
+    [8, 0, 0, 0, 6, 0, 0, 0, 3],
+    [4, 0, 0, 8, 0, 3, 0, 0, 1],
+    [7, 0, 0, 0, 2, 0, 0, 0, 6],
+    [0, 6, 0, 0, 0, 0, 2, 8, 0],
+    [0, 0, 0, 4, 1, 9, 0, 0, 5],
+    [0, 0, 0, 0, 8, 0, 0, 7, 9],
+  ];
+
+  const [grid, setGrid] = useState<number[][]>(puzzle);
+  const [selectedCell, setSelectedCell] = useState<[number, number] | null>([0, 2]);
+  const [mistakes, setMistakes] = useState(0);
+
+  const handleInput = (num: number) => {
+    if (!selectedCell) return;
+    const [r, c] = selectedCell;
+    if (puzzle[r][c] !== 0) return; // Clue cannot be modified
+
+    const copy = grid.map((row) => [...row]);
+    copy[r][c] = num;
+    setGrid(copy);
+  };
+
+  const handleErase = () => {
+    if (!selectedCell) return;
+    const [r, c] = selectedCell;
+    if (puzzle[r][c] !== 0) return;
+    const copy = grid.map((row) => [...row]);
+    copy[r][c] = 0;
+    setGrid(copy);
+  };
+
+  const handleHint = () => {
+    if (!selectedCell) return;
+    const [r, c] = selectedCell;
+    if (puzzle[r][c] !== 0) return;
+    // Simple mock hint for demonstration
+    const copy = grid.map((row) => [...row]);
+    copy[r][c] = 4; // Example hint
+    setGrid(copy);
+  };
+
+  const resetSudoku = () => {
+    setGrid(puzzle);
+    setSelectedCell([0, 2]);
+    setMistakes(0);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h4 className="font-black text-sm md:text-base text-slate-900 dark:text-white flex items-center gap-2">
+            <span>🧩 Classic Newspaper Sudoku (9×9)</span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-700 dark:text-blue-400 font-bold border border-blue-500/30">
+              Brain Workout
+            </span>
+          </h4>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Fill the 9×9 grid so every row, column and 3×3 box contains digits 1 to 9.
+          </p>
+        </div>
+
+        <button
+          onClick={resetSudoku}
+          className="p-1.5 px-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
+        >
+          <RotateCcw className="w-3.5 h-3.5" />
+          <span>Reset</span>
+        </button>
+      </div>
+
+      {/* 9x9 Authentic Sudoku Board */}
+      <div className="max-w-[360px] sm:max-w-[400px] mx-auto p-3 rounded-3xl bg-slate-950 border-4 border-slate-700 shadow-2xl">
+        <div className="grid grid-cols-9 bg-slate-900 border-2 border-slate-400 rounded-xl overflow-hidden">
           {grid.map((row, rIdx) =>
             row.map((val, cIdx) => {
-              const isClue = initialGrid[rIdx][cIdx] !== 0;
+              const isClue = puzzle[rIdx][cIdx] !== 0;
               const isSelected = selectedCell?.[0] === rIdx && selectedCell?.[1] === cIdx;
+              const isSameRowOrCol = selectedCell?.[0] === rIdx || selectedCell?.[1] === cIdx;
+              const borderRight = (cIdx + 1) % 3 === 0 && cIdx !== 8 ? 'border-r-2 border-r-slate-400' : 'border-r border-r-slate-800';
+              const borderBottom = (rIdx + 1) % 3 === 0 && rIdx !== 8 ? 'border-b-2 border-b-slate-400' : 'border-b border-b-slate-800';
 
               return (
                 <button
                   key={`${rIdx}-${cIdx}`}
                   onClick={() => setSelectedCell([rIdx, cIdx])}
-                  className={`h-14 rounded-xl font-display font-black text-xl transition-all cursor-pointer flex items-center justify-center border ${
+                  className={`aspect-square flex items-center justify-center font-display text-sm sm:text-base font-black transition-all cursor-pointer ${borderRight} ${borderBottom} ${
                     isSelected
-                      ? 'ring-2 ring-amber-400 bg-amber-500/20 text-amber-300 border-amber-400'
+                      ? 'bg-amber-400 text-slate-950 ring-2 ring-amber-300 z-10'
+                      : isSameRowOrCol
+                      ? 'bg-slate-800/80 text-white'
                       : isClue
-                      ? 'bg-slate-800 text-white border-slate-700 font-bold'
+                      ? 'bg-slate-900 text-slate-200 font-bold'
                       : val > 0
-                      ? 'bg-blue-950/60 text-blue-300 border-blue-500/40'
-                      : 'bg-slate-950/70 text-slate-600 border-slate-800 hover:bg-slate-800'
+                      ? 'bg-blue-950/60 text-blue-300'
+                      : 'bg-slate-950 text-slate-600 hover:bg-slate-800'
                   }`}
                 >
                   {val > 0 ? val : ''}
@@ -350,366 +761,533 @@ const SudokuGame: React.FC = () => {
         </div>
       </div>
 
-      {/* Number Pad for Input */}
-      <div className="flex items-center justify-center gap-2 pt-1">
-        {[1, 2, 3, 4].map((num) => (
+      {/* 1-9 Number Pad */}
+      <div className="flex flex-wrap items-center justify-center gap-1.5 pt-1">
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
           <button
             key={num}
-            onClick={() => handleNumberInput(num)}
-            className="w-12 h-11 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-black border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-black text-base transition-all active:scale-95 cursor-pointer shadow-xs"
+            onClick={() => handleInput(num)}
+            className="w-9 h-10 sm:w-10 sm:h-11 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-amber-500 hover:text-black border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-black text-sm sm:text-base transition-all active:scale-95 cursor-pointer shadow-xs"
           >
             {num}
           </button>
         ))}
+
         <button
-          onClick={handleClear}
-          className="px-3.5 h-11 rounded-xl bg-slate-100 dark:bg-slate-800 text-rose-500 hover:bg-rose-500 hover:text-white border border-slate-200 dark:border-slate-700 font-black text-xs transition-all active:scale-95 cursor-pointer shadow-xs"
+          onClick={handleErase}
+          className="px-3 h-10 sm:h-11 rounded-xl bg-slate-100 dark:bg-slate-800 text-rose-500 hover:bg-rose-500 hover:text-white border border-slate-200 dark:border-slate-700 font-bold text-xs transition-all active:scale-95 cursor-pointer flex items-center gap-1"
+          title="Erase cell"
         >
-          Erase
+          <Eraser className="w-3.5 h-3.5" />
+          <span>Erase</span>
+        </button>
+
+        <button
+          onClick={handleHint}
+          className="px-3 h-10 sm:h-11 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 hover:bg-amber-500 hover:text-black border border-amber-500/30 font-bold text-xs transition-all active:scale-95 cursor-pointer flex items-center gap-1"
+          title="Get a hint"
+        >
+          <Lightbulb className="w-3.5 h-3.5" />
+          <span>Hint</span>
         </button>
       </div>
     </div>
   );
 };
 
-// -------------------------------------------------------------
-// 3. GAME: SNAKES & LADDERS (PARAMAPATHAM)
-// -------------------------------------------------------------
-const SnakeAndLadderGame: React.FC = () => {
-  const [playerTile, setPlayerTile] = useState(1);
-  const [lastRoll, setLastRoll] = useState<number | null>(null);
-  const [eventMessage, setEventMessage] = useState<string>('Roll the dice to climb to tile 36!');
-  const [isWinner, setIsWinner] = useState(false);
+// ============================================================================
+// 4. MULTILINGUAL TODAY'S LIVE DIGITAL NEWSPAPER & SHORTS
+// ============================================================================
+type NewsLanguage = 'en' | 'ta' | 'hi' | 'te';
 
-  // Board rules: 36 tiles (6x6)
-  const LADDERS: Record<number, number> = {
-    4: 14,
-    9: 22,
-    17: 28,
-    20: 31,
-  };
+interface NewsItem {
+  id: number;
+  newspaper: string;
+  headline: string;
+  summary: string;
+  category: string;
+  readTime: string;
+  image: string;
+  timeAgo: string;
+}
 
-  const SNAKES: Record<number, number> = {
-    16: 6,
-    24: 11,
-    30: 19,
-    35: 8,
-  };
+interface LanguagePaperConfig {
+  code: NewsLanguage;
+  label: string;
+  nativeName: string;
+  flag: string;
+  masthead: string;
+  tagline: string;
+  cityEdition: string;
+  papers: string[];
+  news: NewsItem[];
+}
 
-  const rollDice = () => {
-    if (isWinner) return;
-    const dice = Math.floor(Math.random() * 6) + 1;
-    setLastRoll(dice);
-
-    let nextTile = playerTile + dice;
-    if (nextTile > 36) {
-      setEventMessage(`Rolled ${dice}! Need exact roll to hit 36.`);
-      return;
-    }
-
-    if (LADDERS[nextTile]) {
-      const climbedTo = LADDERS[nextTile];
-      setEventMessage(`🪜 Woohoo! Climbed ladder from tile ${nextTile} to ${climbedTo}!`);
-      nextTile = climbedTo;
-    } else if (SNAKES[nextTile]) {
-      const bitDownTo = SNAKES[nextTile];
-      setEventMessage(`🐍 Oops! Snake bite at tile ${nextTile}, slid down to ${bitDownTo}!`);
-      nextTile = bitDownTo;
-    } else {
-      setEventMessage(`Moved forward ${dice} spaces to tile ${nextTile}.`);
-    }
-
-    setPlayerTile(nextTile);
-    if (nextTile === 36) {
-      setIsWinner(true);
-      setEventMessage('🎉 Congratulations! You conquered the Board!');
-    }
-  };
-
-  const resetGame = () => {
-    setPlayerTile(1);
-    setLastRoll(null);
-    setIsWinner(false);
-    setEventMessage('Game reset! Roll the dice to start.');
-  };
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h4 className="font-black text-sm md:text-base text-slate-900 dark:text-white flex items-center gap-1.5">
-            <span>🐍 Snakes & Ladders (Paramapatham)</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold">
-              Classic Board
-            </span>
-          </h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Ladders boost your meal waiting time, beware of hungry kitchen snakes!
-          </p>
-        </div>
-        <button
-          onClick={resetGame}
-          className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 text-xs font-bold flex items-center gap-1 cursor-pointer"
-        >
-          <RotateCcw className="w-3.5 h-3.5" />
-          <span>Reset</span>
-        </button>
-      </div>
-
-      {/* 6x6 Board grid */}
-      <div className="max-w-[320px] mx-auto p-3 rounded-3xl bg-slate-950 border border-slate-800 shadow-xl">
-        <div className="grid grid-cols-6 gap-1.5">
-          {Array.from({ length: 36 }).map((_, idx) => {
-            const tileNumber = 36 - idx; // serpentine or top-down
-            const isPlayerHere = playerTile === tileNumber;
-            const isLadderStart = LADDERS[tileNumber] !== undefined;
-            const isSnakeHead = SNAKES[tileNumber] !== undefined;
-
-            return (
-              <div
-                key={tileNumber}
-                className={`h-11 rounded-xl border text-[10px] font-black flex flex-col items-center justify-center relative transition-all ${
-                  isPlayerHere
-                    ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-lg scale-105 z-10'
-                    : isLadderStart
-                    ? 'bg-emerald-950/60 text-emerald-300 border-emerald-500/50'
-                    : isSnakeHead
-                    ? 'bg-rose-950/60 text-rose-300 border-rose-500/50'
-                    : tileNumber === 36
-                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                    : 'bg-slate-900 text-slate-400 border-slate-800'
-                }`}
-              >
-                <span>{tileNumber}</span>
-                {isPlayerHere && <span className="text-[12px] leading-none animate-bounce">🪙</span>}
-                {isLadderStart && !isPlayerHere && <span className="text-[10px] leading-none">🪜</span>}
-                {isSnakeHead && !isPlayerHere && <span className="text-[10px] leading-none">🐍</span>}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Dice Action Bar */}
-      <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800">
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-500 flex items-center justify-center font-black text-xl shadow-xs">
-            {lastRoll ? lastRoll : '🎲'}
-          </div>
-          <div className="text-xs">
-            <span className="font-extrabold text-slate-900 dark:text-white block">
-              Player at Tile {playerTile}/36
-            </span>
-            <span className="text-slate-500 dark:text-slate-400 text-[11px]">
-              {eventMessage}
-            </span>
-          </div>
-        </div>
-
-        <button
-          onClick={rollDice}
-          disabled={isWinner}
-          className={`py-2.5 px-4 rounded-xl font-black text-xs transition-all flex items-center gap-1.5 shadow-md ${
-            !isWinner
-              ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white active:scale-95 cursor-pointer shadow-emerald-500/20'
-              : 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
-          }`}
-        >
-          <Dices className="w-4 h-4" />
-          <span>Roll Dice</span>
-        </button>
-      </div>
-    </div>
-  );
-};
-
-// -------------------------------------------------------------
-// 4. DIGITAL NEWSPAPER & SHORTS SECTION
-// -------------------------------------------------------------
-const DIGITAL_NEWSPAPERS = [
-  { id: 'hindu', name: 'The Hindu Daily', lang: 'English', category: 'National & Metro', icon: '📰' },
-  { id: 'times', name: 'Times of India', lang: 'English', category: 'Business & Trends', icon: '🗞️' },
-  { id: 'culinary', name: 'Culinary Chronicles', lang: 'Special', category: 'Food & Recipes', icon: '🍲' },
-  { id: 'tech', name: 'Tech Wire Daily', lang: 'Global', category: 'AI & Gadgets', icon: '⚡' },
-];
-
-const NEWS_SHORTS = [
-  {
-    id: 1,
-    paper: 'The Hindu Daily',
-    title: 'Metro Expansion Reaches Record Milestone with New Green Corridor',
-    summary: 'The new high-speed transit corridor was inaugurated today, reducing peak travel time by 45%. Urban planners praise the eco-friendly electric bus integration across arterial junctions.',
-    category: 'City & Infra',
-    readTime: '45s read',
-    image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
-    time: '20 min ago'
+const MULTILINGUAL_NEWS_DATA: Record<NewsLanguage, LanguagePaperConfig> = {
+  en: {
+    code: 'en',
+    label: 'English',
+    nativeName: 'English Daily',
+    flag: '🇬🇧',
+    masthead: 'THE DAILY CHRONICLE',
+    tagline: "India's Premier Table-Side Morning & Evening Bulletin",
+    cityEdition: 'Metro South Edition • Today, October 16, 2026',
+    papers: ['The Hindu Daily', 'Times of India', 'Indian Express', 'Economic Herald'],
+    news: [
+      {
+        id: 1,
+        newspaper: 'The Hindu Daily',
+        headline: 'Historic Metro Phase 3 Green Corridor Opened for Public Commuters',
+        summary: 'The new 45km high-speed automated metro corridor officially commenced service today, connecting IT clusters with historic cultural hubs. Commuters celebrate zero-emission transit cutting rush-hour transit times by 40%.',
+        category: 'Urban Mobility',
+        readTime: '45s read',
+        image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
+        timeAgo: '15m ago'
+      },
+      {
+        id: 2,
+        newspaper: 'Times of India',
+        headline: 'South Indian Artisanal Culinary Heritage Earns UNESCO Cultural Recognition',
+        summary: 'Centuries-old slow-tandoor roasting and aromatic clay-pot dum biryani methods from Chettinad and Hyderabad were recognized today by the global culinary federation as living artisanal traditions.',
+        category: 'Gourmet & Dine',
+        readTime: '30s read',
+        image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80',
+        timeAgo: '32m ago'
+      },
+      {
+        id: 3,
+        newspaper: 'Economic Herald',
+        headline: 'Indian Tech Startups Lead Global Renewable Micro-Grid Deployments',
+        summary: 'Solar-powered battery hubs pioneered in Bengaluru and Chennai crossed 10 Gigawatts of rural farm electrification, attracting 3.2 billion dollars in international clean energy investment.',
+        category: 'Economy & Tech',
+        readTime: '40s read',
+        image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+        timeAgo: '1h ago'
+      },
+      {
+        id: 4,
+        newspaper: 'Indian Express',
+        headline: 'Cricket World Cup Squad Announces Fearless Youth Batting Lineup',
+        summary: 'National selectors finalized a dynamic, athletic 15-man squad for the upcoming championship, featuring explosive pinch-hitters and wrist-spinners primed for flat pitch conditions.',
+        category: 'Sports Arena',
+        readTime: '35s read',
+        image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&auto=format&fit=crop&q=80',
+        timeAgo: '2h ago'
+      }
+    ]
   },
-  {
-    id: 2,
-    paper: 'Culinary Chronicles',
-    title: 'Ancient Wood-Fired Clay Oven Technique Rediscovered by Modern Chefs',
-    summary: 'Master chefs are returning to century-old slow-tandoor traditions. Infusing smoked hickory and aromatic wild spices delivers extraordinary tenderness without artificial additives.',
-    category: 'Gourmet & Dine',
-    readTime: '30s read',
-    image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80',
-    time: '45 min ago'
+  ta: {
+    code: 'ta',
+    label: 'தமிழ்',
+    nativeName: 'தமிழ் நாளிதழ்',
+    flag: '🇮🇳',
+    masthead: 'தினத்தந்தி & தினமலர் சிறப்பு பதிப்பு',
+    tagline: 'தமிழகத்தின் நம்பகமான உடனடி நேரலை செய்திகள் • உணவக சிறப்பு மடல்',
+    cityEdition: 'சென்னை & மதுரை பதிப்பு • இன்று, 16 அக்டோபர் 2026',
+    papers: ['தினத்தந்தி (Daily Thanthi)', 'தினமலர் (Dinamalar)', 'தி இந்து தமிழ் திசை', 'தினகரன்'],
+    news: [
+      {
+        id: 1,
+        newspaper: 'தினத்தந்தி',
+        headline: 'சென்னையில் புதிய அதிவேக மெட்ரோ ரயில் சேவை இன்று கோலாகலமாக துவக்கம்!',
+        summary: 'சென்னையின் முக்கிய தகவல் தொழில்நுட்ப மையங்களை இணைக்கும் புதிய பசுமை மெட்ரோ பாதை இன்று மக்கள் பயன்பாட்டிற்கு திறக்கப்பட்டது. அலுவலக பயண நேரம் 45% குறையும் என பயணிகள் மகிழ்ச்சி தெரிவித்துள்ளனர்.',
+        category: 'சென்னை செய்திகள்',
+        readTime: '45 வினாடி வாசிப்பு',
+        image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
+        timeAgo: '10 நிமிடம் முன்'
+      },
+      {
+        id: 2,
+        newspaper: 'தி இந்து தமிழ் திசை',
+        headline: 'பாரம்பரிய செட்டிநாடு மண்பானை பிரியாணிக்கு சர்வதேச பாராட்டு விருது!',
+        summary: 'மரபு மாறாத மசாலா மணம் மற்றும் செட்டிநாடு சமையல் கலைஞர்களின் கைவண்ணத்தில் உருவான தம்பிரியாணி உலக உணவு கவுன்சிலால் சிறந்த பாரம்பரிய உணவாக அங்கீகரிக்கப்பட்டுள்ளது.',
+        category: 'உணவு & பண்பாடு',
+        readTime: '30 வினாடி வாசிப்பு',
+        image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80',
+        timeAgo: '25 நிமிடம் முன்'
+      },
+      {
+        id: 3,
+        newspaper: 'தினமலர்',
+        headline: 'மேட்டூர் அணையில் நீர்வரத்து அதிகரிப்பு: டெல்டா விவசாயிகளுக்கு மகிழ்ச்சி செய்தி!',
+        summary: 'காவிரி நீர்ப்பிடிப்பு பகுதிகளில் பெய்த கனமழையால் மேட்டூர் அணைக்கு நீர்வரத்து வினாடிக்கு 35,000 கனஅடியாக உயர்ந்துள்ளது. குறுவை பாசனத்திற்கு போதுமான தண்ணீர் திறக்கப்படும் என அரசு அறிவித்துள்ளது.',
+        category: 'விவசாயம் & வளம்',
+        readTime: '35 வினாடி வாசிப்பு',
+        image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+        timeAgo: '1 மணி முன்'
+      },
+      {
+        id: 4,
+        newspaper: 'தினகரன்',
+        headline: 'டி20 கிரிக்கெட் போட்டி: இந்திய அணி அசுர வேக பேட்டிங்குடன் களம் இறங்குகிறது!',
+        summary: 'இன்றைய முக்கிய ஆட்டத்தில் அதிரடி இளைஞர் படையுடன் இந்திய அணி களமிறங்குகிறது. சுழற்பந்து வீச்சாளர்களின் புதிய வியூகம் ஆட்டத்தை தீர்மானிக்கும் என பயிற்சியாளர் நம்பிக்கை தெரிவித்துள்ளார்.',
+        category: 'விளையாட்டு',
+        readTime: '40 வினாடி வாசிப்பு',
+        image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&auto=format&fit=crop&q=80',
+        timeAgo: '2 மணி முன்'
+      }
+    ]
   },
-  {
-    id: 3,
-    paper: 'Tech Wire Daily',
-    title: 'Next-Gen Quantum Microprocessors Cut Server Energy Use by 80%',
-    summary: 'Silicon breakthrough promises sustainable computing centers with liquid-nitrogen optical gates, paving the way for instant real-time AI processing on everyday handhelds.',
-    category: 'Innovation',
-    readTime: '50s read',
-    image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
-    time: '1h ago'
+  hi: {
+    code: 'hi',
+    label: 'हिन्दी',
+    nativeName: 'दैनिक समाचार',
+    flag: '🇮🇳',
+    masthead: 'दैनिक जागरण & नवभारत टाइम्स',
+    tagline: 'देश का सबसे बड़ा और विश्वसनीय राष्ट्रीय समाचार पत्र',
+    cityEdition: 'राष्ट्रीय राजधानी एवं मेट्रो संस्करण • आज, 16 अक्टूबर 2026',
+    papers: ['दैनिक जागरण (Dainik Jagran)', 'नवभारत टाइम्स (NBT)', 'अमर उजाला', 'हिन्दुस्तान'],
+    news: [
+      {
+        id: 1,
+        newspaper: 'दैनिक जागरण',
+        headline: 'देश के पहले स्वदेशी हाई-स्पीड इलेक्ट्रिक कॉरिडोर का भव्य शुभारंभ',
+        summary: 'मेट्रो और एक्सप्रेस-वे को जोड़ने वाले नए हाई-स्पीड कॉरिडोर से अब सफर में 50% समय की बचत होगी। प्रदूषण मुक्त आवागमन से शहरवासियों को बड़ी राहत मिली है।',
+        category: 'विकास एवं राष्ट्रीय',
+        readTime: '45 सेकेंड पढ़ें',
+        image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
+        timeAgo: '12 मिनट पहले'
+      },
+      {
+        id: 2,
+        newspaper: 'नवभारत टाइम्स',
+        headline: 'भारतीय अवधी एवं तंदूरी व्यंजनों को वैश्विक धरोहर सूची में मिला स्थान',
+        summary: 'धीमी आंच पर पकने वाली दम बिरयानी और पुरानी दिल्ली के शाही मसालों की खुशबू ने अंतरराष्ट्रीय फूड फेडरेशन को मंत्रमुग्ध कर दिया है।',
+        category: 'खान-पान एवं संस्कृति',
+        readTime: '30 सेकेंड पढ़ें',
+        image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80',
+        timeAgo: '30 मिनट पहले'
+      },
+      {
+        id: 3,
+        newspaper: 'अमर उजाला',
+        headline: 'त्योहारी सीजन में अर्थव्यवस्था ने पकड़ी तेज रफ्तार, रिकॉर्ड जीएसटी संग्रह',
+        summary: 'बाजारों में ग्राहकों की भारी भीड़ से व्यापार जगत में उत्साह है। ऑटोमोबाइल और खुदरा बिक्री में पिछले वर्ष की तुलना में 25% का जोरदार उछाल दर्ज हुआ।',
+        category: 'व्यापार एवं अर्थ',
+        readTime: '40 सेकेंड पढ़ें',
+        image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+        timeAgo: '1 घंटा पहले'
+      },
+      {
+        id: 4,
+        newspaper: 'हिन्दुस्तान',
+        headline: 'क्रिकेट महामुकाबले के लिए भारतीय टीम तैयार, मैदान पर मचेगा रोमांच!',
+        summary: 'कप्तान ने प्रेस कॉन्फ्रेंस में बताया कि टीम का ध्यान आक्रामक शुरुआत और सटीक यॉर्कर गेंदबाजी पर है। करोड़ों प्रशंसकों की निगाहें आज के मैच पर टिकी हैं।',
+        category: 'खेल जगत',
+        readTime: '35 सेकेंड पढ़ें',
+        image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&auto=format&fit=crop&q=80',
+        timeAgo: '2 घंटे पहले'
+      }
+    ]
   },
-  {
-    id: 4,
-    paper: 'Times of India',
-    title: 'India T20 Stars Prepare for Festive Showdown Against Rivals',
-    summary: 'Team management announced an aggressive opening lineup for the upcoming weekend clash, emphasizing athletic boundary-saving agility and tactical spin variations in middle overs.',
-    category: 'Sports Arena',
-    readTime: '40s read',
-    image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&auto=format&fit=crop&q=80',
-    time: '2h ago'
+  te: {
+    code: 'te',
+    label: 'తెలుగు',
+    nativeName: 'ఈనాడు దినపత్రిక',
+    flag: '🇮🇳',
+    masthead: 'ఈనాడు & సాక్షి దినపత్రిక',
+    tagline: 'తెలుగు ప్రజల గళం • తాజా ప్రత్యక్ష వార్తలు మరియు విశ్లేషణలు',
+    cityEdition: 'హైదరాబాద్ & ఆంధ్రప్రదేశ్ ఎడిషన్ • ఈరోజు, 16 అక్టోబర్ 2026',
+    papers: ['ఈనాడు (Eenadu)', 'సాక్షి (Sakshi)', 'ఆంధ్రజ్యోతి', 'నమస్తే తెలంగాణ'],
+    news: [
+      {
+        id: 1,
+        newspaper: 'ఈనాడు',
+        headline: 'నగరంలో కొత్త ఎక్స్‌ప్రెస్ మెట్రో కారిడార్ ప్రారంభం: ప్రయాణికుల హర్షం!',
+        summary: 'ఐటీ కారిడార్‌ను పాత నగరంతో అనుసంధానించే నూతన మెట్రో లైన్ నేటి నుంచి అందుబాటులోకి వచ్చింది. ట్రాఫిక్ సమస్యలకు శాశ్వత పరిష్కారం లభించిందని ప్రయాణికులు సంతోషం వ్యక్తం చేశారు.',
+        category: 'రాష్ట్ర వార్తలు',
+        readTime: '40 సెకన్ల చదువు',
+        image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
+        timeAgo: '15 నిమిషాల క్రితం'
+      },
+      {
+        id: 2,
+        newspaper: 'సాక్షి',
+        headline: 'హైదరాబాదీ దమ్ బిర్యానీకి అంతర్జాతీయ స్థాయి గుర్తింపు మరియు పురస్కారం!',
+        summary: 'నిజామీ దమ్ పద్ధతిలో తయారుచేసే సుగంధ ద్రవ్యాల దమ్ బిర్యానీ ప్రపంచ ఫుడ్ ఫెస్టివల్‌లో అత్యుత్తమ రుచి పురస్కారాన్ని దక్కించుకుంది.',
+        category: 'రుచులు & జీవనశైలి',
+        readTime: '30 సెకన్ల చదువు',
+        image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80',
+        timeAgo: '35 నిమిషాల క్రితం'
+      },
+      {
+        id: 3,
+        newspaper: 'ఆంధ్రజ్యోతి',
+        headline: 'గోదావరి జలాలతో నిండిన ప్రాజెక్టులు: రైతుల్లో చిగురించిన ఆశలు!',
+        summary: 'ఎగువ ప్రాంతాల్లో కురుస్తున్న వర్షాలతో సాగునీటి ప్రాజెక్టులకు భారీగా వరద నీరు చేరుతోంది. యాసంగి పంటలకు ఎలాంటి ఢోకా లేదని అధికారులు తెలిపారు.',
+        category: 'వ్యవసాయ రంగం',
+        readTime: '35 సెకన్ల చదువు',
+        image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+        timeAgo: '1 గంట క్రితం'
+      },
+      {
+        id: 4,
+        newspaper: 'నమస్తే తెలంగాణ',
+        headline: 'టీ20 సమరం: యువ ఆటగాళ్లతో దూకుడుగా బరిలోకి దిగుతున్న భారత జట్టు!',
+        summary: 'నేటి రాత్రి జరిగే హై-వోల్టేజ్ పోరులో గెలుపే లక్ష్యంగా భారత ఆటగాళ్లు ప్రాక్టీస్ పూర్తి చేసుకున్నారు. స్టేడియంలో పండుగ వాతావరణం నెలకొంది.',
+        category: 'క్రీడాలోకం',
+        readTime: '40 సెకన్ల చదువు',
+        image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&auto=format&fit=crop&q=80',
+        timeAgo: '2 గంటల క్రితం'
+      }
+    ]
   }
-];
+};
 
-const DigitalNewspaperSection: React.FC = () => {
-  const [selectedPaper, setSelectedPaper] = useState('hindu');
+const MultilingualTodayNewspaper: React.FC = () => {
+  const [selectedLang, setSelectedLang] = useState<NewsLanguage>('en');
+  const [selectedPaperIdx, setSelectedPaperIdx] = useState(0);
   const [activeShortIdx, setActiveShortIdx] = useState(0);
+  const [viewFormat, setViewFormat] = useState<'shorts' | 'epaper'>('shorts');
 
-  const filteredNews = NEWS_SHORTS;
-  const currentShort = filteredNews[activeShortIdx];
+  const currentConfig = MULTILINGUAL_NEWS_DATA[selectedLang];
+  const newsList = currentConfig.news;
+  const currentShort = newsList[activeShortIdx] || newsList[0];
 
-  const handleNext = () => {
-    setActiveShortIdx((prev) => (prev + 1) % filteredNews.length);
+  const handleNextShort = () => {
+    setActiveShortIdx((prev) => (prev + 1) % newsList.length);
   };
 
-  const handlePrev = () => {
-    setActiveShortIdx((prev) => (prev - 1 + filteredNews.length) % filteredNews.length);
+  const handlePrevShort = () => {
+    setActiveShortIdx((prev) => (prev - 1 + newsList.length) % newsList.length);
   };
 
   return (
     <div className="space-y-4">
-      {/* Newspaper Selection Pills */}
-      <div>
-        <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block mb-2">
-          Select Digital Newspaper / Edition:
-        </span>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {DIGITAL_NEWSPAPERS.map((paper) => {
-            const isSelected = selectedPaper === paper.id;
+      
+      {/* 1. LANGUAGE SELECTOR BAR */}
+      <div className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2">
+          <Globe className="w-4 h-4 text-amber-500" />
+          <span className="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+            Choose Newspaper Language:
+          </span>
+        </div>
+
+        <div className="grid grid-cols-4 gap-1.5 w-full sm:w-auto">
+          {(['en', 'ta', 'hi', 'te'] as NewsLanguage[]).map((langKey) => {
+            const config = MULTILINGUAL_NEWS_DATA[langKey];
+            const isSelected = selectedLang === langKey;
             return (
               <button
-                key={paper.id}
-                onClick={() => setSelectedPaper(paper.id)}
-                className={`p-2.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                key={langKey}
+                onClick={() => {
+                  setSelectedLang(langKey);
+                  setActiveShortIdx(0);
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer border ${
                   isSelected
-                    ? 'bg-amber-500/15 border-amber-500/60 shadow-sm ring-1 ring-amber-500/30'
-                    : 'bg-white dark:bg-slate-850 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md scale-102 font-display'
+                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-base">{paper.icon}</span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                    {paper.lang}
-                  </span>
-                </div>
-                <div className="mt-1">
-                  <span className="font-extrabold text-xs text-slate-900 dark:text-white block line-clamp-1">
-                    {paper.name}
-                  </span>
-                  <span className="text-[10px] text-slate-400">
-                    {paper.category}
-                  </span>
-                </div>
+                <span>{config.flag}</span>
+                <span>{config.label}</span>
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* Shorts Card Format */}
-      <div className="p-4 rounded-3xl bg-slate-900 border border-slate-800 text-white shadow-xl relative overflow-hidden">
-        <div className="flex items-center justify-between text-xs text-slate-400 pb-2 mb-2 border-b border-slate-800">
+      {/* 2. AUTHENTIC NEWSPAPER FRONT-PAGE MASTHEAD */}
+      <div className="p-4 rounded-3xl bg-amber-50/80 dark:bg-slate-900/90 border-2 border-amber-200 dark:border-slate-700 text-slate-900 dark:text-white shadow-sm space-y-2 font-serif">
+        <div className="flex flex-col sm:flex-row items-center justify-between pb-2 border-b-2 border-slate-800 dark:border-slate-700 gap-2 text-center sm:text-left">
+          <div className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-400 font-sans font-bold">
+            <Calendar className="w-3.5 h-3.5 text-amber-600" />
+            <span>Today, October 16, 2026</span>
+            <span>• Vol. LXIV No. 288</span>
+          </div>
+
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-full bg-brand-500/20 text-brand-400 text-[10px] font-black uppercase">
-              {currentShort.category}
+            <span className="px-2.5 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-sans font-black flex items-center gap-1 animate-pulse">
+              <span className="w-1.5 h-1.5 rounded-full bg-white" />
+              LIVE BREAKING NEWS
             </span>
-            <span>• {currentShort.paper}</span>
-          </div>
-          <span className="text-[11px] font-mono text-amber-400 font-bold">
-            {activeShortIdx + 1} of {filteredNews.length} Shorts
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-center">
-          <div className="md:col-span-5 relative h-40 md:h-48 rounded-2xl overflow-hidden shadow-md">
-            <img 
-              src={currentShort.image} 
-              alt={currentShort.title}
-              className="w-full h-full object-cover" 
-            />
-            <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded-lg bg-black/75 backdrop-blur-xs text-[10px] font-bold text-white">
-              {currentShort.readTime}
-            </span>
-          </div>
-
-          <div className="md:col-span-7 flex flex-col justify-between space-y-2">
-            <h4 className="font-black text-sm md:text-base leading-snug font-display text-white">
-              {currentShort.title}
-            </h4>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              {currentShort.summary}
-            </p>
-            <div className="flex items-center justify-between pt-1 text-[11px] text-slate-400">
-              <span>Published {currentShort.time}</span>
-              <span className="text-amber-400 font-bold cursor-pointer hover:underline">
-                Read full article →
-              </span>
+            <div className="flex items-center gap-1 text-[11px] text-slate-600 dark:text-slate-400 font-sans font-semibold">
+              <CloudSun className="w-3.5 h-3.5 text-amber-500" />
+              <span>28°C Clear</span>
             </div>
           </div>
         </div>
 
-        {/* Carousel Navigation Buttons */}
-        <div className="flex items-center justify-between pt-3 mt-3 border-t border-slate-800/80">
+        {/* Masthead Banner */}
+        <div className="text-center py-2">
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950 dark:text-amber-400 font-serif uppercase">
+            {currentConfig.masthead}
+          </h2>
+          <p className="text-xs text-slate-600 dark:text-slate-300 font-sans font-medium mt-0.5">
+            {currentConfig.tagline} • <span className="font-bold text-amber-700 dark:text-amber-400">{currentConfig.cityEdition}</span>
+          </p>
+        </div>
+
+        {/* Publication Selector Tabs in this Language */}
+        <div className="flex items-center justify-center gap-1.5 pt-1 overflow-x-auto no-scrollbar font-sans">
+          {currentConfig.papers.map((paperName, pIdx) => (
+            <button
+              key={paperName}
+              onClick={() => setSelectedPaperIdx(pIdx)}
+              className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap border ${
+                selectedPaperIdx === pIdx
+                  ? 'bg-slate-900 text-white dark:bg-amber-500 dark:text-slate-950 border-transparent shadow-xs'
+                  : 'bg-white/80 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              {paperName}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 3. FORMAT TOGGLE (Digital Shorts vs Classic e-Paper) */}
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+          <Radio className="w-3.5 h-3.5 text-red-500 animate-pulse" />
+          <span>Today's Live Stories ({newsList.length} Articles)</span>
+        </span>
+
+        <div className="flex items-center gap-1 bg-slate-200 dark:bg-slate-800 p-1 rounded-xl">
           <button
-            onClick={handlePrev}
-            className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 flex items-center gap-1 transition-colors cursor-pointer"
+            onClick={() => setViewFormat('shorts')}
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+              viewFormat === 'shorts' ? 'bg-white dark:bg-slate-900 text-amber-500 shadow-xs' : 'text-slate-500'
+            }`}
           >
-            <ChevronLeft className="w-3.5 h-3.5" />
-            <span>Previous Short</span>
+            <BookOpen className="w-3 h-3" />
+            <span>Shorts Cards</span>
           </button>
-
-          <div className="flex items-center gap-1">
-            {filteredNews.map((_, i) => (
-              <span 
-                key={i} 
-                className={`h-1.5 rounded-full transition-all ${
-                  i === activeShortIdx ? 'w-5 bg-amber-400' : 'w-1.5 bg-slate-700'
-                }`}
-              />
-            ))}
-          </div>
-
           <button
-            onClick={handleNext}
-            className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black flex items-center gap-1 transition-colors cursor-pointer shadow-xs"
+            onClick={() => setViewFormat('epaper')}
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+              viewFormat === 'epaper' ? 'bg-white dark:bg-slate-900 text-amber-500 shadow-xs' : 'text-slate-500'
+            }`}
           >
-            <span>Next Short</span>
-            <ChevronRight className="w-3.5 h-3.5" />
+            <Layers className="w-3 h-3" />
+            <span>Full e-Paper</span>
           </button>
         </div>
       </div>
+
+      {/* 4. CONTENT DISPLAY */}
+      {viewFormat === 'shorts' ? (
+        /* SHORTS CARD FORMAT (Inshorts Style) */
+        <div className="p-4 rounded-3xl bg-slate-900 border border-slate-800 text-white shadow-xl relative overflow-hidden animate-in fade-in">
+          <div className="flex items-center justify-between text-xs text-slate-400 pb-2 mb-3 border-b border-slate-800">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-black uppercase tracking-wider">
+                {currentShort.category}
+              </span>
+              <span className="font-bold">• {currentShort.newspaper}</span>
+            </div>
+            <span className="text-[11px] font-mono text-amber-400 font-bold">
+              {activeShortIdx + 1} of {newsList.length} Shorts
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+            <div className="md:col-span-5 relative h-44 sm:h-48 rounded-2xl overflow-hidden shadow-lg border border-slate-700">
+              <img 
+                src={currentShort.image} 
+                alt={currentShort.headline}
+                className="w-full h-full object-cover" 
+              />
+              <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded-lg bg-black/80 backdrop-blur-xs text-[10px] font-bold text-white">
+                {currentShort.readTime}
+              </span>
+            </div>
+
+            <div className="md:col-span-7 flex flex-col justify-between space-y-2.5">
+              <h4 className="font-black text-base sm:text-lg leading-snug font-display text-white">
+                {currentShort.headline}
+              </h4>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+                {currentShort.summary}
+              </p>
+              <div className="flex items-center justify-between pt-1 text-[11px] text-slate-400">
+                <span>⏱️ {currentShort.timeAgo}</span>
+                <span className="text-amber-400 font-bold cursor-pointer hover:underline">
+                  Full Story Coverage →
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div className="flex items-center justify-between pt-3.5 mt-3 border-t border-slate-800">
+            <button
+              onClick={handlePrevShort}
+              className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Previous Story</span>
+            </button>
+
+            <div className="flex items-center gap-1.5">
+              {newsList.map((_, i) => (
+                <span 
+                  key={i} 
+                  className={`h-1.5 rounded-full transition-all ${
+                    i === activeShortIdx ? 'w-6 bg-amber-400' : 'w-2 bg-slate-700'
+                  }`}
+                />
+              ))}
+            </div>
+
+            <button
+              onClick={handleNextShort}
+              className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black flex items-center gap-1.5 transition-colors cursor-pointer shadow-md"
+            >
+              <span>Next Story</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* FULL E-PAPER MULTI-COLUMN LAYOUT */
+        <div className="p-4 sm:p-6 rounded-3xl bg-amber-50 dark:bg-slate-900 border-2 border-amber-200 dark:border-slate-800 text-slate-900 dark:text-white space-y-5 animate-in fade-in font-serif">
+          
+          {/* Main Top Headline */}
+          <div className="border-b-2 border-slate-300 dark:border-slate-700 pb-4">
+            <span className="px-2 py-0.5 rounded-sm bg-rose-600 text-white font-sans text-[10px] font-black uppercase tracking-wider">
+              Lead Story
+            </span>
+            <h3 className="text-xl sm:text-2xl font-black leading-snug mt-1.5 text-slate-950 dark:text-white">
+              {newsList[0]?.headline}
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-sans leading-relaxed mt-2">
+              {newsList[0]?.summary}
+            </p>
+          </div>
+
+          {/* 3-Column Newspaper Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-300 dark:divide-slate-800 font-sans">
+            {newsList.slice(1).map((item) => (
+              <div key={item.id} className="pt-3 sm:pt-0 sm:px-3 space-y-1.5 first:pl-0">
+                <span className="text-[10px] font-black uppercase text-amber-700 dark:text-amber-400 tracking-wider">
+                  {item.category}
+                </span>
+                <h5 className="font-bold text-xs sm:text-sm font-display line-clamp-2 leading-snug">
+                  {item.headline}
+                </h5>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 line-clamp-3 leading-relaxed">
+                  {item.summary}
+                </p>
+                <span className="text-[10px] text-slate-400 block pt-1">
+                  {item.timeAgo} • {item.newspaper}
+                </span>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      )}
+
     </div>
   );
 };
 
-// -------------------------------------------------------------
+// ============================================================================
 // 5. MUSIC & AMBIENT LOUNGE SECTION
-// -------------------------------------------------------------
+// ============================================================================
 const AMBIENT_TRACKS = [
   { id: 1, title: 'Royal Ember Evening Sitar & Tabla', genre: 'Acoustic Indian Classical', duration: '3:45', icon: '🪕' },
   { id: 2, title: 'Monsoon Chai & Rainy Cafe Lo-Fi', genre: 'Chillhop Lo-Fi Beats', duration: '4:10', icon: '☕' },
@@ -771,7 +1349,7 @@ const MusicLoungeSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Fake audio progress bar */}
+        {/* Audio progress bar */}
         <div className="space-y-1">
           <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
             <div className={`h-full bg-gradient-to-r from-purple-400 to-amber-400 transition-all ${isPlaying ? 'w-2/5 animate-pulse' : 'w-1/12'}`} />
@@ -830,9 +1408,9 @@ const MusicLoungeSection: React.FC = () => {
   );
 };
 
-// -------------------------------------------------------------
-// MAIN MODAL: CUSTOMER ENTERTAINMENT & WAITING HUB
-// -------------------------------------------------------------
+// ============================================================================
+// MAIN MODAL: TABLE-SIDE ENTERTAINMENT & ENGAGEMENT LOUNGE
+// ============================================================================
 export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProps> = ({
   isOpen,
   onClose,
@@ -841,7 +1419,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
   onFinishMeal,
 }) => {
   const [activeTab, setActiveTab] = useState<'games' | 'news' | 'music'>('games');
-  const [activeGame, setActiveGame] = useState<'ludo' | 'sudoku' | 'snakes'>('ludo');
+  const [activeGame, setActiveGame] = useState<'ludo' | 'snakes' | 'sudoku'>('ludo');
 
   // Real-time delivery countdown calculation
   const [secondsLeft, setSecondsLeft] = useState<number>(() => {
@@ -872,16 +1450,16 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
   const waiter = getAssignedWaiter(order?.tableNumber || 12);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-5 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
       <div 
-        className="w-full max-w-2xl max-h-[92vh] bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+        className="w-full max-w-3xl max-h-[94vh] bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         
         {/* Top Header Bar */}
-        <div className="p-4 bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 text-white border-b border-slate-800 flex items-center justify-between shrink-0">
+        <div className="p-3.5 sm:p-4 bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 text-white border-b border-slate-800 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 flex items-center justify-center font-black shadow-md">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 flex items-center justify-center font-black shadow-md shrink-0">
               <Gamepad2 className="w-5 h-5" />
             </div>
             <div>
@@ -894,7 +1472,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
                 </span>
               </div>
               <p className="text-[11px] text-slate-400">
-                Engage while your food is prepared fresh by the kitchen line
+                Play original board games & read today's multilingual newspapers while waiting
               </p>
             </div>
           </div>
@@ -925,7 +1503,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
           </div>
         </div>
 
-        {/* TIME UP REMINDER ALERT (Triggered once countdown reaches 0 or chef marks READY) */}
+        {/* TIME UP REMINDER ALERT */}
         {isTimeUp && (
           <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white p-3 px-4 flex items-center justify-between gap-3 text-xs shadow-md animate-in slide-in-from-top-2 shrink-0">
             <div className="flex items-center gap-2.5">
@@ -954,36 +1532,36 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
           </div>
         )}
 
-        {/* Main Tab Switcher: Games, Newspaper, Music */}
-        <div className="p-2.5 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 shrink-0">
+        {/* Main Tab Switcher */}
+        <div className="p-2 sm:p-2.5 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 shrink-0">
           <div className="flex items-center gap-1.5 w-full sm:w-auto">
             <button
               onClick={() => setActiveTab('games')}
-              className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === 'games'
                   ? 'bg-amber-500 text-slate-950 font-black shadow-md'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'
               }`}
             >
               <Gamepad2 className="w-4 h-4" />
-              <span>Interactive Games</span>
+              <span>Original Games</span>
             </button>
 
             <button
               onClick={() => setActiveTab('news')}
-              className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === 'news'
                   ? 'bg-amber-500 text-slate-950 font-black shadow-md'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'
               }`}
             >
               <Newspaper className="w-4 h-4" />
-              <span>Digital News Shorts</span>
+              <span>Today's Live News</span>
             </button>
 
             <button
               onClick={() => setActiveTab('music')}
-              className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === 'music'
                   ? 'bg-amber-500 text-slate-950 font-black shadow-md'
                   : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'
@@ -999,33 +1577,33 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
             <div className="hidden sm:flex items-center gap-1 bg-slate-200 dark:bg-slate-800 p-1 rounded-xl">
               <button
                 onClick={() => setActiveGame('ludo')}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                  activeGame === 'ludo' ? 'bg-white dark:bg-slate-900 text-amber-500 shadow-xs' : 'text-slate-500'
+                className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                  activeGame === 'ludo' ? 'bg-white dark:bg-slate-900 text-amber-500 shadow-xs font-black' : 'text-slate-500'
                 }`}
               >
-                Ludo
-              </button>
-              <button
-                onClick={() => setActiveGame('sudoku')}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                  activeGame === 'sudoku' ? 'bg-white dark:bg-slate-900 text-amber-500 shadow-xs' : 'text-slate-500'
-                }`}
-              >
-                Sudoku
+                Ludo Board
               </button>
               <button
                 onClick={() => setActiveGame('snakes')}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                  activeGame === 'snakes' ? 'bg-white dark:bg-slate-900 text-amber-500 shadow-xs' : 'text-slate-500'
+                className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                  activeGame === 'snakes' ? 'bg-white dark:bg-slate-900 text-emerald-500 shadow-xs font-black' : 'text-slate-500'
                 }`}
               >
                 Snakes & Ladders
+              </button>
+              <button
+                onClick={() => setActiveGame('sudoku')}
+                className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                  activeGame === 'sudoku' ? 'bg-white dark:bg-slate-900 text-blue-500 shadow-xs font-black' : 'text-slate-500'
+                }`}
+              >
+                9×9 Sudoku
               </button>
             </div>
           )}
         </div>
 
-        {/* Mobile sub-game selector pills */}
+        {/* Mobile Sub-selector pills for games */}
         {activeTab === 'games' && (
           <div className="flex sm:hidden items-center justify-center gap-1 p-2 bg-slate-100 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800">
             <button
@@ -1037,14 +1615,6 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
               Ludo
             </button>
             <button
-              onClick={() => setActiveGame('sudoku')}
-              className={`flex-1 py-1 rounded-lg text-xs font-bold text-center ${
-                activeGame === 'sudoku' ? 'bg-amber-500 text-slate-950 font-black' : 'text-slate-500'
-              }`}
-            >
-              Sudoku
-            </button>
-            <button
               onClick={() => setActiveGame('snakes')}
               className={`flex-1 py-1 rounded-lg text-xs font-bold text-center ${
                 activeGame === 'snakes' ? 'bg-amber-500 text-slate-950 font-black' : 'text-slate-500'
@@ -1052,29 +1622,38 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
             >
               Snakes & Ladders
             </button>
+            <button
+              onClick={() => setActiveGame('sudoku')}
+              className={`flex-1 py-1 rounded-lg text-xs font-bold text-center ${
+                activeGame === 'sudoku' ? 'bg-amber-500 text-slate-950 font-black' : 'text-slate-500'
+              }`}
+            >
+              Sudoku
+            </button>
           </div>
         )}
 
         {/* Tab Body Content */}
-        <div className="p-4 md:p-6 overflow-y-auto flex-1 space-y-4">
+        <div className="p-3.5 sm:p-6 overflow-y-auto flex-1 space-y-4">
           {activeTab === 'games' && (
             <div>
-              {activeGame === 'ludo' && <LudoGame />}
-              {activeGame === 'sudoku' && <SudokuGame />}
-              {activeGame === 'snakes' && <SnakeAndLadderGame />}
+              {activeGame === 'ludo' && <OriginalLudoGame />}
+              {activeGame === 'snakes' && <OriginalSnakesAndLadders />}
+              {activeGame === 'sudoku' && <OriginalSudokuGame />}
             </div>
           )}
 
-          {activeTab === 'news' && <DigitalNewspaperSection />}
+          {activeTab === 'news' && <MultilingualTodayNewspaper />}
 
           {activeTab === 'music' && <MusicLoungeSection />}
         </div>
 
-        {/* Footer Bar with "Continue Game" & Quick Access */}
+        {/* Footer */}
         <div className="p-3 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs shrink-0">
           <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Games & News active while waiting</span>
+            <span className="hidden sm:inline">Real-time games & multilingual live news active</span>
+            <span className="sm:hidden">Active while waiting</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -1082,7 +1661,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
               onClick={onClose}
               className="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold transition-all cursor-pointer"
             >
-              Minimize & Keep Playing Later
+              Minimize & Keep Playing
             </button>
           </div>
         </div>

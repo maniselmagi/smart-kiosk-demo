@@ -7,8 +7,6 @@ import {
   ArrowLeft,
   Sun,
   Moon,
-  Activity,
-  Gamepad2,
   Users
 } from 'lucide-react';
 import CallWaiterModal from './CallWaiterModal';
@@ -182,32 +180,6 @@ export const Header: React.FC<HeaderProps> = ({
                     ₹{cartGrandTotal}
                   </span>
                 )}
-              </button>
-            )}
-
-            {/* Track Button: "Once order placed track button show" */}
-            {currentTrackedOrder && currentTrackedOrder.status !== 'COMPLETED' && onOpenTrackOrder && (
-              <button
-                onClick={onOpenTrackOrder}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-teal-600 text-white font-black text-xs shadow-md shadow-cyan-500/30 animate-pulse hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                title="Track Active Order Status"
-              >
-                <Activity className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Track</span>
-                <span>#{currentTrackedOrder.orderNumber}</span>
-              </button>
-            )}
-
-            {/* Play Game & Entertainment Hub Button (Highlighted during delivery waiting) */}
-            {currentTrackedOrder && currentTrackedOrder.status !== 'COMPLETED' && onOpenEntertainment && (
-              <button
-                onClick={onOpenEntertainment}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs shadow-md shadow-amber-500/25 active:scale-95 transition-all cursor-pointer animate-pulse ring-2 ring-amber-400/50"
-                title="Play Ludo, Sudoku, Snakes & Ladders, or Read Digital Shorts while waiting"
-              >
-                <Gamepad2 className="w-4 h-4 text-slate-950" />
-                <span className="hidden md:inline">Play Games</span>
-                <span className="md:hidden">Games</span>
               </button>
             )}
 

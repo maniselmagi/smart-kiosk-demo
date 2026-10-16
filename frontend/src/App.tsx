@@ -105,6 +105,7 @@ const MainAppContent: React.FC = () => {
                   onSelectItem={(item) => setSelectedItemForDetail(item)}
                   onOpenCart={() => setIsCartOpen(true)}
                   onOpenOrderTracker={() => setIsTrackerOpen(true)}
+                  onOpenEntertainment={() => setIsEntertainmentOpen(true)}
                 />
               </div>
             )}

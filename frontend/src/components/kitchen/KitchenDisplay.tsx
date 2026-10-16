@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useKiosk } from '../../context/KioskContext';
-import type { OrderStatus } from '../../types';
+import type { OrderStatus, Order } from '../../types';
+import { storageService } from '../../services/storageService';
 import { 
   ChefHat, 
   Clock, 
@@ -29,6 +30,32 @@ export const KitchenDisplay: React.FC = () => {
     setView,
     isStandaloneRole 
   } = useKiosk();
+
+  // Dedicated Kitchen Display live storage heartbeat - guarantees instant new ticket appearance
+  const [liveOrders, setLiveOrders] = useState<Order[]>(() => {
+    const stored = storageService.getOrders();
+    return stored.length > 0 ? stored : activeOrders;
+  });
+
+  useEffect(() => {
+    const syncPulse = () => {
+      const stored = storageService.getOrders();
+      setLiveOrders(stored);
+    };
+
+    syncPulse();
+    const interval = setInterval(syncPulse, 1000);
+    const unsubscribe = storageService.subscribe(() => {
+      syncPulse();
+    });
+
+    return () => {
+      clearInterval(interval);
+      unsubscribe();
+    };
+  }, []);
+
+  const displayOrders = liveOrders.length > 0 ? liveOrders : activeOrders;
 
   // Active view tab: orders or inventory/alerts
   const [activeTab, setActiveTab] = useState<'kds' | 'inventory' | 'alerts'>('kds');
@@ -82,7 +109,7 @@ export const KitchenDisplay: React.FC = () => {
   ];
 
   const pendingAlerts = staffAlerts.filter((a) => a.status === 'PENDING');
-  const activeOrdersCount = activeOrders.filter((o) => o.status !== 'COMPLETED').length;
+  const activeOrdersCount = displayOrders.filter((o) => o.status !== 'COMPLETED').length;
 
   // Elapsed time helper
   const getElapsedMinutes = (dateStr: string) => {
@@ -128,34 +155,19 @@ export const KitchenDisplay: React.FC = () => {
                     Station 1 • Main Kitchen Line
                   </p>
                   
-                  {/* Waiter Station Assignment Badges: T(1-5) V and T(6-10) B */}
-                  <div className="flex items-center gap-1.5">
-                    <span 
-                      className="px-2.5 py-0.5 rounded-lg bg-blue-950/80 text-blue-300 border border-blue-500/40 text-[11px] font-mono font-black flex items-center gap-1 shadow-xs"
-                      title="Tables 1 to 5 assigned to Waiter Vikram (V)"
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                      T(1-5) V
-                      <span className="text-[10px] text-blue-400 font-sans font-semibold hidden md:inline">Vikram</span>
-                    </span>
-
-                    <span 
-                      className="px-2.5 py-0.5 rounded-lg bg-amber-950/80 text-amber-300 border border-amber-500/40 text-[11px] font-mono font-black flex items-center gap-1 shadow-xs"
-                      title="Tables 6 to 10 assigned to Waiter Bala (B)"
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                      T(6-10) B
-                      <span className="text-[10px] text-amber-400 font-sans font-semibold hidden md:inline">Bala</span>
-                    </span>
-
-                    <span 
-                      className="px-2.5 py-0.5 rounded-lg bg-amber-950/80 text-amber-300 border border-amber-500/40 text-[11px] font-mono font-black flex items-center gap-1 shadow-xs"
-                      title="Tables 11 to 15 assigned to Waiter Bala (B)"
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                      T(11-15) B
-                      <span className="text-[10px] text-amber-400 font-sans font-semibold hidden md:inline">Bala</span>
-                    </span>
+                  {/* Waiter Station Assignment Badges: 5 tables per waiter */}
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {WAITER_ZONES.map((zone) => (
+                      <span 
+                        key={zone.rangeLabel}
+                        className={`px-2.5 py-0.5 rounded-lg text-[11px] font-mono font-black flex items-center gap-1 shadow-xs border ${zone.waiter.color}`}
+                        title={`Tables ${zone.minTable} to ${zone.maxTable} assigned to Waiter ${zone.waiter.fullName}`}
+                      >
+                        <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+                        {zone.rangeLabel} {zone.waiter.initial}
+                        <span className="text-[10px] font-sans font-semibold hidden md:inline">{zone.waiter.name}</span>
+                      </span>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -245,11 +257,11 @@ export const KitchenDisplay: React.FC = () => {
                     : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
                 }`}
               >
-                All Stages ({activeOrders.length})
+                All Stages ({displayOrders.length})
               </button>
 
               {columns.map((col) => {
-                const count = activeOrders.filter((o) => o.status === col.status).length;
+                const count = displayOrders.filter((o) => o.status === col.status).length;
                 const isSelected = statusFilter === col.status;
                 return (
                   <button
@@ -279,7 +291,7 @@ export const KitchenDisplay: React.FC = () => {
               {columns
                 .filter((col) => statusFilter === 'ALL' || statusFilter === col.status)
                 .map((col) => {
-                  const ordersInCol = activeOrders.filter((o) => o.status === col.status);
+                  const ordersInCol = displayOrders.filter((o) => o.status === col.status);
 
                   return (
                     <div 

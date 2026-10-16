@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useKiosk } from '../../context/KioskContext';
 import { 
-  Bell, 
   ShoppingBag, 
   Clock, 
   ArrowLeft,
   Sun,
-  Moon,
-  Users
+  Moon
 } from 'lucide-react';
-import CallWaiterModal from './CallWaiterModal';
 import { HotelBrand } from './HotelBrand';
 import { getAssignedWaiter } from '../../utils/waiterAssignment';
 
@@ -24,25 +21,18 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ 
   onBackToWelcome, 
   onOpenCart, 
-  onOpenTrackOrder,
-  onOpenEntertainment,
   showBack = false 
 }) => {
   const { 
     tableNumber, 
-    guestCount,
-    customerName,
-    theme,
-    toggleTheme,
+    theme, 
+    toggleTheme, 
     isAccessibilityMode, 
     cartTotalQuantity, 
-    cartGrandTotal,
-    t,
-    currentTrackedOrder,
-    staffAlerts
+    cartGrandTotal, 
+    t 
   } = useKiosk();
 
-  const [isWaiterModalOpen, setIsWaiterModalOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState<string>('');
 
   // Live dynamic clock updating every second
@@ -60,10 +50,6 @@ export const Header: React.FC<HeaderProps> = ({
 
   // Assigned server/waiter based on table zone
   const assignedWaiter = getAssignedWaiter(tableNumber);
-
-  const pendingAlertsForThisTable = staffAlerts.filter(
-    (a) => a.tableNumber === tableNumber && a.status === 'PENDING'
-  ).length;
 
   return (
     <>
@@ -102,20 +88,9 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="text-sm md:text-base text-amber-600 dark:text-amber-400 font-black">{tableNumber}</span>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ml-0.5" />
             </div>
-
-            {/* GUEST COUNT BADGE */}
-            {guestCount > 0 && (
-              <div 
-                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-bold shadow-xs select-none"
-                title={customerName ? `Allocated for ${customerName} (${guestCount} guests)` : `Party of ${guestCount} guests`}
-              >
-                <Users className="w-3.5 h-3.5 text-amber-500" />
-                <span>{guestCount} {guestCount === 1 ? 'Guest' : 'Guests'}</span>
-              </div>
-            )}
           </div>
 
-          {/* RIGHT: Clock, Waiter Name, Call Waiter, Cart, Track Button */}
+          {/* RIGHT: Clock, Waiter Name, Cart, Mode Toggle (Placed Last) */}
           <div className="flex items-center gap-1.5 md:gap-2.5">
             
             {/* Live Clock */}
@@ -130,37 +105,6 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="hidden lg:inline text-[10px] uppercase font-bold text-amber-700 dark:text-amber-400">Waiter:</span>
               <span className="font-black text-amber-950 dark:text-amber-100">{assignedWaiter.fullName}</span>
             </div>
-
-            {/* Dark/Light Mode Quick Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-xl border transition-all flex items-center justify-center text-xs bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-amber-400 border-slate-200/70 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 shadow-xs cursor-pointer"
-              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-              aria-label="Toggle Theme"
-            >
-              {theme === 'dark' ? (
-                <Sun className="w-4 h-4 text-amber-400" />
-              ) : (
-                <Moon className="w-4 h-4 text-slate-600" />
-              )}
-            </button>
-
-            {/* Call Waiter Button */}
-            <button
-              onClick={() => setIsWaiterModalOpen(true)}
-              className={`relative px-2.5 md:px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 border cursor-pointer ${
-                pendingAlertsForThisTable > 0
-                  ? 'bg-amber-500 text-white border-amber-600 animate-pulse'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200/70 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
-              }`}
-              title="Call Waiter to your table"
-            >
-              <Bell className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-              <span className="hidden md:inline">{t.callWaiter}</span>
-              {pendingAlertsForThisTable > 0 && (
-                <span className="w-2 h-2 rounded-full bg-white animate-ping" />
-              )}
-            </button>
 
             {/* Cart Trigger Button */}
             {onOpenCart && (
@@ -183,15 +127,23 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             )}
 
+            {/* Dark/Light Mode Quick Toggle (Placed Last as requested) */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-xl border transition-all flex items-center justify-center text-xs bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-amber-400 border-slate-200/70 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 shadow-xs cursor-pointer"
+              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              aria-label="Toggle Theme"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-4 h-4 text-amber-400" />
+              ) : (
+                <Moon className="w-4 h-4 text-slate-600" />
+              )}
+            </button>
+
           </div>
         </div>
       </header>
-
-      {/* Waiter modal */}
-      <CallWaiterModal 
-        isOpen={isWaiterModalOpen} 
-        onClose={() => setIsWaiterModalOpen(false)} 
-      />
     </>
   );
 };

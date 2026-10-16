@@ -19,10 +19,12 @@ import {
   Activity,
   Gamepad2,
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  Bell
 } from 'lucide-react';
 import { PromoAdBanner } from './PromoAdBanner';
 import { getAssignedWaiter } from '../../utils/waiterAssignment';
+import CallWaiterModal from '../common/CallWaiterModal';
 
 interface MenuScreenProps {
   onSelectItem: (item: MenuItem) => void;
@@ -47,10 +49,16 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
     t, 
     mealTime,
     activeOrders,
-    currentTrackedOrder
+    currentTrackedOrder,
+    staffAlerts
   } = useKiosk();
 
+  const [isCallWaiterOpen, setIsCallWaiterOpen] = useState(false);
   const assignedWaiter = getAssignedWaiter(tableNumber);
+
+  const pendingAlertsForThisTable = staffAlerts.filter(
+    (a) => a.tableNumber === tableNumber && a.status === 'PENDING'
+  ).length;
 
   const activeTableOrder = useMemo(() => {
     if (currentTrackedOrder && currentTrackedOrder.status !== 'COMPLETED') {
@@ -211,40 +219,65 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             </button>
           </div>
 
-          {/* Card 2: Play Games & Live News Lounge */}
-          <div 
-            onClick={onOpenEntertainment}
-            role="button"
-            tabIndex={0}
-            className="p-3.5 sm:p-4 rounded-3xl border transition-all duration-200 cursor-pointer flex items-center justify-between gap-3 group select-none shadow-xs hover:shadow-md bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-600/15 dark:from-amber-950/50 dark:via-orange-950/40 dark:to-amber-950/50 border-amber-500/40 hover:border-amber-500/70 shadow-amber-500/10"
-            title="Open Interactive Games & Multi-Language E-Paper Lounge"
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 text-slate-950 flex items-center justify-center shrink-0 shadow-md shadow-amber-500/25 group-hover:rotate-6 transition-transform">
-                <Gamepad2 className="w-5 h-5 sm:w-6 sm:h-6 text-slate-950" />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                  <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white font-display truncate">
-                    Play Games & News
-                  </h4>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1 shrink-0">
-                    <Sparkles className="w-3 h-3 text-amber-500" />
-                    Lounge
-                  </span>
+          {/* Card 2 Area: Play Games & Live News Lounge + Dedicated Call Waiter */}
+          <div className="flex items-stretch gap-2.5 sm:gap-3">
+            {/* Play Games & Live News Card */}
+            <div 
+              onClick={onOpenEntertainment}
+              role="button"
+              tabIndex={0}
+              className="flex-1 p-3.5 sm:p-4 rounded-3xl border transition-all duration-200 cursor-pointer flex items-center justify-between gap-2.5 sm:gap-3 group select-none shadow-xs hover:shadow-md bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-600/15 dark:from-amber-950/50 dark:via-orange-950/40 dark:to-amber-950/50 border-amber-500/40 hover:border-amber-500/70 shadow-amber-500/10 min-w-0"
+              title="Open Interactive Games & Multi-Language E-Paper Lounge"
+            >
+              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-amber-500 via-orange-500 to-amber-600 text-slate-950 flex items-center justify-center shrink-0 shadow-md shadow-amber-500/25 group-hover:rotate-6 transition-transform">
+                  <Gamepad2 className="w-5 h-5 sm:w-6 sm:h-6 text-slate-950" />
                 </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                  Ludo, Sudoku, Snakes & Ladders & live e-Papers
-                </p>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                    <h4 className="font-black text-sm sm:text-base text-slate-900 dark:text-white font-display truncate">
+                      Play Games & News
+                    </h4>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1 shrink-0">
+                      <Sparkles className="w-3 h-3 text-amber-500" />
+                      Lounge
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                    Ludo, Sudoku, Snakes & Ladders & live e-Papers
+                  </p>
+                </div>
               </div>
+
+              <button
+                type="button"
+                className="shrink-0 px-3 py-2 rounded-xl text-xs font-black flex items-center gap-1 transition-transform group-hover:translate-x-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-xs cursor-pointer"
+              >
+                <span>Play</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
             </div>
 
+            {/* Dedicated Call Waiter Button nearby Play Game card */}
             <button
               type="button"
-              className="shrink-0 px-3 py-2 rounded-xl text-xs font-black flex items-center gap-1 transition-transform group-hover:translate-x-0.5 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 shadow-xs cursor-pointer"
+              onClick={() => setIsCallWaiterOpen(true)}
+              className={`shrink-0 px-3.5 sm:px-4 py-3 sm:py-3.5 rounded-3xl border transition-all duration-200 cursor-pointer flex flex-col items-center justify-center gap-1 group select-none shadow-xs hover:shadow-md active:scale-95 ${
+                pendingAlertsForThisTable > 0
+                  ? 'bg-gradient-to-br from-amber-500 to-orange-600 text-white border-amber-500 animate-pulse'
+                  : 'bg-white dark:bg-slate-900 border-amber-400/40 dark:border-amber-600/40 hover:border-amber-500 text-slate-800 dark:text-slate-100 hover:bg-amber-500/5'
+              }`}
+              title={`Call dedicated waiter (${assignedWaiter.fullName}) to Table ${tableNumber}`}
             >
-              <span>Play</span>
-              <ChevronRight className="w-3.5 h-3.5" />
+              <div className="relative">
+                <Bell className={`w-5 h-5 ${pendingAlertsForThisTable > 0 ? 'text-white' : 'text-amber-500 group-hover:rotate-12 transition-transform'}`} />
+                {pendingAlertsForThisTable > 0 && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-white animate-ping" />
+                )}
+              </div>
+              <span className="text-[11px] sm:text-xs font-black whitespace-nowrap leading-tight">
+                Call Waiter
+              </span>
             </button>
           </div>
         </div>
@@ -638,6 +671,12 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
         )}
 
       </div>
+
+      {/* Call Waiter Modal */}
+      <CallWaiterModal 
+        isOpen={isCallWaiterOpen} 
+        onClose={() => setIsCallWaiterOpen(false)} 
+      />
 
     </div>
   );

@@ -18,6 +18,7 @@ import {
   Tag
 } from 'lucide-react';
 import { PromoAdBanner } from './PromoAdBanner';
+import { getAssignedWaiter } from '../../utils/waiterAssignment';
 
 interface MenuScreenProps {
   onSelectItem: (item: MenuItem) => void;
@@ -33,11 +34,15 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
   const { 
     menuItems, 
     cart, 
-    tableNumber: _tableNumber, 
+    tableNumber,
+    guestCount,
+    customerName,
     language, 
     t, 
     mealTime
   } = useKiosk();
+
+  const assignedWaiter = getAssignedWaiter(tableNumber);
 
   const [selectedCategory, setSelectedCategory] = useState<Category>('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -126,7 +131,36 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
     <div className="pb-28">
       {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 pt-5">
-        
+        {/* Allocated Table Welcome Card */}
+        <div className="mb-4 p-4 rounded-3xl bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-600/15 border-2 border-amber-500/30 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fade-in">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500 text-slate-950 flex flex-col items-center justify-center font-black shadow-md shadow-amber-500/20 shrink-0">
+              <span className="text-[9px] uppercase tracking-wider font-extrabold text-slate-950/70">TABLE</span>
+              <span className="text-xl font-display leading-none">{tableNumber}</span>
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h4 className="font-black text-base sm:text-lg text-slate-900 dark:text-white font-display">
+                  {customerName ? `Welcome, ${customerName}!` : 'Table Allocated & Ready'}
+                </h4>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Table {tableNumber} Confirmed ({guestCount} {guestCount === 1 ? 'Guest' : 'Guests'})
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                Your table is ready with dedicated service by <strong className="text-amber-700 dark:text-amber-400">{assignedWaiter.fullName}</strong>. Select your favorite gourmet dishes below to begin.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+            <span className="text-xs font-mono font-bold text-slate-500 dark:text-slate-400 bg-white/60 dark:bg-slate-800/60 px-2.5 py-1 rounded-xl border border-slate-200 dark:border-slate-700">
+              Section {assignedWaiter.zone}
+            </span>
+          </div>
+        </div>
+
         {/* Automated Time-Based Menu Banner */}
         <div className="mb-5 p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">

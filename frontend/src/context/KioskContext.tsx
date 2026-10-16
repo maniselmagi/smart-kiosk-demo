@@ -36,6 +36,12 @@ interface KioskContextType {
   isStandaloneRole: boolean;
   tableNumber: number;
   setTableNumber: (table: number) => void;
+  guestCount: number;
+  setGuestCount: (count: number) => void;
+  customerName: string;
+  setCustomerName: (name: string) => void;
+  customerPhone: string;
+  setCustomerPhone: (phone: string) => void;
   language: Language;
   setLanguage: (lang: Language) => void;
   isLanguageModalOpen: boolean;
@@ -132,7 +138,56 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [view, setViewState] = useState<ViewType>(initialRoute.view);
   const [isStandaloneRole, setIsStandaloneRole] = useState<boolean>(initialRoute.isStandalone);
-  const [tableNumber, setTableNumber] = useState<number>(initialRoute.table);
+  const [tableNumber, setTableNumberState] = useState<number>(initialRoute.table);
+  const [guestCount, setGuestCountState] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('royal_ember_guest_count');
+      if (saved) return parseInt(saved) || 4;
+    }
+    return 4;
+  });
+  const [customerName, setCustomerNameState] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('royal_ember_customer_name') || '';
+    }
+    return '';
+  });
+  const [customerPhone, setCustomerPhoneState] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('royal_ember_customer_phone') || '';
+    }
+    return '';
+  });
+
+  const setTableNumber = useCallback((table: number) => {
+    setTableNumberState(table);
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('table', table.toString());
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, []);
+
+  const setGuestCount = useCallback((count: number) => {
+    setGuestCountState(count);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('royal_ember_guest_count', count.toString());
+    }
+  }, []);
+
+  const setCustomerName = useCallback((name: string) => {
+    setCustomerNameState(name);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('royal_ember_customer_name', name);
+    }
+  }, []);
+
+  const setCustomerPhone = useCallback((phone: string) => {
+    setCustomerPhoneState(phone);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('royal_ember_customer_phone', phone);
+    }
+  }, []);
   const [language, setLanguageState] = useState<Language>(() => {
     const saved = storageService.getLanguage();
     if (saved === 'ta' || saved === 'hi' || saved === 'te' || saved === 'es' || saved === 'en') {
@@ -572,6 +627,12 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         isStandaloneRole,
         tableNumber,
         setTableNumber,
+        guestCount,
+        setGuestCount,
+        customerName,
+        setCustomerName,
+        customerPhone,
+        setCustomerPhone,
         language,
         setLanguage,
         isLanguageModalOpen,

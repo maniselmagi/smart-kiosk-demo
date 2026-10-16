@@ -17,6 +17,7 @@ import { KitchenDisplay } from './components/kitchen/KitchenDisplay';
 import { ManagementDashboard } from './components/dashboard/ManagementDashboard';
 import { LanguageSelectionModal } from './components/kiosk/LanguageSelectionModal';
 import { LanguageEntryScreen } from './components/kiosk/LanguageEntryScreen';
+import { CustomerTableAllocationScreen } from './components/kiosk/CustomerTableAllocationScreen';
 import { MenuItem, Order } from './types';
 
 const MainAppContent: React.FC = () => {
@@ -31,8 +32,8 @@ const MainAppContent: React.FC = () => {
     setIsLanguageModalOpen
   } = useKiosk();
 
-  // Kiosk inner sub-screen state: Page 1 (language) -> Page 2 (welcome) -> Page 3 (menu)
-  const [kioskSubScreen, setKioskSubScreen] = useState<'language' | 'welcome' | 'menu'>('language');
+  // Kiosk inner sub-screen state: Step 1 (language) -> Step 2 (allocation) -> Step 3 (menu)
+  const [kioskSubScreen, setKioskSubScreen] = useState<'language' | 'allocation' | 'menu'>('language');
 
   // Modals state
   const [selectedItemForDetail, setSelectedItemForDetail] = useState<MenuItem | null>(null);
@@ -79,14 +80,14 @@ const MainAppContent: React.FC = () => {
           <div className="flex-1 flex flex-col">
             {kioskSubScreen === 'language' && (
               <LanguageEntryScreen 
-                onContinue={() => setKioskSubScreen('welcome')} 
+                onContinue={() => setKioskSubScreen('allocation')} 
               />
             )}
 
-            {kioskSubScreen === 'welcome' && (
-              <WelcomeScreen 
-                onStart={() => setKioskSubScreen('menu')} 
-                onChangeLanguage={() => setKioskSubScreen('language')}
+            {kioskSubScreen === 'allocation' && (
+              <CustomerTableAllocationScreen
+                onBackToLanguage={() => setKioskSubScreen('language')}
+                onConfirmAllocation={() => setKioskSubScreen('menu')}
               />
             )}
 
@@ -94,7 +95,7 @@ const MainAppContent: React.FC = () => {
               <div className="flex-1 flex flex-col">
                 <Header
                   showBack={true}
-                  onBackToWelcome={() => setKioskSubScreen('welcome')}
+                  onBackToWelcome={() => setKioskSubScreen('allocation')}
                   onOpenCart={() => setIsCartOpen(true)}
                   onOpenTrackOrder={() => setIsTrackerOpen(true)}
                   onOpenEntertainment={() => setIsEntertainmentOpen(true)}

@@ -8,7 +8,8 @@ import {
   Sun,
   Moon,
   Activity,
-  Gamepad2
+  Gamepad2,
+  Users
 } from 'lucide-react';
 import CallWaiterModal from './CallWaiterModal';
 import { HotelBrand } from './HotelBrand';
@@ -31,6 +32,8 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { 
     tableNumber, 
+    guestCount,
+    customerName,
     theme,
     toggleTheme,
     isAccessibilityMode, 
@@ -101,6 +104,17 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="text-sm md:text-base text-amber-600 dark:text-amber-400 font-black">{tableNumber}</span>
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ml-0.5" />
             </div>
+
+            {/* GUEST COUNT BADGE */}
+            {guestCount > 0 && (
+              <div 
+                className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-bold shadow-xs select-none"
+                title={customerName ? `Allocated for ${customerName} (${guestCount} guests)` : `Party of ${guestCount} guests`}
+              >
+                <Users className="w-3.5 h-3.5 text-amber-500" />
+                <span>{guestCount} {guestCount === 1 ? 'Guest' : 'Guests'}</span>
+              </div>
+            )}
           </div>
 
           {/* RIGHT: Clock, Waiter Name, Call Waiter, Cart, Track Button */}

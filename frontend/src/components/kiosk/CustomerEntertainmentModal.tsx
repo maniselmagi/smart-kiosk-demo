@@ -2115,7 +2115,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
             <button
               onClick={onClose}
               className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
-              title="Minimize & Continue Game"
+              title="Close"
             >
               <X className="w-5 h-5" />
             </button>

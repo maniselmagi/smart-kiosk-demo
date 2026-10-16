@@ -113,19 +113,6 @@ const MainAppContent: React.FC = () => {
         )}
       </main>
 
-      {/* Floating "Continue Game" Action Pill (docked at bottom right as requested in user mockup) */}
-      {liveTrackedOrder && liveTrackedOrder.status !== 'COMPLETED' && !isEntertainmentOpen && view === 'kiosk' && kioskSubScreen === 'menu' && (
-        <div className="fixed bottom-6 right-6 z-40 animate-in bounce-in duration-300">
-          <button
-            onClick={() => setIsEntertainmentOpen(true)}
-            className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs shadow-2xl shadow-amber-500/40 border-2 border-white/40 flex items-center gap-2 cursor-pointer transition-all active:scale-95 group"
-          >
-            <span className="text-base group-hover:rotate-12 transition-transform">🎮</span>
-            <span className="font-extrabold tracking-wide">Continue Game</span>
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-          </button>
-        </div>
-      )}
 
       {/* Toast Notification Popup */}
       {toastMessage && (

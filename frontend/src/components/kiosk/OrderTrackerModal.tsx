@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useKiosk } from '../../context/KioskContext';
 import { Order, OrderStatus } from '../../types';
 import { 
@@ -9,8 +9,12 @@ import {
   Sparkles, 
   X, 
   Star, 
-  Receipt 
+  Receipt,
+  User,
+  Bell,
+  Timer
 } from 'lucide-react';
+import { getAssignedWaiter } from '../../utils/waiterAssignment';
 
 interface OrderTrackerModalProps {
   order: Order | null;
@@ -27,34 +31,73 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
   onOpenReceipt, 
   onOpenFeedback 
 }) => {
-  const { t, updateOrderStatus } = useKiosk();
+  const { t, updateOrderStatus, callWaiter } = useKiosk();
+
+  // Active delivery countdown timer running in real-time
+  const [secondsLeft, setSecondsLeft] = useState<number>(() => {
+    if (!order) return 0;
+    const target = new Date(order.createdAt).getTime() + (order.estimatedPrepTime * 60 * 1000);
+    return Math.max(0, Math.floor((target - Date.now()) / 1000));
+  });
+
+  useEffect(() => {
+    if (!order) return;
+    const calculateSeconds = () => {
+      if (order.status === 'COMPLETED') return 0;
+      const target = new Date(order.createdAt).getTime() + (order.estimatedPrepTime * 60 * 1000);
+      return Math.max(0, Math.floor((target - Date.now()) / 1000));
+    };
+
+    setSecondsLeft(calculateSeconds());
+    const interval = setInterval(() => {
+      setSecondsLeft(calculateSeconds());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [order?.createdAt, order?.estimatedPrepTime, order?.status]);
 
   if (!isOpen || !order) return null;
+
+  const waiter = getAssignedWaiter(order.tableNumber);
+
+  // Formatting countdown mm:ss
+  const minutes = Math.floor(secondsLeft / 60);
+  const seconds = secondsLeft % 60;
+  const formattedCountdown = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+  // Progress percentage (elapsed vs total prep time)
+  const totalPrepSeconds = Math.max(60, order.estimatedPrepTime * 60);
+  const elapsedSeconds = Math.max(0, totalPrepSeconds - secondsLeft);
+  const progressPercent = order.status === 'COMPLETED'
+    ? 100
+    : order.status === 'READY'
+    ? 90
+    : Math.min(85, Math.max(10, Math.round((elapsedSeconds / totalPrepSeconds) * 100)));
 
   const steps: { key: OrderStatus; label: string; icon: React.ReactNode; desc: string }[] = [
     {
       key: 'NEW',
       label: t.statusReceived,
       icon: <CheckCircle2 className="w-5 h-5" />,
-      desc: 'Ticket printed at Kitchen Display',
+      desc: `Confirmed by Supervisor & Waiter ${waiter.name} (${waiter.initial})`,
     },
     {
       key: 'PREPARING',
       label: t.statusPreparing,
       icon: <ChefHat className="w-5 h-5" />,
-      desc: 'Chef is cooking with customized spice',
+      desc: 'Chef cooking on line • Delivery timer actively ticking',
     },
     {
       key: 'READY',
       label: t.statusReady,
       icon: <UtensilsCrossed className="w-5 h-5" />,
-      desc: 'Plated hot and dispatching to table',
+      desc: `Plated hot • Waiter ${waiter.name} delivering to Table ${order.tableNumber}`,
     },
     {
       key: 'COMPLETED',
       label: t.statusServed,
       icon: <Sparkles className="w-5 h-5" />,
-      desc: 'Meal served & enjoyed at table',
+      desc: 'Dishes served at table • Enjoy your meal!',
     },
   ];
 
@@ -78,9 +121,9 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
       >
         
         {/* Tracker Header */}
-        <div className="p-6 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex items-center justify-between border-b border-slate-700/60">
+        <div className="p-6 bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 text-white flex items-center justify-between border-b border-slate-700/60">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-brand-500/20 text-brand-400 flex items-center justify-center font-black text-base border border-brand-500/30">
+            <div className="w-12 h-12 rounded-2xl bg-brand-500/20 text-brand-400 flex items-center justify-center font-black text-base border border-brand-500/30 shadow-inner">
               #{order.orderNumber}
             </div>
             <div>
@@ -94,43 +137,103 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                 </span>
               </div>
               <h3 className="text-xl font-black font-display text-white">
-                {t.orderProgress}
+                Live Kitchen Progress
               </h3>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700/60 transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700/60 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Live Synchronized Kitchen Stepper */}
-        <div className="p-6 overflow-y-auto space-y-6 flex-1">
+        <div className="p-6 overflow-y-auto space-y-5 flex-1">
           
-          {/* Estimated Wait Card */}
-          <div className="p-4 rounded-2xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/50 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-400 flex items-center justify-center">
-                <Clock className="w-5 h-5" />
+          {/* ASSIGNED WAITER INFO HEADER CHIP */}
+          <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs ${waiter.avatarBg}`}>
+                {waiter.initial}
               </div>
               <div>
-                <span className="text-xs font-bold text-amber-900 dark:text-amber-300 uppercase tracking-wider block">
-                  {t.estimatedWait}
+                <span className="text-[10px] uppercase font-black text-slate-400 block tracking-wider">
+                  Assigned Table Waiter
                 </span>
-                <p className="text-sm font-extrabold text-amber-950 dark:text-amber-100">
-                  ~{order.estimatedPrepTime} minutes
-                </p>
+                <span className="text-xs font-black text-slate-900 dark:text-white">
+                  {waiter.fullName} <span className="font-normal text-slate-400">({waiter.zone})</span>
+                </span>
               </div>
             </div>
 
-            <div className="text-right">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/60 text-xs font-bold">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                Live Sync
-              </span>
+            <button
+              type="button"
+              onClick={() => callWaiter('Need Assistance')}
+              className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-[11px] font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 flex items-center gap-1 transition-colors cursor-pointer"
+            >
+              <Bell className="w-3 h-3 text-amber-500" />
+              <span>Call Waiter {waiter.initial}</span>
+            </button>
+          </div>
+
+          {/* REAL-TIME DELIVER TIME COUNTDOWN CARD */}
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/15 via-brand-500/10 to-emerald-500/10 border border-amber-500/30 shadow-xs space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center">
+                  <Timer className="w-5 h-5 animate-spin-slow" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-black text-amber-800 dark:text-amber-400 uppercase tracking-wider block">
+                    Live Delivery Time Countdown
+                  </span>
+                  <div className="flex items-baseline gap-1.5">
+                    {order.status === 'COMPLETED' ? (
+                      <span className="text-xl font-black text-emerald-600 dark:text-emerald-400 font-display">
+                        Delivered & Served!
+                      </span>
+                    ) : order.status === 'READY' ? (
+                      <span className="text-xl font-black text-emerald-600 dark:text-emerald-400 font-display">
+                        Plated & Dispatched!
+                      </span>
+                    ) : (
+                      <>
+                        <span className="text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
+                          {formattedCountdown}
+                        </span>
+                        <span className="text-xs text-slate-500 font-bold">remaining</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-right">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-[11px] font-black">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  Live Sync
+                </span>
+                <span className="block text-[10px] text-slate-400 mt-1 font-medium">
+                  Est. {order.estimatedPrepTime}m total
+                </span>
+              </div>
+            </div>
+
+            {/* Dynamic Real-Time Progress Bar */}
+            <div className="space-y-1">
+              <div className="flex justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                <span>Cooking Progress</span>
+                <span>{progressPercent}%</span>
+              </div>
+              <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                <div 
+                  className="h-full rounded-full bg-gradient-to-r from-amber-500 via-brand-500 to-emerald-500 transition-all duration-1000 ease-out"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
             </div>
           </div>
 

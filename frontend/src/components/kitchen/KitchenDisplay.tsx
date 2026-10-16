@@ -12,8 +12,11 @@ import {
   Sparkles, 
   ArrowLeft,
   Filter,
-  CheckCheck
+  CheckCheck,
+  User,
+  ShieldCheck
 } from 'lucide-react';
+import { getAssignedWaiter, WAITER_ZONES } from '../../utils/waiterAssignment';
 
 export const KitchenDisplay: React.FC = () => {
   const { 
@@ -120,9 +123,41 @@ export const KitchenDisplay: React.FC = () => {
                     LIVE
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-400 hidden sm:block">
-                  Station 1 • Main Kitchen Line & Tandoor
-                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <p className="text-[11px] text-slate-400 hidden sm:block">
+                    Station 1 • Main Kitchen Line
+                  </p>
+                  
+                  {/* Waiter Station Assignment Badges: T(1-5) V and T(6-10) B */}
+                  <div className="flex items-center gap-1.5">
+                    <span 
+                      className="px-2.5 py-0.5 rounded-lg bg-blue-950/80 text-blue-300 border border-blue-500/40 text-[11px] font-mono font-black flex items-center gap-1 shadow-xs"
+                      title="Tables 1 to 5 assigned to Waiter Vikram (V)"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                      T(1-5) V
+                      <span className="text-[10px] text-blue-400 font-sans font-semibold hidden md:inline">Vikram</span>
+                    </span>
+
+                    <span 
+                      className="px-2.5 py-0.5 rounded-lg bg-amber-950/80 text-amber-300 border border-amber-500/40 text-[11px] font-mono font-black flex items-center gap-1 shadow-xs"
+                      title="Tables 6 to 10 assigned to Waiter Bala (B)"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                      T(6-10) B
+                      <span className="text-[10px] text-amber-400 font-sans font-semibold hidden md:inline">Bala</span>
+                    </span>
+
+                    <span 
+                      className="px-2.5 py-0.5 rounded-lg bg-amber-950/80 text-amber-300 border border-amber-500/40 text-[11px] font-mono font-black flex items-center gap-1 shadow-xs"
+                      title="Tables 11 to 15 assigned to Waiter Bala (B)"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                      T(11-15) B
+                      <span className="text-[10px] text-amber-400 font-sans font-semibold hidden md:inline">Bala</span>
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -271,6 +306,7 @@ export const KitchenDisplay: React.FC = () => {
                           ordersInCol.map((order) => {
                             const elapsed = getElapsedMinutes(order.createdAt);
                             const isLate = elapsed > order.estimatedPrepTime;
+                            const waiter = getAssignedWaiter(order.tableNumber);
 
                             return (
                               <div
@@ -288,6 +324,15 @@ export const KitchenDisplay: React.FC = () => {
                                     </span>
                                     <span className="px-2.5 py-0.5 rounded-lg bg-amber-500 text-slate-950 font-black text-xs">
                                       TABLE {order.tableNumber}
+                                    </span>
+                                    {/* Waiter badge as in Image 2: "B" or "V" */}
+                                    <span 
+                                      className={`px-2 py-0.5 rounded-lg text-xs font-black border flex items-center gap-1 ${waiter.color}`}
+                                      title={`Assigned Waiter: ${waiter.fullName} • Zone ${waiter.zone}`}
+                                    >
+                                      <User className="w-3 h-3" />
+                                      <span className="font-mono font-black">{waiter.initial}</span>
+                                      <span className="text-[10px] hidden sm:inline">({waiter.name})</span>
                                     </span>
                                   </div>
 
@@ -342,10 +387,10 @@ export const KitchenDisplay: React.FC = () => {
                                   {col.status === 'NEW' && (
                                     <button
                                       onClick={() => updateOrderStatus(order.id, 'PREPARING')}
-                                      className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-98 text-white font-black text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                                      className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 active:scale-98 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
                                     >
-                                      <ChefHat className="w-4 h-4" />
-                                      <span>Start Preparing</span>
+                                      <ShieldCheck className="w-4 h-4 text-slate-950" />
+                                      <span>Confirm Order (Waiter {waiter.initial} / Supervisor)</span>
                                     </button>
                                   )}
 

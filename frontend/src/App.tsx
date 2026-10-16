@@ -22,6 +22,7 @@ const MainAppContent: React.FC = () => {
     view, 
     setView, 
     toastMessage, 
+    activeOrders,
     currentTrackedOrder, 
     setCurrentTrackedOrder,
     isLanguageModalOpen,
@@ -39,6 +40,16 @@ const MainAppContent: React.FC = () => {
   const [isTrackerOpen, setIsTrackerOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [activeCompletedOrder, setActiveCompletedOrder] = useState<Order | null>(null);
+
+  // Fresh reactive order from activeOrders so supervisor/waiter status updates sync live
+  const liveTrackedOrder = React.useMemo(() => {
+    const targetId = activeCompletedOrder?.id || currentTrackedOrder?.id;
+    if (targetId) {
+      const match = activeOrders.find((o) => o.id === targetId);
+      if (match) return match;
+    }
+    return activeCompletedOrder || currentTrackedOrder;
+  }, [activeOrders, activeCompletedOrder, currentTrackedOrder]);
 
   const handleOrderSuccess = (newOrder: Order) => {
     setActiveCompletedOrder(newOrder);
@@ -124,7 +135,7 @@ const MainAppContent: React.FC = () => {
       />
 
       <DigitalReceiptModal
-        order={activeCompletedOrder || currentTrackedOrder}
+        order={liveTrackedOrder}
         isOpen={isReceiptOpen}
         onClose={() => setIsReceiptOpen(false)}
         onTrackOrder={() => setIsTrackerOpen(true)}
@@ -132,7 +143,7 @@ const MainAppContent: React.FC = () => {
       />
 
       <OrderTrackerModal
-        order={currentTrackedOrder || activeCompletedOrder}
+        order={liveTrackedOrder}
         isOpen={isTrackerOpen}
         onClose={() => setIsTrackerOpen(false)}
         onOpenReceipt={() => setIsReceiptOpen(true)}

@@ -2145,7 +2145,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
                 }}
                 className="px-3.5 py-1.5 rounded-xl bg-white text-emerald-900 font-black text-xs hover:bg-emerald-50 active:scale-95 transition-all shrink-0 cursor-pointer shadow-xs"
               >
-                Finish Meal & Tip →
+                Finish Meal & Feedback →
               </button>
             )}
           </div>

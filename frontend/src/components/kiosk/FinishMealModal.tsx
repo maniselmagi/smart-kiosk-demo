@@ -4,17 +4,11 @@ import { Order } from '../../types';
 import { getAssignedWaiter } from '../../utils/waiterAssignment';
 import { 
   Star, 
-  Heart, 
   X, 
   CheckCircle2, 
   Sparkles, 
-  Coins, 
-  Utensils, 
-  User, 
-  ThumbsUp, 
-  ShieldCheck,
-  Receipt,
-  ArrowRight
+  ArrowRight,
+  MessageSquare
 } from 'lucide-react';
 
 interface FinishMealModalProps {
@@ -46,17 +40,10 @@ export const FinishMealModal: React.FC<FinishMealModalProps> = ({
   ]);
   const [comment, setComment] = useState('');
 
-  // Waiter Tip State
-  const [selectedTip, setSelectedTip] = useState<number>(50); // default ₹50
-  const [customTip, setCustomTip] = useState<string>('');
-  const [isCustom, setIsCustom] = useState<boolean>(false);
-
   // Submission State
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 
   if (!isOpen) return null;
-
-  const tipOptions = [0, 30, 50, 100, 150];
 
   const experienceTags = [
     'Delicious Food',
@@ -73,17 +60,8 @@ export const FinishMealModal: React.FC<FinishMealModalProps> = ({
     );
   };
 
-  const getEffectiveTip = (): number => {
-    if (isCustom) {
-      const parsed = parseFloat(customTip);
-      return isNaN(parsed) || parsed < 0 ? 0 : parsed;
-    }
-    return selectedTip;
-  };
-
   const handleCompleteDining = (e: React.FormEvent) => {
     e.preventDefault();
-    const effectiveTip = getEffectiveTip();
 
     // 1. Submit feedback to storage
     submitFeedback(
@@ -98,18 +76,14 @@ export const FinishMealModal: React.FC<FinishMealModalProps> = ({
     }
 
     setIsSubmitted(true);
-    showToast(`Dining completed! ₹${effectiveTip} tip sent to Waiter ${waiter.name}.`);
+    showToast(`Dining completed! Thank you for your valuable feedback.`);
 
     setTimeout(() => {
       setIsSubmitted(false);
       onClose();
       onFinishDiningSuccess?.();
-    }, 2800);
+    }, 2400);
   };
-
-  const effectiveTip = getEffectiveTip();
-  const mealTotal = order?.total || 150;
-  const finalGrandTotal = mealTotal + effectiveTip;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
@@ -127,14 +101,14 @@ export const FinishMealModal: React.FC<FinishMealModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-black text-base sm:text-lg font-display">
-                  Finish Dining & Gratuity
+                  Finish Dining & Guest Feedback
                 </h3>
                 <span className="px-2 py-0.5 rounded-full bg-black/25 text-amber-200 text-[10px] font-black uppercase">
                   Table {targetTable}
                 </span>
               </div>
               <p className="text-xs text-white/90">
-                Rate your meal experience & tip your table attendant
+                Rate your meal experience & share feedback
               </p>
             </div>
           </div>
@@ -159,25 +133,8 @@ export const FinishMealModal: React.FC<FinishMealModalProps> = ({
                 Thank You for Dining with Us!
               </h4>
               <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-                Your feedback has been recorded, and your tip of{' '}
-                <strong className="text-emerald-600 dark:text-emerald-400">₹{effectiveTip}</strong>{' '}
-                has been credited directly to <strong>{waiter.fullName}</strong>.
+                Your feedback has been recorded successfully. Table {targetTable} service is now complete.
               </p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 max-w-sm mx-auto text-left space-y-1.5 text-xs">
-              <div className="flex justify-between text-slate-500 dark:text-slate-400">
-                <span>Meal Subtotal & Taxes:</span>
-                <span>₹{mealTotal}</span>
-              </div>
-              <div className="flex justify-between text-slate-500 dark:text-slate-400">
-                <span>Staff Gratuity Tip:</span>
-                <span className="text-emerald-600 dark:text-emerald-400 font-bold">+₹{effectiveTip}</span>
-              </div>
-              <div className="flex justify-between pt-2 border-t border-slate-200 dark:border-slate-700 font-black text-sm text-slate-900 dark:text-white">
-                <span>Total Settled:</span>
-                <span className="text-brand-600 dark:text-brand-400 font-display">₹{finalGrandTotal}</span>
-              </div>
             </div>
 
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 text-xs font-bold border border-amber-500/30">
@@ -279,101 +236,17 @@ export const FinishMealModal: React.FC<FinishMealModalProps> = ({
 
             {/* Optional Comment */}
             <div>
+              <div className="flex items-center gap-1.5 mb-1 text-[11px] font-bold text-slate-400">
+                <MessageSquare className="w-3.5 h-3.5" />
+                <span>Comments or suggestions (optional):</span>
+              </div>
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder="Optional feedback for the kitchen chefs or management..."
-                rows={2}
+                placeholder="Share any special feedback for the kitchen chefs or management..."
+                rows={3}
                 className="w-full p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
               />
-            </div>
-
-            {/* SECTION 2: WAITER TIP PORTION */}
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/10 via-brand-500/10 to-amber-500/10 border border-emerald-500/30 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
-                    <Coins className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <span className="font-extrabold text-xs text-slate-900 dark:text-white block">
-                      Staff Gratuity Tip for {waiter.name} ({waiter.initial})
-                    </span>
-                    <span className="text-[10px] text-slate-500 dark:text-slate-400">
-                      100% goes directly to your server
-                    </span>
-                  </div>
-                </div>
-
-                <span className="font-mono font-black text-emerald-600 dark:text-emerald-400 text-sm">
-                  ₹{effectiveTip}
-                </span>
-              </div>
-
-              {/* Tip Preset Chips */}
-              <div className="grid grid-cols-5 gap-1.5">
-                {tipOptions.map((amount) => {
-                  const isSelected = !isCustom && selectedTip === amount;
-                  return (
-                    <button
-                      key={amount}
-                      type="button"
-                      onClick={() => {
-                        setIsCustom(false);
-                        setSelectedTip(amount);
-                      }}
-                      className={`py-2 px-1 rounded-xl text-xs font-black transition-all cursor-pointer border text-center ${
-                        isSelected
-                          ? 'bg-emerald-600 text-white border-emerald-500 shadow-md scale-102'
-                          : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100'
-                      }`}
-                    >
-                      {amount === 0 ? 'No Tip' : `₹${amount}`}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Custom Tip Input */}
-              <div className="flex items-center gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={() => setIsCustom(true)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold border cursor-pointer ${
-                    isCustom 
-                      ? 'bg-emerald-600 text-white border-emerald-500' 
-                      : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
-                  }`}
-                >
-                  Custom
-                </button>
-                {isCustom && (
-                  <div className="flex-1 relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">₹</span>
-                    <input
-                      type="number"
-                      min="0"
-                      value={customTip}
-                      onChange={(e) => setCustomTip(e.target.value)}
-                      placeholder="Enter tip amount"
-                      className="w-full pl-7 pr-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Final Total Summary */}
-            <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
-              <div>
-                <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Final Total (Meal + Tip)</span>
-                <span className="font-mono text-slate-400 text-[10px]">Settled via Table Kiosk</span>
-              </div>
-              <div className="text-right">
-                <span className="font-black text-lg text-brand-600 dark:text-brand-400 font-display">
-                  ₹{finalGrandTotal}
-                </span>
-              </div>
             </div>
 
             {/* Complete Dining CTA Button */}

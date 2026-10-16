@@ -364,7 +364,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
             className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-brand-600 hover:from-emerald-500 hover:to-brand-500 text-white text-xs font-black shadow-md shadow-emerald-500/25 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <Sparkles className="w-4 h-4 text-amber-200" />
-            <span>Finish Meal & Tip Waiter {waiter.name} →</span>
+            <span>Finish Meal & Leave Feedback →</span>
           </button>
         </div>
 

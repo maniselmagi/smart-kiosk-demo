@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import CallWaiterModal from './CallWaiterModal';
 import { HotelBrand } from './HotelBrand';
+import { getAssignedWaiter } from '../../utils/waiterAssignment';
 
 interface HeaderProps {
   onBackToWelcome?: () => void;
@@ -53,8 +54,8 @@ export const Header: React.FC<HeaderProps> = ({
     return () => clearInterval(interval);
   }, []);
 
-  // Assigned server/waiter based on table
-  const assignedWaiter = tableNumber % 2 === 0 ? 'Suresh M.' : 'Rajesh K.';
+  // Assigned server/waiter based on table zone
+  const assignedWaiter = getAssignedWaiter(tableNumber);
 
   const pendingAlertsForThisTable = staffAlerts.filter(
     (a) => a.tableNumber === tableNumber && a.status === 'PENDING'
@@ -108,11 +109,11 @@ export const Header: React.FC<HeaderProps> = ({
               <span>{currentTime || '--:--'}</span>
             </div>
 
-            {/* Waiter Name Badge (Highlighted as in mockup) */}
-            <div className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-xl bg-cyan-100 dark:bg-cyan-950/80 text-cyan-900 dark:text-cyan-200 text-xs font-bold border border-cyan-300/80 dark:border-cyan-800/80 shadow-xs">
+            {/* Waiter Name Badge (Strictly matches KDS and receipts) */}
+            <div className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-xl bg-amber-100 dark:bg-amber-950/80 text-amber-950 dark:text-amber-200 text-xs font-bold border border-amber-300/80 dark:border-amber-700/80 shadow-xs">
               <span className="text-sm">🧑‍🍳</span>
-              <span className="hidden lg:inline text-[10px] uppercase font-bold text-cyan-700 dark:text-cyan-400">Waiter:</span>
-              <span className="font-black text-cyan-950 dark:text-cyan-100">{assignedWaiter}</span>
+              <span className="hidden lg:inline text-[10px] uppercase font-bold text-amber-700 dark:text-amber-400">Waiter:</span>
+              <span className="font-black text-amber-950 dark:text-amber-100">{assignedWaiter.fullName}</span>
             </div>
 
             {/* Dark/Light Mode Quick Toggle */}

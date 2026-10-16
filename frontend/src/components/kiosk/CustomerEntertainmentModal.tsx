@@ -796,7 +796,7 @@ const OriginalSudokuGame: React.FC = () => {
 };
 
 // ============================================================================
-// 4. MULTILINGUAL TODAY'S LIVE DIGITAL NEWSPAPER & SHORTS
+// 4. MULTILINGUAL TODAY'S LIVE NEWSPAPER SECTION
 // ============================================================================
 type NewsLanguage = 'en' | 'ta' | 'hi' | 'te';
 
@@ -811,16 +811,20 @@ interface NewsItem {
   timeAgo: string;
 }
 
+interface NewspaperEdition {
+  name: string;
+  masthead: string;
+  tagline: string;
+  cityEdition: string;
+  news: NewsItem[];
+}
+
 interface LanguagePaperConfig {
   code: NewsLanguage;
   label: string;
   nativeName: string;
   flag: string;
-  masthead: string;
-  tagline: string;
-  cityEdition: string;
-  papers: string[];
-  news: NewsItem[];
+  papers: NewspaperEdition[];
 }
 
 const MULTILINGUAL_NEWS_DATA: Record<NewsLanguage, LanguagePaperConfig> = {
@@ -829,50 +833,198 @@ const MULTILINGUAL_NEWS_DATA: Record<NewsLanguage, LanguagePaperConfig> = {
     label: 'English',
     nativeName: 'English Daily',
     flag: '🇬🇧',
-    masthead: 'THE DAILY CHRONICLE',
-    tagline: "India's Premier Table-Side Morning & Evening Bulletin",
-    cityEdition: 'Metro South Edition • Today, October 16, 2026',
-    papers: ['The Hindu Daily', 'Times of India', 'Indian Express', 'Economic Herald'],
-    news: [
+    papers: [
       {
-        id: 1,
-        newspaper: 'The Hindu Daily',
-        headline: 'Historic Metro Phase 3 Green Corridor Opened for Public Commuters',
-        summary: 'The new 45km high-speed automated metro corridor officially commenced service today, connecting IT clusters with historic cultural hubs. Commuters celebrate zero-emission transit cutting rush-hour transit times by 40%.',
-        category: 'Urban Mobility',
-        readTime: '45s read',
-        image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
-        timeAgo: '15m ago'
+        name: 'The Hindu Daily',
+        masthead: 'THE HINDU',
+        tagline: "India's National Newspaper Since 1878 • Independent & Trusted",
+        cityEdition: 'Metro South Edition • Today, October 16, 2026',
+        news: [
+          {
+            id: 101,
+            newspaper: 'The Hindu Daily',
+            headline: 'Historic Metro Phase 3 Green Corridor Opened for Public Commuters',
+            summary: 'The new 45km high-speed automated metro corridor officially commenced service today, connecting IT clusters with historic cultural hubs. Commuters celebrate zero-emission transit cutting rush-hour transit times by 40%.',
+            category: 'Urban Mobility',
+            readTime: '45s read',
+            image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '15m ago'
+          },
+          {
+            id: 102,
+            newspaper: 'The Hindu Daily',
+            headline: 'Supreme Court Landmark Ruling Safeguards Pristine Western Ghats Bio-Corridors',
+            summary: 'A constitutional bench ruled today that continuous forested elephant and river corridors in the Western Ghats enjoy absolute ecological protection against commercial quarrying and unauthorized resorts.',
+            category: 'Environment & Law',
+            readTime: '40s read',
+            image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '42m ago'
+          },
+          {
+            id: 103,
+            newspaper: 'The Hindu Daily',
+            headline: 'National Science Academies Partner on Next-Gen Clean Coastal Desalination',
+            summary: 'Indian and Scandinavian oceanographic researchers unveiled a low-energy solar osmosis desalination grid along the Coromandel coast, supplying 100 million liters of potable drinking water per day.',
+            category: 'Science & Water',
+            readTime: '35s read',
+            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '1h ago'
+          },
+          {
+            id: 104,
+            newspaper: 'The Hindu Daily',
+            headline: 'Digital Literacy Curriculum Rolled Out to 12,000 Rural State Secondary Schools',
+            summary: 'State education councils commenced training students in ethical AI, hands-on computer science, and regional digital publishing, bridging urban-rural technological parity across tier-2 and tier-3 towns.',
+            category: 'Education & Future',
+            readTime: '30s read',
+            image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '2h ago'
+          }
+        ]
       },
       {
-        id: 2,
-        newspaper: 'Times of India',
-        headline: 'South Indian Artisanal Culinary Heritage Earns UNESCO Cultural Recognition',
-        summary: 'Centuries-old slow-tandoor roasting and aromatic clay-pot dum biryani methods from Chettinad and Hyderabad were recognized today by the global culinary federation as living artisanal traditions.',
-        category: 'Gourmet & Dine',
-        readTime: '30s read',
-        image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80',
-        timeAgo: '32m ago'
+        name: 'Times of India',
+        masthead: 'THE TIMES OF INDIA',
+        tagline: "Let Truth Prevail • World's Largest Circulated English Daily",
+        cityEdition: 'National & Metro Edition • Today, October 16, 2026',
+        news: [
+          {
+            id: 201,
+            newspaper: 'Times of India',
+            headline: 'South Indian Artisanal Culinary Heritage Earns UNESCO Cultural Recognition',
+            summary: 'Centuries-old slow-tandoor roasting and aromatic clay-pot dum biryani methods from Chettinad and Hyderabad were recognized today by the global culinary federation as living artisanal traditions in a grand Paris gala.',
+            category: 'Gourmet & Culture',
+            readTime: '30s read',
+            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '20m ago'
+          },
+          {
+            id: 202,
+            newspaper: 'Times of India',
+            headline: 'Tech Corridors Record 300,000 New Campus Hiring Offers This Festive Season',
+            summary: 'Hiring indices released by Indian tech councils revealed a massive hiring surge across AI engineering, autonomous automotive systems, and clean energy tech, with average salary packages rising 18%.',
+            category: 'Campus & Careers',
+            readTime: '35s read',
+            image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '45m ago'
+          },
+          {
+            id: 203,
+            newspaper: 'Times of India',
+            headline: 'Indian Cinema Waves Sweep International Film Awards with 12 Grand Trophies',
+            summary: 'Acclaimed independent features and epic period dramas from Tamil, Telugu, and Hindi cinema dominated the global film circuit this week, winning top honors for sound design, screenplay, and cinematography.',
+            category: 'Cinema & Arts',
+            readTime: '40s read',
+            image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '1h ago'
+          },
+          {
+            id: 204,
+            newspaper: 'Times of India',
+            headline: 'Next-Gen Vande Bharat Sleeper Trains Enter Commercial Inter-City Operations',
+            summary: 'The futuristic aerodynamic sleeper train clocked smooth 160km/h speeds during maiden nocturnal journeys between major metropolitan capitals, boasting smart airline-style pods and noise-dampened cabins.',
+            category: 'Travel & Railways',
+            readTime: '30s read',
+            image: 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '2h ago'
+          }
+        ]
       },
       {
-        id: 3,
-        newspaper: 'Economic Herald',
-        headline: 'Indian Tech Startups Lead Global Renewable Micro-Grid Deployments',
-        summary: 'Solar-powered battery hubs pioneered in Bengaluru and Chennai crossed 10 Gigawatts of rural farm electrification, attracting 3.2 billion dollars in international clean energy investment.',
-        category: 'Economy & Tech',
-        readTime: '40s read',
-        image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
-        timeAgo: '1h ago'
+        name: 'Indian Express',
+        masthead: 'THE INDIAN EXPRESS',
+        tagline: 'Journalism of Courage • Uncompromising Ground Reporting & Truth',
+        cityEdition: 'National Express Edition • Today, October 16, 2026',
+        news: [
+          {
+            id: 301,
+            newspaper: 'Indian Express',
+            headline: 'Cricket World Cup Squad Announces Fearless Youth Batting Lineup',
+            summary: 'National selectors finalized a dynamic, athletic 15-man squad for the upcoming championship, featuring explosive pinch-hitters, 145km/h pacers, and wrist-spinners primed for subcontinent conditions.',
+            category: 'Sports Arena',
+            readTime: '35s read',
+            image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '18m ago'
+          },
+          {
+            id: 302,
+            newspaper: 'Indian Express',
+            headline: 'Special Investigation: Solar Microgrids Electrify 50,000 Agricultural Borewells',
+            summary: 'An on-the-ground survey across drought-prone rural belts revealed farmers enjoying uninterrupted daytime irrigation without diesel bills, transforming dryland crop yields and doubling household farm incomes.',
+            category: 'Ground Report',
+            readTime: '50s read',
+            image: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '50m ago'
+          },
+          {
+            id: 303,
+            newspaper: 'Indian Express',
+            headline: 'Space Commission Approves Second-Gen Orbital Habitation Module',
+            summary: 'National space scientists achieved green clearances for indigenous docking and life-support modules slated for the upcoming permanent space station orbit mission in early 2027.',
+            category: 'Aerospace & Defence',
+            readTime: '40s read',
+            image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '1h ago'
+          },
+          {
+            id: 304,
+            newspaper: 'Indian Express',
+            headline: 'University Research Group Synthesizes Low-Cost Carbon Nano-Filter for River Cleaning',
+            summary: 'Engineering scholars produced a bio-derived filtration mesh capable of removing 99.8% of industrial chemical effluents and heavy microplastics at less than ten paise per liter cost.',
+            category: 'Innovations',
+            readTime: '35s read',
+            image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '3h ago'
+          }
+        ]
       },
       {
-        id: 4,
-        newspaper: 'Indian Express',
-        headline: 'Cricket World Cup Squad Announces Fearless Youth Batting Lineup',
-        summary: 'National selectors finalized a dynamic, athletic 15-man squad for the upcoming championship, featuring explosive pinch-hitters and wrist-spinners primed for flat pitch conditions.',
-        category: 'Sports Arena',
-        readTime: '35s read',
-        image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&auto=format&fit=crop&q=80',
-        timeAgo: '2h ago'
+        name: 'Economic Herald',
+        masthead: 'THE ECONOMIC HERALD',
+        tagline: 'Financial Intelligence, Capital Markets & Enterprise Strategy',
+        cityEdition: 'Financial & Markets Edition • Today, October 16, 2026',
+        news: [
+          {
+            id: 401,
+            newspaper: 'Economic Herald',
+            headline: 'Indian Tech Startups Lead Global Renewable Micro-Grid Deployments with $3.2B Inflow',
+            summary: 'Solar-powered battery hubs pioneered in Bengaluru and Chennai crossed 10 Gigawatts of rural electrification, attracting 3.2 billion dollars in international sovereign wealth and venture funds.',
+            category: 'Economy & Tech',
+            readTime: '40s read',
+            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '10m ago'
+          },
+          {
+            id: 402,
+            newspaper: 'Economic Herald',
+            headline: 'Sensex & Nifty Smash Historic All-Time Highs on Record Festive Consumer Demand',
+            summary: 'Benchmark indices closed in green for the seventh straight session, propelled by heavy institutional buying in banking, automotive, and high-frequency retail consumer goods.',
+            category: 'Bourses & Indices',
+            readTime: '35s read',
+            image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '28m ago'
+          },
+          {
+            id: 403,
+            newspaper: 'Economic Herald',
+            headline: 'Central Bank Expands Zero-Fee Cross-Border Instant Payments to 14 Global Hubs',
+            summary: 'Cross-border QR and instant UPI remittances officially commenced operations between India, Southeast Asia, and the Gulf, drastically cutting foreign transaction costs for exporters and families.',
+            category: 'Fintech & Banking',
+            readTime: '45s read',
+            image: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '1h ago'
+          },
+          {
+            id: 404,
+            newspaper: 'Economic Herald',
+            headline: 'Commercial EV Fleet Adoption Breaches 28% Mark Across Tier-1 Urban Logistics',
+            summary: 'E-commerce deliveries and urban taxi operators reported a rapid transition to localized electric vans and two-wheelers, aided by widespread battery swapping stations and lower operating costs.',
+            category: 'Auto & Logistics',
+            readTime: '30s read',
+            image: 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '2h ago'
+          }
+        ]
       }
     ]
   },
@@ -881,50 +1033,198 @@ const MULTILINGUAL_NEWS_DATA: Record<NewsLanguage, LanguagePaperConfig> = {
     label: 'தமிழ்',
     nativeName: 'தமிழ் நாளிதழ்',
     flag: '🇮🇳',
-    masthead: 'தினத்தந்தி & தினமலர் சிறப்பு பதிப்பு',
-    tagline: 'தமிழகத்தின் நம்பகமான உடனடி நேரலை செய்திகள் • உணவக சிறப்பு மடல்',
-    cityEdition: 'சென்னை & மதுரை பதிப்பு • இன்று, 16 அக்டோபர் 2026',
-    papers: ['தினத்தந்தி (Daily Thanthi)', 'தினமலர் (Dinamalar)', 'தி இந்து தமிழ் திசை', 'தினகரன்'],
-    news: [
+    papers: [
       {
-        id: 1,
-        newspaper: 'தினத்தந்தி',
-        headline: 'சென்னையில் புதிய அதிவேக மெட்ரோ ரயில் சேவை இன்று கோலாகலமாக துவக்கம்!',
-        summary: 'சென்னையின் முக்கிய தகவல் தொழில்நுட்ப மையங்களை இணைக்கும் புதிய பசுமை மெட்ரோ பாதை இன்று மக்கள் பயன்பாட்டிற்கு திறக்கப்பட்டது. அலுவலக பயண நேரம் 45% குறையும் என பயணிகள் மகிழ்ச்சி தெரிவித்துள்ளனர்.',
-        category: 'சென்னை செய்திகள்',
-        readTime: '45 வினாடி வாசிப்பு',
-        image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
-        timeAgo: '10 நிமிடம் முன்'
+        name: 'தினத்தந்தி (Daily Thanthi)',
+        masthead: 'தினத்தந்தி',
+        tagline: 'வெல்க தமிழ் • தமிழ்நாட்டின் முதன்மை நாளிதழ்',
+        cityEdition: 'சென்னை & மதுரை பதிப்பு • இன்று, 16 அக்டோபர் 2026',
+        news: [
+          {
+            id: 501,
+            newspaper: 'தினத்தந்தி',
+            headline: 'சென்னையில் புதிய அதிவேக மெட்ரோ ரயில் சேவை இன்று கோலாகலமாக துவக்கம்!',
+            summary: 'சென்னையின் முக்கிய தகவல் தொழில்நுட்ப மையங்களை இணைக்கும் புதிய பசுமை மெட்ரோ பாதை இன்று மக்கள் பயன்பாட்டிற்கு திறக்கப்பட்டது. அலுவலக பயண நேரம் 45% குறையும் என பயணிகள் மகிழ்ச்சி தெரிவித்துள்ளனர்.',
+            category: 'சென்னை செய்திகள்',
+            readTime: '45 வினாடி வாசிப்பு',
+            image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '10 நிமிடம் முன்'
+          },
+          {
+            id: 502,
+            newspaper: 'தினத்தந்தி',
+            headline: 'சென்னை-பெங்களூரு எக்ஸ்பிரஸ் விரைவுச்சாலை பணிகள் நிறைவு: அடுத்த மாதம் திறப்பு!',
+            summary: 'இரு பெருநகரங்களுக்கு இடையிலான பயண நேரத்தை வெறும் 3 மணி நேரமாகக் குறைக்கும் அதிநவீன எட்டு வழி விரைவுச்சாலை பணிகள் இறுதிக்கட்டத்தை எட்டியுள்ளன.',
+            category: 'உள்கட்டமைப்பு',
+            readTime: '35 வினாடி வாசிப்பு',
+            image: 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '40 நிமிடம் முன்'
+          },
+          {
+            id: 503,
+            newspaper: 'தினத்தந்தி',
+            headline: 'அரசுப் பள்ளி மாணவர்களுக்கு புதிய ஸ்மார்ட் வகுப்பறைகள் மற்றும் கணினி ஆய்வகங்கள்',
+            summary: 'தமிழகம் முழுவதும் 5,000 அரசுப் பள்ளிகளில் ரோபோட்டிக்ஸ் மற்றும் செயற்கை நுண்ணறிவு பயிற்சிக்கான சிறப்பு ஆய்வகங்களை பள்ளிக்கல்வித்துறை இன்று தொடங்கி வைத்தது.',
+            category: 'கல்வி உலகம்',
+            readTime: '30 வினாடி வாசிப்பு',
+            image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '1 மணி முன்'
+          },
+          {
+            id: 504,
+            newspaper: 'தினத்தந்தி',
+            headline: '48-வது சர்வதேச சென்னை புத்தகத் திருவிழா தேதிகள் அதிகாரப்பூர்வமாக அறிவிப்பு!',
+            summary: 'நந்தனம் ஒய்.எம்.சி.ஏ மைதானத்தில் 1,000-க்கும் மேற்பட்ட அரங்கங்களுடன் புத்தகத் திருவிழா ஜனவரியில் பிரம்மாண்டமாக நடைபெற ஏற்பாடுகள் தொடங்கியுள்ளன.',
+            category: 'பண்பாடு & இலக்கியம்',
+            readTime: '25 வினாடி வாசிப்பு',
+            image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '2 மணி முன்'
+          }
+        ]
       },
       {
-        id: 2,
-        newspaper: 'தி இந்து தமிழ் திசை',
-        headline: 'பாரம்பரிய செட்டிநாடு மண்பானை பிரியாணிக்கு சர்வதேச பாராட்டு விருது!',
-        summary: 'மரபு மாறாத மசாலா மணம் மற்றும் செட்டிநாடு சமையல் கலைஞர்களின் கைவண்ணத்தில் உருவான தம்பிரியாணி உலக உணவு கவுன்சிலால் சிறந்த பாரம்பரிய உணவாக அங்கீகரிக்கப்பட்டுள்ளது.',
-        category: 'உணவு & பண்பாடு',
-        readTime: '30 வினாடி வாசிப்பு',
-        image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80',
-        timeAgo: '25 நிமிடம் முன்'
+        name: 'தினமலர் (Dinamalar)',
+        masthead: 'தினமலர்',
+        tagline: 'உண்மை மட்டுமே • நடுநிலையான செய்திப் பார்வை',
+        cityEdition: 'மதுரை, கோவை & திருச்சி பதிப்பு • இன்று, 16 அக்டோபர் 2026',
+        news: [
+          {
+            id: 601,
+            newspaper: 'தினமலர்',
+            headline: 'மேட்டூர் அணையில் நீர்வரத்து அதிகரிப்பு: டெல்டா விவசாயிகளுக்கு மகிழ்ச்சி செய்தி!',
+            summary: 'காவிரி நீர்ப்பிடிப்பு பகுதிகளில் பெய்த கனமழையால் மேட்டூர் அணைக்கு நீர்வரத்து வினாடிக்கு 35,000 கனஅடியாக உயர்ந்துள்ளது. குறுவை பாசனத்திற்கு போதுமான தண்ணீர் திறக்கப்படும் என அரசு அறிவித்துள்ளது.',
+            category: 'விவசாயம் & வளம்',
+            readTime: '35 வினாடி வாசிப்பு',
+            image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '25 நிமிடம் முன்'
+          },
+          {
+            id: 602,
+            newspaper: 'தினமலர்',
+            headline: 'கோவை தொழில் முதலீட்டு மாநாடு: ரூ. 15,000 கோடி புதிய ஒப்பந்தங்கள் கையெழுத்து!',
+            summary: 'வாகன உதிரிபாகங்கள், எலக்ட்ரானிக்ஸ் மற்றும் ஜவுளித் துறையில் பல்லாயிரக்கணக்கான இளைஞர்களுக்கு வேலைவாய்ப்பை உருவாக்கும் புதிய முதலீடுகள் ஈர்க்கப்பட்டுள்ளன.',
+            category: 'வணிகம் & தொழில்',
+            readTime: '40 வினாடி வாசிப்பு',
+            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '50 நிமிடம் முன்'
+          },
+          {
+            id: 603,
+            newspaper: 'தினமலர்',
+            headline: 'தமிழகத்தில் நெல் கொள்முதல் புதிய வரலாற்று சாதனை: விவசாயிகளுக்கு கூடுதல் ஊக்கத்தொகை',
+            summary: 'நேரடி நெல் கொள்முதல் நிலையங்கள் மூலம் 40 லட்சம் மெட்ரிக் டன் நெல் கொள்முதல் செய்யப்பட்டு விவசாயிகளின் வங்கிக் கணக்குகளில் உடனடி தொகை வரவு வைக்கப்பட்டுள்ளது.',
+            category: 'பொருளாதாரம்',
+            readTime: '30 வினாடி வாசிப்பு',
+            image: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '1 மணி முன்'
+          },
+          {
+            id: 604,
+            newspaper: 'தினமலர்',
+            headline: 'தென்மண்டல பசுமை காற்றாலை மின் உற்பத்தி தன்னிறைவை எட்டியது',
+            summary: 'கயத்தாறு மற்றும் ஆரல்வாய்மொழி பகுதிகளில் வீசிய பலத்த காற்றினால் தமிழக மின்கட்டமைப்பிற்கு நாள் ஒன்றுக்கு 4,500 மெகாவாட் தூய மின்சாரம் கிடைத்துள்ளது.',
+            category: 'சுற்றுச்சூழல்',
+            readTime: '35 வினாடி வாசிப்பு',
+            image: 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '3 மணி முன்'
+          }
+        ]
       },
       {
-        id: 3,
-        newspaper: 'தினமலர்',
-        headline: 'மேட்டூர் அணையில் நீர்வரத்து அதிகரிப்பு: டெல்டா விவசாயிகளுக்கு மகிழ்ச்சி செய்தி!',
-        summary: 'காவிரி நீர்ப்பிடிப்பு பகுதிகளில் பெய்த கனமழையால் மேட்டூர் அணைக்கு நீர்வரத்து வினாடிக்கு 35,000 கனஅடியாக உயர்ந்துள்ளது. குறுவை பாசனத்திற்கு போதுமான தண்ணீர் திறக்கப்படும் என அரசு அறிவித்துள்ளது.',
-        category: 'விவசாயம் & வளம்',
-        readTime: '35 வினாடி வாசிப்பு',
-        image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
-        timeAgo: '1 மணி முன்'
+        name: 'தி இந்து தமிழ் திசை',
+        masthead: 'இந்து தமிழ் திசை',
+        tagline: 'தலைநிமிர் தமிழா • ஆழமான சிந்தனை மற்றும் பண்பாட்டுப் பார்வை',
+        cityEdition: 'தமிழ்நாடு மாநில பதிப்பு • இன்று, 16 அக்டோபர் 2026',
+        news: [
+          {
+            id: 701,
+            newspaper: 'தி இந்து தமிழ் திசை',
+            headline: 'பாரம்பரிய செட்டிநாடு மண்பானை பிரியாணிக்கு சர்வதேச பாராட்டு விருது!',
+            summary: 'மரபு மாறாத மசாலா மணம் மற்றும் செட்டிநாடு சமையல் கலைஞர்களின் கைவண்ணத்தில் உருவான தம்பிரியாணி உலக உணவு கவுன்சிலால் சிறந்த பாரம்பரிய உணவாக அங்கீகரிக்கப்பட்டுள்ளது.',
+            category: 'உணவு & பண்பாடு',
+            readTime: '30 வினாடி வாசிப்பு',
+            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '20 நிமிடம் முன்'
+          },
+          {
+            id: 702,
+            newspaper: 'தி இந்து தமிழ் திசை',
+            headline: 'கீழடி தொல்லியல் அருங்காட்சியகத்திற்கு உலகளாவிய யுனெஸ்கோ பாரம்பரிய சான்றிதழ்',
+            summary: 'வைகை நதிக்கரை நாகரிகத்தின் 2600 ஆண்டுகள் பழமையான தமிழ் பிராமி எழுத்துக்கள் மற்றும் நகர்ப்புற கட்டமைப்பு ஆவணங்களை உலக அறிஞர்கள் வியப்புடன் பாராட்டியுள்ளனர்.',
+            category: 'வரலாறு & தொல்லியல்',
+            readTime: '45 வினாடி வாசிப்பு',
+            image: 'https://images.unsplash.com/photo-1461360370896-922624d12aa1?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '45 நிமிடம் முன்'
+          },
+          {
+            id: 703,
+            newspaper: 'தி இந்து தமிழ் திசை',
+            headline: 'பிச்சாவரம் சதுப்புநிலக் காடுகளைப் பாதுகாக்க சர்வதேச பசுமை நிதி ஒதுக்கீடு',
+            summary: 'கடற்கரை அரிப்பைத் தடுத்து பல்லுயிர் பெருக்கத்தைப் பாதுகாக்கும் சதுப்புநில அலையாத்திக் காடுகளை மேலும் 2,000 ஹெக்டேர் பரப்பளவில் விரிவாக்க திட்டம் வகுக்கப்பட்டுள்ளது.',
+            category: 'சுற்றுச்சூழல் விழிப்புணர்வு',
+            readTime: '35 வினாடி வாசிப்பு',
+            image: 'https://images.unsplash.com/photo-1511497584788-87676104235f?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '1 மணி முன்'
+          },
+          {
+            id: 704,
+            newspaper: 'தி இந்து தமிழ் திசை',
+            headline: 'சர்வதேச திரைப்பட விழாவில் மூன்று தமிழ் சுதந்திர திரைப்படங்களுக்கு தங்க விருது!',
+            summary: 'எளிய மனிதர்களின் வாழ்வியலைப் பேசும் உணர்வுப்பூர்வமான கதையம்சமும், தொழில்நுட்ப நேர்த்தியும் உலக நடுவர்களை வெகுவாகக் கவர்ந்துள்ளது.',
+            category: 'திரைக்கலை',
+            readTime: '30 வினாடி வாசிப்பு',
+            image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '2 மணி முன்'
+          }
+        ]
       },
       {
-        id: 4,
-        newspaper: 'தினகரன்',
-        headline: 'டி20 கிரிக்கெட் போட்டி: இந்திய அணி அசுர வேக பேட்டிங்குடன் களம் இறங்குகிறது!',
-        summary: 'இன்றைய முக்கிய ஆட்டத்தில் அதிரடி இளைஞர் படையுடன் இந்திய அணி களமிறங்குகிறது. சுழற்பந்து வீச்சாளர்களின் புதிய வியூகம் ஆட்டத்தை தீர்மானிக்கும் என பயிற்சியாளர் நம்பிக்கை தெரிவித்துள்ளார்.',
-        category: 'விளையாட்டு',
-        readTime: '40 வினாடி வாசிப்பு',
-        image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&auto=format&fit=crop&q=80',
-        timeAgo: '2 மணி முன்'
+        name: 'தினகரன்',
+        masthead: 'தினகரன்',
+        tagline: 'விடியலை நோக்கி • மக்களின் உரிமைக்குரல்',
+        cityEdition: 'அனைத்து மாவட்ட பதிப்பு • இன்று, 16 அக்டோபர் 2026',
+        news: [
+          {
+            id: 801,
+            newspaper: 'தினகரன்',
+            headline: 'டி20 கிரிக்கெட் போட்டி: இந்திய அணி அசுர வேக பேட்டிங்குடன் களம் இறங்குகிறது!',
+            summary: 'இன்றைய முக்கிய ஆட்டத்தில் அதிரடி இளைஞர் படையுடன் இந்திய அணி களமிறங்குகிறது. சுழற்பந்து வீச்சாளர்களின் புதிய வியூகம் ஆட்டத்தை தீர்மானிக்கும் என பயிற்சியாளர் நம்பிக்கை தெரிவித்துள்ளார்.',
+            category: 'விளையாட்டு',
+            readTime: '40 வினாடி வாசிப்பு',
+            image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '15 நிமிடம் முன்'
+          },
+          {
+            id: 802,
+            newspaper: 'தினகரன்',
+            headline: 'பெண்களுக்கான கட்டணமில்லா பேருந்து பயணம்: புதிய 1,500 நவீன பேருந்துகள் இணைப்பு!',
+            summary: 'நகரப்புற மற்றும் கிராமப்புற பகுதிகளில் பெண்களின் பாதுகாப்பான பயணத்தை உறுதிசெய்ய சிசிடிவி வசதியுடன் கூடிய புதிய தாழ்தள பேருந்துகள் பயன்பாட்டுக்கு வந்தன.',
+            category: 'மக்கள் நலம்',
+            readTime: '35 வினாடி வாசிப்பு',
+            image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '35 நிமிடம் முன்'
+          },
+          {
+            id: 803,
+            newspaper: 'தினகரன்',
+            headline: 'தீபாவளி பண்டிகை சிறப்பு ரயில்கள் மற்றும் பேருந்துகள் முன்பதிவு விறுவிறுப்பு!',
+            summary: 'சொந்த ஊர்களுக்கு செல்லும் பயணிகளின் வசதிக்காக 16,000 சிறப்பு பேருந்துகள் இயக்கப்படுகின்றன. கூடுதல் பெட்டிகளுடன் சிறப்பு ரயில்களும் இயக்கப்படுகின்றன.',
+            category: 'பயணிகள் தகவல்',
+            readTime: '30 வினாடி வாசிப்பு',
+            image: 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '1 மணி முன்'
+          },
+          {
+            id: 804,
+            newspaper: 'தினகரன்',
+            headline: 'கிராமப்புற இளைஞர்களுக்கு இலவச திறன் மேம்பாட்டுப் பயிற்சி முகாம்கள்',
+            summary: 'முன்னணி ஐடி மற்றும் உற்பத்தி நிறுவனங்களுடன் இணைந்து நவீன தொழில்நுட்பங்களில் இலவச சான்றிதழ் பயிற்சி வழங்கி உடனடி வேலைவாய்ப்பு அளிக்கப்படுகிறது.',
+            category: 'இளைஞர் நலம்',
+            readTime: '30 வினாடி வாசிப்பு',
+            image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '2 மணி முன்'
+          }
+        ]
       }
     ]
   },
@@ -933,50 +1233,198 @@ const MULTILINGUAL_NEWS_DATA: Record<NewsLanguage, LanguagePaperConfig> = {
     label: 'हिन्दी',
     nativeName: 'दैनिक समाचार',
     flag: '🇮🇳',
-    masthead: 'दैनिक जागरण & नवभारत टाइम्स',
-    tagline: 'देश का सबसे बड़ा और विश्वसनीय राष्ट्रीय समाचार पत्र',
-    cityEdition: 'राष्ट्रीय राजधानी एवं मेट्रो संस्करण • आज, 16 अक्टूबर 2026',
-    papers: ['दैनिक जागरण (Dainik Jagran)', 'नवभारत टाइम्स (NBT)', 'अमर उजाला', 'हिन्दुस्तान'],
-    news: [
+    papers: [
       {
-        id: 1,
-        newspaper: 'दैनिक जागरण',
-        headline: 'देश के पहले स्वदेशी हाई-स्पीड इलेक्ट्रिक कॉरिडोर का भव्य शुभारंभ',
-        summary: 'मेट्रो और एक्सप्रेस-वे को जोड़ने वाले नए हाई-स्पीड कॉरिडोर से अब सफर में 50% समय की बचत होगी। प्रदूषण मुक्त आवागमन से शहरवासियों को बड़ी राहत मिली है।',
-        category: 'विकास एवं राष्ट्रीय',
-        readTime: '45 सेकेंड पढ़ें',
-        image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
-        timeAgo: '12 मिनट पहले'
+        name: 'दैनिक जागरण (Dainik Jagran)',
+        masthead: 'दैनिक जागरण',
+        tagline: 'दुनियां का सबसे ज्यादा पढ़ा जाने वाला दैनिक समाचार पत्र',
+        cityEdition: 'राष्ट्रीय राजधानी एवं मेट्रो संस्करण • आज, 16 अक्टूबर 2026',
+        news: [
+          {
+            id: 901,
+            newspaper: 'दैनिक जागरण',
+            headline: 'देश के पहले स्वदेशी हाई-स्पीड इलेक्ट्रिक कॉरिडोर का भव्य शुभारंभ',
+            summary: 'मेट्रो और एक्सप्रेस-वे को जोड़ने वाले नए हाई-स्पीड कॉरिडोर से अब सफर में 50% समय की बचत होगी। प्रदूषण मुक्त आवागमन से शहरवासियों को बड़ी राहत मिली है।',
+            category: 'विकास एवं राष्ट्रीय',
+            readTime: '45 सेकेंड पढ़ें',
+            image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '12 मिनट पहले'
+          },
+          {
+            id: 902,
+            newspaper: 'दैनिक जागरण',
+            headline: 'इसरो का नया मौसम एवं समुद्र निगरानी उपग्रह सफलतापूर्वक कक्षा में स्थापित',
+            summary: 'सतीश धवन अंतरिक्ष केंद्र से प्रक्षेपित अत्याधुनिक उपग्रह से किसानों और तटीय मछुआरों को मौसम की सटीक और त्वरित जानकारी 48 घंटे पहले प्राप्त हो सकेगी।',
+            category: 'अंतरिक्ष एवं विज्ञान',
+            readTime: '40 सेकेंड पढ़ें',
+            image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '35 मिनट पहले'
+          },
+          {
+            id: 903,
+            newspaper: 'दैनिक जागरण',
+            headline: 'पीएम गति-शक्ति परियोजना: उत्तर भारत के प्रमुख एक्सप्रेसवे पर लॉजिस्टिक्स पार्क तैयार',
+            summary: 'दिल्ली-मुंबई एवं पूर्वांचल एक्सप्रेसवे के किनारे नए मल्टीमॉडल फ्रेट टर्मिनल चालू होने से माल ढुलाई लागत में 20% तक की भारी कमी दर्ज की गई है।',
+            category: 'उद्योग व व्यापार',
+            readTime: '35 सेकेंड पढ़ें',
+            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '1 घंटा पहले'
+          },
+          {
+            id: 904,
+            newspaper: 'दैनिक जागरण',
+            headline: 'हर खेत को सोलर पंप: 1 लाख नए किसानों को मिली सौर ऊर्जा सब्सिडी',
+            summary: 'कुसुम योजना के तहत सोलर ट्यूबवेल स्थापित करने से किसानों का डीजल पर निर्भरता शून्य हो गई है, जिससे प्रति माह हजारों रुपयों की शुद्ध बचत हो रही है।',
+            category: 'कृषि व ग्रामीण',
+            readTime: '30 सेकेंड पढ़ें',
+            image: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '2 घंटे पहले'
+          }
+        ]
       },
       {
-        id: 2,
-        newspaper: 'नवभारत टाइम्स',
-        headline: 'भारतीय अवधी एवं तंदूरी व्यंजनों को वैश्विक धरोहर सूची में मिला स्थान',
-        summary: 'धीमी आंच पर पकने वाली दम बिरयानी और पुरानी दिल्ली के शाही मसालों की खुशबू ने अंतरराष्ट्रीय फूड फेडरेशन को मंत्रमुग्ध कर दिया है।',
-        category: 'खान-पान एवं संस्कृति',
-        readTime: '30 सेकेंड पढ़ें',
-        image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80',
-        timeAgo: '30 मिनट पहले'
+        name: 'नवभारत टाइम्स (NBT)',
+        masthead: 'नवभारत टाइम्स',
+        tagline: 'हमसे है आपका सवेरा • दिल्ली-एनसीआर एवं देश की धड़कन',
+        cityEdition: 'दिल्ली, नोएडा व गुरुग्राम संस्करण • आज, 16 अक्टूबर 2026',
+        news: [
+          {
+            id: 1001,
+            newspaper: 'नवभारत टाइम्स',
+            headline: 'भारतीय अवधी एवं तंदूरी व्यंजनों को वैश्विक धरोहर सूची में मिला स्थान',
+            summary: 'धीमी आंच पर पकने वाली दम बिरयानी और पुरानी दिल्ली के शाही मसालों की खुशबू ने अंतरराष्ट्रीय फूड फेडरेशन को मंत्रमुग्ध कर दिया है। इसे विश्व विरासत पाक-कला घोषित किया गया।',
+            category: 'खान-पान एवं संस्कृति',
+            readTime: '30 सेकेंड पढ़ें',
+            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '15 मिनट पहले'
+          },
+          {
+            id: 1002,
+            newspaper: 'नवभारत टाइम्स',
+            headline: 'दिल्ली-एनसीआर में 1,000 नई वातानुकूलित इलेक्ट्रिक बसें सड़कों पर उतरीं',
+            summary: 'यात्रियों की सुविधा और प्रदूषण निवारण हेतु दिल्ली सरकार ने अत्याधुनिक लो-फ्लोर इलेक्ट्रिक बेड़ा समर्पित किया। महिलाओं और बुजुर्गों को सुगम यात्रा का लाभ।',
+            category: 'राजधानी एक्सप्रेस',
+            readTime: '35 सेकेंड पढ़ें',
+            image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '40 मिनट पहले'
+          },
+          {
+            id: 1003,
+            newspaper: 'नवभारत टाइम्स',
+            headline: 'त्योहारी सीजन में बाजारों में भारी भीड़, रिकॉर्ड 50,000 करोड़ का व्यापार दर्ज',
+            summary: 'चांदनी चौक, करोल बाग और कनॉट प्लेस के बाजारों में ग्राहकों का तांता लगा है। ज्वैलरी, ऑटोमोबाइल और इलेक्ट्रॉनिक्स में जबरदस्त उछाल देखने को मिला है।',
+            category: 'मार्केट लाइव',
+            readTime: '40 सेकेंड पढ़ें',
+            image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '1 घंटा पहले'
+          },
+          {
+            id: 1004,
+            newspaper: 'नवभारत टाइम्स',
+            headline: 'दिल्ली के प्रमुख स्मारकों पर भव्य लेज़र शो और सांस्कृतिक संध्या का आयोजन',
+            summary: 'लाल किला और कुतुब परिसर में अत्याधुनिक 3D मैपिंग लाइट शो शुरू हुआ, जिसमें भारत के समृद्ध इतिहास और स्वतंत्रता संग्राम की शौर्य गाथा दिखाई गई।',
+            category: 'कला एवं पर्यटन',
+            readTime: '25 सेकेंड पढ़ें',
+            image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '2 घंटे पहले'
+          }
+        ]
       },
       {
-        id: 3,
-        newspaper: 'अमर उजाला',
-        headline: 'त्योहारी सीजन में अर्थव्यवस्था ने पकड़ी तेज रफ्तार, रिकॉर्ड जीएसटी संग्रह',
-        summary: 'बाजारों में ग्राहकों की भारी भीड़ से व्यापार जगत में उत्साह है। ऑटोमोबाइल और खुदरा बिक्री में पिछले वर्ष की तुलना में 25% का जोरदार उछाल दर्ज हुआ।',
-        category: 'व्यापार एवं अर्थ',
-        readTime: '40 सेकेंड पढ़ें',
-        image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
-        timeAgo: '1 घंटा पहले'
+        name: 'अमर उजाला',
+        masthead: 'अमर उजाला',
+        tagline: 'जोश सच का • उत्तर भारत का सर्वाधिक विश्वसनीय समाचार पत्र',
+        cityEdition: 'उत्तर प्रदेश, उत्तराखंड व पंजाब संस्करण • आज, 16 अक्टूबर 2026',
+        news: [
+          {
+            id: 1101,
+            newspaper: 'अमर उजाला',
+            headline: 'त्योहारी सीजन में अर्थव्यवस्था ने पकड़ी तेज रफ्तार, रिकॉर्ड जीएसटी संग्रह',
+            summary: 'बाजारों में ग्राहकों की भारी भीड़ से व्यापार जगत में उत्साह है। ऑटोमोबाइल और खुदरा बिक्री में पिछले वर्ष की तुलना में 25% का जोरदार उछाल दर्ज हुआ है।',
+            category: 'व्यापार एवं अर्थ',
+            readTime: '40 सेकेंड पढ़ें',
+            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '22 मिनट पहले'
+          },
+          {
+            id: 1102,
+            newspaper: 'अमर उजाला',
+            headline: 'चारधाम ऑल-वेदर रोड का अंतिम चरण पूरा: यात्रा अब और भी सुरक्षित एवं तेज',
+            summary: 'पहाड़ी क्षेत्रों में नई टनल और सुरक्षा बैरियर बनने से भूस्खलन का खतरा समाप्त हो गया है। श्रद्धालुओं ने यात्रा समय में 4 घंटे की कमी पर खुशी जताई।',
+            category: 'उत्तराखंड विकास',
+            readTime: '35 सेकेंड पढ़ें',
+            image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '50 मिनट पहले'
+          },
+          {
+            id: 1103,
+            newspaper: 'अमर उजाला',
+            headline: 'हिमालयी जड़ी-बूटियों से निर्मित प्राकृतिक औषधियों का निर्यात 30% बढ़ा',
+            summary: 'आयुष उत्पादों की वैश्विक मांग में भारी वृद्धि हुई है। अमेरिका, यूरोप और खाड़ी देशों में भारतीय हर्बल टी और च्यवनप्राश की भारी मांग बनी हुई है।',
+            category: 'स्वास्थ्य व आयुर्वेद',
+            readTime: '30 सेकेंड पढ़ें',
+            image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '1 घंटा पहले'
+          },
+          {
+            id: 1104,
+            newspaper: 'अमर उजाला',
+            headline: 'ग्रामीण खेल महाकुंभ में युवाओं ने तोड़े कई राष्ट्रीय एथलेटिक्स रिकॉर्ड',
+            summary: 'दौड़, कुश्ती और तीरंदाजी में गांव के होनहार खिलाड़ियों ने बेहतरीन प्रदर्शन कर राष्ट्रीय प्रशिक्षण शिविर में अपनी जगह पक्की की।',
+            category: 'खेल प्रतिभा',
+            readTime: '35 सेकेंड पढ़ें',
+            image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '2 घंटे पहले'
+          }
+        ]
       },
       {
-        id: 4,
-        newspaper: 'हिन्दुस्तान',
-        headline: 'क्रिकेट महामुकाबले के लिए भारतीय टीम तैयार, मैदान पर मचेगा रोमांच!',
-        summary: 'कप्तान ने प्रेस कॉन्फ्रेंस में बताया कि टीम का ध्यान आक्रामक शुरुआत और सटीक यॉर्कर गेंदबाजी पर है। करोड़ों प्रशंसकों की निगाहें आज के मैच पर टिकी हैं।',
-        category: 'खेल जगत',
-        readTime: '35 सेकेंड पढ़ें',
-        image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&auto=format&fit=crop&q=80',
-        timeAgo: '2 घंटे पहले'
+        name: 'हिन्दुस्तान',
+        masthead: 'हिन्दुस्तान',
+        tagline: 'भरोसा नए हिन्दुस्तान का • निष्पक्ष और निर्भीक पत्रकारिता',
+        cityEdition: 'राष्ट्रीय हिन्दी मुख्य संस्करण • आज, 16 अक्टूबर 2026',
+        news: [
+          {
+            id: 1201,
+            newspaper: 'हिन्दुस्तान',
+            headline: 'क्रिकेट महामुकाबले के लिए भारतीय टीम तैयार, मैदान पर मचेगा रोमांच!',
+            summary: 'कप्तान ने प्रेस कॉन्फ्रेंस में बताया कि टीम का ध्यान आक्रामक शुरुआत और सटीक यॉर्कर गेंदबाजी पर है। करोड़ों प्रशंसकों की निगाहें आज के मैच पर टिकी हैं।',
+            category: 'खेल जगत',
+            readTime: '35 सेकेंड पढ़ें',
+            image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '18 मिनट पहले'
+          },
+          {
+            id: 1202,
+            newspaper: 'हिन्दुस्तान',
+            headline: 'आईआईटी एवं प्रमुख विश्वविद्यालयों में नए एआई रिसर्च सेंटर्स का उद्घाटन',
+            summary: 'देश के 20 शीर्ष संस्थानों में सुपरकंप्यूटिंग हब स्थापित किए गए, जिससे स्वास्थ्य, रक्षा और मौसम पूर्वानुमान में स्वदेशी शोध को अभूतपूर्व गति मिलेगी।',
+            category: 'शिक्षा एवं शोध',
+            readTime: '40 सेकेंड पढ़ें',
+            image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '45 मिनट पहले'
+          },
+          {
+            id: 1203,
+            newspaper: 'हिन्दुस्तान',
+            headline: 'डिजिटल इंडिया यूपीआई लेनदेन ने तोड़ा पिछला रिकॉर्ड, 18 अरब लेनदेन पार',
+            summary: 'छोटे चाय विक्रेताओं से लेकर बड़े शॉपिंग मॉल तक डिजिटल लेन-देन आम हो गया है। कैशलेस अर्थव्यवस्था से वित्तीय पारदर्शिता में ऐतिहासिक सुधार हुआ है।',
+            category: 'डिजिटल भारत',
+            readTime: '30 सेकेंड पढ़ें',
+            image: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '1 घंटा पहले'
+          },
+          {
+            id: 1204,
+            newspaper: 'हिन्दुस्तान',
+            headline: 'मुद्रा योजना: महिला उद्यमियों को मिले 5 लाख तक के ब्याज-मुक्त ऋण',
+            summary: 'स्वयं सहायता समूहों और कुटीर उद्योगों से जुड़ी महिलाओं को सशक्त बनाने हेतु बैंकों ने विशेष ऋण मेले आयोजित कर त्वरित मंजूरी प्रदान की।',
+            category: 'महिला सशक्तिकरण',
+            readTime: '30 सेकेंड पढ़ें',
+            image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '2 घंटे पहले'
+          }
+        ]
       }
     ]
   },
@@ -985,50 +1433,198 @@ const MULTILINGUAL_NEWS_DATA: Record<NewsLanguage, LanguagePaperConfig> = {
     label: 'తెలుగు',
     nativeName: 'ఈనాడు దినపత్రిక',
     flag: '🇮🇳',
-    masthead: 'ఈనాడు & సాక్షి దినపత్రిక',
-    tagline: 'తెలుగు ప్రజల గళం • తాజా ప్రత్యక్ష వార్తలు మరియు విశ్లేషణలు',
-    cityEdition: 'హైదరాబాద్ & ఆంధ్రప్రదేశ్ ఎడిషన్ • ఈరోజు, 16 అక్టోబర్ 2026',
-    papers: ['ఈనాడు (Eenadu)', 'సాక్షి (Sakshi)', 'ఆంధ్రజ్యోతి', 'నమస్తే తెలంగాణ'],
-    news: [
+    papers: [
       {
-        id: 1,
-        newspaper: 'ఈనాడు',
-        headline: 'నగరంలో కొత్త ఎక్స్‌ప్రెస్ మెట్రో కారిడార్ ప్రారంభం: ప్రయాణికుల హర్షం!',
-        summary: 'ఐటీ కారిడార్‌ను పాత నగరంతో అనుసంధానించే నూతన మెట్రో లైన్ నేటి నుంచి అందుబాటులోకి వచ్చింది. ట్రాఫిక్ సమస్యలకు శాశ్వత పరిష్కారం లభించిందని ప్రయాణికులు సంతోషం వ్యక్తం చేశారు.',
-        category: 'రాష్ట్ర వార్తలు',
-        readTime: '40 సెకన్ల చదువు',
-        image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
-        timeAgo: '15 నిమిషాల క్రితం'
+        name: 'ఈనాడు (Eenadu)',
+        masthead: 'ఈనాడు',
+        tagline: 'ప్రజల పక్షం • తెలుగువారి నిత్య చైతన్యం',
+        cityEdition: 'హైదరాబాద్ & తెలంగాణ ఎడిషన్ • ఈరోజు, 16 అక్టోబర్ 2026',
+        news: [
+          {
+            id: 1301,
+            newspaper: 'ఈనాడు',
+            headline: 'నగరంలో కొత్త ఎక్స్‌ప్రెస్ మెట్రో కారిడార్ ప్రారంభం: ప్రయాణికుల హర్షం!',
+            summary: 'ఐటీ కారిడార్‌ను పాత నగరంతో అనుసంధానించే నూతన మెట్రో లైన్ నేటి నుంచి అందుబాటులోకి వచ్చింది. ట్రాఫిక్ సమస్యలకు శాశ్వత పరిష్కారం లభించిందని ప్రయాణికులు సంతోషం వ్యక్తం చేశారు.',
+            category: 'రాష్ట్ర వార్తలు',
+            readTime: '40 సెకన్ల చదువు',
+            image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '15 నిమిషాల క్రితం'
+          },
+          {
+            id: 1302,
+            newspaper: 'ఈనాడు',
+            headline: 'ఐటీ ఎగుమతుల్లో నూతన శిఖరాలకు చేరుకున్న హైదరాబాద్: ₹2.5 లక్షల కోట్ల మైలురాయి',
+            summary: 'గ్లోబల్ కేపబిలిటీ సెంటర్లు, కృత్రిమ మేధ మరియు సెమీకండక్టర్ కంపెనీల విస్తరణతో లక్షలాది మంది యువతీ యువకులకు కొత్త ఉద్యోగావకాశాలు లభించాయి.',
+            category: 'ఐటీ & వాణిజ్యం',
+            readTime: '45 సెకన్ల చదువు',
+            image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '40 నిమిషాల క్రితం'
+          },
+          {
+            id: 1303,
+            newspaper: 'ఈనాడు',
+            headline: 'వరి సాగులో ఆధునిక డ్రోన్ టెక్నాలజీ: రైతులకు తగ్గిన ఎరువుల ఖర్చు',
+            summary: 'వ్యవసాయ శాఖ ఆధ్వర్యంలో డ్రోన్ల ద్వారా పురుగుమందులు మరియు నానో యూరియా పిచికారీ విజయవంతం కావడంతో ఎకరాకు ₹3,000 ఆదా అవుతోంది.',
+            category: 'వ్యవసాయం',
+            readTime: '35 సెకన్ల చదువు',
+            image: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '1 గంట క్రితం'
+          },
+          {
+            id: 1304,
+            newspaper: 'ఈనాడు',
+            headline: 'హైదరాబాద్ అంతర్జాతీయ పుస్తక ప్రదర్శన తేదీలు ఖరారు',
+            summary: 'ఎన్టీఆర్ స్టేడియంలో డిసెంబర్ నెలలో 300కు పైగా ప్రచురణ సంస్థలతో తెలుగు మరియు ఆంగ్ల పుస్తకాల జాతర నిర్వహించేందుకు ఏర్పాట్లు ప్రారంభమయ్యాయి.',
+            category: 'సాహిత్యం & సంస్కృతి',
+            readTime: '30 సెకన్ల చదువు',
+            image: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '2 గంటల క్రితం'
+          }
+        ]
       },
       {
-        id: 2,
-        newspaper: 'సాక్షి',
-        headline: 'హైదరాబాదీ దమ్ బిర్యానీకి అంతర్జాతీయ స్థాయి గుర్తింపు మరియు పురస్కారం!',
-        summary: 'నిజామీ దమ్ పద్ధతిలో తయారుచేసే సుగంధ ద్రవ్యాల దమ్ బిర్యానీ ప్రపంచ ఫుడ్ ఫెస్టివల్‌లో అత్యుత్తమ రుచి పురస్కారాన్ని దక్కించుకుంది.',
-        category: 'రుచులు & జీవనశైలి',
-        readTime: '30 సెకన్ల చదువు',
-        image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80',
-        timeAgo: '35 నిమిషాల క్రితం'
+        name: 'సాక్షి (Sakshi)',
+        masthead: 'సాక్షి',
+        tagline: 'సత్యమేవ జయతే • నిక్కచ్చిగా నిజాలు మరియు ప్రజా గళం',
+        cityEdition: 'ఆంధ్రప్రదేశ్ & రాయలసీమ ఎడిషన్ • ఈరోజు, 16 అక్టోబర్ 2026',
+        news: [
+          {
+            id: 1401,
+            newspaper: 'సాక్షి',
+            headline: 'హైదరాబాదీ దమ్ బిర్యానీకి అంతర్జాతీయ స్థాయి గుర్తింపు మరియు పురస్కారం!',
+            summary: 'నిజామీ దమ్ పద్ధతిలో తయారుచేసే సుగంధ ద్రవ్యాల దమ్ బిర్యానీ ప్రపంచ ఫుడ్ ఫెస్టివల్‌లో అత్యుత్తమ రుచి పురస్కారాన్ని దక్కించుకుంది. అంతర్జాతీయ షెఫ్‌లు ప్రశంసల జల్లు కురిపించారు.',
+            category: 'రుచులు & జీవనశైలి',
+            readTime: '30 సెకన్ల చదువు',
+            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '20 నిమిషాల క్రితం'
+          },
+          {
+            id: 1402,
+            newspaper: 'సాక్షి',
+            headline: 'పోలవరం ప్రాజెక్టు డయాఫ్రమ్ వాల్ నిర్మాణం శరవేగంగా పూర్తి',
+            summary: 'నిర్దేశిత గడువు కంటే ముందే ప్రధాన డ్యామ్ పనులు వేగం పుంజుకున్నాయి. గోదావరి వరద జలాలను సమర్థవంతంగా నిల్వ చేసేందుకు అధికారులు పటిష్ట చర్యలు చేపట్టారు.',
+            category: 'సాగునీటి ప్రాజెక్టులు',
+            readTime: '40 సెకన్ల చదువు',
+            image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '45 నిమిషాల క్రితం'
+          },
+          {
+            id: 1403,
+            newspaper: 'సాక్షి',
+            headline: 'తీరప్రాంత పారిశ్రామిక కారిడార్‌లో 10 కొత్త గ్రీన్ ఎనర్జీ ప్రాజెక్టులు',
+            summary: 'సౌర, పవన విద్యుత్ మరియు గ్రీన్ హైడ్రోజన్ రంగాలలో భారీ అంతర్జాతీయ సంస్థలు పెట్టుబడులు పెట్టేందుకు ప్రభుత్వం అనుమతులు జారీ చేసింది.',
+            category: 'పరిశ్రమలు & అభివృద్ధి',
+            readTime: '35 సెకన్ల చదువు',
+            image: 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '1 గంట క్రితం'
+          },
+          {
+            id: 1404,
+            newspaper: 'సాక్షి',
+            headline: 'ప్రభుత్వ పాఠశాలల విద్యార్థులకు అంతర్జాతీయ ఒలింపియాడ్లలో స్వర్ణ పతకాలు',
+            summary: 'గణితం మరియు సైన్స్ విభాగాలలో గ్రామీణ ప్రాంత విద్యార్థులు అద్భుత ప్రతిభ కనబరిచి రాష్ట్ర కీర్తిని దశదిశలా చాటిచెప్పారు.',
+            category: 'విద్యా రంగం',
+            readTime: '30 సెకన్ల చదువు',
+            image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '2 గంటల క్రితం'
+          }
+        ]
       },
       {
-        id: 3,
-        newspaper: 'ఆంధ్రజ్యోతి',
-        headline: 'గోదావరి జలాలతో నిండిన ప్రాజెక్టులు: రైతుల్లో చిగురించిన ఆశలు!',
-        summary: 'ఎగువ ప్రాంతాల్లో కురుస్తున్న వర్షాలతో సాగునీటి ప్రాజెక్టులకు భారీగా వరద నీరు చేరుతోంది. యాసంగి పంటలకు ఎలాంటి ఢోకా లేదని అధికారులు తెలిపారు.',
-        category: 'వ్యవసాయ రంగం',
-        readTime: '35 సెకన్ల చదువు',
-        image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
-        timeAgo: '1 గంట క్రితం'
+        name: 'ఆంధ్రజ్యోతి (Andhra Jyothy)',
+        masthead: 'ఆంధ్రజ్యోతి',
+        tagline: 'నిరంతర ప్రజా చైతన్యం • నిర్భయ జర్నలిజం',
+        cityEdition: 'విశాఖ & అమరావతి ఎడిషన్ • ఈరోజు, 16 అక్టోబర్ 2026',
+        news: [
+          {
+            id: 1501,
+            newspaper: 'ఆంధ్రజ్యోతి',
+            headline: 'గోదావరి జలాలతో నిండిన ప్రాజెక్టులు: రైతుల్లో చిగురించిన ఆశలు!',
+            summary: 'ఎగువ ప్రాంతాల్లో కురుస్తున్న వర్షాలతో సాగునీటి ప్రాజెక్టులకు భారీగా వరద నీరు చేరుతోంది. యాసంగి పంటలకు ఎలాంటి ఢోకా లేదని అధికారులు తెలిపారు.',
+            category: 'వ్యవసాయ రంగం',
+            readTime: '35 సెకన్ల చదువు',
+            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '25 నిమిషాల క్రితం'
+          },
+          {
+            id: 1502,
+            newspaper: 'ఆంధ్రజ్యోతి',
+            headline: 'అమరావతి రాజధాని నగర పనులకు నూతన ఊపు: వరల్డ్ బ్యాంక్ నిధులు విడుదల',
+            summary: 'ఐకానిక్ భవనాలు, ట్రంక్ రోడ్లు మరియు వరద నియంత్రణ కాలువల పనులను వేగవంతం చేసేందుకు అవసరమైన బడ్జెట్ కేటాయింపులు పూర్తయ్యాయి.',
+            category: 'రాజధాని ప్రత్యేక కథనం',
+            readTime: '40 సెకన్ల చదువు',
+            image: 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '50 నిమిషాల క్రితం'
+          },
+          {
+            id: 1503,
+            newspaper: 'ఆంధ్రజ్యోతి',
+            headline: 'విశాఖ పోర్టులో రికార్డు స్థాయిలో సరుకు రవాణా: దేశంలోనే రెండో స్థానం',
+            summary: 'కంటైనర్ టెర్మినల్ విస్తరణ మరియు ఆటోమేటెడ్ క్రేన్ల సహాయంతో నౌకల టర్న్‌అరౌండ్ సమయం భారీగా తగ్గి వ్యాపార లావాదేవీలు పెరిగాయి.',
+            category: 'పోర్టులు & వాణిజ్యం',
+            readTime: '35 సెకన్ల చదువు',
+            image: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '1 గంట క్రితం'
+          },
+          {
+            id: 1504,
+            newspaper: 'ఆంధ్రజ్యోతి',
+            headline: 'తిరుమల శ్రీవారి దర్శనార్థం భక్తుల రద్దీ: సర్వదర్శనానికి 12 గంటల సమయం',
+            summary: 'వారాంతం మరియు సెలవుల నేపథ్యంలో భక్తుల సౌకర్యార్థం టీటీడీ విస్తృత ఏర్పాట్లు చేసింది. నిరంతర అన్నప్రసాద వితరణ కొనసాగుతోంది.',
+            category: 'ఆధ్యాత్మికం',
+            readTime: '30 సెకన్ల చదువు',
+            image: 'https://images.unsplash.com/photo-1461360370896-922624d12aa1?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '2 గంటల క్రితం'
+          }
+        ]
       },
       {
-        id: 4,
-        newspaper: 'నమస్తే తెలంగాణ',
-        headline: 'టీ20 సమరం: యువ ఆటగాళ్లతో దూకుడుగా బరిలోకి దిగుతున్న భారత జట్టు!',
-        summary: 'నేటి రాత్రి జరిగే హై-వోల్టేజ్ పోరులో గెలుపే లక్ష్యంగా భారత ఆటగాళ్లు ప్రాక్టీస్ పూర్తి చేసుకున్నారు. స్టేడియంలో పండుగ వాతావరణం నెలకొంది.',
-        category: 'క్రీడాలోకం',
-        readTime: '40 సెకన్ల చదువు',
-        image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&auto=format&fit=crop&q=80',
-        timeAgo: '2 గంటల క్రితం'
+        name: 'నమస్తే తెలంగాణ',
+        masthead: 'నమస్తే తెలంగాణ',
+        tagline: 'తెలంగాణ గుండె చప్పుడు • ప్రగతి పథంలో నవ తెలంగాణ',
+        cityEdition: 'గ్రేటర్ హైదరాబాద్ & జిల్లా ఎడిషన్ • ఈరోజు, 16 అక్టోబర్ 2026',
+        news: [
+          {
+            id: 1601,
+            newspaper: 'నమస్తే తెలంగాణ',
+            headline: 'టీ20 సమరం: యువ ఆటగాళ్లతో దూకుడుగా బరిలోకి దిగుతున్న భారత జట్టు!',
+            summary: 'నేటి రాత్రి జరిగే హై-వోల్టేజ్ పోరులో గెలుపే లక్ష్యంగా భారత ఆటగాళ్లు ప్రాక్టీస్ పూర్తి చేసుకున్నారు. స్టేడియంలో పండుగ వాతావరణం నెలకొంది.',
+            category: 'క్రీడాలోకం',
+            readTime: '40 సెకన్ల చదువు',
+            image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '15 నిమిషాల క్రితం'
+          },
+          {
+            id: 1602,
+            newspaper: 'నమస్తే తెలంగాణ',
+            headline: 'టీ-హబ్ వేదికగా సరికొత్త డీప్‌టెక్ మరియు హెల్త్‌కేర్ ఆవిష్కరణల ప్రదర్శన',
+            summary: 'హైదరాబాద్ స్టార్టప్‌లు రూపొందించిన తక్కువ ఖర్చుతో కూడిన రోగనిర్ధారణ పరికరాలను అంతర్జాతీయ సంస్థలు కొనుగోలు చేసేందుకు ఒప్పందాలు చేసుకున్నాయి.',
+            category: 'ఆవిష్కరణలు',
+            readTime: '35 సెకన్ల చదువు',
+            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '45 నిమిషాల క్రితం'
+          },
+          {
+            id: 1603,
+            newspaper: 'నమస్తే తెలంగాణ',
+            headline: 'కాళేశ్వరం ప్రాజెక్టు రిజర్వాయర్ల నుంచి ఆయకట్టుకు తాగు, సాగునీటి విడుదల',
+            summary: 'రైతుల విజ్ఞప్తి మేరకు చెరువులు, కుంటలను నింపేందుకు కాల్వల ద్వారా నీటిని విడుదల చేశారు. భూగర్భ జలాలు గణనీయంగా పెరిగాయి.',
+            category: 'నీటి వనరులు',
+            readTime: '35 సెకన్ల చదువు',
+            image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '1 గంట క్రితం'
+          },
+          {
+            id: 1604,
+            newspaper: 'నమస్తే తెలంగాణ',
+            headline: 'వరంగల్‌లో కాళోజీ కళాక్షేత్రం ఘనంగా ప్రారంభం: తెలంగాణ సాంస్కృతిక వైభవం',
+            summary: 'కవులు, కళాకారుల సమ్మేళనంతో నూతన ఆడిటోరియం ప్రారంభమైంది. జానపద కళారూపాలు, నాటకాలు మరియు సంగీత విభావరి ప్రేక్షకులను అలరించాయి.',
+            category: 'సంస్కృతి & కళలు',
+            readTime: '30 సెకన్ల చదువు',
+            image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '2 గంటల క్రితం'
+          }
+        ]
       }
     ]
   }
@@ -1041,7 +1637,8 @@ const MultilingualTodayNewspaper: React.FC = () => {
   const [viewFormat, setViewFormat] = useState<'shorts' | 'epaper'>('shorts');
 
   const currentConfig = MULTILINGUAL_NEWS_DATA[selectedLang];
-  const newsList = currentConfig.news;
+  const activePaper = currentConfig.papers[selectedPaperIdx] || currentConfig.papers[0];
+  const newsList = activePaper.news;
   const currentShort = newsList[activeShortIdx] || newsList[0];
 
   const handleNextShort = () => {
@@ -1073,6 +1670,7 @@ const MultilingualTodayNewspaper: React.FC = () => {
                 key={langKey}
                 onClick={() => {
                   setSelectedLang(langKey);
+                  setSelectedPaperIdx(0);
                   setActiveShortIdx(0);
                 }}
                 className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer border ${
@@ -1110,31 +1708,49 @@ const MultilingualTodayNewspaper: React.FC = () => {
           </div>
         </div>
 
-        {/* Masthead Banner */}
+        {/* Dynamic Masthead for the Selected Paper */}
         <div className="text-center py-2">
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-950 dark:text-amber-400 font-serif uppercase">
-            {currentConfig.masthead}
+          <div className="inline-block px-3 py-0.5 mb-1 rounded-full bg-amber-500/20 border border-amber-500/30 text-[11px] font-sans font-black tracking-widest text-amber-600 dark:text-amber-400 uppercase">
+            {activePaper.name}
+          </div>
+          <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-slate-950 dark:text-amber-400 font-serif uppercase transition-all">
+            {activePaper.masthead}
           </h2>
-          <p className="text-xs text-slate-600 dark:text-slate-300 font-sans font-medium mt-0.5">
-            {currentConfig.tagline} • <span className="font-bold text-amber-700 dark:text-amber-400">{currentConfig.cityEdition}</span>
+          <p className="text-xs text-slate-600 dark:text-slate-300 font-sans font-medium mt-1">
+            {activePaper.tagline} • <span className="font-bold text-amber-700 dark:text-amber-400">{activePaper.cityEdition}</span>
           </p>
         </div>
 
         {/* Publication Selector Tabs in this Language */}
-        <div className="flex items-center justify-center gap-1.5 pt-1 overflow-x-auto no-scrollbar font-sans">
-          {currentConfig.papers.map((paperName, pIdx) => (
-            <button
-              key={paperName}
-              onClick={() => setSelectedPaperIdx(pIdx)}
-              className={`px-3 py-1 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap border ${
-                selectedPaperIdx === pIdx
-                  ? 'bg-slate-900 text-white dark:bg-amber-500 dark:text-slate-950 border-transparent shadow-xs'
-                  : 'bg-white/80 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-200'
-              }`}
-            >
-              {paperName}
-            </button>
-          ))}
+        <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
+          <div className="text-[10px] font-sans font-bold text-slate-500 uppercase tracking-wider text-center mb-1.5">
+            Select Newspaper Edition:
+          </div>
+          <div className="flex items-center justify-center gap-2 overflow-x-auto no-scrollbar font-sans py-1">
+            {currentConfig.papers.map((paper, pIdx) => {
+              const isSelected = selectedPaperIdx === pIdx;
+              return (
+                <button
+                  key={paper.name}
+                  onClick={() => {
+                    setSelectedPaperIdx(pIdx);
+                    setActiveShortIdx(0);
+                  }}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap border flex items-center gap-1.5 shadow-xs ${
+                    isSelected
+                      ? 'bg-amber-500 text-slate-950 border-amber-400 ring-2 ring-amber-400/50 scale-105 font-black'
+                      : 'bg-white/90 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  <span className="text-sm">📰</span>
+                  <span>{paper.name}</span>
+                  {isSelected && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-950 ml-0.5 animate-ping" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -1142,7 +1758,7 @@ const MultilingualTodayNewspaper: React.FC = () => {
       <div className="flex items-center justify-between">
         <span className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
           <Radio className="w-3.5 h-3.5 text-red-500 animate-pulse" />
-          <span>Today's Live Stories ({newsList.length} Articles)</span>
+          <span>{activePaper.name} Live Stories ({newsList.length} Articles)</span>
         </span>
 
         <div className="flex items-center gap-1 bg-slate-200 dark:bg-slate-800 p-1 rounded-xl">
@@ -1176,7 +1792,7 @@ const MultilingualTodayNewspaper: React.FC = () => {
               <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-black uppercase tracking-wider">
                 {currentShort.category}
               </span>
-              <span className="font-bold">• {currentShort.newspaper}</span>
+              <span className="font-bold text-amber-300">• {currentShort.newspaper}</span>
             </div>
             <span className="text-[11px] font-mono text-amber-400 font-bold">
               {activeShortIdx + 1} of {newsList.length} Shorts
@@ -1188,7 +1804,7 @@ const MultilingualTodayNewspaper: React.FC = () => {
               <img 
                 src={currentShort.image} 
                 alt={currentShort.headline}
-                className="w-full h-full object-cover" 
+                className="w-full h-full object-cover transition-transform duration-500 hover:scale-105" 
               />
               <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded-lg bg-black/80 backdrop-blur-xs text-[10px] font-bold text-white">
                 {currentShort.readTime}
@@ -1247,9 +1863,12 @@ const MultilingualTodayNewspaper: React.FC = () => {
           
           {/* Main Top Headline */}
           <div className="border-b-2 border-slate-300 dark:border-slate-700 pb-4">
-            <span className="px-2 py-0.5 rounded-sm bg-rose-600 text-white font-sans text-[10px] font-black uppercase tracking-wider">
-              Lead Story
-            </span>
+            <div className="flex items-center justify-between mb-1">
+              <span className="px-2 py-0.5 rounded-sm bg-rose-600 text-white font-sans text-[10px] font-black uppercase tracking-wider">
+                Lead Story • {activePaper.name}
+              </span>
+              <span className="text-xs text-slate-500 font-sans">{activePaper.cityEdition}</span>
+            </div>
             <h3 className="text-xl sm:text-2xl font-black leading-snug mt-1.5 text-slate-950 dark:text-white">
               {newsList[0]?.headline}
             </h3>

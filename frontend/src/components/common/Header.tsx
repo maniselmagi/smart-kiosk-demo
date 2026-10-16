@@ -129,7 +129,12 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* Dark/Light Mode Quick Toggle (Placed Last as requested) */}
             <button
-              onClick={toggleTheme}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleTheme();
+              }}
               className="p-2 rounded-xl border transition-all flex items-center justify-center text-xs bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-amber-400 border-slate-200/70 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 shadow-xs cursor-pointer"
               title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               aria-label="Toggle Theme"

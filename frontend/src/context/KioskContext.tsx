@@ -234,15 +234,10 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const setTheme = useCallback((newTheme: 'light' | 'dark') => {
     setThemeState(newTheme);
-    storageService.saveTheme(newTheme);
   }, []);
 
   const toggleTheme = useCallback(() => {
-    setThemeState((prev) => {
-      const next = prev === 'light' ? 'dark' : 'light';
-      storageService.saveTheme(next);
-      return next;
-    });
+    setThemeState((prev) => (prev === 'light' ? 'dark' : 'light'));
   }, []);
 
   // Continuously synchronize meal time automatically based on system clock
@@ -257,20 +252,30 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => clearInterval(timer);
   }, []);
 
-  // Synchronize HTML element classes for Tailwind dark: variants
+  // Synchronize HTML & Body element classes for Tailwind dark: variants and persist
   useEffect(() => {
     if (typeof document !== 'undefined') {
       const root = document.documentElement;
+      const body = document.body;
       if (theme === 'dark') {
         root.classList.add('dark');
         root.classList.remove('light');
         root.setAttribute('data-theme', 'dark');
+        if (body) {
+          body.classList.add('dark');
+          body.classList.remove('light');
+        }
       } else {
         root.classList.remove('dark');
         root.classList.add('light');
         root.setAttribute('data-theme', 'light');
+        if (body) {
+          body.classList.remove('dark');
+          body.classList.add('light');
+        }
       }
     }
+    storageService.saveTheme(theme);
   }, [theme]);
 
   // Synchronize route if user navigates back/forward or changes hash
@@ -365,7 +370,8 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           break;
         case 'THEME_CHANGED':
           if (msg.payload === 'light' || msg.payload === 'dark') {
-            setThemeState(msg.payload);
+            const incoming = msg.payload as 'light' | 'dark';
+            setThemeState((current) => (current !== incoming ? incoming : current));
           }
           break;
         case 'LANGUAGE_CHANGED':

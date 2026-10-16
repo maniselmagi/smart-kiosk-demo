@@ -205,7 +205,9 @@ export const storageService = {
   saveTheme(theme: 'light' | 'dark') {
     try {
       localStorage.setItem(STORAGE_KEYS.THEME, theme);
-      this.broadcast({ type: 'THEME_CHANGED', payload: theme });
+      if (broadcastChannel) {
+        broadcastChannel.postMessage({ type: 'THEME_CHANGED', payload: theme });
+      }
     } catch (e) {
       console.error(e);
     }

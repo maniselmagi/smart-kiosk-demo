@@ -27,19 +27,40 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
     isAccessibilityMode
   } = useKiosk();
 
+  const [isOpenAnimated, setIsOpenAnimated] = React.useState(false);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => setIsOpenAnimated(true), 60);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div 
-      className={`min-h-[100dvh] w-full flex flex-col justify-between relative overflow-hidden transition-colors duration-300 select-none ${
+      className={`min-h-[100dvh] w-full flex flex-col justify-between relative overflow-hidden transition-colors duration-500 select-none ${
         isAccessibilityMode 
           ? 'bg-slate-950 text-white' 
           : 'bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100'
       }`}
     >
+      {/* CINEMATIC APERTURE / CURTAIN OPEN TRANSITION OVERLAY */}
+      <div 
+        className={`fixed inset-0 z-50 pointer-events-none transition-all duration-1000 ease-out flex items-center justify-center ${
+          isOpenAnimated ? 'opacity-0 scale-110 pointer-events-none' : 'opacity-100 scale-100 bg-slate-950'
+        }`}
+      >
+        <div className="text-center space-y-3">
+          <div className="w-16 h-16 rounded-full border-2 border-amber-500/60 border-t-amber-400 animate-spin mx-auto" />
+          <p className="text-amber-400 text-xs font-black tracking-widest uppercase">Opening Royal Ember...</p>
+        </div>
+      </div>
+
       {/* 1. TOP FLOATING BRAND & CONTROLS BAR */}
-      <header className="absolute top-4 inset-x-4 sm:top-6 sm:inset-x-8 lg:inset-x-12 flex items-center justify-between z-30 pointer-events-none">
+      <header className={`absolute top-4 inset-x-4 sm:top-6 sm:inset-x-8 lg:inset-x-12 flex items-center justify-between z-30 pointer-events-none transition-all duration-700 delay-150 ${
+        isOpenAnimated ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
+      }`}>
         {/* Subtle Brand Watermark Badge */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-amber-500/30 text-amber-300 shadow-lg pointer-events-auto">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/45 backdrop-blur-md border border-amber-500/30 text-amber-300 shadow-lg pointer-events-auto">
+          <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
           <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase font-display">
             Royal Ember Dining
           </span>
@@ -50,7 +71,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           <button
             type="button"
             onClick={toggleTheme}
-            className="p-2.5 sm:p-3 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md text-amber-300 hover:text-white transition-all border border-white/20 active:scale-95 cursor-pointer shadow-xl"
+            className="p-2.5 sm:p-3 rounded-full bg-black/45 hover:bg-black/65 backdrop-blur-md text-amber-300 hover:text-white transition-all border border-white/20 active:scale-95 cursor-pointer shadow-xl"
             title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             aria-label="Toggle Theme"
           >
@@ -59,13 +80,20 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
         </div>
       </header>
 
-      {/* 2. HERO RESTAURANT FOOD PHOTOGRAPHY (Full dish shown, no head cutoff, tablet-optimized) */}
+      {/* 2. HERO RESTAURANT FOOD PHOTOGRAPHY (Cinematic Entrance Zoom & Fade) */}
       <div className="relative w-full h-[45vh] sm:h-[48vh] md:h-[50vh] lg:h-[52vh] overflow-hidden shrink-0">
         <img
           src={restaurantFoodImg}
           alt="Royal Ember Gourmet Signature Culinary Presentation"
-          className="w-full h-full object-cover object-center filter brightness-[0.96] contrast-[1.04] transition-transform duration-1000 scale-[1.01]"
+          className={`w-full h-full object-cover object-center filter brightness-[0.96] contrast-[1.04] transition-all duration-1200 ease-out ${
+            isOpenAnimated ? 'scale-100 opacity-100 blur-0' : 'scale-115 opacity-20 blur-[8px]'
+          }`}
         />
+
+        {/* Ambient Top Golden Beam */}
+        <div className={`absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 bg-amber-500/20 rounded-full blur-3xl pointer-events-none transition-opacity duration-1000 ${
+          isOpenAnimated ? 'opacity-100' : 'opacity-0'
+        }`} />
 
         {/* Soft top gradient for header readability */}
         <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/60 via-black/25 to-transparent pointer-events-none" />
@@ -78,7 +106,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
       <div className="flex-1 flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-24 pt-2 sm:pt-4 pb-8 sm:pb-12 md:pb-14 z-10 max-w-4xl mx-auto w-full text-center">
         
         {/* Core Brand & Supporting Content */}
-        <div className="space-y-4 sm:space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-600">
+        <div className={`space-y-4 sm:space-y-5 transition-all duration-1000 delay-200 ease-out ${
+          isOpenAnimated ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'
+        }`}>
           
           {/* Subtitle Eyebrow */}
           <div className="inline-flex items-center justify-center gap-2">
@@ -89,9 +119,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             <span className="h-[1px] w-6 sm:w-10 bg-amber-500/60" />
           </div>
 
-          {/* Grand Prominent Highlighted Restaurant Title */}
+          {/* Grand Prominent Highlighted Restaurant Title with Shimmer Glow */}
           <div>
-            <h1 className="font-royal text-4xl sm:text-6xl md:text-7xl font-black tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 dark:from-amber-200 dark:via-amber-400 dark:to-yellow-500 drop-shadow-[0_4px_25px_rgba(245,158,11,0.35)] leading-tight">
+            <h1 className="font-royal text-4xl sm:text-6xl md:text-7xl font-black tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-amber-400 to-yellow-500 dark:from-amber-200 dark:via-amber-400 dark:to-yellow-400 drop-shadow-[0_4px_25px_rgba(245,158,11,0.4)] leading-tight animate-gold-shimmer">
               ROYAL EMBER
             </h1>
             
@@ -117,15 +147,15 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
 
           {/* Tablet Feature Highlights (fills tablet width horizontally with luxury hospitality badges) */}
           <div className="pt-2 sm:pt-3 flex flex-wrap items-center justify-center gap-2 sm:gap-3 max-w-2xl mx-auto">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm hover:scale-105 transition-transform">
               <Utensils className="w-3.5 h-3.5 text-amber-500" />
               <span>Chef's Artisanal Menu</span>
             </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm hover:scale-105 transition-transform">
               <Clock className="w-3.5 h-3.5 text-amber-500" />
               <span>Fast Table-Side Service</span>
             </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm hover:scale-105 transition-transform">
               <Wine className="w-3.5 h-3.5 text-amber-500" />
               <span>Fine Dining Experience</span>
             </div>
@@ -133,9 +163,11 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
 
         </div>
 
-        {/* 4. BOTTOM ACTION CONTROLLER PILL (Balanced & Ergonomic for Tablet Touch) */}
-        <div className="pt-6 sm:pt-8 md:pt-10 w-full max-w-xl mx-auto">
-          <div className="p-2 sm:p-2.5 rounded-full bg-slate-100 dark:bg-slate-900/95 border border-slate-200/90 dark:border-slate-800 shadow-2xl flex items-center justify-between gap-3">
+        {/* 4. BOTTOM ACTION CONTROLLER PILL (Balanced & Ergonomic for Tablet Touch with Open Animation) */}
+        <div className={`pt-6 sm:pt-8 md:pt-10 w-full max-w-xl mx-auto transition-all duration-1000 delay-400 ease-out ${
+          isOpenAnimated ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-90'
+        }`}>
+          <div className="p-2 sm:p-2.5 rounded-full bg-slate-100 dark:bg-slate-900/95 border border-slate-200/90 dark:border-slate-800 shadow-2xl flex items-center justify-between gap-3 animate-pulse-ring">
             
             {/* Left Circular Button (Food Cloche / Menu Icon) */}
             <button
@@ -157,12 +189,12 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
               className="flex-1 h-13 sm:h-15 px-3 sm:px-4 pr-6 sm:pr-8 rounded-full bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-700/80 shadow-md flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-[0.98] transition-all cursor-pointer group"
             >
               {/* Black Circular Icon on the Left */}
-              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950 dark:bg-amber-500 text-white dark:text-slate-950 flex items-center justify-center shadow-md shrink-0">
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950 dark:bg-amber-500 text-white dark:text-slate-950 flex items-center justify-center shadow-md shrink-0 group-hover:scale-105 transition-transform">
                 <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
 
               {/* Start Label */}
-              <span className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white tracking-wider">
+              <span className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white tracking-wider group-hover:text-amber-500 transition-colors">
                 Start Ordering
               </span>
 

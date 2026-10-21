@@ -131,6 +131,29 @@ export interface TranslationDictionary {
   onlyServedIn: string;
   changeLanguage: string;
   allDay: string;
+  chooseLanguageHeader: string;
+  selectLanguageHelpText: string;
+  youSelected: string;
+  allLanguages: string;
+  searchPlaceholder: string;
+  continueBtn: string;
+  backBtn: string;
+  tableAllocationTitle: string;
+  tableAllocationSubtitle: string;
+  guestInfoTitle: string;
+  yourNameLabel: string;
+  yourNamePlaceholder: string;
+  phoneLabel: string;
+  phonePlaceholder: string;
+  howManyGuestsTitle: string;
+  confirmedTableTitle: string;
+  proceedToMenuBtn: string;
+  stepTableAllocation: string;
+  coupleDuo: string;
+  standardFamily: string;
+  largeGroup: string;
+  celebrationFeast: string;
+  royalBanquet: string;
 }
 
 export const translations: Record<Language, TranslationDictionary> = {
@@ -241,6 +264,29 @@ export const translations: Record<Language, TranslationDictionary> = {
     onlyServedIn: "Served during",
     changeLanguage: "Change Language",
     allDay: "All Day",
+    chooseLanguageHeader: "Choose the language",
+    selectLanguageHelpText: "Select your preferred language below This helps us serve you better.",
+    youSelected: "You Selected",
+    allLanguages: "All Languages",
+    searchPlaceholder: "Search",
+    continueBtn: "Continue",
+    backBtn: "Back",
+    tableAllocationTitle: "Guest Details & Smart Table Allocation",
+    tableAllocationSubtitle: "Tell us how many guests are dining so our concierge allocates the most suitable dining table and dedicated section attendant for your family.",
+    guestInfoTitle: "1. Guest / Family Information (Optional)",
+    yourNameLabel: "Your Name / Family Name",
+    yourNamePlaceholder: "e.g. Mani S. / Rajesh Kumar",
+    phoneLabel: "Mobile / WhatsApp (For Digital Bill)",
+    phonePlaceholder: "e.g. 98765 43210",
+    howManyGuestsTitle: "2. How Many Guests Are Dining Today?",
+    confirmedTableTitle: "Confirmed Table Allocation",
+    proceedToMenuBtn: "Proceed to Digital Menu",
+    stepTableAllocation: "Step 2 of 2: Table Allocation",
+    coupleDuo: "1-2 Duo",
+    standardFamily: "3-4 Family",
+    largeGroup: "5-6 Large",
+    celebrationFeast: "7-8 Feast",
+    royalBanquet: "10+ Royal",
   },
   ta: {
     welcomeTo: "வணக்கம்",
@@ -349,6 +395,29 @@ export const translations: Record<Language, TranslationDictionary> = {
     onlyServedIn: "வழங்கப்படும் நேரம்",
     changeLanguage: "மொழியை மாற்றுக",
     allDay: "முழு நாளும்",
+    chooseLanguageHeader: "மொழியைத் தேர்ந்தெடுக்கவும்",
+    selectLanguageHelpText: "கீழே உங்கள் விருப்பமான மொழியைத் தேர்ந்தெடுக்கவும். இது உங்களுக்கு சிறந்த சேவை அளிக்க உதவும்.",
+    youSelected: "நீங்கள் தேர்ந்தெடுத்தது",
+    allLanguages: "அனைத்து மொழிகள்",
+    searchPlaceholder: "தேடு...",
+    continueBtn: "தொடரவும்",
+    backBtn: "பின்செல்க",
+    tableAllocationTitle: "விருந்தினர் விவரங்கள் & ஸ்மார்ட் மேஜை ஒதுக்கீடு",
+    tableAllocationSubtitle: "உங்கள் குடும்பத்திற்கு மிகவும் பொருத்தமான மேஜை மற்றும் உணவுப் பணியாளரை ஒதுக்க விருந்தினர்களின் எண்ணிக்கையைத் தெரிவிக்கவும்.",
+    guestInfoTitle: "1. விருந்தினர் / குடும்ப விவரங்கள் (விருப்பத்தேர்வு)",
+    yourNameLabel: "உங்கள் பெயர் / குடும்பப் பெயர்",
+    yourNamePlaceholder: "எ.கா. மணி எஸ். / ராஜேஷ் குமார்",
+    phoneLabel: "கைபேசி எண் (டிஜிட்டல் பில் பெற)",
+    phonePlaceholder: "எ.கா. 98765 43210",
+    howManyGuestsTitle: "2. இன்று எத்தனை விருந்தினர்கள் உணவருந்துகிறீர்கள்?",
+    confirmedTableTitle: "உறுதிசெய்யப்பட்ட மேஜை ஒதுக்கீடு",
+    proceedToMenuBtn: "டிஜிட்டல் மெனுவிற்குச் செல்லவும்",
+    stepTableAllocation: "படி 2 / 2: மேஜை ஒதுக்கீடு",
+    coupleDuo: "1-2 ஜோடி",
+    standardFamily: "3-4 குடும்பம்",
+    largeGroup: "5-6 பெரிய குழு",
+    celebrationFeast: "7-8 விருந்து",
+    royalBanquet: "10+ ராயல் குழு",
   },
   hi: {
     welcomeTo: "स्वागत है",
@@ -457,6 +526,29 @@ export const translations: Record<Language, TranslationDictionary> = {
     onlyServedIn: "परोसने का समय",
     changeLanguage: "भाषा बदलें",
     allDay: "पूरे दिन",
+    chooseLanguageHeader: "भाषा चुनें",
+    selectLanguageHelpText: "नीचे अपनी पसंदीदा भाषा चुनें। इससे हमें आपकी बेहतर सेवा करने में मदद मिलती है।",
+    youSelected: "आपने चुना",
+    allLanguages: "सभी भाषाएँ",
+    searchPlaceholder: "खोजें...",
+    continueBtn: "आगे बढ़ें",
+    backBtn: "पीछे जाएं",
+    tableAllocationTitle: "अतिथि विवरण एवं स्मार्ट टेबल आवंटन",
+    tableAllocationSubtitle: "कृपया बताएं कि कितने अतिथि भोजन कर रहे हैं ताकि हम आपके परिवार के लिए सबसे उपयुक्त टेबल आवंटित कर सकें।",
+    guestInfoTitle: "1. अतिथि / परिवार विवरण (वैकल्पिक)",
+    yourNameLabel: "आपका नाम / परिवार का नाम",
+    yourNamePlaceholder: "उदा. राजेश कुमार / मनी एस.",
+    phoneLabel: "मोबाइल नंबर (डिजिटल बिल के लिए)",
+    phonePlaceholder: "उदा. 98765 43210",
+    howManyGuestsTitle: "2. आज कितने अतिथि भोजन कर रहे हैं?",
+    confirmedTableTitle: "पुष्ट टेबल आवंटन",
+    proceedToMenuBtn: "डिजिटल मेनू पर जाएं",
+    stepTableAllocation: "चरण 2 / 2: टेबल आवंटन",
+    coupleDuo: "1-2 युगल",
+    standardFamily: "3-4 परिवार",
+    largeGroup: "5-6 बड़ा समूह",
+    celebrationFeast: "7-8 दावत",
+    royalBanquet: "10+ शाही समूह",
   },
   te: {
     welcomeTo: "స్వాగతం",
@@ -565,6 +657,29 @@ export const translations: Record<Language, TranslationDictionary> = {
     onlyServedIn: "వడ్డించే సమయం",
     changeLanguage: "భాష మార్చండి",
     allDay: "రోజంతా",
+    chooseLanguageHeader: "భాషను ఎంచుకోండి",
+    selectLanguageHelpText: "దయచేసి మీ ప్రాధాన్య భాషను క్రింద ఎంచుకోండి. ఇది మీకు మరింత మెరుగైన సేవలను అందించడానికి సహాయపడుతుంది.",
+    youSelected: "మీరు ఎంచుకున్నది",
+    allLanguages: "అన్ని భాషలు",
+    searchPlaceholder: "శోధించండి...",
+    continueBtn: "కొనసాగించండి",
+    backBtn: "వెనుకకు",
+    tableAllocationTitle: "అతిథి వివరాలు & స్మార్ట్ టేబుల్ కేటాయింపు",
+    tableAllocationSubtitle: "మీ కుటుంబానికి అత్యంత అనుకూలమైన టేబుల్‌ను కేటాయించడానికి దయచేసి ఎంతమంది అతిథులు భోజనం చేస్తున్నారో తెలపండి.",
+    guestInfoTitle: "1. అతిథి / కుటుంబ వివరాలు (ఐచ్ఛికం)",
+    yourNameLabel: "మీ పేరు / కుటుంబ పేరు",
+    yourNamePlaceholder: "ఉదా. రాజేష్ కుమార్ / మణి ఎస్.",
+    phoneLabel: "మొబైల్ నంబర్ (డిజిటల్ బిల్లు కోసం)",
+    phonePlaceholder: "ఉదా. 98765 43210",
+    howManyGuestsTitle: "2. ఈరోజు ఎంతమంది భోజనం చేస్తున్నారు?",
+    confirmedTableTitle: "కేటాయించిన టేబుల్",
+    proceedToMenuBtn: "డిజిటల్ మెనూకి వెళ్లండి",
+    stepTableAllocation: "దశ 2 / 2: టేబుల్ కేటాయింపు",
+    coupleDuo: "1-2 జంట",
+    standardFamily: "3-4 కుటుంబం",
+    largeGroup: "5-6 బృందం",
+    celebrationFeast: "7-8 విందు",
+    royalBanquet: "10+ రాయల్ గ్రూప్",
   },
   es: {
     welcomeTo: "Bienvenido a",
@@ -673,6 +788,29 @@ export const translations: Record<Language, TranslationDictionary> = {
     onlyServedIn: "Servido durante",
     changeLanguage: "Cambiar Idioma",
     allDay: "Todo el día",
+    chooseLanguageHeader: "Elija el idioma",
+    selectLanguageHelpText: "Seleccione su idioma preferido a continuación. Esto nos ayuda a servirle mejor.",
+    youSelected: "Ha seleccionado",
+    allLanguages: "Todos los idiomas",
+    searchPlaceholder: "Buscar...",
+    continueBtn: "Continuar",
+    backBtn: "Volver",
+    tableAllocationTitle: "Detalles de Invitados y Asignación de Mesa",
+    tableAllocationSubtitle: "Indíquenos cuántos comensales nos acompañan para asignar la mesa más adecuada y su anfitrión de servicio.",
+    guestInfoTitle: "1. Información de Invitados / Familia (Opcional)",
+    yourNameLabel: "Su Nombre / Familia",
+    yourNamePlaceholder: "Ej. Carlos Gómez",
+    phoneLabel: "Móvil / WhatsApp (Para Factura Digital)",
+    phonePlaceholder: "Ej. 98765 43210",
+    howManyGuestsTitle: "2. ¿Cuántos Comensales nos Acompañan?",
+    confirmedTableTitle: "Mesa Asignada Confirmada",
+    proceedToMenuBtn: "Proceder al Menú Digital",
+    stepTableAllocation: "Paso 2 de 2: Asignación de Mesa",
+    coupleDuo: "1-2 Pareja",
+    standardFamily: "3-4 Familia",
+    largeGroup: "5-6 Grupo Grande",
+    celebrationFeast: "7-8 Banquete",
+    royalBanquet: "10+ Real",
   },
   ar: {} as TranslationDictionary,
   fr: {} as TranslationDictionary,
@@ -682,18 +820,163 @@ export const translations: Record<Language, TranslationDictionary> = {
   ml: {} as TranslationDictionary,
 };
 
-translations.ar = { ...translations.en, welcomeTo: "مرحبا بكم في", startOrdering: "ابدأ الطلب", selectLanguage: "اختر لغتك", continueInLanguage: "متابعة" };
-translations.fr = { ...translations.en, welcomeTo: "Bienvenue à", startOrdering: "Commander", selectLanguage: "Choisissez votre langue", continueInLanguage: "Continuer" };
-translations.de = { ...translations.en, welcomeTo: "Willkommen bei", startOrdering: "Bestellen", selectLanguage: "Wählen Sie Ihre Sprache", continueInLanguage: "Weiter" };
-translations.ko = { ...translations.en, welcomeTo: "환영합니다", startOrdering: "주문하기", selectLanguage: "언어를 선택하세요", continueInLanguage: "계속하기" };
-translations.kn = { ...translations.en, welcomeTo: "ಸ್ವಾಗತ", startOrdering: "ಆರ್ಡರ್ ಪ್ರಾರಂಭಿಸಿ", selectLanguage: "ನಿಮ್ಮ ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ", continueInLanguage: "ಮುಂದುವರಿಸಿ" };
-translations.ml = { ...translations.en, welcomeTo: "സ്വാഗതം", startOrdering: "ഓർഡർ ആരംഭിക്കുക", selectLanguage: "നിങ്ങളുടെ ഭാഷ തിരഞ്ഞെടുക്കുക", continueInLanguage: "തുടരുക" };
+translations.ar = {
+  ...translations.en,
+  welcomeTo: "مرحبا بكم في",
+  startOrdering: "ابدأ الطلب",
+  selectLanguage: "اختر لغتك",
+  continueInLanguage: "متابعة",
+  chooseLanguageHeader: "اختر اللغة",
+  selectLanguageHelpText: "حدد لغتك المفضلة أدناه. يساعدنا هذا في خدمتك بشكل أفضل.",
+  youSelected: "لقد اخترت",
+  allLanguages: "جميع اللغات",
+  searchPlaceholder: "بحث...",
+  continueBtn: "متابعة",
+  backBtn: "رجوع",
+  tableAllocationTitle: "تفاصيل الضيوف وتخصيص الطاولة الذكي",
+  tableAllocationSubtitle: "أخبرنا بعدد الضيوف لتخصيص أنسب طاولة وموظف خدمة لعائلتك.",
+  guestInfoTitle: "1. معلومات الضيوف / العائلة (اختياري)",
+  yourNameLabel: "اسمك / اسم العائلة",
+  yourNamePlaceholder: "مثال: محمد أحمد",
+  phoneLabel: "رقم الجوال (للفاتورة الإلكترونية)",
+  phonePlaceholder: "مثال: 0501234567",
+  howManyGuestsTitle: "2. كم عدد الضيوف اليوم؟",
+  confirmedTableTitle: "الطاولة المخصصة المؤكدة",
+  proceedToMenuBtn: "الانتقال إلى القائمة الرقمية",
+  stepTableAllocation: "الخطوة 2 من 2: تخصيص الطاولة",
+  coupleDuo: "1-2 ثنائي",
+  standardFamily: "3-4 عائلة",
+  largeGroup: "5-6 مجموعة كبيرة",
+  celebrationFeast: "7-8 وليمة",
+  royalBanquet: "10+ ملكي",
+};
+
+translations.kn = {
+  ...translations.en,
+  welcomeTo: "ಸ್ವಾಗತ",
+  startOrdering: "ಆರ್ಡರ್ ಪ್ರಾರಂಭಿಸಿ",
+  selectLanguage: "ನಿಮ್ಮ ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+  continueInLanguage: "ಮುಂದುವರಿಸಿ",
+  chooseLanguageHeader: "ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+  selectLanguageHelpText: "ಕೆಳಗೆ ನಿಮ್ಮ ಆದ್ಯತೆಯ ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ. ಇದು ನಿಮಗೆ ಉತ್ತಮ ಸೇವೆ ನೀಡಲು ಸಹಾಯ ಮಾಡುತ್ತದೆ.",
+  youSelected: "ನೀವು ಆಯ್ಕೆ ಮಾಡಿದ್ದು",
+  allLanguages: "ಎಲ್ಲಾ ಭಾಷೆಗಳು",
+  searchPlaceholder: "ಹುಡುಕಿ...",
+  continueBtn: "ಮುಂದುವರಿಸಿ",
+  backBtn: "ಹಿಂದಕ್ಕೆ",
+  tableAllocationTitle: "ಅತಿಥಿ ವಿವರಗಳು ಮತ್ತು ಸ್ಮಾರ್ಟ್ ಟೇಬಲ್ ಹಂಚಿಕೆ",
+  tableAllocationSubtitle: "ನಿಮ್ಮ ಕುಟುಂಬಕ್ಕೆ ಅತ್ಯಂತ ಸೂಕ್ತವಾದ ಊಟದ ಟೇಬಲ್ ಅನ್ನು ನಿಯೋಜಿಸಲು ಎಷ್ಟು ಜನರು ಊಟ ಮಾಡುತ್ತಿದ್ದಾರೆಂದು ತಿಳಿಸಿ.",
+  guestInfoTitle: "1. ಅತಿಥಿ / ಕುಟುಂಬದ ಮಾಹಿತಿ (ಐಚ್ಛಿಕ)",
+  yourNameLabel: "ನಿಮ್ಮ ಹೆಸರು / ಕುಟುಂಬದ ಹೆಸರು",
+  yourNamePlaceholder: "ಉದಾ. ರಾಜೇಶ್ ಕುಮಾರ್",
+  phoneLabel: "ಮೊಬೈಲ್ ಸಂಖ್ಯೆ (ಡಿಜಿಟಲ್ ಬಿಲ್ ಗಾಗಿ)",
+  phonePlaceholder: "ಉದಾ. 98765 43210",
+  howManyGuestsTitle: "2. ಇಂದು ಎಷ್ಟು ಅತಿಥಿಗಳು ಊಟ ಮಾಡುತ್ತಿದ್ದಾರೆ?",
+  confirmedTableTitle: "ಖಚಿತಪಡಿಸಿದ ಟೇಬಲ್ ಹಂಚಿಕೆ",
+  proceedToMenuBtn: "ಡಿಜಿಟಲ್ ಮೆನುಗೆ ಮುಂದುವರಿಯಿರಿ",
+  stepTableAllocation: "ಹಂತ 2 / 2: ಟೇಬಲ್ ಹಂಚಿಕೆ",
+  coupleDuo: "1-2 ಜೋಡಿ",
+  standardFamily: "3-4 ಕುಟುಂಬ",
+  largeGroup: "5-6 ಗುಂಪು",
+  celebrationFeast: "7-8 ಔತಣಕೂಟ",
+  royalBanquet: "10+ ರಾಜಮನೆತನ",
+};
+
+translations.ml = {
+  ...translations.en,
+  welcomeTo: "സ്വാഗതം",
+  startOrdering: "ഓർഡർ ആരംഭിക്കുക",
+  selectLanguage: "നിങ്ങളുടെ ഭാഷ തിരഞ്ഞെടുക്കുക",
+  continueInLanguage: "തുടരുക",
+  chooseLanguageHeader: "ഭാഷ തിരഞ്ഞെടുക്കുക",
+  selectLanguageHelpText: "താഴെ നിങ്ങളുടെ ഇഷ്ടപ്പെട്ട ഭാഷ തിരഞ്ഞെടുക്കുക. ഇത് നിങ്ങളെ മികച്ച രീതിയിൽ സേവിക്കാൻ സഹായിക്കും.",
+  youSelected: "നിങ്ങൾ തിരഞ്ഞെടുത്തത്",
+  allLanguages: "എല്ലാ ഭാഷകളും",
+  searchPlaceholder: "തിരയുക...",
+  continueBtn: "തുടരുക",
+  backBtn: "തിരികെ",
+  tableAllocationTitle: "അതിഥി വിവരങ്ങളും സ്മാർട്ട് ടേബിൾ അലോക്കേഷനും",
+  tableAllocationSubtitle: "നിങ്ങളുടെ കുടുംബത്തിന് അനുയോജ്യമായ ടേബിൾ നൽകുന്നതിനായി എത്ര പേർ ഉണ്ടെന്ന് അറിയിക്കുക.",
+  guestInfoTitle: "1. അതിഥി വിവരങ്ങൾ (ഓപ്ഷണൽ)",
+  yourNameLabel: "നിങ്ങളുടെ പേര് / കുടുംബപ്പേര്",
+  yourNamePlaceholder: "ഉദാ. രാജേഷ് കുമാർ",
+  phoneLabel: "മൊബൈൽ നമ്പർ (ഡിജിറ്റൽ ബില്ലിനായി)",
+  phonePlaceholder: "ഉദാ. 98765 43210",
+  howManyGuestsTitle: "2. ഇന്ന് എത്ര പേർ ഭക്ഷണം കഴിക്കുന്നു?",
+  confirmedTableTitle: "സ്ഥിരീകരിച്ച ടേബിൾ",
+  proceedToMenuBtn: "ഡിജിറ്റൽ മെനുവിലേക്ക് പോകുക",
+  stepTableAllocation: "ഘട്ടം 2 / 2: ടേബിൾ അലോക്കേഷൻ",
+  coupleDuo: "1-2 ജോഡി",
+  standardFamily: "3-4 കുടുംബം",
+  largeGroup: "5-6 വലിയ സംഘം",
+  celebrationFeast: "7-8 വിരുന്ന്",
+  royalBanquet: "10+ റോയൽ ഗ്രൂപ്പ്",
+};
+
+translations.fr = {
+  ...translations.en,
+  welcomeTo: "Bienvenue à",
+  startOrdering: "Commander",
+  selectLanguage: "Choisissez votre langue",
+  continueInLanguage: "Continuer",
+  chooseLanguageHeader: "Choisissez la langue",
+  selectLanguageHelpText: "Sélectionnez votre langue préférée ci-dessous pour nous aider à mieux vous servir.",
+  youSelected: "Vous avez sélectionné",
+  allLanguages: "Toutes les langues",
+  searchPlaceholder: "Rechercher...",
+  continueBtn: "Continuer",
+  backBtn: "Retour",
+  tableAllocationTitle: "Détails des invités & Attribution de table",
+  tableAllocationSubtitle: "Indiquez le nombre de convives pour nous permettre de vous attribuer la table idéale.",
+  proceedToMenuBtn: "Accéder au menu digital",
+  stepTableAllocation: "Étape 2 sur 2 : Attribution de table",
+};
+
+translations.de = {
+  ...translations.en,
+  welcomeTo: "Willkommen bei",
+  startOrdering: "Bestellen",
+  selectLanguage: "Wählen Sie Ihre Sprache",
+  continueInLanguage: "Weiter",
+  chooseLanguageHeader: "Wählen Sie die Sprache",
+  selectLanguageHelpText: "Wählen Sie unten Ihre bevorzugte Sprache für das beste Bestellerlebnis.",
+  youSelected: "Ausgewählt",
+  allLanguages: "Alle Sprachen",
+  searchPlaceholder: "Suchen...",
+  continueBtn: "Weiter",
+  backBtn: "Zurück",
+  tableAllocationTitle: "Gästedetails & Tischzuweisung",
+  tableAllocationSubtitle: "Bitte geben Sie die Gästeanzahl an, damit wir Ihnen den passenden Tisch zuweisen können.",
+  proceedToMenuBtn: "Weiter zur digitalen Speisekarte",
+  stepTableAllocation: "Schritt 2 von 2: Tischzuweisung",
+};
+
+translations.ko = {
+  ...translations.en,
+  welcomeTo: "환영합니다",
+  startOrdering: "주문하기",
+  selectLanguage: "언어를 선택하세요",
+  continueInLanguage: "계속하기",
+  chooseLanguageHeader: "언어를 선택하세요",
+  selectLanguageHelpText: "더 나은 주문 서비스를 위해 원하시는 언어를 선택해 주세요.",
+  youSelected: "선택된 언어",
+  allLanguages: "모든 언어",
+  searchPlaceholder: "검색...",
+  continueBtn: "계속하기",
+  backBtn: "뒤로",
+  tableAllocationTitle: "고객 정보 및 스마트 테이블 배정",
+  tableAllocationSubtitle: "최적의 좌석과 서비스를 제공해 드릴 수 있도록 인원수를 알려주세요.",
+  proceedToMenuBtn: "디지털 메뉴로 이동",
+  stepTableAllocation: "2단계 중 2단계: 테이블 배정",
+};
 
 
 export function getLocalizedItemName(item: MenuItem, lang: Language): string {
   if (lang === 'ta' && item.nameTamil) return item.nameTamil;
   if (lang === 'hi' && item.nameHindi) return item.nameHindi;
   if (lang === 'te' && item.nameTelugu) return item.nameTelugu;
+  if (lang === 'kn' && (item.nameTelugu || item.nameHindi)) return item.nameTelugu || item.nameHindi || item.name;
+  if (lang === 'ml' && (item.nameTamil || item.nameHindi)) return item.nameTamil || item.nameHindi || item.name;
   if (lang === 'es' && item.nameSpanish) return item.nameSpanish;
   return item.name;
 }
@@ -702,6 +985,8 @@ export function getLocalizedItemDescription(item: MenuItem, lang: Language): str
   if (lang === 'ta' && item.descriptionTamil) return item.descriptionTamil;
   if (lang === 'hi' && item.descriptionHindi) return item.descriptionHindi;
   if (lang === 'te' && item.descriptionTelugu) return item.descriptionTelugu;
+  if (lang === 'kn' && (item.descriptionTelugu || item.descriptionHindi)) return item.descriptionTelugu || item.descriptionHindi || item.description;
+  if (lang === 'ml' && (item.descriptionTamil || item.descriptionHindi)) return item.descriptionTamil || item.descriptionHindi || item.description;
   if (lang === 'es' && item.descriptionSpanish) return item.descriptionSpanish;
   return item.description;
 }
@@ -710,6 +995,8 @@ export function getLocalizedComboTitle(combo: ComboRecommendation, lang: Languag
   if (lang === 'ta' && combo.titleTamil) return combo.titleTamil;
   if (lang === 'hi' && combo.titleHindi) return combo.titleHindi;
   if (lang === 'te' && combo.titleTelugu) return combo.titleTelugu;
+  if (lang === 'kn' && (combo.titleTelugu || combo.titleHindi)) return combo.titleTelugu || combo.titleHindi || combo.title;
+  if (lang === 'ml' && (combo.titleTamil || combo.titleHindi)) return combo.titleTamil || combo.titleHindi || combo.title;
   if (lang === 'es' && combo.titleSpanish) return combo.titleSpanish;
   return combo.title;
 }

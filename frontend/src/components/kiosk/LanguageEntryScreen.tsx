@@ -22,6 +22,7 @@ export const LanguageEntryScreen: React.FC<LanguageEntryScreenProps> = ({
   const { 
     language, 
     setLanguage, 
+    t,
     theme, 
     toggleTheme, 
     isAccessibilityMode 
@@ -77,7 +78,7 @@ export const LanguageEntryScreen: React.FC<LanguageEntryScreenProps> = ({
               ? 'bg-[#1d2430] hover:bg-[#252e3d] text-white border border-slate-800'
               : 'bg-[#daf3f7] hover:bg-[#cdecf2] text-slate-800'
           }`}
-          title="Back to Welcome Screen"
+          title={t.backBtn || "Back"}
           aria-label="Back"
         >
           <ChevronLeft className="w-6 h-6 stroke-[2.2]" />
@@ -102,20 +103,20 @@ export const LanguageEntryScreen: React.FC<LanguageEntryScreenProps> = ({
       {/* Main Content Area (Centered for Tablet & Mobile) */}
       <div className="flex-1 w-full max-w-lg md:max-w-xl mx-auto px-5 sm:px-6 py-4 flex flex-col justify-start">
         
-        {/* 1. Page Header (Exact Typography from Reference Image) */}
+        {/* 1. Page Header (Exact Typography from Reference Image - Dynamically Translated) */}
         <div className="mt-2 mb-6">
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-1.5">
-            Choose the language
+            {t.chooseLanguageHeader || 'Choose the language'}
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-normal leading-relaxed">
-            Select your preferred language below This helps us serve you better.
+            {t.selectLanguageHelpText || 'Select your preferred language below This helps us serve you better.'}
           </p>
         </div>
 
         {/* 2. "You Selected" Section (Cyan Outlined Pill Card) */}
         <div className="mb-6">
           <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-2.5">
-            You Selected
+            {t.youSelected || 'You Selected'}
           </h2>
           <div 
             className={`w-full h-15 px-4 rounded-2xl flex items-center justify-between border-2 border-[#00c5cd] transition-all shadow-sm ${
@@ -147,7 +148,7 @@ export const LanguageEntryScreen: React.FC<LanguageEntryScreenProps> = ({
         {/* 3. "All Languages" Section (Rounded Card Container with Search) */}
         <div className="flex-1 flex flex-col min-h-0 mb-6">
           <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-2.5">
-            All Languages
+            {t.allLanguages || 'All Languages'}
           </h2>
 
           <div 
@@ -168,7 +169,7 @@ export const LanguageEntryScreen: React.FC<LanguageEntryScreenProps> = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search"
+                placeholder={t.searchPlaceholder || 'Search'}
                 className="w-full bg-transparent text-sm sm:text-base text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none"
               />
             </div>
@@ -242,7 +243,7 @@ export const LanguageEntryScreen: React.FC<LanguageEntryScreenProps> = ({
           onClick={handleContinue}
           className="w-full h-13 sm:h-14 rounded-full bg-[#00c5cd] hover:bg-[#00b4bc] text-white font-bold text-base sm:text-lg tracking-wide shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center"
         >
-          Continue
+          {t.continueBtn || 'Continue'}
         </button>
       </div>
     </div>

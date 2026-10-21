@@ -1,6 +1,6 @@
 import type { MenuItem, ComboRecommendation } from '../types';
 
-export type Language = 'en' | 'ta' | 'hi' | 'te' | 'es';
+export type Language = 'en' | 'ta' | 'hi' | 'te' | 'es' | 'ar' | 'fr' | 'de' | 'ko' | 'kn' | 'ml';
 
 export interface LanguageOption {
   code: Language;
@@ -11,11 +11,17 @@ export interface LanguageOption {
 }
 
 export const AVAILABLE_LANGUAGES: LanguageOption[] = [
-  { code: 'en', label: 'English', nativeLabel: 'English', flag: '🇬🇧', short: 'EN' },
-  { code: 'ta', label: 'Tamil', nativeLabel: 'தமிழ்', flag: '🇮🇳', short: 'தமிழ்' },
-  { code: 'hi', label: 'Hindi', nativeLabel: 'हिंदी', flag: '🇮🇳', short: 'हिंदी' },
-  { code: 'te', label: 'Telugu', nativeLabel: 'తెలుగు', flag: '🇮🇳', short: 'తెలుగు' },
+  { code: 'ar', label: 'Arabic', nativeLabel: 'العربية', flag: '🇦🇪', short: 'AR' },
   { code: 'es', label: 'Spanish', nativeLabel: 'Español', flag: '🇪🇸', short: 'ES' },
+  { code: 'fr', label: 'French', nativeLabel: 'Français', flag: '🇫🇷', short: 'FR' },
+  { code: 'de', label: 'German', nativeLabel: 'Deutsch', flag: '🇩🇪', short: 'DE' },
+  { code: 'hi', label: 'Hindi', nativeLabel: 'हिन्दी', flag: '🇮🇳', short: 'हिन्दी' },
+  { code: 'ta', label: 'Tamil', nativeLabel: 'தமிழ்', flag: '🇮🇳', short: 'தமிழ்' },
+  { code: 'te', label: 'Telugu', nativeLabel: 'తెలుగు', flag: '🇮🇳', short: 'తెలుగు' },
+  { code: 'ko', label: 'Korean', nativeLabel: '한국어', flag: '🇰🇷', short: 'KO' },
+  { code: 'en', label: 'English', nativeLabel: 'English', flag: '🇬🇧', short: 'EN' },
+  { code: 'kn', label: 'Kannada', nativeLabel: 'ಕನ್ನಡ', flag: '🇮🇳', short: 'ಕನ್ನಡ' },
+  { code: 'ml', label: 'Malayalam', nativeLabel: 'മലയാളം', flag: '🇮🇳', short: 'മലയാളം' },
 ];
 
 export interface TranslationDictionary {
@@ -667,8 +673,22 @@ export const translations: Record<Language, TranslationDictionary> = {
     onlyServedIn: "Servido durante",
     changeLanguage: "Cambiar Idioma",
     allDay: "Todo el día",
-  }
+  },
+  ar: {} as TranslationDictionary,
+  fr: {} as TranslationDictionary,
+  de: {} as TranslationDictionary,
+  ko: {} as TranslationDictionary,
+  kn: {} as TranslationDictionary,
+  ml: {} as TranslationDictionary,
 };
+
+translations.ar = { ...translations.en, welcomeTo: "مرحبا بكم في", startOrdering: "ابدأ الطلب", selectLanguage: "اختر لغتك", continueInLanguage: "متابعة" };
+translations.fr = { ...translations.en, welcomeTo: "Bienvenue à", startOrdering: "Commander", selectLanguage: "Choisissez votre langue", continueInLanguage: "Continuer" };
+translations.de = { ...translations.en, welcomeTo: "Willkommen bei", startOrdering: "Bestellen", selectLanguage: "Wählen Sie Ihre Sprache", continueInLanguage: "Weiter" };
+translations.ko = { ...translations.en, welcomeTo: "환영합니다", startOrdering: "주문하기", selectLanguage: "언어를 선택하세요", continueInLanguage: "계속하기" };
+translations.kn = { ...translations.en, welcomeTo: "ಸ್ವಾಗತ", startOrdering: "ಆರ್ಡರ್ ಪ್ರಾರಂಭಿಸಿ", selectLanguage: "ನಿಮ್ಮ ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ", continueInLanguage: "ಮುಂದುವರಿಸಿ" };
+translations.ml = { ...translations.en, welcomeTo: "സ്വാഗതം", startOrdering: "ഓർഡർ ആരംഭിക്കുക", selectLanguage: "നിങ്ങളുടെ ഭാഷ തിരഞ്ഞെടുക്കുക", continueInLanguage: "തുടരുക" };
+
 
 export function getLocalizedItemName(item: MenuItem, lang: Language): string {
   if (lang === 'ta' && item.nameTamil) return item.nameTamil;

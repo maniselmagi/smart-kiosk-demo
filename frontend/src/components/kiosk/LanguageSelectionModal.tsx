@@ -16,7 +16,7 @@ interface LanguageMeta {
   description: string;
 }
 
-const LANGUAGE_DETAILS: Record<Language, LanguageMeta> = {
+const LANGUAGE_DETAILS: Record<string, LanguageMeta> = {
   en: {
     code: 'en',
     greeting: 'Welcome!',
@@ -108,7 +108,12 @@ export const LanguageSelectionModal: React.FC<LanguageSelectionModalProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
           {AVAILABLE_LANGUAGES.map((lang) => {
             const isSelected = language === lang.code;
-            const meta = LANGUAGE_DETAILS[lang.code];
+            const meta = LANGUAGE_DETAILS[lang.code] || {
+              code: lang.code,
+              greeting: 'Welcome!',
+              sub: lang.label,
+              description: 'Order food in your preferred language'
+            };
 
             return (
               <button

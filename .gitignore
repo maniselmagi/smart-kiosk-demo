@@ -40,3 +40,4 @@ Thumbs.db
 *.pem
 
 *.exe
+/smart_kiosk_app/

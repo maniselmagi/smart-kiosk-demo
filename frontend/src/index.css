@@ -14,6 +14,7 @@ body {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   user-select: none;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
 h1, h2, h3, h4, .font-display {
@@ -35,16 +36,39 @@ h1, h2, h3, h4, .font-display {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.03);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.5);
+  background: rgba(156, 163, 175, 0.4);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(107, 114, 128, 0.8);
+  background: rgba(107, 114, 128, 0.7);
+}
+
+/* Luxury Glassmorphism Utilities */
+.glass-luxury {
+  background: rgba(11, 17, 32, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-luxury-light {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.85);
+}
+
+.gold-glow {
+  box-shadow: 0 0 30px -5px rgba(245, 158, 11, 0.3);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
 
 /* Accessibility mode high contrast and scaling */
@@ -67,7 +91,7 @@ h1, h2, h3, h4, .font-display {
 
 @keyframes pulse-subtle {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.92; transform: scale(1.02); }
+  50% { opacity: 0.94; transform: scale(1.015); }
 }
 
 .animate-pulse-subtle {

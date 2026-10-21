@@ -164,7 +164,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             tabIndex={0}
             className={`p-2.5 sm:p-3 rounded-2xl sm:rounded-3xl border transition-all duration-200 cursor-pointer flex items-center justify-between gap-2 group select-none shadow-xs hover:shadow-md ${
               activeTableOrder 
-                ? 'bg-gradient-to-r from-cyan-500/15 via-teal-500/10 to-emerald-500/15 dark:from-cyan-950/50 dark:via-teal-950/40 dark:to-emerald-950/50 border-cyan-500/40 hover:border-cyan-500/70 shadow-cyan-500/10'
+                ? 'bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-emerald-500/15 dark:from-emerald-950/50 dark:via-teal-950/40 dark:to-emerald-950/50 border-emerald-500/40 hover:border-emerald-500/70 shadow-emerald-500/10'
                 : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
             }`}
             title={activeTableOrder ? `Track Order #${activeTableOrder.orderNumber}` : 'View Order Tracking'}
@@ -172,7 +172,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             <div className="flex items-center gap-2.5 min-w-0">
               <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 shadow-sm ${
                 activeTableOrder 
-                  ? 'bg-gradient-to-br from-cyan-500 to-teal-600 text-white animate-pulse'
+                  ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white animate-pulse'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
               }`}>
                 <Activity className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -194,7 +194,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
               </div>
             </div>
 
-            <div className="shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-lg sm:rounded-xl bg-slate-100 dark:bg-slate-800/80 flex items-center justify-center text-slate-400 group-hover:text-cyan-500 group-hover:bg-cyan-500/10 transition-all">
+            <div className="shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-lg sm:rounded-xl bg-slate-100 dark:bg-slate-800/80 flex items-center justify-center text-slate-400 group-hover:text-emerald-500 group-hover:bg-emerald-500/10 transition-all">
               <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </div>
           </div>
@@ -403,16 +403,16 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             <span>Combo</span>
           </button>
 
-          {/* HIGHLIGHTED SIGNATURE BUTTON (Cyan Signature Theme as in mockup) */}
+          {/* HIGHLIGHTED SIGNATURE BUTTON (Royal Gold Signature Theme) */}
           <button
             onClick={() => setSelectedCategory('Signature')}
             className={`px-5 py-2.5 rounded-2xl font-black text-sm whitespace-nowrap transition-all duration-200 border-2 active:scale-95 flex items-center gap-1.5 shadow-sm cursor-pointer ${
               selectedCategory === 'Signature'
-                ? 'bg-cyan-400 text-slate-950 border-cyan-300 shadow-lg shadow-cyan-400/35 scale-105'
-                : 'bg-cyan-100 dark:bg-cyan-950/70 text-cyan-950 dark:text-cyan-200 border-cyan-400/80 hover:bg-cyan-200 dark:hover:bg-cyan-900/60'
+                ? 'bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 border-amber-300 shadow-lg shadow-amber-500/35 scale-105'
+                : 'bg-amber-100 dark:bg-amber-950/70 text-amber-950 dark:text-amber-200 border-amber-400/80 hover:bg-amber-200 dark:hover:bg-amber-900/60'
             }`}
           >
-            <Crown className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+            <Crown className="w-4 h-4 text-amber-600 dark:text-amber-300" />
             <span>Signature</span>
           </button>
 
@@ -438,7 +438,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
 
           {selectedCategory !== 'Signature' && selectedCategory !== 'Combo' && (
             <span className="text-xs text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
-              <Crown className="w-3.5 h-3.5 text-cyan-500" />
+              <Crown className="w-3.5 h-3.5 text-amber-500" />
               <span className="hidden sm:inline">Signature dishes served first</span>
             </span>
           )}

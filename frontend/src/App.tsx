@@ -88,14 +88,7 @@ const MainAppContent: React.FC = () => {
             {kioskSubScreen === 'language' && (
               <LanguageEntryScreen 
                 onBack={() => setKioskSubScreen('welcome')}
-                onContinue={() => setKioskSubScreen('allocation')} 
-              />
-            )}
-
-            {kioskSubScreen === 'allocation' && (
-              <CustomerTableAllocationScreen
-                onBackToLanguage={() => setKioskSubScreen('language')}
-                onConfirmAllocation={() => setKioskSubScreen('menu')}
+                onContinue={() => setKioskSubScreen('menu')} 
               />
             )}
 

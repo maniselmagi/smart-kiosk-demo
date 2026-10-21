@@ -1,12 +1,15 @@
 import React from 'react';
 import { useKiosk } from '../../context/KioskContext';
-import chefPlatingImg from '../../assets/chef_plating_welcome.jpg';
+import restaurantFoodImg from '../../assets/restaurant_food_welcome.jpg';
 import { 
   ShoppingBag, 
   ChevronRight, 
   Sun, 
   Moon, 
-  Utensils
+  Utensils,
+  Sparkles,
+  Clock,
+  Wine
 } from 'lucide-react';
 
 interface WelcomeScreenProps {
@@ -19,96 +22,131 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   onOpenLanguage 
 }) => {
   const { 
-    theme,
+    theme, 
     toggleTheme,
     isAccessibilityMode
   } = useKiosk();
 
   return (
     <div 
-      className={`min-h-[calc(100vh-45px)] w-full flex flex-col justify-between relative overflow-hidden transition-colors duration-300 ${
+      className={`min-h-[100dvh] w-full flex flex-col justify-between relative overflow-hidden transition-colors duration-300 select-none ${
         isAccessibilityMode 
           ? 'bg-slate-950 text-white' 
           : 'bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100'
       }`}
     >
-      {/* 1. TOP MINIMAL CONTROLS (Discreet Dark/Light Mode Only - Table/Battery/Wifi removed as requested) */}
-      <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-30">
-        <button
-          type="button"
-          onClick={toggleTheme}
-          className="p-2.5 sm:p-3 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md text-amber-300 hover:text-white transition-all border border-white/20 active:scale-95 cursor-pointer shadow-lg"
-          title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-          aria-label="Toggle Theme"
-        >
-          {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-white" />}
-        </button>
-      </div>
+      {/* 1. TOP FLOATING BRAND & CONTROLS BAR */}
+      <header className="absolute top-4 inset-x-4 sm:top-6 sm:inset-x-8 lg:inset-x-12 flex items-center justify-between z-30 pointer-events-none">
+        {/* Subtle Brand Watermark Badge */}
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-amber-500/30 text-amber-300 shadow-lg pointer-events-auto">
+          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase font-display">
+            Royal Ember Dining
+          </span>
+        </div>
 
-      {/* 2. UPPER PORTION: GOURMET CHEF PLATING PHOTOGRAPHY (Tags removed, scales with tablet) */}
-      <div className="relative w-full h-[52vh] sm:h-[54vh] md:h-[56vh] overflow-hidden shrink-0">
+        {/* Theme Toggle Button */}
+        <div className="pointer-events-auto">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="p-2.5 sm:p-3 rounded-full bg-black/40 hover:bg-black/60 backdrop-blur-md text-amber-300 hover:text-white transition-all border border-white/20 active:scale-95 cursor-pointer shadow-xl"
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            aria-label="Toggle Theme"
+          >
+            {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4 text-white" />}
+          </button>
+        </div>
+      </header>
+
+      {/* 2. HERO RESTAURANT FOOD PHOTOGRAPHY (Full dish shown, no head cutoff, tablet-optimized) */}
+      <div className="relative w-full h-[45vh] sm:h-[48vh] md:h-[50vh] lg:h-[52vh] overflow-hidden shrink-0">
         <img
-          src={chefPlatingImg}
-          alt="Master Chef Plating Gourmet Food at Royal Ember"
-          className="w-full h-full object-cover object-top filter brightness-[0.98] contrast-[1.02]"
+          src={restaurantFoodImg}
+          alt="Royal Ember Gourmet Signature Culinary Presentation"
+          className="w-full h-full object-cover object-center filter brightness-[0.96] contrast-[1.04] transition-transform duration-1000 scale-[1.01]"
         />
 
-        {/* Soft top vignette */}
-        <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/50 via-black/20 to-transparent pointer-events-none" />
+        {/* Soft top gradient for header readability */}
+        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/60 via-black/25 to-transparent pointer-events-none" />
 
-        {/* SMOOTH VERTICAL GRADIENT FADE INTO WHITE/DARK BACKGROUND */}
-        <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-white dark:from-slate-950 via-white/80 dark:via-slate-950/80 to-transparent pointer-events-none" />
+        {/* Bottom smooth fade seamlessly melting photo into the page */}
+        <div className="absolute inset-x-0 bottom-0 h-32 sm:h-44 md:h-52 bg-gradient-to-t from-white dark:from-slate-950 via-white/85 dark:via-slate-950/85 to-transparent pointer-events-none" />
       </div>
 
-      {/* 3. LOWER PORTION: HIGHLIGHTED RESTAURANT NAME & SUPPORTING CONTENT */}
-      <div className="flex-1 flex flex-col justify-between px-6 sm:px-12 lg:px-20 pb-8 sm:pb-12 pt-2 z-10 max-w-3xl mx-auto w-full">
+      {/* 3. LOWER SECTION: BALANCED TABLET TYPOGRAPHY & INTERACTIVE CONTROLS */}
+      <div className="flex-1 flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-24 pt-2 sm:pt-4 pb-8 sm:pb-12 md:pb-14 z-10 max-w-4xl mx-auto w-full text-center">
         
-        {/* Main Brand Typography Hierarchy */}
-        <div className="space-y-4 text-center sm:text-left animate-in fade-in slide-in-from-bottom-4 duration-500">
+        {/* Core Brand & Supporting Content */}
+        <div className="space-y-4 sm:space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-600">
           
-          {/* Highlighted Grand Restaurant Title as Main Star */}
-          <div>
-            <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.3em] text-amber-600 dark:text-amber-400 block mb-1">
-              WELCOME TO
+          {/* Subtitle Eyebrow */}
+          <div className="inline-flex items-center justify-center gap-2">
+            <span className="h-[1px] w-6 sm:w-10 bg-amber-500/60" />
+            <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.35em] text-amber-600 dark:text-amber-400">
+              Welcome To
             </span>
-            <h1 className="font-royal text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 dark:from-amber-200 dark:via-amber-400 dark:to-yellow-500 drop-shadow-[0_2px_15px_rgba(245,158,11,0.25)]">
+            <span className="h-[1px] w-6 sm:w-10 bg-amber-500/60" />
+          </div>
+
+          {/* Grand Prominent Highlighted Restaurant Title */}
+          <div>
+            <h1 className="font-royal text-4xl sm:text-6xl md:text-7xl font-black tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 dark:from-amber-200 dark:via-amber-400 dark:to-yellow-500 drop-shadow-[0_4px_25px_rgba(245,158,11,0.35)] leading-tight">
               ROYAL EMBER
             </h1>
-            <div className="flex items-center justify-center sm:justify-start gap-2.5 mt-2">
-              <span className="h-[1.5px] w-8 sm:w-12 bg-amber-500/60" />
-              <span className="text-[11px] sm:text-xs font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">
+            
+            {/* Elegant Sub-Brand Slogan */}
+            <div className="flex items-center justify-center gap-3 mt-2 sm:mt-2.5">
+              <span className="h-[1px] w-8 sm:w-16 bg-slate-300 dark:bg-slate-700" />
+              <p className="text-xs sm:text-sm font-black uppercase tracking-[0.25em] text-slate-600 dark:text-slate-300">
                 Restaurant &amp; Grand Banquet
-              </span>
-              <span className="h-[1.5px] w-8 sm:w-12 bg-amber-500/60 sm:hidden" />
+              </p>
+              <span className="h-[1px] w-8 sm:w-16 bg-slate-300 dark:bg-slate-700" />
             </div>
           </div>
 
-          {/* Supporting Headline & Description */}
-          <div className="space-y-1.5 pt-1 sm:pt-2 border-t border-slate-200/60 dark:border-slate-800/80">
+          {/* Supporting Headline & Description (Balanced across tablet width) */}
+          <div className="max-w-2xl mx-auto space-y-1.5 pt-2 border-t border-slate-200/70 dark:border-slate-800/80">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight font-display">
               Exceptional Food, Delivered Fresh
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed max-w-lg mx-auto sm:mx-0">
+            <p className="text-xs sm:text-sm md:text-base text-slate-600 dark:text-slate-400 font-medium leading-relaxed max-w-xl mx-auto">
               Experience gourmet-quality culinary meals prepared with care and delivered faster than ever — straight to your table.
             </p>
           </div>
 
+          {/* Tablet Feature Highlights (fills tablet width horizontally with luxury hospitality badges) */}
+          <div className="pt-2 sm:pt-3 flex flex-wrap items-center justify-center gap-2 sm:gap-3 max-w-2xl mx-auto">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
+              <Utensils className="w-3.5 h-3.5 text-amber-500" />
+              <span>Chef's Artisanal Menu</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
+              <Clock className="w-3.5 h-3.5 text-amber-500" />
+              <span>Fast Table-Side Service</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-[11px] sm:text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-sm">
+              <Wine className="w-3.5 h-3.5 text-amber-500" />
+              <span>Fine Dining Experience</span>
+            </div>
+          </div>
+
         </div>
 
-        {/* 4. BOTTOM ACTION CONTROLLER BAR (Matching Mockup Pill) */}
-        <div className="pt-6 sm:pt-10">
-          <div className="p-1.5 sm:p-2 rounded-full bg-slate-100 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 shadow-xl flex items-center justify-between gap-3 max-w-lg mx-auto sm:mx-0">
+        {/* 4. BOTTOM ACTION CONTROLLER PILL (Balanced & Ergonomic for Tablet Touch) */}
+        <div className="pt-6 sm:pt-8 md:pt-10 w-full max-w-xl mx-auto">
+          <div className="p-2 sm:p-2.5 rounded-full bg-slate-100 dark:bg-slate-900/95 border border-slate-200/90 dark:border-slate-800 shadow-2xl flex items-center justify-between gap-3">
             
             {/* Left Circular Button (Food Cloche / Menu Icon) */}
             <button
               type="button"
               onClick={onOpenLanguage || onStart}
-              className="w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 shadow-md flex items-center justify-center border border-slate-200/70 dark:border-slate-700/70 hover:scale-105 active:scale-95 transition-all shrink-0 cursor-pointer group"
-              title="View Languages & Menu"
-              aria-label="View Languages"
+              className="w-13 h-13 sm:w-15 sm:h-15 rounded-full bg-white dark:bg-slate-850 text-slate-800 dark:text-slate-100 shadow-md flex items-center justify-center border border-slate-200/70 dark:border-slate-700/70 hover:scale-105 active:scale-95 transition-all shrink-0 cursor-pointer group"
+              title="Explore Menu & Languages"
+              aria-label="Explore Menu"
             >
-              <div className="p-2 rounded-full bg-amber-500/10 group-hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 transition-colors">
-                <Utensils className="w-5 h-5" />
+              <div className="p-2.5 rounded-full bg-amber-500/10 group-hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 transition-colors">
+                <Utensils className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
             </button>
 
@@ -116,27 +154,32 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             <button
               type="button"
               onClick={onStart}
-              className="flex-1 h-13 sm:h-14 px-2.5 pr-6 rounded-full bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-700/80 shadow-md flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-[0.98] transition-all cursor-pointer group"
+              className="flex-1 h-13 sm:h-15 px-3 sm:px-4 pr-6 sm:pr-8 rounded-full bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-700/80 shadow-md flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-[0.98] transition-all cursor-pointer group"
             >
               {/* Black Circular Icon on the Left */}
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-950 dark:bg-amber-500 text-white dark:text-slate-950 flex items-center justify-center shadow-sm shrink-0">
-                <ShoppingBag className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950 dark:bg-amber-500 text-white dark:text-slate-950 flex items-center justify-center shadow-md shrink-0">
+                <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
 
               {/* Start Label */}
-              <span className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white tracking-wide">
-                Start
+              <span className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white tracking-wider">
+                Start Ordering
               </span>
 
               {/* Triple Chevrons >>> */}
               <div className="flex items-center text-slate-400 dark:text-slate-500 group-hover:text-amber-500 group-hover:translate-x-1.5 transition-all">
-                <ChevronRight className="w-4 h-4 -mr-2.5" />
-                <ChevronRight className="w-4 h-4 -mr-2.5" />
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 -mr-2 sm:-mr-2.5" />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 -mr-2 sm:-mr-2.5" />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </button>
 
           </div>
+
+          {/* Gentle interactive instruction hint below the pill */}
+          <p className="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500 font-medium mt-3 tracking-wide">
+            Tap <span className="text-amber-500 font-semibold">Start Ordering</span> to browse our digital menu
+          </p>
         </div>
 
       </div>

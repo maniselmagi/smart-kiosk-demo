@@ -32,8 +32,8 @@ const MainAppContent: React.FC = () => {
     setIsLanguageModalOpen
   } = useKiosk();
 
-  // Kiosk inner sub-screen state: Step 1 (language) -> Step 2 (allocation) -> Step 3 (menu)
-  const [kioskSubScreen, setKioskSubScreen] = useState<'language' | 'allocation' | 'menu'>('language');
+  // Kiosk inner sub-screen state: Step 1 (welcome) -> Step 2 (language) -> Step 3 (allocation) -> Step 4 (menu)
+  const [kioskSubScreen, setKioskSubScreen] = useState<'welcome' | 'language' | 'allocation' | 'menu'>('welcome');
 
   // Modals state
   const [selectedItemForDetail, setSelectedItemForDetail] = useState<MenuItem | null>(null);
@@ -78,8 +78,16 @@ const MainAppContent: React.FC = () => {
 
         {view === 'kiosk' && (
           <div className="flex-1 flex flex-col">
+            {kioskSubScreen === 'welcome' && (
+              <WelcomeScreen
+                onStart={() => setKioskSubScreen('language')}
+                onOpenLanguage={() => setKioskSubScreen('language')}
+              />
+            )}
+
             {kioskSubScreen === 'language' && (
               <LanguageEntryScreen 
+                onBack={() => setKioskSubScreen('welcome')}
                 onContinue={() => setKioskSubScreen('allocation')} 
               />
             )}
@@ -95,7 +103,7 @@ const MainAppContent: React.FC = () => {
               <div className="flex-1 flex flex-col">
                 <Header
                   showBack={true}
-                  onBackToWelcome={() => setKioskSubScreen('allocation')}
+                  onBackToWelcome={() => setKioskSubScreen('welcome')}
                   onOpenCart={() => setIsCartOpen(true)}
                   onOpenTrackOrder={() => setIsTrackerOpen(true)}
                   onOpenEntertainment={() => setIsEntertainmentOpen(true)}

@@ -6,6 +6,7 @@ import royalEmberLogo from '../../assets/royal_ember_logo.jpg';
 import { 
   Check, 
   ArrowRight, 
+  ArrowLeft,
   Sparkles, 
   Globe2, 
   Crown, 
@@ -17,6 +18,7 @@ import {
 
 interface LanguageEntryScreenProps {
   onContinue: () => void;
+  onBack?: () => void;
 }
 
 interface LanguageMeta {
@@ -71,7 +73,7 @@ const LUXURY_LANGUAGE_DATA: Record<Language, LanguageMeta> = {
   }
 };
 
-export const LanguageEntryScreen: React.FC<LanguageEntryScreenProps> = ({ onContinue }) => {
+export const LanguageEntryScreen: React.FC<LanguageEntryScreenProps> = ({ onContinue, onBack }) => {
   const { language, setLanguage, isAccessibilityMode } = useKiosk();
   const [selectedLang, setSelectedLang] = useState<Language>(language);
 
@@ -96,6 +98,20 @@ export const LanguageEntryScreen: React.FC<LanguageEntryScreenProps> = ({ onCont
           : 'bg-[#080B11] text-slate-100'
       }`}
     >
+      {/* Optional Top Left Back Button to Welcome Screen */}
+      {onBack && (
+        <div className="w-full max-w-4xl flex items-center justify-start z-20 pb-2">
+          <button
+            type="button"
+            onClick={onBack}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900/80 border border-slate-700/80 text-xs font-bold text-slate-300 hover:text-white hover:border-amber-400/60 active:scale-95 transition-all cursor-pointer shadow-sm"
+          >
+            <ArrowLeft className="w-4 h-4 text-amber-400" />
+            <span>Welcome Screen</span>
+          </button>
+        </div>
+      )}
+
       {/* 1. LUXURIOUS AMBIENT LIGHTING & GOLDEN MIST */}
       <div 
         className="absolute inset-0 pointer-events-none opacity-40"

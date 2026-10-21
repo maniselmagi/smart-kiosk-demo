@@ -6,10 +6,11 @@ import {
   ChevronRight, 
   Sun, 
   Moon, 
-  Utensils,
-  Sparkles,
-  Clock,
-  Wine
+  Utensils, 
+  Sparkles, 
+  Clock, 
+  Wine,
+  Crown
 } from 'lucide-react';
 
 interface WelcomeScreenProps {
@@ -30,7 +31,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   const [isOpenAnimated, setIsOpenAnimated] = React.useState(false);
 
   React.useEffect(() => {
-    const timer = setTimeout(() => setIsOpenAnimated(true), 60);
+    // 250ms initial pause so the customer sees the glowing golden royal crest before doors glide apart
+    const timer = setTimeout(() => setIsOpenAnimated(true), 250);
     return () => clearTimeout(timer);
   }, []);
 
@@ -42,15 +44,52 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           : 'bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100'
       }`}
     >
-      {/* CINEMATIC APERTURE / CURTAIN OPEN TRANSITION OVERLAY */}
+      {/* GRAND DINING DOUBLE-DOOR CINEMATIC OPENING EFFECT */}
       <div 
-        className={`fixed inset-0 z-50 pointer-events-none transition-all duration-1000 ease-out flex items-center justify-center ${
-          isOpenAnimated ? 'opacity-0 scale-110 pointer-events-none' : 'opacity-100 scale-100 bg-slate-950'
+        className={`fixed inset-0 z-50 pointer-events-none overflow-hidden transition-opacity duration-1000 ${
+          isOpenAnimated ? 'opacity-0 delay-700 pointer-events-none' : 'opacity-100'
         }`}
       >
-        <div className="text-center space-y-3">
-          <div className="w-16 h-16 rounded-full border-2 border-amber-500/60 border-t-amber-400 animate-spin mx-auto" />
-          <p className="text-amber-400 text-xs font-black tracking-widest uppercase">Opening Royal Ember...</p>
+        {/* Left Luxury Door Panel */}
+        <div 
+          className={`absolute top-0 bottom-0 left-0 w-1/2 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border-r border-amber-500/40 shadow-2xl transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-end ${
+            isOpenAnimated ? '-translate-x-full' : 'translate-x-0'
+          }`}
+        >
+          {/* Subtle vertical luxury gold border accents */}
+          <div className="h-full w-1 bg-gradient-to-b from-transparent via-amber-400 to-transparent opacity-60" />
+        </div>
+
+        {/* Right Luxury Door Panel */}
+        <div 
+          className={`absolute top-0 bottom-0 right-0 w-1/2 bg-gradient-to-l from-slate-950 via-slate-900 to-slate-950 border-l border-amber-500/40 shadow-2xl transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-start ${
+            isOpenAnimated ? 'translate-x-full' : 'translate-x-0'
+          }`}
+        >
+          <div className="h-full w-1 bg-gradient-to-b from-transparent via-amber-400 to-transparent opacity-60" />
+        </div>
+
+        {/* Center Golden Medallion Crest (Scales gently and dissolves as doors glide open) */}
+        <div 
+          className={`absolute inset-0 flex items-center justify-center transition-all duration-700 ease-out ${
+            isOpenAnimated ? 'scale-125 opacity-0 pointer-events-none' : 'scale-100 opacity-100'
+          }`}
+        >
+          <div className="relative flex flex-col items-center">
+            {/* Ambient Golden Halo Glow */}
+            <div className="absolute w-44 h-44 rounded-full bg-amber-500/30 blur-2xl animate-pulse" />
+            
+            {/* Medallion Badge */}
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-yellow-600 p-0.5 shadow-[0_0_40px_rgba(245,158,11,0.7)]">
+              <div className="w-full h-full rounded-full bg-slate-950 flex flex-col items-center justify-center border border-amber-300/40 text-amber-300">
+                <Crown className="w-8 h-8 text-amber-400 animate-pulse" />
+              </div>
+            </div>
+
+            <p className="font-royal text-xs font-black uppercase tracking-[0.3em] text-amber-400 mt-3 drop-shadow-md">
+              Royal Ember
+            </p>
+          </div>
         </div>
       </div>
 

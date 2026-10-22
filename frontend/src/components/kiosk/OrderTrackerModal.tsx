@@ -12,9 +12,12 @@ import {
   Timer,
   Gamepad2,
   Flame,
-  ArrowRight
+  ArrowRight,
+  Star,
+  Zap
 } from 'lucide-react';
 import { getAssignedWaiter } from '../../utils/waiterAssignment';
+import { CustomerFeedbackModal } from './CustomerFeedbackModal';
 
 interface OrderTrackerModalProps {
   order: Order | null;
@@ -23,6 +26,7 @@ interface OrderTrackerModalProps {
   onOpenReceipt: () => void;
   onOpenEntertainment?: () => void;
   onOpenFinishMeal?: () => void;
+  onOpenFeedback?: () => void;
 }
 
 export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({ 
@@ -30,9 +34,11 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
   isOpen, 
   onClose, 
   onOpenReceipt, 
-  onOpenEntertainment
+  onOpenEntertainment,
+  onOpenFeedback
 }) => {
   const { t, callWaiter } = useKiosk();
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   // Active delivery countdown timer running in real-time
   const [secondsLeft, setSecondsLeft] = useState<number>(() => {
@@ -66,10 +72,13 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
   const seconds = secondsLeft % 60;
   const formattedCountdown = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
+  // Delivery status time-up condition
+  const isTimeUp = secondsLeft === 0 || order.status === 'READY' || order.status === 'COMPLETED';
+
   // Progress percentage (elapsed vs total prep time)
   const totalPrepSeconds = Math.max(60, order.estimatedPrepTime * 60);
   const elapsedSeconds = Math.max(0, totalPrepSeconds - secondsLeft);
-  const progressPercent = order.status === 'COMPLETED'
+  const progressPercent = order.status === 'COMPLETED' || isTimeUp
     ? 100
     : order.status === 'READY'
     ? 90
@@ -213,10 +222,10 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                       <Sparkles className="w-7 h-7 text-emerald-400 animate-bounce" />
                       <span className="text-[11px] font-black text-emerald-300 uppercase tracking-wider mt-0.5">Ready!</span>
                     </>
-                  ) : order.status === 'READY' ? (
+                  ) : order.status === 'READY' || isTimeUp ? (
                     <>
                       <UtensilsCrossed className="w-7 h-7 text-amber-400 animate-pulse" />
-                      <span className="text-[11px] font-black text-amber-300 uppercase tracking-wider mt-0.5">Plated</span>
+                      <span className="text-[11px] font-black text-amber-300 uppercase tracking-wider mt-0.5">Time's Up!</span>
                     </>
                   ) : (
                     <>
@@ -226,6 +235,15 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                       <span className="text-[10px] text-amber-400/90 font-black uppercase tracking-wider mt-1">
                         Est. Time
                       </span>
+                      <button
+                        type="button"
+                        onClick={() => setSecondsLeft(0)}
+                        title="Simulate time's up for demo testing"
+                        className="mt-1 text-[9px] text-amber-400/70 hover:text-amber-300 flex items-center gap-0.5 underline font-medium cursor-pointer"
+                      >
+                        <Zap className="w-2.5 h-2.5" />
+                        <span>Time's Up</span>
+                      </button>
                     </>
                   )}
                 </div>
@@ -266,6 +284,38 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
               </div>
 
             </div>
+
+            {/* TIME'S UP FEEDBACK CALLOUT BANNER */}
+            {isTimeUp && (
+              <div className="mt-4 pt-4 border-t border-amber-500/30 bg-gradient-to-r from-amber-500/15 via-yellow-500/10 to-amber-500/15 p-4 rounded-2xl border border-amber-400/40 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg shadow-amber-500/10 animate-in slide-in-from-bottom-2 duration-300">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center shrink-0 shadow-md">
+                    <Star className="w-5 h-5 fill-slate-950 text-slate-950 animate-bounce" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-black text-amber-300 uppercase tracking-wider block">
+                      Kitchen Time’s Up • Order Plated & Delivered!
+                    </span>
+                    <p className="text-xs text-slate-200">
+                      Rate your meal, restaurant service, and hospitality with <strong className="text-amber-300 font-extrabold">Waiter {waiter.fullName}</strong>.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onOpenFeedback) onOpenFeedback();
+                    setIsFeedbackOpen(true);
+                  }}
+                  className="w-full sm:w-auto py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/30 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+                >
+                  <Star className="w-3.5 h-3.5 fill-slate-950 text-slate-950" />
+                  <span>Rate Meal & Waiter</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-950" />
+                </button>
+              </div>
+            )}
 
             {/* Play Games & Digital News Lounge CTA Banner */}
             {onOpenEntertainment && (
@@ -425,14 +475,29 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
         </div>
 
         {/* MODAL BOTTOM BAR */}
-        <div className="p-4 sm:p-5 bg-slate-900 border-t border-white/[0.08] flex items-center justify-between gap-3 shrink-0">
+        <div className="p-4 sm:p-5 bg-slate-900 border-t border-white/[0.08] flex items-center justify-between gap-2.5 sm:gap-3 shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-3 rounded-2xl bg-white/[0.06] hover:bg-white/[0.12] text-slate-300 hover:text-white text-xs font-bold transition-all cursor-pointer border border-white/10 active:scale-95"
+            className="px-4 py-3 rounded-2xl bg-white/[0.06] hover:bg-white/[0.12] text-slate-300 hover:text-white text-xs font-bold transition-all cursor-pointer border border-white/10 active:scale-95"
           >
             Close Tracker
           </button>
+
+          {/* Prominent Feedback Button once Time's Up */}
+          {isTimeUp && (
+            <button
+              type="button"
+              onClick={() => {
+                if (onOpenFeedback) onOpenFeedback();
+                setIsFeedbackOpen(true);
+              }}
+              className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 text-xs font-black shadow-lg shadow-amber-500/30 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer ring-2 ring-amber-400/40 animate-pulse"
+            >
+              <Star className="w-4 h-4 fill-slate-950 text-slate-950" />
+              <span>Feedback & Ratings</span>
+            </button>
+          )}
 
           <button
             type="button"
@@ -440,14 +505,34 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
               onClose();
               onOpenReceipt();
             }}
-            className="flex-1 py-3 px-5 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 text-xs font-black shadow-lg shadow-amber-500/25 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className={`py-3 px-4 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer border ${
+              isTimeUp
+                ? 'bg-slate-800 hover:bg-slate-750 text-slate-200 border-white/10 active:scale-95'
+                : 'flex-1 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 shadow-lg shadow-amber-500/25 active:scale-95'
+            }`}
           >
-            <Receipt className="w-4 h-4 text-slate-950" />
-            <span>View Digital Receipt</span>
+            <Receipt className="w-4 h-4" />
+            <span>View Receipt</span>
           </button>
         </div>
 
       </div>
+
+      {/* Customer Rating & Feedback Modal with Celebratory Thank You Card */}
+      <CustomerFeedbackModal
+        order={order}
+        isOpen={isFeedbackOpen}
+        onClose={() => setIsFeedbackOpen(false)}
+        onOpenReceipt={() => {
+          setIsFeedbackOpen(false);
+          onClose();
+          onOpenReceipt();
+        }}
+        onReturnToMenu={() => {
+          setIsFeedbackOpen(false);
+          onClose();
+        }}
+      />
     </div>
   );
 };

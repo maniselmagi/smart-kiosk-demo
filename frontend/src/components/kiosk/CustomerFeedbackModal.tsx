@@ -7,12 +7,14 @@ import {
   X, 
   Check, 
   Utensils, 
-  Heart,
   Receipt,
   Sparkles,
   Crown,
   Award,
-  ArrowRight
+  ArrowRight,
+  Flame,
+  Building2,
+  MessageSquare
 } from 'lucide-react';
 
 interface CustomerFeedbackModalProps {
@@ -45,7 +47,7 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
   const [ambianceRating, setAmbianceRating] = useState<number>(5);
   const [hoverAmbianceRating, setHoverAmbianceRating] = useState<number>(0);
 
-  // Curated, non-cluttered compliment tags with micro-icons
+  // Curated praise tags with micro-icons
   const [selectedTags, setSelectedTags] = useState<string[]>([
     'Delicious Food',
     'Friendly Waiter'
@@ -118,113 +120,285 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
     }
   };
 
+  // 12 rising ember particles for dynamic atmospheric animation
+  const emberParticles = [
+    { left: '15%', delay: '0s', duration: '3.8s', drift: '-20px', size: '5px' },
+    { left: '25%', delay: '1.2s', duration: '4.2s', drift: '18px', size: '4px' },
+    { left: '38%', delay: '0.5s', duration: '3.5s', drift: '-15px', size: '6px' },
+    { left: '48%', delay: '2.1s', duration: '4.0s', drift: '22px', size: '3px' },
+    { left: '55%', delay: '0.8s', duration: '3.7s', drift: '-10px', size: '5px' },
+    { left: '68%', delay: '1.6s', duration: '4.4s', drift: '15px', size: '4px' },
+    { left: '78%', delay: '0.2s', duration: '3.9s', drift: '-25px', size: '6px' },
+    { left: '86%', delay: '2.4s', duration: '4.1s', drift: '12px', size: '3px' },
+    { left: '10%', delay: '1.8s', duration: '3.6s', drift: '16px', size: '4px' },
+    { left: '32%', delay: '2.7s', duration: '4.3s', drift: '-18px', size: '5px' },
+    { left: '62%', delay: '1.0s', duration: '3.8s', drift: '20px', size: '4px' },
+    { left: '92%', delay: '0.4s', duration: '4.5s', drift: '-14px', size: '5px' }
+  ];
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-300 select-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-300 select-none overflow-y-auto">
+      {/* CUSTOM UNIQUE CSS ANIMATIONS FOR CELEBRATORY CARD */}
+      <style>{`
+        @keyframes royalStampDrop {
+          0% { transform: scale(2.5) rotate(-10deg); opacity: 0; filter: blur(10px); }
+          55% { transform: scale(0.92) rotate(2deg); opacity: 1; filter: blur(0px); }
+          75% { transform: scale(1.08) rotate(-1deg); }
+          90% { transform: scale(0.98) rotate(0.5deg); }
+          100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        @keyframes shockwaveRing1 {
+          0% { transform: scale(0.5); opacity: 0.9; }
+          100% { transform: scale(2.4); opacity: 0; }
+        }
+
+        @keyframes shockwaveRing2 {
+          0% { transform: scale(0.4); opacity: 0.8; }
+          100% { transform: scale(2.8); opacity: 0; }
+        }
+
+        @keyframes sunburstSpin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        @keyframes sacredRaysCounter {
+          0% { transform: rotate(360deg); }
+          100% { transform: rotate(0deg); }
+        }
+
+        @keyframes emberAscend {
+          0% { transform: translateY(40px) translateX(0) scale(0.3); opacity: 0; }
+          20% { opacity: 0.9; }
+          70% { opacity: 0.7; }
+          100% { transform: translateY(-110px) translateX(var(--drift)) scale(1.1); opacity: 0; }
+        }
+
+        @keyframes goldFoilSheen {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+
+        @keyframes cascadeCardSlide {
+          0% { transform: translateY(24px) scale(0.94); opacity: 0; }
+          100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        @keyframes ribbonGlint {
+          0%, 100% { transform: scale(1); filter: brightness(1); }
+          50% { transform: scale(1.03); filter: brightness(1.2); }
+        }
+      `}</style>
+
+      {/* SPACIOUS WIDESCREEN MODAL CONTAINER (Wider & Taller as requested) */}
       <div 
-        className="w-full max-w-lg bg-slate-900/95 text-slate-100 rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.85)] border border-amber-500/20 overflow-hidden flex flex-col animate-in zoom-in-95 duration-200 relative backdrop-blur-xl"
+        className="w-full max-w-2xl lg:max-w-3xl min-h-[580px] sm:min-h-[660px] bg-slate-900/98 text-slate-100 rounded-3xl shadow-[0_30px_90px_rgba(0,0,0,0.95)] border border-amber-500/25 overflow-hidden flex flex-col animate-in zoom-in-95 duration-200 relative backdrop-blur-2xl my-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Subtle Ambient Top Glow Line */}
+        {/* Ambient Top Glow Line */}
         <div className="absolute top-0 left-1/4 right-1/4 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent blur-[2px]" />
 
-        {/* MODAL HEADER */}
-        <div className="px-5 py-4 border-b border-white/[0.08] flex items-center justify-between bg-slate-850/60 shrink-0">
+        {/* SPACIOUS MODAL HEADER */}
+        <div className="px-6 sm:px-8 py-5 border-b border-white/[0.08] flex items-center justify-between bg-slate-850/60 shrink-0">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-extrabold tracking-wider text-amber-400 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/30 uppercase">
+            <div className="flex items-center gap-2.5">
+              <span className="text-[11px] font-extrabold tracking-wider text-amber-400 bg-amber-400/10 px-3 py-0.5 rounded-full border border-amber-400/30 uppercase">
                 Table {targetTable}
               </span>
               {order && (
-                <span className="text-[11px] font-mono text-slate-400">
+                <span className="text-xs font-mono text-slate-400 font-semibold">
                   Order #{order.orderNumber}
                 </span>
               )}
             </div>
-            <h3 className="text-base sm:text-lg font-bold text-white tracking-tight mt-1 flex items-center gap-1.5">
-              <span>{isSubmitted ? 'Guest Honors & Appreciation' : 'How Was Your Dining Experience?'}</span>
+            <h3 className="text-lg sm:text-xl font-black text-white tracking-tight mt-1 flex items-center gap-2">
+              <span>{isSubmitted ? 'Royal Ember Guest Appreciation' : 'How Was Your Dining Experience?'}</span>
               <Sparkles className="w-4 h-4 text-amber-400" />
             </h3>
           </div>
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-slate-400 hover:text-white transition-colors flex items-center justify-center cursor-pointer border border-white/5"
+            className="w-10 h-10 rounded-full bg-white/[0.06] hover:bg-white/[0.12] text-slate-400 hover:text-white transition-colors flex items-center justify-center cursor-pointer border border-white/5 active:scale-95"
             aria-label="Close"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* CONTENT */}
         {isSubmitted ? (
           /* ==============================================================
-             CELEBRATORY THANK YOU CARD WITH ROYAL EMBER MEDALLION ANIMATION
+             SPECTACULAR UNCONVENTIONAL THANK YOU CARD ANIMATION
+             (Solar Sunburst + Royal Wax Seal Stamp + Concentric Shockwaves + Rising Embers)
              ============================================================== */
-          <div className="p-7 sm:p-9 text-center space-y-6 my-auto animate-in zoom-in-95 duration-300 relative overflow-hidden">
-            {/* Ambient Background Glow */}
-            <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-56 h-56 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
-
-            {/* CONCENTRIC RADIANT PULSING MEDALLION CREST */}
-            <div className="relative w-24 h-24 mx-auto mb-2 flex items-center justify-center">
-              {/* Expanding Ping Ring */}
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400/25 opacity-75" />
-              {/* Ambient Golden Blur Glow */}
-              <div className="absolute w-32 h-32 rounded-full bg-amber-500/20 blur-2xl animate-pulse" />
-              {/* Medallion Golden Ring */}
-              <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-yellow-600 p-0.5 shadow-[0_0_40px_rgba(245,158,11,0.6)]">
-                <div className="w-full h-full rounded-full bg-slate-950 flex flex-col items-center justify-center border border-amber-300/40 text-amber-300">
-                  <Crown className="w-9 h-9 text-amber-400 animate-pulse" />
-                </div>
-              </div>
-              {/* Floating micro sparkle dots */}
-              <Sparkles className="w-5 h-5 text-amber-300 absolute -top-1 -right-1 animate-bounce" />
-              <Sparkles className="w-4 h-4 text-amber-400 absolute -bottom-1 -left-1 animate-pulse" />
+          <div className="p-8 sm:p-12 text-center space-y-7 my-auto animate-in zoom-in-95 duration-300 relative overflow-hidden flex-1 flex flex-col justify-center">
+            
+            {/* 1. RISING EMBER SPARKS PARTICLES EFFECT */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              {emberParticles.map((p, idx) => (
+                <div
+                  key={idx}
+                  className="absolute bottom-12 rounded-full bg-gradient-to-t from-amber-400 to-yellow-200 shadow-[0_0_8px_rgba(245,158,11,0.8)]"
+                  style={{
+                    left: p.left,
+                    width: p.size,
+                    height: p.size,
+                    animation: `emberAscend ${p.duration} ease-in-out infinite`,
+                    animationDelay: p.delay,
+                    ['--drift' as string]: p.drift,
+                  }}
+                />
+              ))}
             </div>
 
-            {/* Gratitude Headlines */}
-            <div className="space-y-2 relative z-10">
-              <span className="text-[11px] font-black uppercase tracking-[0.25em] text-amber-400 flex items-center justify-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" /> Royal Ember Dining Honors <Sparkles className="w-3.5 h-3.5" />
-              </span>
-              <h4 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            {/* Ambient Warm Center Backlight */}
+            <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+
+            {/* 2. SOLAR SUNBURST BEAMS & ROYAL STAMP MEDALLION */}
+            <div className="relative w-36 h-36 mx-auto flex items-center justify-center">
+              
+              {/* Rotating Celestial Sunburst Aura Rays */}
+              <div 
+                className="absolute inset-0 pointer-events-none opacity-40"
+                style={{ animation: 'sunburstSpin 20s linear infinite' }}
+              >
+                <svg viewBox="0 0 100 100" className="w-full h-full text-amber-400 fill-current">
+                  {[...Array(16)].map((_, i) => (
+                    <polygon
+                      key={i}
+                      points="48,15 52,15 50,0"
+                      transform={`rotate(${i * 22.5} 50 50)`}
+                      className="opacity-70"
+                    />
+                  ))}
+                  <circle cx="50" cy="50" r="32" fill="none" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2,2" />
+                </svg>
+              </div>
+
+              {/* Counter-Rotating Sacred Geometry Ring */}
+              <div 
+                className="absolute w-32 h-32 pointer-events-none opacity-30"
+                style={{ animation: 'sacredRaysCounter 14s linear infinite' }}
+              >
+                <svg viewBox="0 0 100 100" className="w-full h-full text-yellow-300">
+                  <polygon points="50,10 90,50 50,90 10,50" fill="none" stroke="currentColor" strokeWidth="1" />
+                  <polygon points="50,10 90,50 50,90 10,50" fill="none" stroke="currentColor" strokeWidth="1" transform="rotate(45 50 50)" />
+                </svg>
+              </div>
+
+              {/* Triple Concentric Shockwave Golden Rings rippling out from Stamp */}
+              <div 
+                className="absolute w-24 h-24 rounded-full border-2 border-amber-400 pointer-events-none"
+                style={{ animation: 'shockwaveRing1 2.2s cubic-bezier(0.2, 0.8, 0.4, 1) infinite' }}
+              />
+              <div 
+                className="absolute w-24 h-24 rounded-full border border-yellow-300 pointer-events-none"
+                style={{ animation: 'shockwaveRing2 2.2s cubic-bezier(0.2, 0.8, 0.4, 1) infinite 0.6s' }}
+              />
+
+              {/* Central Royal Ember Crest with Elastic Stamp Drop Animation */}
+              <div 
+                className="relative z-10 w-24 h-24 rounded-3xl bg-gradient-to-br from-amber-300 via-amber-500 to-yellow-600 p-1 shadow-[0_0_50px_rgba(245,158,11,0.65)]"
+                style={{ animation: 'royalStampDrop 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards' }}
+              >
+                <div className="w-full h-full rounded-[22px] bg-slate-950 flex flex-col items-center justify-center border border-amber-300/50 text-amber-300 shadow-inner relative overflow-hidden">
+                  {/* Subtle internal shine */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-amber-400/10 to-transparent" />
+                  <Crown className="w-11 h-11 text-amber-400 drop-shadow-md" />
+                </div>
+              </div>
+
+              {/* Orbiting Sparkle Star Jewels */}
+              <Sparkles className="w-6 h-6 text-amber-300 absolute -top-2 -right-2 animate-bounce" />
+              <Sparkles className="w-5 h-5 text-yellow-200 absolute -bottom-2 -left-2 animate-pulse" />
+            </div>
+
+            {/* 3. HEADLINE WITH GOLDEN SASH BANNER */}
+            <div className="space-y-2.5 relative z-10 max-w-lg mx-auto">
+              <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 text-xs font-black uppercase tracking-[0.2em] shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>Royal Ember Dining Honors</span>
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              </div>
+
+              <h4 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-tight">
                 Thank You for Dining with Us!
               </h4>
-              <p className="text-xs text-slate-300 max-w-sm mx-auto leading-relaxed">
-                Your gracious feedback has been conveyed directly to{' '}
-                <strong className="text-amber-300 font-bold">Waiter {waiter.fullName}</strong>{' '}
+
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Your generous rating and feedback have been officially presented to{' '}
+                <strong className="text-amber-300 font-extrabold">Waiter {waiter.fullName}</strong>{' '}
                 and Executive Chef Anand.
               </p>
             </div>
 
-            {/* Clean, Refined Review Summary Card */}
-            <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-amber-400/20 flex items-center justify-around text-center max-w-sm mx-auto shadow-md relative z-10">
-              <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">Food & Taste</span>
-                <span className="text-xs sm:text-sm font-black text-amber-400 font-mono">⭐ {mealRating}.0 / 5</span>
+            {/* 4. SPACIOUS CASCADING RATINGS HONORS CARDS */}
+            <div 
+              className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 max-w-xl mx-auto w-full relative z-10"
+              style={{ animation: 'cascadeCardSlide 0.6s ease-out forwards 0.2s' }}
+            >
+              {/* Card 1: Food & Taste */}
+              <div className="p-4 rounded-2xl bg-slate-800/90 border border-amber-400/30 shadow-lg text-center flex flex-col items-center justify-center space-y-1">
+                <div className="w-8 h-8 rounded-xl bg-amber-400/15 text-amber-400 flex items-center justify-center mb-1">
+                  <Utensils className="w-4 h-4" />
+                </div>
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  Food & Culinary
+                </span>
+                <span className="text-base sm:text-lg font-black text-amber-400 font-mono">
+                  ⭐ {mealRating}.0 / 5
+                </span>
+                <span className="text-[10px] text-amber-300/80 font-medium">
+                  {getRatingFeedback(mealRating, 'meal')}
+                </span>
               </div>
-              <div className="w-px h-7 bg-white/10" />
-              <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">Waiter {waiter.name}</span>
-                <span className="text-xs sm:text-sm font-black text-amber-400 font-mono">⭐ {waiterRating}.0 / 5</span>
+
+              {/* Card 2: Waiter Suresh */}
+              <div className="p-4 rounded-2xl bg-slate-800/90 border border-amber-400/30 shadow-lg text-center flex flex-col items-center justify-center space-y-1 ring-1 ring-amber-400/30">
+                <div className={`w-8 h-8 rounded-xl ${waiter.avatarBg} text-white font-black text-xs flex items-center justify-center mb-1 shadow-sm`}>
+                  {waiter.initial}
+                </div>
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  Waiter {waiter.name}
+                </span>
+                <span className="text-base sm:text-lg font-black text-amber-400 font-mono">
+                  ⭐ {waiterRating}.0 / 5
+                </span>
+                <span className="text-[10px] text-amber-300/80 font-medium">
+                  Zone {waiter.zone}
+                </span>
               </div>
-              <div className="w-px h-7 bg-white/10" />
-              <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">Ambiance</span>
-                <span className="text-xs sm:text-sm font-black text-amber-400 font-mono">⭐ {ambianceRating}.0 / 5</span>
+
+              {/* Card 3: Restaurant Ambiance */}
+              <div className="p-4 rounded-2xl bg-slate-800/90 border border-amber-400/30 shadow-lg text-center flex flex-col items-center justify-center space-y-1">
+                <div className="w-8 h-8 rounded-xl bg-amber-400/15 text-amber-400 flex items-center justify-center mb-1">
+                  <Building2 className="w-4 h-4" />
+                </div>
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                  Ambiance
+                </span>
+                <span className="text-base sm:text-lg font-black text-amber-400 font-mono">
+                  ⭐ {ambianceRating}.0 / 5
+                </span>
+                <span className="text-[10px] text-amber-300/80 font-medium">
+                  {getRatingFeedback(ambianceRating, 'ambiance')}
+                </span>
               </div>
             </div>
 
             {/* Respectful Hospitality Note */}
-            <p className="text-xs text-slate-400 italic max-w-xs mx-auto relative z-10">
-              “Table {targetTable} • It was our highest honor hosting you today. We look forward to welcoming you back!”
+            <p className="text-xs sm:text-sm text-slate-400 italic max-w-md mx-auto relative z-10 leading-relaxed">
+              “Table {targetTable} • It was our highest honor hosting you today. We eagerly look forward to welcoming you back for another unforgettable meal!”
             </p>
 
-            {/* Primary Action Button */}
-            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3 relative z-10">
+            {/* Action Buttons */}
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3.5 max-w-md mx-auto w-full relative z-10">
               <button
                 type="button"
                 onClick={handleReturn}
-                className="w-full sm:w-auto flex-1 py-3 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto flex-1 py-3.5 sm:py-4 px-7 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-amber-500/25 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Utensils className="w-4 h-4 text-slate-950" />
                 <span>Return to Table Menu</span>
@@ -237,41 +411,47 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
                     onClose();
                     onOpenReceipt();
                   }}
-                  className="w-full sm:w-auto py-3 px-4 rounded-2xl bg-white/[0.06] hover:bg-white/[0.12] text-slate-200 hover:text-white border border-white/10 font-bold text-xs active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full sm:w-auto py-3.5 sm:py-4 px-5 rounded-2xl bg-white/[0.06] hover:bg-white/[0.12] text-slate-200 hover:text-white border border-white/10 font-bold text-xs sm:text-sm active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Receipt className="w-3.5 h-3.5 text-amber-400" />
+                  <Receipt className="w-4 h-4 text-amber-400" />
                   <span>View Receipt</span>
                 </button>
               )}
             </div>
+
           </div>
         ) : (
           /* ==============================================================
-             POLISHED, BALANCED RATING FORM (TASTEFUL & ENGAGING)
+             SPACIOUS, GENEROUSLY PROPORTIONED RATING FORM
+             (More space, larger dimensions, comfortable touch targets)
              ============================================================== */
-          <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 overflow-y-auto max-h-[78vh] custom-scrollbar">
+          <form onSubmit={handleSubmit} className="p-6 sm:p-8 md:p-9 space-y-6 overflow-y-auto max-h-[82vh] custom-scrollbar flex-1">
             
-            {/* 1. MEAL & FOOD QUALITY */}
-            <div className="p-3.5 rounded-2xl bg-slate-850/70 border border-white/[0.08] space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-amber-400/15 text-amber-400 flex items-center justify-center border border-amber-400/20">
-                    <Utensils className="w-4 h-4" />
+            {/* 1. MEAL & FOOD QUALITY SECTION */}
+            <div className="p-5 sm:p-6 rounded-3xl bg-slate-850/80 border border-white/[0.08] space-y-3.5 hover:border-amber-400/30 transition-colors">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-400/15 text-amber-400 flex items-center justify-center border border-amber-400/20 shrink-0">
+                    <Utensils className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-white tracking-tight">1. Meal & Food Quality</h4>
-                    <span className="text-[10px] text-slate-400">Flavor, freshness & dish temperature</span>
+                    <h4 className="text-sm sm:text-base font-black text-white tracking-tight">
+                      1. Meal & Food Quality
+                    </h4>
+                    <span className="text-xs text-slate-400">
+                      Flavor depth, freshness, aroma & plating temperature
+                    </span>
                   </div>
                 </div>
 
-                <span className="text-[11px] font-bold text-amber-300 font-mono bg-amber-400/10 px-2 py-0.5 rounded-md border border-amber-400/20">
+                <span className="text-xs sm:text-sm font-black text-amber-300 font-mono bg-amber-400/10 px-3 py-1 rounded-xl border border-amber-400/20 self-start sm:self-center">
                   {mealRating}.0 ★
                 </span>
               </div>
 
-              {/* 5 Stars with dynamic feedback text */}
-              <div className="flex items-center justify-between pt-1">
-                <div className="flex items-center gap-1">
+              {/* Large, Easy-Touch 5 Stars */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                <div className="flex items-center gap-2 sm:gap-3">
                   {[1, 2, 3, 4, 5].map((star) => {
                     const isFilled = (hoverMealRating || mealRating) >= star;
                     return (
@@ -281,13 +461,13 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
                         onMouseEnter={() => setHoverMealRating(star)}
                         onMouseLeave={() => setHoverMealRating(0)}
                         onClick={() => setMealRating(star)}
-                        className="p-1 hover:scale-115 active:scale-95 transition-transform cursor-pointer"
+                        className="p-1 sm:p-1.5 hover:scale-120 active:scale-95 transition-transform cursor-pointer"
                         aria-label={`Rate food ${star} stars`}
                       >
                         <Star
-                          className={`w-6 h-6 sm:w-7 sm:h-7 transition-colors ${
+                          className={`w-7 h-7 sm:w-9 sm:h-9 transition-colors ${
                             isFilled
-                              ? 'text-amber-400 fill-amber-400 drop-shadow-[0_0_6px_rgba(245,158,11,0.5)]'
+                              ? 'text-amber-400 fill-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]'
                               : 'text-slate-700'
                           }`}
                         />
@@ -296,42 +476,50 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
                   })}
                 </div>
 
-                <span className="text-[11px] font-medium text-amber-300/90 text-right">
+                <span className="text-xs sm:text-sm font-bold text-amber-300/90 text-left sm:text-right">
                   {getRatingFeedback(hoverMealRating || mealRating, 'meal')}
                 </span>
               </div>
             </div>
 
-            {/* 2. DEDICATED WAITER SECTION (PROMINENT WAITER NAME & BADGE) */}
-            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-850 to-slate-800/90 border border-amber-400/30 space-y-2.5 shadow-sm">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm ${waiter.avatarBg} text-white shrink-0 border border-white/20 shadow-sm`}>
+            {/* 2. DEDICATED WAITER SECTION (PROMINENT & SPACIOUS) */}
+            <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-slate-850 to-slate-800/95 border-2 border-amber-400/35 space-y-4 shadow-lg">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-white/[0.08]">
+                <div className="flex items-center gap-4">
+                  <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center font-black text-lg sm:text-xl ${waiter.avatarBg} text-white shrink-0 border-2 border-white/20 shadow-md`}>
                     {waiter.initial}
                   </div>
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider block">
-                      Dedicated Table Server
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] sm:text-[11px] uppercase font-black text-amber-400 bg-amber-400/15 px-2.5 py-0.5 rounded-full border border-amber-400/30 tracking-wider">
+                        Assigned Table Concierge
+                      </span>
+                      <span className="text-xs text-slate-400 font-semibold">
+                        Zone {waiter.zone}
+                      </span>
+                    </div>
+
                     {/* PROMINENT WAITER NAME */}
-                    <h4 className="text-sm font-black text-white tracking-tight flex items-center gap-1.5">
+                    <h4 className="text-lg sm:text-2xl font-black text-white tracking-tight mt-1 flex items-center gap-2">
                       <span>Waiter {waiter.fullName}</span>
-                      <Award className="w-3.5 h-3.5 text-amber-400" />
+                      <Award className="w-5 h-5 text-amber-400" />
                     </h4>
-                    <span className="text-[10px] text-slate-400">
-                      Floor Section • Zone {waiter.zone}
+                    <span className="text-xs text-slate-400">
+                      Dedicated floor attendant for Table {targetTable}
                     </span>
                   </div>
                 </div>
 
-                <span className="text-[11px] font-bold text-amber-300 font-mono bg-amber-400/10 px-2 py-0.5 rounded-md border border-amber-400/20">
-                  {waiterRating}.0 ★
-                </span>
+                <div className="self-start sm:self-center">
+                  <span className="text-xs sm:text-sm font-black text-amber-300 font-mono bg-amber-400/10 px-3 py-1 rounded-xl border border-amber-400/25">
+                    {waiterRating}.0 ★
+                  </span>
+                </div>
               </div>
 
-              {/* 5 Stars for Waiter with dynamic feedback */}
-              <div className="flex items-center justify-between pt-1">
-                <div className="flex items-center gap-1">
+              {/* Large 5 Stars for Waiter */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                <div className="flex items-center gap-2 sm:gap-3">
                   {[1, 2, 3, 4, 5].map((star) => {
                     const isFilled = (hoverWaiterRating || waiterRating) >= star;
                     return (
@@ -341,13 +529,13 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
                         onMouseEnter={() => setHoverWaiterRating(star)}
                         onMouseLeave={() => setHoverWaiterRating(0)}
                         onClick={() => setWaiterRating(star)}
-                        className="p-1 hover:scale-115 active:scale-95 transition-transform cursor-pointer"
+                        className="p-1 sm:p-1.5 hover:scale-120 active:scale-95 transition-transform cursor-pointer"
                         aria-label={`Rate waiter ${star} stars`}
                       >
                         <Star
-                          className={`w-6 h-6 sm:w-7 sm:h-7 transition-colors ${
+                          className={`w-7 h-7 sm:w-9 sm:h-9 transition-colors ${
                             isFilled
-                              ? 'text-amber-400 fill-amber-400 drop-shadow-[0_0_6px_rgba(245,158,11,0.5)]'
+                              ? 'text-amber-400 fill-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]'
                               : 'text-slate-700'
                           }`}
                         />
@@ -356,28 +544,37 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
                   })}
                 </div>
 
-                <span className="text-[11px] font-medium text-amber-300/90 text-right">
+                <span className="text-xs sm:text-sm font-bold text-amber-300/90 text-left sm:text-right">
                   {getRatingFeedback(hoverWaiterRating || waiterRating, 'waiter')}
                 </span>
               </div>
             </div>
 
-            {/* 3. RESTAURANT AMBIANCE & EXPERIENCE */}
-            <div className="p-3.5 rounded-2xl bg-slate-850/70 border border-white/[0.08] space-y-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="text-xs font-bold text-white tracking-tight">3. Restaurant Ambiance & Cleanliness</h4>
-                  <span className="text-[10px] text-slate-400">Atmosphere, hygiene & ambient music</span>
+            {/* 3. RESTAURANT AMBIANCE & EXPERIENCE SECTION */}
+            <div className="p-5 sm:p-6 rounded-3xl bg-slate-850/80 border border-white/[0.08] space-y-3.5 hover:border-amber-400/30 transition-colors">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-400/15 text-amber-400 flex items-center justify-center border border-amber-400/20 shrink-0">
+                    <Building2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm sm:text-base font-black text-white tracking-tight">
+                      3. Restaurant Service & Dining Ambiance
+                    </h4>
+                    <span className="text-xs text-slate-400">
+                      Atmosphere, cleanliness, table comfort & background music
+                    </span>
+                  </div>
                 </div>
 
-                <span className="text-[11px] font-bold text-amber-300 font-mono bg-amber-400/10 px-2 py-0.5 rounded-md border border-amber-400/20">
+                <span className="text-xs sm:text-sm font-black text-amber-300 font-mono bg-amber-400/10 px-3 py-1 rounded-xl border border-amber-400/20 self-start sm:self-center">
                   {ambianceRating}.0 ★
                 </span>
               </div>
 
-              {/* 5 Stars for Ambiance */}
-              <div className="flex items-center justify-between pt-1">
-                <div className="flex items-center gap-1">
+              {/* Large 5 Stars for Ambiance */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                <div className="flex items-center gap-2 sm:gap-3">
                   {[1, 2, 3, 4, 5].map((star) => {
                     const isFilled = (hoverAmbianceRating || ambianceRating) >= star;
                     return (
@@ -387,13 +584,13 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
                         onMouseEnter={() => setHoverAmbianceRating(star)}
                         onMouseLeave={() => setHoverAmbianceRating(0)}
                         onClick={() => setAmbianceRating(star)}
-                        className="p-1 hover:scale-110 active:scale-95 transition-transform cursor-pointer"
+                        className="p-1 sm:p-1.5 hover:scale-120 active:scale-95 transition-transform cursor-pointer"
                         aria-label={`Rate ambiance ${star} stars`}
                       >
                         <Star
-                          className={`w-6 h-6 sm:w-7 sm:h-7 transition-colors ${
+                          className={`w-7 h-7 sm:w-9 sm:h-9 transition-colors ${
                             isFilled
-                              ? 'text-amber-400 fill-amber-400 drop-shadow-[0_0_6px_rgba(245,158,11,0.5)]'
+                              ? 'text-amber-400 fill-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]'
                               : 'text-slate-700'
                           }`}
                         />
@@ -402,18 +599,18 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
                   })}
                 </div>
 
-                <span className="text-[11px] font-medium text-amber-300/90 text-right">
+                <span className="text-xs sm:text-sm font-bold text-amber-300/90 text-left sm:text-right">
                   {getRatingFeedback(hoverAmbianceRating || ambianceRating, 'ambiance')}
                 </span>
               </div>
             </div>
 
-            {/* QUICK COMPLIMENT PILLS (TASTEFUL & ENGAGING) */}
-            <div className="space-y-1.5 pt-0.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+            {/* SPACIOUS QUICK COMPLIMENT PILLS */}
+            <div className="space-y-2.5 pt-1">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
                 What Made Your Visit Special? (Optional)
               </span>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-2 sm:gap-2.5">
                 {quickPraiseTags.map((item) => {
                   const isSelected = selectedTags.includes(item.label);
                   return (
@@ -421,40 +618,46 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
                       key={item.label}
                       type="button"
                       onClick={() => toggleTag(item.label)}
-                      className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all cursor-pointer border flex items-center gap-1.5 ${
+                      className={`px-4 py-2 sm:px-4.5 sm:py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition-all cursor-pointer border flex items-center gap-2 ${
                         isSelected
-                          ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-xs scale-102'
+                          ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-md shadow-amber-400/20 scale-102'
                           : 'bg-white/[0.04] text-slate-300 border-white/10 hover:bg-white/[0.08]'
                       }`}
                     >
-                      <span>{item.icon}</span>
+                      <span className="text-sm sm:text-base">{item.icon}</span>
                       <span>{item.label}</span>
-                      {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                      {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {/* COMPACT NOTE FIELD */}
-            <div className="space-y-1">
-              <input
-                type="text"
+            {/* SPACIOUS COMMENT BOX */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-400 flex items-center gap-1.5">
+                <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
+                <span>Special Compliment or Chef Note (Optional):</span>
+              </label>
+              <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder={`Compliments for Waiter ${waiter.name} or Chef Anand (optional)...`}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30 transition-all"
+                rows={3}
+                placeholder={`Share your kind words for Waiter ${waiter.name}, compliments for Executive Chef Anand, or suggestions for our next visit...`}
+                className="w-full p-4 rounded-2xl bg-white/[0.04] border border-white/10 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30 transition-all resize-none"
               />
             </div>
 
-            {/* SUBMIT BUTTON */}
-            <button
-              type="submit"
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs shadow-md shadow-amber-400/25 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer mt-1"
-            >
-              <span>Submit Dining Feedback</span>
-              <ArrowRight className="w-4 h-4 text-slate-950" />
-            </button>
+            {/* PROMINENT SUBMIT BUTTON */}
+            <div className="pt-2">
+              <button
+                type="submit"
+                className="w-full py-4 sm:py-4.5 px-8 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-sm sm:text-base shadow-xl shadow-amber-400/25 active:scale-98 transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+              >
+                <span>Submit Dining Feedback</span>
+                <ArrowRight className="w-5 h-5 text-slate-950" />
+              </button>
+            </div>
 
           </form>
         )}

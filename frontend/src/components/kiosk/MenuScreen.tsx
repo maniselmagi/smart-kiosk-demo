@@ -12,20 +12,17 @@ import {
   Minus,
   Search, 
   AlertCircle, 
-  TrendingUp, 
   Leaf, 
   Drumstick,
   Crown,
   Tag,
   Activity,
   Gamepad2,
-  Sparkles,
   ChevronRight,
   Bell,
   Star,
   Zap,
-  Heart,
-  UtensilsCrossed
+  Heart
 } from 'lucide-react';
 import { PromoAdBanner } from './PromoAdBanner';
 import { getAssignedWaiter } from '../../utils/waiterAssignment';
@@ -40,7 +37,7 @@ interface MenuScreenProps {
 
 export const MenuScreen: React.FC<MenuScreenProps> = ({ 
   onSelectItem, 
-  onOpenCart,
+  onOpenCart: _onOpenCart,
   onOpenOrderTracker,
   onOpenEntertainment 
 }) => {
@@ -80,16 +77,16 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
   const [ratingFilter, setRatingFilter] = useState<boolean>(false);
   const [fastPrepFilter, setFastPrepFilter] = useState<boolean>(false);
 
-  // Modern Categories with Food Icons matching Reference Image ("Chicken Grill House" style)
-  const categoriesList: { key: Category; label: string; icon: string; countLabel: string }[] = [
-    { key: 'All', label: 'All Items', icon: '🍽️', countLabel: 'All' },
-    { key: 'Starters', label: 'Starters', icon: '🍗', countLabel: 'Appetizers' },
-    { key: 'Main Course', label: 'Main Course', icon: '🍛', countLabel: 'Curries' },
-    { key: 'Breads & Rice', label: 'Breads & Rice', icon: '🍚', countLabel: 'Naan & Biryani' },
-    { key: 'Beverages', label: 'Beverages', icon: '🍹', countLabel: 'Coolers & Tea' },
-    { key: 'Desserts', label: 'Desserts', icon: '🍰', countLabel: 'Sweets' },
-    { key: 'Combo', label: 'Chef Combos', icon: '🍱', countLabel: 'Value Deals' },
-    { key: 'Signature', label: 'Signature', icon: '👑', countLabel: 'Royal Special' },
+  // Clean, professional categories inspired by the reference mockup
+  const categoriesList: { key: Category; label: string; icon: string }[] = [
+    { key: 'All', label: 'All Items', icon: '🍽️' },
+    { key: 'Starters', label: 'Starters', icon: '🍗' },
+    { key: 'Main Course', label: 'Main Course', icon: '🍛' },
+    { key: 'Breads & Rice', label: 'Breads & Rice', icon: '🍚' },
+    { key: 'Beverages', label: 'Beverages', icon: '🍹' },
+    { key: 'Desserts', label: 'Desserts', icon: '🍰' },
+    { key: 'Combo', label: 'Chef Combos', icon: '🍱' },
+    { key: 'Signature', label: 'Signature', icon: '👑' },
   ];
 
   const toggleFavorite = (itemId: string, e: React.MouseEvent) => {
@@ -97,10 +94,8 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
     setFavoriteItemIds(prev => ({ ...prev, [itemId]: !prev[itemId] }));
   };
 
-  // Quick Direct Add / Quantity change from card button
   const handleQuickAdd = (item: MenuItem, e: React.MouseEvent) => {
     e.stopPropagation();
-    // If item has customizable options, open detail modal for full choice
     if (item.customizationOptions && item.customizationOptions.length > 0) {
       onSelectItem(item);
     } else {
@@ -120,14 +115,14 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
 
   const filteredItems = useMemo(() => {
     const list = menuItems.filter((item) => {
-      // 1. Time-based meal filtering: morning foods in morning, lunch foods in lunch, dinner foods in dinner
+      // 1. Time-based meal filtering
       if (item.mealTimes && item.mealTimes.length > 0) {
         if (!item.mealTimes.includes(mealTime)) {
           return false;
         }
       }
 
-      // 2. Category / Mode filter - Combo ONLY shows in Combo section
+      // 2. Category / Mode filter
       if (selectedCategory === 'Combo') {
         if (!item.isCombo && item.category !== 'Combo') return false;
       } else {
@@ -144,18 +139,18 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
       if (dietFilter === 'veg' && !item.isVeg) return false;
       if (dietFilter === 'non-veg' && item.isVeg) return false;
 
-      // 4. Rating filter (over 4.5 rating)
+      // 4. Rating filter
       if (ratingFilter) {
         const ratingNum = item.rating || 4.7;
         if (ratingNum < 4.5) return false;
       }
 
-      // 5. Fast prep filter (under 15 min)
+      // 5. Fast prep filter
       if (fastPrepFilter) {
         if ((item.prepTimeMinutes || 20) > 15) return false;
       }
 
-      // 6. Search query across all available languages
+      // 6. Search query
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchName = item.name.toLowerCase().includes(query);
@@ -170,7 +165,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
       return true;
     });
 
-    // 7. Sort signature dishes strictly first, then combos, then popularity
+    // 7. Sort signatures first, then combos, then popularity
     return list.sort((a, b) => {
       if (a.isSignature && !b.isSignature) return -1;
       if (!a.isSignature && b.isSignature) return 1;
@@ -184,59 +179,40 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
     <div className={`pb-28 transition-colors duration-300 ${
       mealTime === 'dinner' 
         ? 'bg-slate-950 text-white' 
-        : 'bg-slate-50/60 dark:bg-slate-950 text-slate-900 dark:text-slate-100'
+        : 'bg-slate-50/70 dark:bg-slate-950 text-slate-900 dark:text-slate-100'
     }`}>
       
       {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-4 sm:pt-5 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pt-4 sm:pt-5 space-y-5">
 
-        {/* 1. TIME-BASED MEAL BANNER (Shows active Dinner / Lunch / Breakfast status cleanly) */}
-        <div className="p-3.5 sm:p-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-2xl shadow-sm shrink-0 ${
-              mealTime === 'morning' ? 'bg-amber-100 text-amber-700 dark:bg-amber-950/70 dark:text-amber-300' :
-              mealTime === 'lunch' ? 'bg-orange-100 text-orange-700 dark:bg-orange-950/70 dark:text-orange-300' :
-              'bg-indigo-950 text-amber-400 border border-amber-500/30'
-            }`}>
-              {mealTime === 'morning' && '🌅'}
-              {mealTime === 'lunch' && '☀️'}
-              {mealTime === 'dinner' && '🌙'}
-            </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-display font-black text-base sm:text-lg text-slate-900 dark:text-white">
-                  {mealTime === 'morning' && t.morningBreakfast}
-                  {mealTime === 'lunch' && t.lunchAfternoon}
-                  {mealTime === 'dinner' && `${t.dinnerEvening} — Night Mode Active`}
-                </h3>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-black bg-emerald-100 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5 border border-emerald-200/60 dark:border-emerald-800/60">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  {t.autoTimeBadge}
-                </span>
-              </div>
-              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                {mealTime === 'morning' && `${t.morningHours} • Morning breakfast dishes automatically served`}
-                {mealTime === 'lunch' && `${t.lunchHours} • Lunch dishes automatically served`}
-                {mealTime === 'dinner' && `${t.dinnerHours} • Dinner sizzlers & tandoori platters served hot`}
-              </p>
-            </div>
+        {/* 1. SLIM LUXURY DINING STATUS STRIP (Clean & Professional) */}
+        <div className="px-4 py-2.5 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 shadow-xs flex items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+            <span className="font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
+              {mealTime === 'morning' ? 'Sunrise Breakfast Service' : mealTime === 'lunch' ? 'Grand Afternoon Lunch Service' : 'Royal Evening Dinner Service'}
+            </span>
+            <span className="hidden sm:inline text-slate-400 dark:text-slate-600">•</span>
+            <span className="hidden sm:inline font-medium text-slate-600 dark:text-slate-400">
+              {mealTime === 'morning' ? t.morningHours : mealTime === 'lunch' ? t.lunchHours : `${t.dinnerHours} (Late Night Sizzlers)`}
+            </span>
           </div>
 
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200/70 dark:border-slate-700 shadow-xs shrink-0">
+          <div className="flex items-center gap-1.5 font-bold text-slate-500 dark:text-slate-400">
             <Clock className="w-3.5 h-3.5 text-amber-500" />
             <span>Time-Synchronized Menu</span>
           </div>
         </div>
 
-        {/* 2. PROMOTIONAL OFFER CARDS IN SLIDE BAR DESIGN (Time-Based Offers, Combos & Signatures) */}
+        {/* 2. PROMOTIONAL OFFER CARDS IN SLIDE BAR DESIGN */}
         <PromoAdBanner onSelectCategory={(cat) => setSelectedCategory(cat)} />
 
-        {/* 3. CATEGORIES SECTION (Reference Image "Chicken Grill House" Theme) */}
+        {/* 3. CATEGORIES SECTION (Reference Image Style: Sleek Horizontal Cards) */}
         <section aria-label="Menu Categories" className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-amber-500 text-base">🌿</span>
-              <h3 className="font-display font-black text-lg sm:text-xl text-slate-900 dark:text-white">
+              <h3 className="font-sans font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight">
                 Categories
               </h3>
             </div>
@@ -250,8 +226,8 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             </button>
           </div>
 
-          {/* Clean Rounded-2xl Category Cards (matching the reference image) */}
-          <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-8 gap-2.5 sm:gap-3">
+          {/* Clean Horizontal Rounded-2xl Cards */}
+          <div className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar py-1">
             {categoriesList.map((cat) => {
               const isActive = selectedCategory === cat.key;
               return (
@@ -259,27 +235,15 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                   key={cat.key}
                   type="button"
                   onClick={() => setSelectedCategory(cat.key)}
-                  className={`p-3 rounded-2xl sm:rounded-3xl flex flex-col items-center justify-center text-center transition-all duration-200 cursor-pointer border active:scale-95 group ${
+                  className={`px-4 py-2 rounded-2xl flex items-center gap-2 shrink-0 transition-all duration-200 cursor-pointer border active:scale-95 shadow-xs ${
                     isActive
-                      ? 'bg-amber-400 text-slate-950 border-amber-400 shadow-lg shadow-amber-400/25 scale-103 font-black'
-                      : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-800 hover:border-amber-300 dark:hover:border-slate-700 shadow-xs hover:shadow-md'
+                      ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-400 text-slate-950 border-amber-400 shadow-md shadow-amber-400/25 font-black scale-102'
+                      : 'bg-white dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/[0.08] hover:border-amber-400/50 hover:text-amber-400'
                   }`}
                 >
-                  {/* Category Circular Emoji Badge */}
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl mb-2 transition-transform group-hover:scale-110 ${
-                    isActive 
-                      ? 'bg-slate-950 text-amber-400 shadow-sm' 
-                      : 'bg-amber-50 dark:bg-slate-800'
-                  }`}>
-                    {cat.icon}
-                  </div>
-                  
-                  {/* Category Name */}
-                  <span className={`text-xs font-extrabold truncate w-full ${isActive ? 'text-slate-950 font-black' : 'text-slate-900 dark:text-white'}`}>
+                  <span className="text-base">{cat.icon}</span>
+                  <span className="text-xs sm:text-sm font-extrabold whitespace-nowrap">
                     {cat.label}
-                  </span>
-                  <span className={`text-[10px] mt-0.5 truncate w-full ${isActive ? 'text-slate-800 font-bold' : 'text-slate-400 dark:text-slate-500 font-medium'}`}>
-                    {cat.countLabel}
                   </span>
                 </button>
               );
@@ -290,7 +254,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
         {/* 4. CAPSULE SEARCH BAR & FILTER PILL CHIPS */}
         <section aria-label="Search and Filter Controls" className="space-y-3">
           
-          {/* Capsule Search Bar (Reference Image Style) */}
+          {/* Capsule Search Bar */}
           <div className="relative w-full">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
             <input
@@ -298,7 +262,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
               placeholder="Search for delicious dishes, curries, tandoors, biryanis..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-11 pr-20 py-3 rounded-full bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-sm font-medium text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/25 focus:border-amber-500 shadow-sm transition-all"
+              className="w-full pl-11 pr-20 py-2.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-sm font-medium text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/25 focus:border-amber-500 shadow-xs transition-all"
             />
             {searchQuery && (
               <button 
@@ -316,7 +280,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             <button
               type="button"
               onClick={() => setDietFilter('all')}
-              className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-xs active:scale-95 ${
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-xs active:scale-95 ${
                 dietFilter === 'all'
                   ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-950 font-black'
                   : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:border-slate-300'
@@ -328,7 +292,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             <button
               type="button"
               onClick={() => setDietFilter(dietFilter === 'veg' ? 'all' : 'veg')}
-              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-xs active:scale-95 border ${
+              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-xs active:scale-95 border ${
                 dietFilter === 'veg'
                   ? 'bg-emerald-600 text-white border-emerald-600 shadow-emerald-500/20'
                   : 'bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-400 border-emerald-200/80 dark:border-emerald-900/60 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
@@ -341,7 +305,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             <button
               type="button"
               onClick={() => setDietFilter(dietFilter === 'non-veg' ? 'all' : 'non-veg')}
-              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-xs active:scale-95 border ${
+              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-xs active:scale-95 border ${
                 dietFilter === 'non-veg'
                   ? 'bg-rose-600 text-white border-rose-600 shadow-rose-500/20'
                   : 'bg-white dark:bg-slate-900 text-rose-700 dark:text-rose-400 border-rose-200/80 dark:border-rose-900/60 hover:bg-rose-50 dark:hover:bg-rose-950/40'
@@ -354,7 +318,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             <button
               type="button"
               onClick={() => setRatingFilter(!ratingFilter)}
-              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-xs active:scale-95 border ${
+              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-xs active:scale-95 border ${
                 ratingFilter
                   ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-amber-500/20 font-black'
                   : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-slate-800 hover:border-amber-300'
@@ -367,7 +331,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             <button
               type="button"
               onClick={() => setFastPrepFilter(!fastPrepFilter)}
-              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-xs active:scale-95 border ${
+              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap shadow-xs active:scale-95 border ${
                 fastPrepFilter
                   ? 'bg-cyan-600 text-white border-cyan-500 shadow-cyan-500/20 font-black'
                   : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-slate-800 hover:border-cyan-300'
@@ -379,28 +343,26 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
           </div>
         </section>
 
-        {/* 5. POPULAR DISHES SECTION HEADER (Reference Image "Popular Dishes" Style) */}
-        <div className="flex items-center justify-between pt-2">
+        {/* 5. POPULAR DISHES SECTION HEADER (Reference Image Style) */}
+        <div className="flex items-center justify-between pt-1">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="font-display font-black text-2xl sm:text-3xl text-slate-900 dark:text-white tracking-tight">
+              <h2 className="font-sans font-extrabold text-2xl sm:text-3xl text-slate-900 dark:text-white tracking-tight">
                 Popular Dishes
               </h2>
-              <span className="text-amber-500 font-display font-black text-lg">~</span>
+              <span className="text-amber-500 font-bold text-lg">~</span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
               Freshly prepared artisanal meals served straight to Table {tableNumber}
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700 shadow-xs">
-              {filteredItems.length} Dishes
-            </span>
-          </div>
+          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700 shadow-xs">
+            {filteredItems.length} Dishes
+          </span>
         </div>
 
-        {/* 6. FOOD ITEMS GRID: CURRENT TREND MODERN CARDS (Exactly like the Reference Image!) */}
+        {/* 6. FOOD ITEMS GRID: CURRENT TREND MODERN CARDS (Exactly like Reference Image!) */}
         {filteredItems.length === 0 ? (
           <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 p-8 shadow-xs">
             <AlertCircle className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
@@ -442,13 +404,13 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                   onClick={() => item.isAvailable && onSelectItem(item)}
                   className={`group relative rounded-3xl transition-all duration-300 overflow-hidden flex flex-col justify-between cursor-pointer border p-3.5 sm:p-4 ${
                     !item.isAvailable
-                      ? 'opacity-65 border-slate-200 dark:border-slate-800 grayscale-[0.4] bg-white dark:bg-slate-900'
-                      : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800/90 shadow-[0_4px_25px_rgba(0,0,0,0.05)] hover:shadow-xl hover:-translate-y-1.5'
+                      ? 'opacity-65 border-slate-200 dark:border-slate-800 grayscale-[0.4] bg-white dark:bg-slate-900/60'
+                      : 'bg-white dark:bg-slate-900/90 border-slate-200/80 dark:border-white/[0.08] shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_25px_rgba(0,0,0,0.3)] hover:shadow-xl hover:border-amber-400/50 hover:-translate-y-1.5'
                   }`}
                 >
                   
                   {/* TOP FOOD PRESENTATION CONTAINER */}
-                  <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden bg-amber-50/40 dark:bg-slate-850 flex items-center justify-center">
+                  <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 flex items-center justify-center">
                     
                     {/* Food Image with Smooth Hover Zoom */}
                     <img
@@ -530,7 +492,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                   <div className="pt-3 flex-1 flex flex-col justify-between">
                     <div>
                       {/* Dish Title */}
-                      <h3 className="font-display font-black text-base sm:text-lg text-slate-900 dark:text-white group-hover:text-amber-500 transition-colors line-clamp-1 leading-snug">
+                      <h3 className="font-sans font-bold text-base sm:text-lg text-slate-900 dark:text-white group-hover:text-amber-400 transition-colors line-clamp-1 leading-snug">
                         {localizedName}
                       </h3>
 
@@ -551,12 +513,12 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                       </p>
                     </div>
 
-                    {/* BOTTOM ROW: BOLD PRICE ON LEFT, YELLOW CIRCULAR '+' BUTTON ON RIGHT (Current Trend) */}
+                    {/* BOTTOM ROW: BOLD PRICE ON LEFT, YELLOW CIRCULAR '+' BUTTON ON RIGHT */}
                     <div className="flex items-center justify-between pt-3 mt-2 border-t border-slate-100 dark:border-slate-800/80">
                       
                       {/* Price Tag */}
                       <div className="flex flex-col">
-                        <span className="font-display font-black text-lg sm:text-xl text-slate-950 dark:text-amber-400 leading-none">
+                        <span className="font-sans font-extrabold text-lg sm:text-xl text-slate-950 dark:text-amber-400 leading-none">
                           ₹{item.price}
                         </span>
                         <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">
@@ -595,7 +557,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                           <button
                             type="button"
                             onClick={(e) => handleQuickAdd(item, e)}
-                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 flex items-center justify-center font-black shadow-md shadow-amber-400/25 hover:scale-108 active:scale-95 transition-all cursor-pointer group/btn"
+                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 flex items-center justify-center font-black shadow-md shadow-amber-500/30 hover:scale-108 active:scale-95 transition-all cursor-pointer group/btn"
                             title="Add to Cart"
                             aria-label={`Add ${item.name} to cart`}
                           >

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useKiosk } from '../../context/KioskContext';
 import { 
   ShoppingBag, 
@@ -6,41 +6,32 @@ import {
   ArrowLeft,
   Sun,
   Moon,
-  Activity,
-  Gamepad2,
-  Bell
+  ConciergeBell
 } from 'lucide-react';
-import { HotelBrand } from './HotelBrand';
+import royalEmberLogo from '../../assets/royal_ember_logo.jpg';
 import { getAssignedWaiter } from '../../utils/waiterAssignment';
 
 interface HeaderProps {
   onBackToWelcome?: () => void;
   onOpenCart?: () => void;
+  showBack?: boolean;
   onOpenTrackOrder?: () => void;
   onOpenEntertainment?: () => void;
   onCallWaiter?: () => void;
-  showBack?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
   onBackToWelcome, 
   onOpenCart, 
-  onOpenTrackOrder,
-  onOpenEntertainment,
-  onCallWaiter,
   showBack = false 
 }) => {
   const { 
     tableNumber, 
     theme, 
     toggleTheme, 
-    isAccessibilityMode, 
     cartTotalQuantity, 
     cartGrandTotal, 
-    t,
-    activeOrders,
-    currentTrackedOrder,
-    staffAlerts
+    t 
   } = useKiosk();
 
   const [currentTime, setCurrentTime] = useState<string>('');
@@ -58,122 +49,123 @@ export const Header: React.FC<HeaderProps> = ({
     return () => clearInterval(interval);
   }, []);
 
-  // Assigned server/waiter based on table zone
   const assignedWaiter = getAssignedWaiter(tableNumber);
 
-  // Active table order for real-time ping indicator
-  const activeTableOrder = useMemo(() => {
-    if (currentTrackedOrder && currentTrackedOrder.status !== 'COMPLETED') {
-      const match = activeOrders.find(o => o.id === currentTrackedOrder.id);
-      return match || currentTrackedOrder;
-    }
-    return activeOrders.find(o => o.tableNumber === tableNumber && o.status !== 'COMPLETED') || null;
-  }, [activeOrders, currentTrackedOrder, tableNumber]);
-
-  // Pending staff alerts count
-  const pendingAlertsForThisTable = staffAlerts.filter(
-    (a) => a.tableNumber === tableNumber && a.status === 'PENDING'
-  ).length;
-
   return (
-    <>
-      <header className={`sticky top-0 z-30 transition-colors duration-200 border-b ${
-        isAccessibilityMode 
-          ? 'bg-slate-900 text-white border-slate-700 py-3.5 px-3 md:px-6' 
-          : 'bg-white/95 dark:bg-slate-900/95 backdrop-blur-md text-slate-800 dark:text-slate-100 border-slate-200/80 dark:border-slate-800 shadow-sm py-2.5 px-3 md:px-8'
-      }`}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 md:gap-3">
+    <header className="sticky top-0 z-40 bg-slate-950/90 dark:bg-slate-950/90 backdrop-blur-xl border-b border-white/[0.08] shadow-[0_4px_25px_rgba(0,0,0,0.3)] transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-3 flex items-center justify-between gap-3">
+        
+        {/* LEFT: Back Button, Luxury Brand Logo & Table Number */}
+        <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
           
-          {/* LEFT: Hotel Name & Fixed Table Number */}
-          <div className="flex items-center gap-2 md:gap-3 shrink-0">
-            {showBack && onBackToWelcome && (
-              <button
-                onClick={onBackToWelcome}
-                className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-300 active:scale-95 cursor-pointer"
-                title="Back to Welcome Screen"
-                aria-label="Back to Welcome Screen"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-            )}
-
-            {/* Hotel Name & Logo */}
-            <div 
-              onClick={onBackToWelcome}
-              className="cursor-pointer group flex items-center"
-              title="Royal Ember Restaurant & Banquet"
-            >
-              <HotelBrand size="sm" align="left" showTagline={false} showDescriptor={false} />
-            </div>
-
-            {/* FIXED TABLE NUMBER BADGE */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 dark:bg-amber-400/10 text-amber-800 dark:text-amber-300 border border-amber-300/70 dark:border-amber-700/70 font-black text-xs md:text-sm shadow-xs select-none">
-              <span className="text-[10px] md:text-xs uppercase font-bold text-slate-500 dark:text-slate-400">TABLE</span>
-              <span className="text-sm md:text-base text-amber-600 dark:text-amber-400 font-black">{tableNumber}</span>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse ml-0.5" />
-            </div>
-          </div>
-
-          {/* RIGHT: Clock, Waiter Name, Cart, Mode Toggle */}
-          <div className="flex items-center gap-1.5 md:gap-2.5 shrink-0">
-            
-            {/* Live Clock */}
-            <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-mono font-bold border border-slate-200/80 dark:border-slate-700 shadow-xs">
-              <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-              <span>{currentTime || '--:--'}</span>
-            </div>
-
-            {/* Waiter Name Badge */}
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-full bg-amber-100 dark:bg-amber-950/80 text-amber-950 dark:text-amber-200 text-xs font-bold border border-amber-300/80 dark:border-amber-700/80 shadow-xs">
-              <span className="text-sm">🧑‍🍳</span>
-              <span className="hidden xl:inline text-[10px] uppercase font-bold text-amber-700 dark:text-amber-400">Waiter:</span>
-              <span className="font-black text-amber-950 dark:text-amber-100">{assignedWaiter.fullName}</span>
-            </div>
-
-            {/* Cart Trigger Button */}
-            {onOpenCart && (
-              <button
-                onClick={onOpenCart}
-                className="relative flex items-center gap-1.5 px-4 py-2 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-md shadow-amber-400/25 active:scale-95 transition-all cursor-pointer"
-              >
-                <ShoppingBag className="w-4 h-4 text-slate-950" />
-                <span className="hidden sm:inline font-black">{t.cart}</span>
-                {cartTotalQuantity > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full bg-slate-950 text-amber-400 text-xs font-black">
-                    {cartTotalQuantity}
-                  </span>
-                )}
-                {cartGrandTotal > 0 && (
-                  <span className="text-xs font-black border-l border-slate-950/20 pl-1.5 hidden md:inline">
-                    ₹{cartGrandTotal}
-                  </span>
-                )}
-              </button>
-            )}
-
-            {/* Dark/Light Mode Quick Toggle */}
+          {showBack && onBackToWelcome && (
             <button
               type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleTheme();
-              }}
-              className="p-2 rounded-full border transition-all flex items-center justify-center text-xs bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-amber-400 border-slate-200/70 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-95 shadow-xs cursor-pointer"
-              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-              aria-label="Toggle Theme"
+              onClick={onBackToWelcome}
+              className="w-9 h-9 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-slate-300 hover:text-white flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-xs"
+              title="Return to Welcome Screen"
+              aria-label="Return to Welcome Screen"
             >
-              {theme === 'dark' ? (
-                <Sun className="w-4 h-4 text-amber-400" />
-              ) : (
-                <Moon className="w-4 h-4 text-slate-600" />
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+          )}
+
+          {/* Luxury Brand Lockup (Always Visible & Responsive) */}
+          <div 
+            onClick={onBackToWelcome}
+            className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group select-none"
+            title="Royal Ember Restaurant & Banquet"
+          >
+            {/* Gold Crest Logo */}
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden border border-amber-400/50 shadow-[0_0_15px_rgba(245,158,11,0.25)] shrink-0 group-hover:scale-105 transition-transform">
+              <img 
+                src={royalEmberLogo} 
+                alt="Royal Ember Logo" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Brand Typography */}
+            <div className="flex flex-col leading-none">
+              <h1 className="font-royal font-black text-sm sm:text-base md:text-lg tracking-[0.14em] uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-500 drop-shadow-sm whitespace-nowrap">
+                Royal Ember
+              </h1>
+              <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.24em] text-amber-400/80 font-bold mt-0.5 whitespace-nowrap">
+                Dining &amp; Banquet
+              </p>
+            </div>
+          </div>
+
+          {/* TABLE NUMBER CAPSULE (Ultra-refined luxury glass badge) */}
+          <div className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 border border-amber-500/30 text-amber-300 shadow-sm select-none">
+            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-amber-400/80">Table</span>
+            <span className="text-xs sm:text-sm font-black text-amber-300 leading-none">{tableNumber}</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)] animate-pulse" />
+          </div>
+
+        </div>
+
+        {/* RIGHT: Live Clock, Assigned Server, Cart & Theme Toggle */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          
+          {/* Live Dynamic Clock */}
+          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/80 border border-white/10 text-slate-300 font-mono text-xs shadow-xs">
+            <Clock className="w-3.5 h-3.5 text-amber-400" />
+            <span>{currentTime || '--:--'}</span>
+          </div>
+
+          {/* Assigned Server Badge (Luxury Concierge Bell with Gold Name) */}
+          <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/80 border border-white/10 text-slate-200 shadow-xs hover:border-amber-500/30 transition-colors">
+            <ConciergeBell className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 hidden md:inline">Server:</span>
+            <span className="text-xs font-black text-amber-300">{assignedWaiter.fullName}</span>
+          </div>
+
+          {/* Cart Trigger Button (Vibrant Culinary Amber Pill with Always-Visible Label) */}
+          {onOpenCart && (
+            <button
+              type="button"
+              onClick={onOpenCart}
+              className="relative flex items-center gap-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-[0_4px_20px_rgba(245,158,11,0.35)] active:scale-95 transition-all cursor-pointer shrink-0"
+            >
+              <ShoppingBag className="w-4 h-4 text-slate-950 stroke-[2.5]" />
+              <span className="font-black tracking-wide">{t.cart}</span>
+              {cartTotalQuantity > 0 && (
+                <span className="px-2 py-0.5 rounded-full bg-slate-950 text-amber-400 text-xs font-black shadow-xs">
+                  {cartTotalQuantity}
+                </span>
+              )}
+              {cartGrandTotal > 0 && (
+                <span className="text-xs font-black border-l border-slate-950/25 pl-1.5 hidden md:inline">
+                  ₹{cartGrandTotal}
+                </span>
               )}
             </button>
+          )}
 
-          </div>
+          {/* Theme Toggle (Frosted Glass Button) */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleTheme();
+            }}
+            className="w-9 h-9 rounded-full bg-slate-900/80 hover:bg-slate-800 border border-white/10 text-amber-400 hover:text-amber-300 flex items-center justify-center transition-all active:scale-95 cursor-pointer shadow-xs"
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            aria-label="Toggle Theme"
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-4 h-4" />
+            ) : (
+              <Moon className="w-4 h-4 text-slate-300" />
+            )}
+          </button>
+
         </div>
-      </header>
-    </>
+
+      </div>
+    </header>
   );
 };
 

@@ -194,7 +194,7 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
       {/* MODAL CONTAINER: Compact for Feedback, Spacious for Thank You Card */}
       <div 
         className={`w-full ${
-          isSubmitted ? 'max-w-2xl lg:max-w-3xl min-h-[560px]' : 'max-w-lg sm:max-w-xl'
+          isSubmitted ? 'max-w-2xl lg:max-w-3xl min-h-[560px]' : 'max-w-xl md:max-w-2xl'
         } bg-slate-900/98 text-slate-100 rounded-3xl shadow-[0_25px_70px_rgba(0,0,0,0.92)] border border-amber-500/25 overflow-hidden flex flex-col animate-in zoom-in-95 duration-200 relative backdrop-blur-2xl my-auto`}
         onClick={(e) => e.stopPropagation()}
       >
@@ -202,7 +202,7 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
         <div className="absolute top-0 left-1/4 right-1/4 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent blur-[2px]" />
 
         {/* MODAL HEADER */}
-        <div className="px-5 sm:px-6 py-4 border-b border-white/[0.08] flex items-center justify-between bg-slate-850/60 shrink-0">
+        <div className="px-6 sm:px-7 py-4.5 sm:py-5 border-b border-white/[0.08] flex items-center justify-between bg-slate-850/60 shrink-0">
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-extrabold tracking-wider text-amber-400 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/30 uppercase">
@@ -423,36 +423,35 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
           </div>
         ) : (
           /* ==============================================================
-             MEDIUM SIZE & MEDIUM SPACING RATING FORM
-             (Balanced: not big size, not small size - true medium)
+             SPACIOUS, BALANCED RATING FORM (Zero Overlap, Generous Breathing Room)
              ============================================================== */
-          <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 sm:space-y-4.5 overflow-y-auto max-h-[82vh] custom-scrollbar flex-1">
+          <form onSubmit={handleSubmit} className="p-6 sm:p-7 space-y-5 overflow-y-auto max-h-[82vh] custom-scrollbar flex-1">
             
-            {/* 1. MEAL & FOOD QUALITY SECTION (MEDIUM) */}
-            <div className="p-4 sm:p-4.5 rounded-2xl bg-slate-850/80 border border-white/[0.08] space-y-2.5 hover:border-amber-400/30 transition-colors">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-amber-400/15 text-amber-400 flex items-center justify-center border border-amber-400/20 shrink-0">
-                    <Utensils className="w-4.5 h-4.5" />
+            {/* 1. MEAL & FOOD QUALITY SECTION */}
+            <div className="p-4.5 sm:p-5 rounded-2xl bg-slate-850/80 border border-white/[0.08] space-y-3.5 hover:border-amber-400/30 transition-colors">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-amber-400/15 text-amber-400 flex items-center justify-center border border-amber-400/20 shrink-0">
+                    <Utensils className="w-5 h-5" />
                   </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-white tracking-tight">
+                  <div className="min-w-0">
+                    <h4 className="text-sm sm:text-base font-bold text-white tracking-tight">
                       1. Meal & Food Quality
                     </h4>
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-slate-400 block truncate">
                       Flavor, freshness & dish temperature
                     </span>
                   </div>
                 </div>
 
-                <span className="text-xs sm:text-sm font-bold text-amber-300 font-mono bg-amber-400/10 px-2.5 py-0.5 rounded-lg border border-amber-400/20">
+                <span className="text-xs sm:text-sm font-bold text-amber-300 font-mono bg-amber-400/10 px-3 py-1 rounded-lg border border-amber-400/20 shrink-0">
                   {mealRating}.0 ★
                 </span>
               </div>
 
-              {/* 5 Stars with Dynamic Feedback (Medium) */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-0.5">
-                <div className="flex items-center gap-1.5 sm:gap-2">
+              {/* 5 Stars with Dynamic Feedback */}
+              <div className="flex items-center justify-between gap-3 pt-1 flex-wrap sm:flex-nowrap">
+                <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
                   {[1, 2, 3, 4, 5].map((star) => {
                     const isFilled = (hoverMealRating || mealRating) >= star;
                     return (
@@ -477,48 +476,50 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
                   })}
                 </div>
 
-                <span className="text-xs sm:text-sm font-medium text-amber-300/90 text-left sm:text-right">
-                  {getRatingFeedback(hoverMealRating || mealRating, 'meal')}
-                </span>
+                <div className="min-w-0 text-right shrink-0 sm:shrink">
+                  <span className="text-xs sm:text-sm font-semibold text-amber-300/90 bg-amber-400/10 px-3 py-1 rounded-lg border border-amber-400/20 inline-block">
+                    {getRatingFeedback(hoverMealRating || mealRating, 'meal')}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* 2. DEDICATED WAITER SECTION (MEDIUM & BALANCED) */}
-            <div className="p-4 sm:p-4.5 rounded-2xl bg-gradient-to-r from-slate-850 to-slate-800/95 border border-amber-400/30 space-y-3 shadow-sm">
-              <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
-                <div className="flex items-center gap-3">
+            {/* 2. DEDICATED WAITER SECTION */}
+            <div className="p-4.5 sm:p-5 rounded-2xl bg-gradient-to-r from-slate-850 to-slate-800/95 border border-amber-400/30 space-y-3.5 shadow-sm">
+              <div className="flex items-center justify-between gap-3 pb-3 border-b border-white/[0.08]">
+                <div className="flex items-center gap-3.5 min-w-0">
                   <div className={`w-12 h-12 sm:w-13 sm:h-13 rounded-xl flex items-center justify-center font-black text-base ${waiter.avatarBg} text-white shrink-0 border border-white/20 shadow-sm`}>
                     {waiter.initial}
                   </div>
-                  <div>
-                    <div className="flex items-center gap-1.5">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
                       <span className="text-[10px] sm:text-[11px] uppercase font-bold text-amber-400 tracking-wider">
                         Assigned Waiter
                       </span>
-                      <span className="text-xs text-slate-400 font-medium">
+                      <span className="text-[11px] text-slate-400 font-semibold bg-white/[0.06] px-2 py-0.5 rounded-md">
                         Zone {waiter.zone}
                       </span>
                     </div>
 
                     {/* PROMINENT WAITER NAME */}
-                    <h4 className="text-base sm:text-lg font-black text-white tracking-tight flex items-center gap-1.5 mt-0.5">
-                      <span>Waiter {waiter.fullName}</span>
-                      <Award className="w-4 h-4 text-amber-400" />
+                    <h4 className="text-base sm:text-lg font-black text-white tracking-tight flex items-center gap-2 mt-0.5">
+                      <span className="truncate">Waiter {waiter.fullName}</span>
+                      <Award className="w-4 h-4 text-amber-400 shrink-0" />
                     </h4>
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-slate-400 block truncate">
                       Dedicated floor attendant for Table {targetTable}
                     </span>
                   </div>
                 </div>
 
-                <span className="text-xs sm:text-sm font-bold text-amber-300 font-mono bg-amber-400/10 px-2.5 py-0.5 rounded-lg border border-amber-400/25">
+                <span className="text-xs sm:text-sm font-bold text-amber-300 font-mono bg-amber-400/10 px-3 py-1 rounded-lg border border-amber-400/25 shrink-0">
                   {waiterRating}.0 ★
                 </span>
               </div>
 
-              {/* 5 Stars for Waiter (Medium) */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-0.5">
-                <div className="flex items-center gap-1.5 sm:gap-2">
+              {/* 5 Stars for Waiter */}
+              <div className="flex items-center justify-between gap-3 pt-1 flex-wrap sm:flex-nowrap">
+                <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
                   {[1, 2, 3, 4, 5].map((star) => {
                     const isFilled = (hoverWaiterRating || waiterRating) >= star;
                     return (
@@ -543,37 +544,39 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
                   })}
                 </div>
 
-                <span className="text-xs sm:text-sm font-medium text-amber-300/90 text-left sm:text-right">
-                  {getRatingFeedback(hoverWaiterRating || waiterRating, 'waiter')}
-                </span>
+                <div className="min-w-0 text-right shrink-0 sm:shrink">
+                  <span className="text-xs sm:text-sm font-semibold text-amber-300/90 bg-amber-400/10 px-3 py-1 rounded-lg border border-amber-400/20 inline-block">
+                    {getRatingFeedback(hoverWaiterRating || waiterRating, 'waiter')}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* 3. RESTAURANT AMBIANCE & EXPERIENCE SECTION (MEDIUM) */}
-            <div className="p-4 sm:p-4.5 rounded-2xl bg-slate-850/80 border border-white/[0.08] space-y-2.5 hover:border-amber-400/30 transition-colors">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-amber-400/15 text-amber-400 flex items-center justify-center border border-amber-400/20 shrink-0">
-                    <Building2 className="w-4.5 h-4.5" />
+            {/* 3. RESTAURANT AMBIANCE & EXPERIENCE SECTION */}
+            <div className="p-4.5 sm:p-5 rounded-2xl bg-slate-850/80 border border-white/[0.08] space-y-3.5 hover:border-amber-400/30 transition-colors">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-amber-400/15 text-amber-400 flex items-center justify-center border border-amber-400/20 shrink-0">
+                    <Building2 className="w-5 h-5" />
                   </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-white tracking-tight">
+                  <div className="min-w-0">
+                    <h4 className="text-sm sm:text-base font-bold text-white tracking-tight">
                       3. Restaurant Service & Ambiance
                     </h4>
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-slate-400 block truncate">
                       Atmosphere, cleanliness & ambient music
                     </span>
                   </div>
                 </div>
 
-                <span className="text-xs sm:text-sm font-bold text-amber-300 font-mono bg-amber-400/10 px-2.5 py-0.5 rounded-lg border border-amber-400/20">
+                <span className="text-xs sm:text-sm font-bold text-amber-300 font-mono bg-amber-400/10 px-3 py-1 rounded-lg border border-amber-400/20 shrink-0">
                   {ambianceRating}.0 ★
                 </span>
               </div>
 
-              {/* 5 Stars for Ambiance (Medium) */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-0.5">
-                <div className="flex items-center gap-1.5 sm:gap-2">
+              {/* 5 Stars for Ambiance */}
+              <div className="flex items-center justify-between gap-3 pt-1 flex-wrap sm:flex-nowrap">
+                <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
                   {[1, 2, 3, 4, 5].map((star) => {
                     const isFilled = (hoverAmbianceRating || ambianceRating) >= star;
                     return (
@@ -598,18 +601,20 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
                   })}
                 </div>
 
-                <span className="text-xs sm:text-sm font-medium text-amber-300/90 text-left sm:text-right">
-                  {getRatingFeedback(hoverAmbianceRating || ambianceRating, 'ambiance')}
-                </span>
+                <div className="min-w-0 text-right shrink-0 sm:shrink">
+                  <span className="text-xs sm:text-sm font-semibold text-amber-300/90 bg-amber-400/10 px-3 py-1 rounded-lg border border-amber-400/20 inline-block">
+                    {getRatingFeedback(hoverAmbianceRating || ambianceRating, 'ambiance')}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* QUICK COMPLIMENT PILLS (MEDIUM) */}
-            <div className="space-y-2 pt-0.5">
+            {/* QUICK COMPLIMENT PILLS */}
+            <div className="space-y-2.5 pt-1">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
                 What Made Your Visit Special? (Optional)
               </span>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2.5">
                 {quickPraiseTags.map((item) => {
                   const isSelected = selectedTags.includes(item.label);
                   return (
@@ -617,13 +622,13 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
                       key={item.label}
                       type="button"
                       onClick={() => toggleTag(item.label)}
-                      className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border flex items-center gap-1.5 ${
+                      className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer border flex items-center gap-2 ${
                         isSelected
                           ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-sm scale-102'
                           : 'bg-white/[0.04] text-slate-300 border-white/10 hover:bg-white/[0.08]'
                       }`}
                     >
-                      <span className="text-sm">{item.icon}</span>
+                      <span className="text-base">{item.icon}</span>
                       <span>{item.label}</span>
                       {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                     </button>
@@ -632,10 +637,10 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
               </div>
             </div>
 
-            {/* COMPACT COMMENT BOX (MEDIUM) */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
-                <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
+            {/* COMPACT COMMENT BOX */}
+            <div className="space-y-2 pt-1">
+              <label className="text-xs font-semibold text-slate-400 flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-amber-400" />
                 <span>Special Compliment or Chef Note (Optional):</span>
               </label>
               <textarea
@@ -643,15 +648,15 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
                 onChange={(e) => setComment(e.target.value)}
                 rows={2}
                 placeholder={`Share kind words for Waiter ${waiter.name} or Chef Anand...`}
-                className="w-full p-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30 transition-all resize-none"
+                className="w-full p-4 rounded-xl bg-white/[0.04] border border-white/10 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30 transition-all resize-none"
               />
             </div>
 
-            {/* SUBMIT BUTTON (MEDIUM) */}
-            <div className="pt-1">
+            {/* SUBMIT BUTTON */}
+            <div className="pt-2 sm:pt-3">
               <button
                 type="submit"
-                className="w-full py-3.5 sm:py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-400/25 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-sm sm:text-base shadow-lg shadow-amber-400/25 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>Submit Dining Feedback</span>
                 <ArrowRight className="w-4 h-4 text-slate-950" />

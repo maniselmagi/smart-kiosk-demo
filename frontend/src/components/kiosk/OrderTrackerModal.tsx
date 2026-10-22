@@ -287,17 +287,17 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
 
             {/* TIME'S UP FEEDBACK CALLOUT BANNER */}
             {isTimeUp && (
-              <div className="mt-4 pt-4 border-t border-amber-500/30 bg-gradient-to-r from-amber-500/15 via-yellow-500/10 to-amber-500/15 p-4 rounded-2xl border border-amber-400/40 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg shadow-amber-500/10 animate-in slide-in-from-bottom-2 duration-300">
+              <div className="mt-4 pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 rounded-2xl bg-white/[0.03] border border-amber-400/25">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center shrink-0 shadow-md">
-                    <Star className="w-5 h-5 fill-slate-950 text-slate-950 animate-bounce" />
+                  <div className="w-9 h-9 rounded-xl bg-amber-400/10 text-amber-400 flex items-center justify-center shrink-0 border border-amber-400/20">
+                    <Star className="w-4 h-4 fill-amber-400/40 text-amber-400" />
                   </div>
                   <div>
-                    <span className="text-xs font-black text-amber-300 uppercase tracking-wider block">
-                      Kitchen Time’s Up • Order Plated & Delivered!
+                    <span className="text-xs font-bold text-white block">
+                      Dishes Delivered • How Was Everything?
                     </span>
-                    <p className="text-xs text-slate-200">
-                      Rate your meal, restaurant service, and hospitality with <strong className="text-amber-300 font-extrabold">Waiter {waiter.fullName}</strong>.
+                    <p className="text-[11px] text-slate-300">
+                      Rate your meal and service by <strong className="text-amber-300 font-medium">Waiter {waiter.fullName}</strong>.
                     </p>
                   </div>
                 </div>
@@ -308,11 +308,11 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                     if (onOpenFeedback) onOpenFeedback();
                     setIsFeedbackOpen(true);
                   }}
-                  className="w-full sm:w-auto py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/30 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+                  className="w-full sm:w-auto py-2 px-3.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs shadow-xs active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
                 >
-                  <Star className="w-3.5 h-3.5 fill-slate-950 text-slate-950" />
-                  <span>Rate Meal & Waiter</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-slate-950" />
+                  <Star className="w-3.5 h-3.5 fill-slate-950" />
+                  <span>Rate Experience</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             )}
@@ -484,7 +484,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
             Close Tracker
           </button>
 
-          {/* Prominent Feedback Button once Time's Up */}
+          {/* Feedback Button once Time's Up */}
           {isTimeUp && (
             <button
               type="button"
@@ -492,9 +492,9 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                 if (onOpenFeedback) onOpenFeedback();
                 setIsFeedbackOpen(true);
               }}
-              className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 text-xs font-black shadow-lg shadow-amber-500/30 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer ring-2 ring-amber-400/40 animate-pulse"
+              className="flex-1 py-3 px-4 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Star className="w-4 h-4 fill-slate-950 text-slate-950" />
+              <Star className="w-4 h-4 fill-slate-950" />
               <span>Feedback & Ratings</span>
             </button>
           )}
@@ -505,10 +505,10 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
               onClose();
               onOpenReceipt();
             }}
-            className={`py-3 px-4 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer border ${
+            className={`py-3 px-4 rounded-2xl text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer border ${
               isTimeUp
-                ? 'bg-slate-800 hover:bg-slate-750 text-slate-200 border-white/10 active:scale-95'
-                : 'flex-1 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 shadow-lg shadow-amber-500/25 active:scale-95'
+                ? 'bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 border-white/10 active:scale-95'
+                : 'flex-1 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold shadow-sm active:scale-95'
             }`}
           >
             <Receipt className="w-4 h-4" />

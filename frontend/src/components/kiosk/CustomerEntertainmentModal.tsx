@@ -401,24 +401,24 @@ const OriginalLudoGame: React.FC = () => {
   const b2Pos = getBotTokenPos(botTokens[1]);
 
   return (
-    <div className="space-y-4 max-w-xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-3 max-w-4xl mx-auto">
+      {/* Top Header */}
+      <div className="flex items-center justify-between bg-slate-900/60 p-2.5 px-3.5 rounded-2xl border border-white/5">
         <div>
-          <h4 className="font-black text-sm md:text-base text-white flex items-center gap-2">
+          <h4 className="font-black text-xs sm:text-sm text-white flex items-center gap-2">
             <span>🎲 Royal Ludo Master</span>
-            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-400/15 text-amber-300 font-extrabold border border-amber-400/30">
-              Interactive 15×15 Board
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-extrabold border border-amber-400/30">
+              15×15 Board
             </span>
           </h4>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Roll 6 to leave base. Tap gleaming tokens to walk on the board cells!
+          <p className="text-[11px] text-slate-400">
+            Roll 6 to leave base. Tap gleaming tokens or use the action buttons to advance!
           </p>
         </div>
 
         <button
           onClick={resetGame}
-          className="p-2 px-3 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-slate-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer border border-white/10 active:scale-95 transition-all"
+          className="p-1.5 px-3 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-slate-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer border border-white/10 active:scale-95 transition-all"
         >
           <RotateCcw className="w-3.5 h-3.5" />
           <span>New Game</span>
@@ -426,384 +426,443 @@ const OriginalLudoGame: React.FC = () => {
       </div>
 
       {winner && (
-        <div className="p-4 rounded-3xl bg-gradient-to-r from-amber-500/25 via-emerald-500/25 to-amber-500/25 border-2 border-amber-400/40 text-center animate-in zoom-in-95 shadow-xl">
-          <Trophy className="w-8 h-8 text-amber-400 mx-auto mb-1 animate-bounce" />
-          <span className="font-black text-base text-white block">{winner}</span>
+        <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/25 via-emerald-500/25 to-amber-500/25 border-2 border-amber-400/60 text-center animate-in zoom-in-95 shadow-xl">
+          <Trophy className="w-6 h-6 text-amber-400 mx-auto mb-1 animate-bounce" />
+          <span className="font-black text-xs sm:text-sm text-white block">{winner}</span>
         </div>
       )}
 
-      {/* AUTHENTIC 15×15 LUDO BOARD CANVAS */}
-      <div className="p-3 sm:p-4 rounded-3xl bg-slate-950 border-2 border-amber-500/40 shadow-2xl relative select-none">
+      {/* 2-COLUMN RESPONSIVE LAYOUT (Perfect for Tablet & Desktop >= 640px) */}
+      <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-start">
         
-        <div 
-          className="aspect-square w-full rounded-2xl bg-slate-900 border border-white/10 p-1 shadow-inner relative overflow-hidden"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(15, minmax(0, 1fr))',
-            gridTemplateRows: 'repeat(15, minmax(0, 1fr))',
-            gap: '1px'
-          }}
-        >
-          {/* 1. TOP-LEFT YARD: RED (Chef Bot) */}
-          <div 
-            style={{ gridColumn: '1 / span 6', gridRow: '1 / span 6' }}
-            className="bg-gradient-to-br from-rose-700 to-rose-900 rounded-xl p-2.5 flex flex-col justify-between border border-rose-600/50 shadow-inner relative"
-          >
-            <span className="text-[10px] font-black uppercase text-rose-200 tracking-wider flex items-center gap-1">
-              <span>👨‍🍳 Chef Bot</span>
-            </span>
-
-            {/* Inner Yard Circle with 2 token pockets */}
-            <div className="bg-slate-950/80 rounded-xl p-2.5 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center border border-rose-500/30">
-              {/* Bot Token 1 Pocket */}
-              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 border-2 border-dashed border-rose-500/50 flex items-center justify-center relative">
-                {botTokens[0] === -1 ? (
-                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 text-white flex items-center justify-center text-[10px] font-black shadow-md border border-rose-300">
-                    B1
-                  </div>
-                ) : (
-                  <span className="text-[9px] text-slate-600 font-bold">B1</span>
-                )}
-              </div>
-
-              {/* Bot Token 2 Pocket */}
-              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 border-2 border-dashed border-rose-500/50 flex items-center justify-center relative">
-                {botTokens[1] === -1 ? (
-                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 text-white flex items-center justify-center text-[10px] font-black shadow-md border border-rose-300">
-                    B2
-                  </div>
-                ) : (
-                  <span className="text-[9px] text-slate-600 font-bold">B2</span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* 2. TOP-RIGHT YARD: GREEN (North Yard) */}
-          <div 
-            style={{ gridColumn: '10 / span 6', gridRow: '1 / span 6' }}
-            className="bg-gradient-to-br from-emerald-700 to-emerald-900 rounded-xl p-2.5 flex flex-col justify-between border border-emerald-600/50 shadow-inner relative"
-          >
-            <span className="text-[10px] font-black uppercase text-emerald-200 tracking-wider">Green Yard</span>
-            <div className="bg-slate-950/80 rounded-xl p-2.5 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center border border-emerald-500/30">
-              <div className="w-7 h-7 rounded-full bg-emerald-950/60 border border-emerald-500/40 flex items-center justify-center text-[9px] text-emerald-400 font-bold">G1</div>
-              <div className="w-7 h-7 rounded-full bg-emerald-950/60 border border-emerald-500/40 flex items-center justify-center text-[9px] text-emerald-400 font-bold">G2</div>
-            </div>
-          </div>
-
-          {/* 3. BOTTOM-LEFT YARD: BLUE (South Yard) */}
-          <div 
-            style={{ gridColumn: '1 / span 6', gridRow: '10 / span 6' }}
-            className="bg-gradient-to-br from-blue-700 to-blue-900 rounded-xl p-2.5 flex flex-col justify-between border border-blue-600/50 shadow-inner relative"
-          >
-            <span className="text-[10px] font-black uppercase text-blue-200 tracking-wider">Blue Yard</span>
-            <div className="bg-slate-950/80 rounded-xl p-2.5 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center border border-blue-500/30">
-              <div className="w-7 h-7 rounded-full bg-blue-950/60 border border-blue-500/40 flex items-center justify-center text-[9px] text-blue-400 font-bold">U1</div>
-              <div className="w-7 h-7 rounded-full bg-blue-950/60 border border-blue-500/40 flex items-center justify-center text-[9px] text-blue-400 font-bold">U2</div>
-            </div>
-          </div>
-
-          {/* 4. BOTTOM-RIGHT YARD: YELLOW (PLAYER GOLD COINS) */}
-          <div 
-            style={{ gridColumn: '10 / span 6', gridRow: '10 / span 6' }}
-            className="bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-600 rounded-xl p-2.5 flex flex-col justify-between border-2 border-amber-300 shadow-xl relative"
-          >
-            <span className="text-[10px] font-black uppercase text-slate-950 tracking-wider flex items-center justify-between">
-              <span>👑 You (Gold)</span>
-              <span className="text-[9px] font-mono bg-slate-950 text-amber-400 px-1.5 py-0.2 rounded-full">Base</span>
-            </span>
-
-            {/* Inner Yard Circle with 2 interactive player token pockets */}
-            <div className="bg-slate-950/90 rounded-xl p-2.5 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center border border-amber-400/40 shadow-inner">
-              {/* Player Token 1 in Base */}
-              <div 
-                onClick={() => canPlayerMoveToken(0) && handlePlayerMove(0)}
-                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 border-2 border-dashed border-amber-400/50 flex items-center justify-center relative transition-all ${
-                  canPlayerMoveToken(0) ? 'ring-4 ring-amber-400 animate-bounce cursor-pointer' : ''
-                }`}
-                title="Gold Coin P1"
-              >
-                {playerTokens[0] === -1 ? (
-                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 text-slate-950 flex items-center justify-center text-[10px] font-black shadow-md border border-white">
-                    P1
-                  </div>
-                ) : (
-                  <span className="text-[9px] text-slate-600 font-bold">P1</span>
-                )}
-              </div>
-
-              {/* Player Token 2 in Base */}
-              <div 
-                onClick={() => canPlayerMoveToken(1) && handlePlayerMove(1)}
-                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 border-2 border-dashed border-amber-400/50 flex items-center justify-center relative transition-all ${
-                  canPlayerMoveToken(1) ? 'ring-4 ring-amber-400 animate-bounce cursor-pointer' : ''
-                }`}
-                title="Gold Coin P2"
-              >
-                {playerTokens[1] === -1 ? (
-                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 text-slate-950 flex items-center justify-center text-[10px] font-black shadow-md border border-white">
-                    P2
-                  </div>
-                ) : (
-                  <span className="text-[9px] text-slate-600 font-bold">P2</span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* 5. CENTER: LUDO TRIANGULAR HOME */}
-          <div 
-            style={{ gridColumn: '7 / span 3', gridRow: '7 / span 3' }}
-            className="bg-gradient-to-tr from-amber-500 via-rose-600 to-emerald-600 rounded-xl border-2 border-white flex flex-col items-center justify-center text-white text-center p-1 relative shadow-lg"
-          >
-            <Trophy className="w-5 h-5 text-amber-300 drop-shadow-md animate-pulse" />
-            <span className="text-[8px] font-black tracking-widest uppercase">HOME</span>
+        {/* LEFT COLUMN: 15×15 LUDO BOARD (Constrained width so it fits in Tablet Viewport!) */}
+        <div className="sm:col-span-7 flex flex-col items-center">
+          <div className="w-full max-w-[320px] sm:max-w-[340px] p-2 rounded-2xl bg-slate-950 border-2 border-amber-500/40 shadow-2xl relative select-none">
             
-            {/* Finished Tokens inside Home */}
-            <div className="flex gap-1 mt-0.5">
-              {playerTokens[0] === 56 && <span className="w-2.5 h-2.5 rounded-full bg-amber-400 border border-white" title="P1 Home" />}
-              {playerTokens[1] === 56 && <span className="w-2.5 h-2.5 rounded-full bg-amber-400 border border-white" title="P2 Home" />}
-              {botTokens[0] === 56 && <span className="w-2.5 h-2.5 rounded-full bg-rose-500 border border-white" title="B1 Home" />}
-              {botTokens[1] === 56 && <span className="w-2.5 h-2.5 rounded-full bg-rose-500 border border-white" title="B2 Home" />}
+            <div 
+              className="aspect-square w-full rounded-xl bg-slate-900 border border-white/10 p-0.5 shadow-inner relative overflow-hidden"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(15, minmax(0, 1fr))',
+                gridTemplateRows: 'repeat(15, minmax(0, 1fr))',
+                gap: '1px'
+              }}
+            >
+              {/* 1. TOP-LEFT YARD: RED (Chef Bot) */}
+              <div 
+                style={{ gridColumn: '1 / span 6', gridRow: '1 / span 6' }}
+                className="bg-gradient-to-br from-rose-700 to-rose-900 rounded-lg p-2 flex flex-col justify-between border border-rose-600/50 shadow-inner relative"
+              >
+                <span className="text-[9px] font-black uppercase text-rose-200 tracking-wider flex items-center gap-1">
+                  <span>👨‍🍳 Chef Bot</span>
+                </span>
+
+                {/* Inner Yard Circle with 2 token pockets */}
+                <div className="bg-slate-950/80 rounded-lg p-2 grid grid-cols-2 gap-1.5 aspect-square items-center justify-items-center border border-rose-500/30">
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-900 border border-dashed border-rose-500/50 flex items-center justify-center relative">
+                    {botTokens[0] === -1 ? (
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 text-white flex items-center justify-center text-[9px] font-black shadow-md border border-rose-300">
+                        B1
+                      </div>
+                    ) : (
+                      <span className="text-[8px] text-slate-600 font-bold">B1</span>
+                    )}
+                  </div>
+
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-900 border border-dashed border-rose-500/50 flex items-center justify-center relative">
+                    {botTokens[1] === -1 ? (
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 text-white flex items-center justify-center text-[9px] font-black shadow-md border border-rose-300">
+                        B2
+                      </div>
+                    ) : (
+                      <span className="text-[8px] text-slate-600 font-bold">B2</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. TOP-RIGHT YARD: GREEN */}
+              <div 
+                style={{ gridColumn: '10 / span 6', gridRow: '1 / span 6' }}
+                className="bg-gradient-to-br from-emerald-700 to-emerald-900 rounded-lg p-2 flex flex-col justify-between border border-emerald-600/50 shadow-inner relative"
+              >
+                <span className="text-[9px] font-black uppercase text-emerald-200 tracking-wider">Green Yard</span>
+                <div className="bg-slate-950/80 rounded-lg p-2 grid grid-cols-2 gap-1.5 aspect-square items-center justify-items-center border border-emerald-500/30">
+                  <div className="w-6 h-6 rounded-full bg-emerald-950/60 border border-emerald-500/40 flex items-center justify-center text-[8px] text-emerald-400 font-bold">G1</div>
+                  <div className="w-6 h-6 rounded-full bg-emerald-950/60 border border-emerald-500/40 flex items-center justify-center text-[8px] text-emerald-400 font-bold">G2</div>
+                </div>
+              </div>
+
+              {/* 3. BOTTOM-LEFT YARD: BLUE */}
+              <div 
+                style={{ gridColumn: '1 / span 6', gridRow: '10 / span 6' }}
+                className="bg-gradient-to-br from-blue-700 to-blue-900 rounded-lg p-2 flex flex-col justify-between border border-blue-600/50 shadow-inner relative"
+              >
+                <span className="text-[9px] font-black uppercase text-blue-200 tracking-wider">Blue Yard</span>
+                <div className="bg-slate-950/80 rounded-lg p-2 grid grid-cols-2 gap-1.5 aspect-square items-center justify-items-center border border-blue-500/30">
+                  <div className="w-6 h-6 rounded-full bg-blue-950/60 border border-blue-500/40 flex items-center justify-center text-[8px] text-blue-400 font-bold">U1</div>
+                  <div className="w-6 h-6 rounded-full bg-blue-950/60 border border-blue-500/40 flex items-center justify-center text-[8px] text-blue-400 font-bold">U2</div>
+                </div>
+              </div>
+
+              {/* 4. BOTTOM-RIGHT YARD: YELLOW (PLAYER GOLD COINS) */}
+              <div 
+                style={{ gridColumn: '10 / span 6', gridRow: '10 / span 6' }}
+                className="bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-600 rounded-lg p-2 flex flex-col justify-between border-2 border-amber-300 shadow-xl relative"
+              >
+                <span className="text-[9px] font-black uppercase text-slate-950 tracking-wider flex items-center justify-between">
+                  <span>👑 You (Gold)</span>
+                  <span className="text-[8px] font-mono bg-slate-950 text-amber-400 px-1 rounded-full">Base</span>
+                </span>
+
+                {/* Inner Yard with interactive player tokens */}
+                <div className="bg-slate-950/90 rounded-lg p-2 grid grid-cols-2 gap-1.5 aspect-square items-center justify-items-center border border-amber-400/40 shadow-inner">
+                  {/* Player Token 1 */}
+                  <div 
+                    onClick={() => canPlayerMoveToken(0) && handlePlayerMove(0)}
+                    className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-900 border border-dashed border-amber-400/50 flex items-center justify-center relative transition-all ${
+                      canPlayerMoveToken(0) ? 'ring-2 ring-amber-400 animate-bounce cursor-pointer' : ''
+                    }`}
+                    title="Gold Coin P1"
+                  >
+                    {playerTokens[0] === -1 ? (
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 text-slate-950 flex items-center justify-center text-[9px] font-black shadow-md border border-white">
+                        P1
+                      </div>
+                    ) : (
+                      <span className="text-[8px] text-slate-600 font-bold">P1</span>
+                    )}
+                  </div>
+
+                  {/* Player Token 2 */}
+                  <div 
+                    onClick={() => canPlayerMoveToken(1) && handlePlayerMove(1)}
+                    className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-900 border border-dashed border-amber-400/50 flex items-center justify-center relative transition-all ${
+                      canPlayerMoveToken(1) ? 'ring-2 ring-amber-400 animate-bounce cursor-pointer' : ''
+                    }`}
+                    title="Gold Coin P2"
+                  >
+                    {playerTokens[1] === -1 ? (
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 text-slate-950 flex items-center justify-center text-[9px] font-black shadow-md border border-white">
+                        P2
+                      </div>
+                    ) : (
+                      <span className="text-[8px] text-slate-600 font-bold">P2</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* 5. CENTER: LUDO TRIANGULAR HOME */}
+              <div 
+                style={{ gridColumn: '7 / span 3', gridRow: '7 / span 3' }}
+                className="bg-gradient-to-tr from-amber-500 via-rose-600 to-emerald-600 rounded-lg border border-white flex flex-col items-center justify-center text-white text-center p-0.5 relative shadow-lg"
+              >
+                <Trophy className="w-4 h-4 text-amber-300 drop-shadow-md animate-pulse" />
+                <span className="text-[7px] font-black tracking-widest uppercase">HOME</span>
+                
+                <div className="flex gap-0.5 mt-0.5">
+                  {playerTokens[0] === 56 && <span className="w-2 h-2 rounded-full bg-amber-400 border border-white" title="P1 Home" />}
+                  {playerTokens[1] === 56 && <span className="w-2 h-2 rounded-full bg-amber-400 border border-white" title="P2 Home" />}
+                  {botTokens[0] === 56 && <span className="w-2 h-2 rounded-full bg-rose-500 border border-white" title="B1 Home" />}
+                  {botTokens[1] === 56 && <span className="w-2 h-2 rounded-full bg-rose-500 border border-white" title="B2 Home" />}
+                </div>
+              </div>
+
+              {/* 6. ALL 52 TRACK SQUARES */}
+              {LUDO_TRACK_COORDS.map(([r, c], trackIdx) => {
+                const isSafe = SAFE_CELL_INDICES.has(trackIdx);
+                const isRedStart = trackIdx === 0;
+                const isYellowStart = trackIdx === 26;
+
+                const hasP1 = p1Pos && p1Pos[0] === r && p1Pos[1] === c && playerTokens[0] < 56;
+                const hasP2 = p2Pos && p2Pos[0] === r && p2Pos[1] === c && playerTokens[1] < 56;
+                const hasB1 = b1Pos && b1Pos[0] === r && b1Pos[1] === c && botTokens[0] < 56;
+                const hasB2 = b2Pos && b2Pos[0] === r && b2Pos[1] === c && botTokens[0] < 56;
+
+                const canP1MoveHere = hasP1 && canPlayerMoveToken(0);
+                const canP2MoveHere = hasP2 && canPlayerMoveToken(1);
+
+                return (
+                  <div
+                    key={`track-${trackIdx}`}
+                    style={{ gridColumn: c + 1, gridRow: r + 1 }}
+                    onClick={() => {
+                      if (canP1MoveHere) handlePlayerMove(0);
+                      else if (canP2MoveHere) handlePlayerMove(1);
+                    }}
+                    className={`relative flex items-center justify-center rounded-xs transition-colors text-[7px] font-bold ${
+                      isRedStart
+                        ? 'bg-rose-600 text-white'
+                        : isYellowStart
+                        ? 'bg-amber-500 text-slate-950 font-black'
+                        : isSafe
+                        ? 'bg-slate-700 text-amber-400 font-black'
+                        : 'bg-slate-800/80 hover:bg-slate-750'
+                    }`}
+                  >
+                    {isSafe && !hasP1 && !hasP2 && !hasB1 && !hasB2 && (
+                      <span className="text-[8px]">★</span>
+                    )}
+
+                    {hasP1 && (
+                      <div 
+                        className={`w-4 h-4 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 text-slate-950 border border-white flex items-center justify-center font-black text-[7px] shadow-lg ${
+                          canP1MoveHere ? 'ring-2 ring-white animate-bounce cursor-pointer scale-110' : ''
+                        }`}
+                        title="P1 - Tap to Move"
+                      >
+                        P1
+                      </div>
+                    )}
+
+                    {hasP2 && (
+                      <div 
+                        className={`w-4 h-4 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 text-slate-950 border border-white flex items-center justify-center font-black text-[7px] shadow-lg ${
+                          canP2MoveHere ? 'ring-2 ring-white animate-bounce cursor-pointer scale-110' : ''
+                        }`}
+                        title="P2 - Tap to Move"
+                      >
+                        P2
+                      </div>
+                    )}
+
+                    {hasB1 && (
+                      <div 
+                        className="w-4 h-4 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 text-white border border-white flex items-center justify-center font-black text-[7px] shadow-lg"
+                        title="Chef Bot B1"
+                      >
+                        B1
+                      </div>
+                    )}
+
+                    {hasB2 && (
+                      <div 
+                        className="w-4 h-4 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 text-white border border-white flex items-center justify-center font-black text-[7px] shadow-lg"
+                        title="Chef Bot B2"
+                      >
+                        B2
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {/* 7. YELLOW HOME RUNWAY */}
+              {YELLOW_HOME_RUNWAY.map(([r, c], i) => {
+                const hasP1 = p1Pos && p1Pos[0] === r && p1Pos[1] === c;
+                const hasP2 = p2Pos && p2Pos[0] === r && p2Pos[1] === c;
+                const canP1 = hasP1 && canPlayerMoveToken(0);
+                const canP2 = hasP2 && canPlayerMoveToken(1);
+
+                return (
+                  <div
+                    key={`yellow-runway-${i}`}
+                    style={{ gridColumn: c + 1, gridRow: r + 1 }}
+                    onClick={() => {
+                      if (canP1) handlePlayerMove(0);
+                      else if (canP2) handlePlayerMove(1);
+                    }}
+                    className="bg-amber-400/90 text-slate-950 flex items-center justify-center rounded-xs font-black text-[7px]"
+                  >
+                    {hasP1 && (
+                      <div className={`w-4 h-4 rounded-full bg-white text-slate-950 border border-amber-600 flex items-center justify-center font-black text-[7px] ${canP1 ? 'animate-bounce ring-1 ring-slate-950 cursor-pointer' : ''}`}>
+                        P1
+                      </div>
+                    )}
+                    {hasP2 && (
+                      <div className={`w-4 h-4 rounded-full bg-white text-slate-950 border border-amber-600 flex items-center justify-center font-black text-[7px] ${canP2 ? 'animate-bounce ring-1 ring-slate-950 cursor-pointer' : ''}`}>
+                        P2
+                      </div>
+                    )}
+                    {!hasP1 && !hasP2 && <span className="opacity-60 text-[6px]">▶</span>}
+                  </div>
+                );
+              })}
+
+              {/* 8. RED HOME RUNWAY */}
+              {RED_HOME_RUNWAY.map(([r, c], i) => {
+                const hasB1 = b1Pos && b1Pos[0] === r && b1Pos[1] === c;
+                const hasB2 = b2Pos && b2Pos[0] === r && b2Pos[1] === c;
+
+                return (
+                  <div
+                    key={`red-runway-${i}`}
+                    style={{ gridColumn: c + 1, gridRow: r + 1 }}
+                    className="bg-rose-600/90 text-white flex items-center justify-center rounded-xs font-bold text-[7px]"
+                  >
+                    {hasB1 && (
+                      <div className="w-4 h-4 rounded-full bg-white text-rose-700 border border-rose-900 flex items-center justify-center font-black text-[7px]">
+                        B1
+                      </div>
+                    )}
+                    {hasB2 && (
+                      <div className="w-4 h-4 rounded-full bg-white text-rose-700 border border-rose-900 flex items-center justify-center font-black text-[7px]">
+                        B2
+                      </div>
+                    )}
+                    {!hasB1 && !hasB2 && <span className="opacity-60 text-[6px]">▶</span>}
+                  </div>
+                );
+              })}
+
             </div>
+
+            {/* STATUS FOOTER BAR */}
+            <div className="flex items-center justify-between text-[11px] font-bold pt-2 px-1 border-t border-white/[0.08] mt-2">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+                <span className="text-amber-300 text-[10px]">
+                  You: P1 ({playerTokens[0] === -1 ? 'Base' : playerTokens[0] === 56 ? '🏆 Home' : `S${playerTokens[0]}`}) • P2 ({playerTokens[1] === -1 ? 'Base' : playerTokens[1] === 56 ? '🏆 Home' : `S${playerTokens[1]}`})
+                </span>
+              </div>
+
+              <div className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block" />
+                <span className="text-rose-400 text-[10px]">
+                  Chef: B1 ({botTokens[0] === -1 ? 'Base' : botTokens[0] === 56 ? '🏆 Home' : `S${botTokens[0]}`}) • B2 ({botTokens[1] === -1 ? 'Base' : botTokens[1] === 56 ? '🏆 Home' : `S${botTokens[1]}`})
+                </span>
+              </div>
+            </div>
+
           </div>
+        </div>
 
-          {/* 6. ALL 52 TRACK SQUARES & RUNWAYS RENDERING */}
-          {LUDO_TRACK_COORDS.map(([r, c], trackIdx) => {
-            const isSafe = SAFE_CELL_INDICES.has(trackIdx);
-            const isRedStart = trackIdx === 0;
-            const isYellowStart = trackIdx === 26;
+        {/* RIGHT COLUMN: ACTION & CONTROL DESK (ALWAYS VISIBLE AT EYE LEVEL ON TABLET) */}
+        <div className="sm:col-span-5 flex flex-col space-y-2.5 w-full">
+          
+          {/* Action Box: Dice & Move Selection */}
+          <div className="p-3.5 rounded-2xl bg-slate-900/95 border border-amber-500/30 shadow-xl space-y-3 backdrop-blur-md">
+            
+            {/* Turn Header */}
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                Active Turn
+              </span>
+              <div className="flex items-center gap-1.5">
+                {turn === 'player' ? (
+                  <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40 text-[10px] font-black animate-pulse">
+                    <span className="w-2 h-2 rounded-full bg-amber-400" />
+                    YOUR TURN
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10px] font-black">
+                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                    CHEF BOT PLAYING
+                  </span>
+                )}
+              </div>
+            </div>
 
-            // Check if P1, P2, B1, B2 are at this track square
-            const hasP1 = p1Pos && p1Pos[0] === r && p1Pos[1] === c && playerTokens[0] < 56;
-            const hasP2 = p2Pos && p2Pos[0] === r && p2Pos[1] === c && playerTokens[1] < 56;
-            const hasB1 = b1Pos && b1Pos[0] === r && b1Pos[1] === c && botTokens[0] < 56;
-            const hasB2 = b2Pos && b2Pos[0] === r && b2Pos[1] === c && botTokens[1] < 56;
+            {/* 3D Dice Display & Guidance */}
+            <div className="flex items-center gap-3 bg-slate-950/80 p-2.5 rounded-xl border border-white/5">
+              <div className={`w-13 h-13 rounded-xl bg-gradient-to-tr from-slate-800 to-slate-900 border-2 border-amber-400 text-amber-300 flex items-center justify-center font-black text-2xl shadow-lg transition-transform ${isRolling ? 'rotate-180 scale-110' : ''}`}>
+                {diceRoll !== null ? diceRoll : '🎲'}
+              </div>
+              <div className="flex-1">
+                <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">
+                  Dice Outcome
+                </span>
+                <span className="text-xs font-black text-white block mt-0.5">
+                  {turn === 'player' ? (
+                    waitingForMove ? (
+                      <span className="text-amber-300 font-extrabold">Rolled a {diceRoll}! Pick a coin to move 👇</span>
+                    ) : (
+                      <span>Roll dice to start your turn</span>
+                    )
+                  ) : (
+                    <span className="text-rose-300">Chef Bot is taking turn...</span>
+                  )}
+                </span>
+                <span className="text-[10px] text-slate-400">
+                  {playerTokens[0] === -1 && playerTokens[1] === -1 ? 'Need a 6 to deploy from base' : 'Aim to conquer Center Home 🏆'}
+                </span>
+              </div>
+            </div>
 
-            const canP1MoveHere = hasP1 && canPlayerMoveToken(0);
-            const canP2MoveHere = hasP2 && canPlayerMoveToken(1);
-
-            return (
-              <div
-                key={`track-${trackIdx}`}
-                style={{ gridColumn: c + 1, gridRow: r + 1 }}
-                onClick={() => {
-                  if (canP1MoveHere) handlePlayerMove(0);
-                  else if (canP2MoveHere) handlePlayerMove(1);
-                }}
-                className={`relative flex items-center justify-center rounded-xs transition-colors text-[8px] font-bold ${
-                  isRedStart
-                    ? 'bg-rose-600 text-white'
-                    : isYellowStart
-                    ? 'bg-amber-500 text-slate-950 font-black'
-                    : isSafe
-                    ? 'bg-slate-700 text-amber-400 font-black'
-                    : 'bg-slate-800/80 hover:bg-slate-750'
+            {/* PRIMARY ACTION BUTTONS: ROLL DICE vs PROMINENT MOVE GOLD P1 & MOVE GOLD P2 */}
+            {!waitingForMove ? (
+              <button
+                onClick={handleRollDice}
+                disabled={turn !== 'player' || isRolling || !!winner}
+                className={`w-full py-3 px-4 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2 shadow-xl ${
+                  turn === 'player' && !winner
+                    ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 active:scale-95 cursor-pointer shadow-amber-500/25 ring-2 ring-amber-400/50'
+                    : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5'
                 }`}
               >
-                {/* Safe Star Icon */}
-                {isSafe && !hasP1 && !hasP2 && !hasB1 && !hasB2 && (
-                  <span className="text-[9px]">★</span>
-                )}
-
-                {/* VISIBLE INTERACTIVE COINS ON BOARD CELLS */}
-                {hasP1 && (
-                  <div 
-                    className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 text-slate-950 border border-white flex items-center justify-center font-black text-[8px] shadow-lg ${
-                      canP1MoveHere ? 'ring-2 ring-white animate-bounce cursor-pointer scale-110' : ''
-                    }`}
-                    title="P1 - Tap to Move"
-                  >
-                    P1
-                  </div>
-                )}
-
-                {hasP2 && (
-                  <div 
-                    className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 text-slate-950 border border-white flex items-center justify-center font-black text-[8px] shadow-lg ${
-                      canP2MoveHere ? 'ring-2 ring-white animate-bounce cursor-pointer scale-110' : ''
-                    }`}
-                    title="P2 - Tap to Move"
-                  >
-                    P2
-                  </div>
-                )}
-
-                {hasB1 && (
-                  <div 
-                    className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 text-white border border-white flex items-center justify-center font-black text-[8px] shadow-lg"
-                    title="Chef Bot B1"
-                  >
-                    B1
-                  </div>
-                )}
-
-                {hasB2 && (
-                  <div 
-                    className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 text-white border border-white flex items-center justify-center font-black text-[8px] shadow-lg"
-                    title="Chef Bot B2"
-                  >
-                    B2
-                  </div>
-                )}
-              </div>
-            );
-          })}
-
-          {/* 7. YELLOW HOME RUNWAY CELLS */}
-          {YELLOW_HOME_RUNWAY.map(([r, c], i) => {
-            const hasP1 = p1Pos && p1Pos[0] === r && p1Pos[1] === c;
-            const hasP2 = p2Pos && p2Pos[0] === r && p2Pos[1] === c;
-            const canP1 = hasP1 && canPlayerMoveToken(0);
-            const canP2 = hasP2 && canPlayerMoveToken(1);
-
-            return (
-              <div
-                key={`yellow-runway-${i}`}
-                style={{ gridColumn: c + 1, gridRow: r + 1 }}
-                onClick={() => {
-                  if (canP1) handlePlayerMove(0);
-                  else if (canP2) handlePlayerMove(1);
-                }}
-                className="bg-amber-400/90 text-slate-950 flex items-center justify-center rounded-xs font-black text-[8px]"
-              >
-                {hasP1 && (
-                  <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white text-slate-950 border border-amber-600 flex items-center justify-center font-black text-[8px] ${canP1 ? 'animate-bounce ring-2 ring-slate-950 cursor-pointer' : ''}`}>
-                    P1
-                  </div>
-                )}
-                {hasP2 && (
-                  <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white text-slate-950 border border-amber-600 flex items-center justify-center font-black text-[8px] ${canP2 ? 'animate-bounce ring-2 ring-slate-950 cursor-pointer' : ''}`}>
-                    P2
-                  </div>
-                )}
-                {!hasP1 && !hasP2 && <span className="opacity-60">▶</span>}
-              </div>
-            );
-          })}
-
-          {/* 8. RED HOME RUNWAY CELLS */}
-          {RED_HOME_RUNWAY.map(([r, c], i) => {
-            const hasB1 = b1Pos && b1Pos[0] === r && b1Pos[1] === c;
-            const hasB2 = b2Pos && b2Pos[0] === r && b2Pos[1] === c;
-
-            return (
-              <div
-                key={`red-runway-${i}`}
-                style={{ gridColumn: c + 1, gridRow: r + 1 }}
-                className="bg-rose-600/90 text-white flex items-center justify-center rounded-xs font-bold text-[8px]"
-              >
-                {hasB1 && (
-                  <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white text-rose-700 border border-rose-900 flex items-center justify-center font-black text-[8px]">
-                    B1
-                  </div>
-                )}
-                {hasB2 && (
-                  <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white text-rose-700 border border-rose-900 flex items-center justify-center font-black text-[8px]">
-                    B2
-                  </div>
-                )}
-                {!hasB1 && !hasB2 && <span className="opacity-60">▶</span>}
-              </div>
-            );
-          })}
-
-        </div>
-
-        {/* STATUS FOOTER BAR */}
-        <div className="flex items-center justify-between text-xs font-bold pt-3 px-1 border-t border-white/[0.08] mt-3">
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-amber-400 inline-block shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
-            <span className="text-amber-300 text-[11px]">
-              You: P1 ({playerTokens[0] === -1 ? 'Base' : playerTokens[0] === 56 ? '🏆 Home' : `Step ${playerTokens[0]}`}) • P2 ({playerTokens[1] === -1 ? 'Base' : playerTokens[1] === 56 ? '🏆 Home' : `Step ${playerTokens[1]}`})
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-rose-500 inline-block" />
-            <span className="text-rose-400 text-[11px]">
-              Chef: B1 ({botTokens[0] === -1 ? 'Base' : botTokens[0] === 56 ? '🏆 Home' : `Step ${botTokens[0]}`}) • B2 ({botTokens[1] === -1 ? 'Base' : botTokens[1] === 56 ? '🏆 Home' : `Step ${botTokens[1]}`})
-            </span>
-          </div>
-        </div>
-
-      </div>
-
-      {/* DICES & ACTION CONTROLS */}
-      <div className="p-4 rounded-3xl bg-slate-900/90 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
-        <div className="flex items-center gap-4 w-full sm:w-auto">
-          {/* Animated 3D Die */}
-          <div className={`w-14 h-14 rounded-2xl bg-gradient-to-tr from-slate-800 to-slate-900 border-2 border-amber-400 flex items-center justify-center font-black text-3xl shadow-lg transition-transform ${isRolling ? 'rotate-180 scale-110' : ''}`}>
-            {diceRoll !== null ? diceRoll : '🎲'}
-          </div>
-
-          <div>
-            <span className="text-[11px] font-bold text-slate-400 block uppercase tracking-wider">
-              Turn Status
-            </span>
-            <span className="text-xs font-black text-white flex items-center gap-1.5 mt-0.5">
-              {turn === 'player' ? (
-                <>
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
-                  <span className="text-amber-300">
-                    {waitingForMove ? 'Tap a glowing gold coin to advance!' : 'Your Turn (Roll 6 to launch from base)'}
+                <Dices className="w-4 h-4 text-slate-950" />
+                <span>{isRolling ? 'Rolling Dice...' : 'Roll Dice 🎲'}</span>
+              </button>
+            ) : (
+              /* PROMINENT MOVE GOLD P1 / P2 BUTTONS (CLEARLY VISIBLE IN TABLET VIEW) */
+              <div className="space-y-2 bg-gradient-to-b from-amber-500/15 to-amber-500/5 border-2 border-amber-400/60 p-2.5 rounded-xl animate-in zoom-in-95">
+                <div className="flex items-center justify-between pb-0.5">
+                  <span className="text-[10px] font-black uppercase text-amber-300 tracking-wider">
+                    👉 Move Your Gold Token:
                   </span>
-                </>
-              ) : (
-                <>
-                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
-                  <span className="text-rose-300">Chef Bot Playing...</span>
-                </>
-              )}
+                  <span className="text-[10px] font-mono font-black text-amber-400 bg-slate-950 px-2 py-0.5 rounded-full border border-amber-400/40">
+                    Rolled {diceRoll}
+                  </span>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  {canPlayerMoveToken(0) && (
+                    <button
+                      onClick={() => handlePlayerMove(0)}
+                      className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 ring-2 ring-white flex items-center justify-between cursor-pointer active:scale-95 animate-pulse transition-all"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-5 h-5 rounded-full bg-slate-950 text-amber-400 flex items-center justify-center text-[10px] font-black">
+                          P1
+                        </span>
+                        <span>Move Gold P1 ➔</span>
+                      </span>
+                      <span className="text-[10px] bg-slate-950/20 px-2 py-0.5 rounded-md font-mono">
+                        {playerTokens[0] === -1 ? 'Deploy to Track 🚀' : `Advance +${diceRoll} steps`}
+                      </span>
+                    </button>
+                  )}
+
+                  {canPlayerMoveToken(1) && (
+                    <button
+                      onClick={() => handlePlayerMove(1)}
+                      className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 ring-2 ring-white flex items-center justify-between cursor-pointer active:scale-95 animate-pulse transition-all"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-5 h-5 rounded-full bg-slate-950 text-amber-400 flex items-center justify-center text-[10px] font-black">
+                          P2
+                        </span>
+                        <span>Move Gold P2 ➔</span>
+                      </span>
+                      <span className="text-[10px] bg-slate-950/20 px-2 py-0.5 rounded-md font-mono">
+                        {playerTokens[1] === -1 ? 'Deploy to Track 🚀' : `Advance +${diceRoll} steps`}
+                      </span>
+                    </button>
+                  )}
+                </div>
+
+                <p className="text-[10px] text-amber-200/90 text-center pt-0.5">
+                  💡 Tip: You can also tap the bouncing gold token directly on the board!
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Commentary & Move Log */}
+          <div className="p-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-[10px] font-mono text-slate-400 space-y-1 shadow-inner">
+            <span className="text-[9px] font-sans font-black uppercase tracking-wider text-slate-500 block mb-0.5">
+              Live Battle Feed
             </span>
+            {gameLog.map((log, i) => (
+              <div key={i} className={i === 0 ? 'text-amber-400 font-bold' : ''}>
+                {log}
+              </div>
+            ))}
           </div>
+
         </div>
 
-        {/* Buttons: Roll Dice or Quick Move Coins */}
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          {!waitingForMove ? (
-            <button
-              onClick={handleRollDice}
-              disabled={turn !== 'player' || isRolling || !!winner}
-              className={`w-full sm:w-auto py-3 px-6 rounded-2xl font-black text-xs transition-all flex items-center justify-center gap-2 shadow-xl ${
-                turn === 'player' && !winner
-                  ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 active:scale-95 cursor-pointer shadow-amber-500/25 ring-2 ring-amber-400/40'
-                  : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5'
-              }`}
-            >
-              <Dices className="w-4 h-4 text-slate-950" />
-              <span>{isRolling ? 'Rolling Dice...' : 'Roll Dice 🎲'}</span>
-            </button>
-          ) : (
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              {canPlayerMoveToken(0) && (
-                <button
-                  onClick={() => handlePlayerMove(0)}
-                  className="flex-1 sm:flex-none py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-black text-xs shadow-md animate-bounce cursor-pointer active:scale-95"
-                >
-                  Move Gold P1 ➔
-                </button>
-              )}
-              {canPlayerMoveToken(1) && (
-                <button
-                  onClick={() => handlePlayerMove(1)}
-                  className="flex-1 sm:flex-none py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-black text-xs shadow-md animate-bounce cursor-pointer active:scale-95"
-                >
-                  Move Gold P2 ➔
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Mini Game Commentary Feed */}
-      <div className="p-3 rounded-2xl bg-slate-900 border border-white/10 text-[11px] font-mono text-slate-400 space-y-1 shadow-inner">
-        {gameLog.map((log, i) => (
-          <div key={i} className={i === 0 ? 'text-amber-400 font-bold' : ''}>
-            {log}
-          </div>
-        ))}
       </div>
     </div>
   );
@@ -1218,7 +1277,7 @@ const OriginalSudokuGame: React.FC = () => {
 // ============================================================================
 // 4. MULTILINGUAL TODAY'S LIVE NEWSPAPER SECTION
 // ============================================================================
-type NewsLanguage = 'en' | 'ta' | 'hi' | 'te';
+type NewsLanguage = 'en' | 'ta' | 'hi' | 'te' | 'kn' | 'ml' | 'mr';
 
 interface NewsItem {
   id: number;
@@ -2047,6 +2106,238 @@ const MULTILINGUAL_NEWS_DATA: Record<NewsLanguage, LanguagePaperConfig> = {
         ]
       }
     ]
+  },
+  kn: {
+    code: 'kn',
+    label: 'ಕನ್ನಡ (Kannada)',
+    nativeName: 'ಕನ್ನಡ ದಿನಪತ್ರಿಕೆ',
+    flag: '🇮🇳',
+    papers: [
+      {
+        name: 'ವಿಜಯ ಕರ್ನಾಟಕ (Vijay Karnataka)',
+        masthead: 'ವಿಜಯ ಕರ್ನಾಟಕ',
+        tagline: 'ಕರ್ನಾಟಕದ ನಂ.1 ದಿನಪತ್ರಿಕೆ • ಸತ್ಯಮೇವ ಜಯತೇ',
+        cityEdition: 'ಬೆಂಗಳೂರು & ಮೈಸೂರು ಆವೃತ್ತಿ • ಇಂದು, 16 ಅಕ್ಟೋಬರ್ 2026',
+        news: [
+          {
+            id: 1701,
+            newspaper: 'ವಿಜಯ ಕರ್ನಾಟಕ',
+            headline: 'ನಮ್ಮ ಮೆಟ್ರೋ 3ನೇ ಹಂತದ ಕಾಮಗಾರಿ ಪೂರ್ಣ: ಹೊಸ ಮಾರ್ಗಗಳು ಸಾರ್ವಜನಿಕ ಸೇವೆಗೆ ಸಿದ್ಧ!',
+            summary: 'ಐಟಿ ಕಾರಿಡಾರ್ ಹಾಗೂ ನಗರದ ಪ್ರಮುಖ ತಾಣಗಳನ್ನು ಬೆಸೆಯುವ ಹೊಸ ಹೈ-ಸ್ಪೀಡ್ ಮೆಟ್ರೋ ಮಾರ್ಗವನ್ನು ಇಂದಿನಿಂದ ಸಾರ್ವಜನಿಕ ಸಂಚಾರಕ್ಕೆ ಮುಕ್ತಗೊಳಿಸಲಾಯಿತು.',
+            category: 'ನಗರಾಭಿವೃದ್ಧಿ',
+            readTime: '45 ಸೆಕೆಂಡ್ ಓದು',
+            image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '10 ನಿಮಿಷಗಳ ಹಿಂದೆ'
+          },
+          {
+            id: 1702,
+            newspaper: 'ವಿಜಯ ಕರ್ನಾಟಕ',
+            headline: 'ಬೆಂಗಳೂರು ಟೆಕ್ ಸಮ್ಮಿಟ್ 2026: ಕೃತಕ ಬುದ್ಧಿಮತ್ತೆ ಕ್ಷೇತ್ರದಲ್ಲಿ ₹40,000 ಕೋಟಿ ಹೂಡಿಕೆ ಒಪ್ಪಂದ',
+            summary: 'ಜಾಗತಿಕ ತಂತ್ರಜ್ಞಾನ ಸಂಸ್ಥೆಗಳು ಕರ್ನಾಟಕದಲ್ಲಿ ಅತ್ಯಾಧುನಿಕ ಡೇಟಾ ಸೆಂಟರ್ ಹಾಗೂ ಎಐ ಸಂಶೋಧನಾ ಕೇಂದ್ರಗಳನ್ನು ಸ್ಥಾಪಿಸಲು ಒಡಂಬಡಿಕೆಗೆ ಸಹಿ ಹಾಕಿವೆ.',
+            category: 'ತಂತ್ರಜ್ಞಾನ & ಉದ್ಯಮ',
+            readTime: '40 ಸೆಕೆಂಡ್ ಓದು',
+            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '30 ನಿಮಿಷಗಳ ಹಿಂದೆ'
+          },
+          {
+            id: 1703,
+            newspaper: 'ವಿಜಯ ಕರ್ನಾಟಕ',
+            headline: 'ಕರ್ನಾಟಕದ ದೇಸಿ ತಿನಿಸುಗಳಿಗೆ ಜಾಗತಿಕ ಮನ್ನಣೆ: ಮೈಸೂರು ಪಾಕ್ ಮತ್ತು ದೋಸೆಗೆ ಹೆರಿಟೇಜ್ ಗರಿ',
+            summary: 'ಪ್ಯಾರಿಸ್‌ನಲ್ಲಿ ನಡೆದ ಅಂತರರಾಷ್ಟ್ರೀಯ ಪಾಕಶಾಸ್ತ್ರ ಸಮ್ಮೇಳನದಲ್ಲಿ ಸಾಂಪ್ರದಾಯಿಕ ಮೈಸೂರು ಪಾಕ್ ಮತ್ತು ಮಸಾಲೆ ದೋಸೆಗೆ ವಿಶ್ವ ಪಾರಂಪರಿಕ ಆಹಾರ ಮಾನ್ಯತೆ ಲಭಿಸಿದೆ.',
+            category: 'ಆಹಾರ & ಸಂಸ್ಕೃತಿ',
+            readTime: '35 ಸೆಕೆಂಡ್ ಓದು',
+            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '1 ಗಂಟೆ ಹಿಂದೆ'
+          },
+          {
+            id: 1704,
+            newspaper: 'ವಿಜಯ ಕರ್ನಾಟಕ',
+            headline: 'ರೈತರ ಕೃಷಿ ಪಂಪ್‌ಸೆಟ್‌ಗಳಿಗೆ ಹಗಲು ವೇಳೆಯೇ ಸೌರ ವಿದ್ಯುತ್: 50,000 ಹೊಸ ಸಂಪರ್ಕಗಳು ಮಂಜೂರು',
+            summary: 'ಕುಸುಮ್ ಯೋಜನೆಯಡಿ ರಾಜ್ಯದ ಎಲ್ಲಾ ಜಿಲ್ಲೆಗಳ ರೈತರಿಗೆ ಉಚಿತ ಸೋಲಾರ್ ಪಂಪ್ ವಿತರಣೆ ಆರಂಭವಾಗಿದ್ದು, ಕೃಷಿ ಇಳುವರಿ ಗಣನೀಯವಾಗಿ ಹೆಚ್ಚಲಿದೆ.',
+            category: 'ಕೃಷಿ ಜಗತ್ತು',
+            readTime: '30 ಸೆಕೆಂಡ್ ಓದು',
+            image: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '2 ಗಂಟೆ ಹಿಂದೆ'
+          }
+        ]
+      },
+      {
+        name: 'ಕನ್ನಡ ಪ್ರಭ (Kannada Prabha)',
+        masthead: 'ಕನ್ನಡ ಪ್ರಭ',
+        tagline: 'ಕನ್ನಡದ ಹೆಮ್ಮೆಯ ಧ್ವನಿ • ನಿಖರ ಮತ್ತು ನಿಷ್ಠುರ ವರದಿ',
+        cityEdition: 'ರಾಜ್ಯ ಆವೃತ್ತಿ • ಇಂದು, 16 ಅಕ್ಟೋಬರ್ 2026',
+        news: [
+          {
+            id: 1801,
+            newspaper: 'ಕನ್ನಡ ಪ್ರಭ',
+            headline: 'ಟಿ20 ವಿಶ್ವ ಸಮರ: ಯುವ ಭಾರತೀಯ ಪಡೆಯ ಭರ್ಜರಿ ಗೆಲುವು, ಅಭಿಮಾನಿಗಳ ಸಂಭ್ರಮ!',
+            summary: 'ಅತ್ಯಾಕರ್ಷಕ ಬ್ಯಾಟಿಂಗ್ ಹಾಗೂ ಶಿಸ್ತಿನ ಬೌಲಿಂಗ್ ಪ್ರದರ್ಶನದ ಮೂಲಕ ಭಾರತ ತಂಡ ಜಯಭೇರಿ ಬಾರಿಸಿದ್ದು, ಕ್ರೀಡಾಂಗಣದಲ್ಲಿ ಸಂಭ್ರಮ ಮನೆಮಾಡಿದೆ.',
+            category: 'ಕ್ರೀಡಾ ಲೋಕ',
+            readTime: '40 ಸೆಕೆಂಡ್ ಓದು',
+            image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '15 ನಿಮಿಷಗಳ ಹಿಂದೆ'
+          },
+          {
+            id: 1802,
+            newspaper: 'ಕನ್ನಡ ಪ್ರಭ',
+            headline: 'ಹಂಪಿಯ ಐತಿಹಾಸಿಕ ತಾಣಗಳಲ್ಲಿ ನೂತನ 3D ಲೇಸರ್ ಶೋ: ಪ್ರವಾಸಿಗರ ಭಾರಿ ಆಕರ್ಷಣೆ',
+            summary: 'ವಿಜಯನಗರ ಸಾಮ್ರಾಜ್ಯದ ವೈಭವವನ್ನು ಕಣ್ಮುಂದೆ ತರುವ ವಿಶ್ವದರ್ಜೆಯ ಧ್ವನಿ ಮತ್ತು ಬೆಳಕು ಕಾರ್ಯಕ್ರಮ ಇಂದಿನಿಂದ ಪ್ರವಾಸಿಗರಿಗೆ ವೀಕ್ಷಣೆಗೆ ಲಭ್ಯವಿದೆ.',
+            category: 'ಪ್ರವಾಸೋದ್ಯಮ',
+            readTime: '35 ಸೆಕೆಂಡ್ ಓದು',
+            image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '1 ಗಂಟೆ ಹಿಂದೆ'
+          }
+        ]
+      }
+    ]
+  },
+  ml: {
+    code: 'ml',
+    label: 'മലയാളം (Malayalam)',
+    nativeName: 'മലയാള വാർത്തകൾ',
+    flag: '🇮🇳',
+    papers: [
+      {
+        name: 'മലയാള മനോരമ (Malayala Manorama)',
+        masthead: 'മലയാള മനോരമ',
+        tagline: 'സത്യവും നീതിയും • കേരളത്തിന്റെ വിശ്വസ്ത ദിനപത്രം',
+        cityEdition: 'കൊച്ചി & തിരുവനന്തപുരം പതിപ്പ് • ഇന്ന്, 16 ഒക്ടോബർ 2026',
+        news: [
+          {
+            id: 1901,
+            newspaper: 'മലയാള മനോരമ',
+            headline: 'കൊച്ചി വാട്ടർ മെട്രോ പുതിയ ടെർമിനലുകൾ പ്രവർത്തനം തുടങ്ങി; ദ്വീപ് നിവാസികൾക്ക് ആശ്വാസം!',
+            summary: 'പരിസ്ഥിതി സൗഹൃദ ഇലക്ട്രിക് ബോട്ടുകൾ പുതിയ റൂട്ടുകളിൽ സർവീസ് ആരംഭിച്ചതോടെ നഗരത്തിലെ യാത്രാസമയം പകുതിയായി കുറഞ്ഞു.',
+            category: 'നഗര വികസനം',
+            readTime: '45 സെക്കൻഡ് വായന',
+            image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '12 മിനിറ്റ് മുൻപ്'
+          },
+          {
+            id: 1902,
+            newspaper: 'മലയാള മനോരമ',
+            headline: 'കേരളത്തിന്റെ തനത് സദ്യയ്ക്കും സുഗന്ധവ്യഞ്ജനങ്ങൾക്കും അന്താരാഷ്ട്ര ഗുണനിലവാര അംഗീകാരം',
+            summary: 'പരമ്പരാഗത സുഗന്ധവ്യഞ്ജന കൂട്ടുകൾക്കും സ്വാദിഷ്ടമായ സദ്യയ്ക്കും ആഗോള ഫുഡ് കോൺഫെഡറേഷന്റെ പ്രത്യേക പുരസ്കാരം ലഭിച്ചു.',
+            category: 'രുചിയും പൈതൃകവും',
+            readTime: '40 സെക്കൻഡ് വായന',
+            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '35 മിനിറ്റ് മുൻപ്'
+          },
+          {
+            id: 1903,
+            newspaper: 'മലയാള മനോരമ',
+            headline: 'ഐടി ഇടനാഴിയിൽ 100 പുതിയ സ്റ്റാർട്ടപ്പുകൾക്ക് കൂടി തുടക്കം; 15,000 തൊഴിലവസರങ്ങൾ',
+            summary: 'ഡിജിറ്റൽ ഹെಲ್ത്ത് കെയರ್, ഫിൻടെക് മേഖലകളിലെ ಪ್ರಮುಖ ആഗോള നിക്ഷേപകർ കേരളത്തിലെ സ്റ്റാർട്ടപ്പുകളിലേക്ക് വൻതോതിൽ ഫണ്ട് ഒഴുക്കുന്നു.',
+            category: 'ടെക്നോളജി',
+            readTime: '35 സെക്കൻഡ് വായന',
+            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '1 മണിക്കൂർ മുൻപ്'
+          }
+        ]
+      },
+      {
+        name: 'മാതൃഭൂമി (Mathrubhumi)',
+        masthead: 'മാതൃഭൂമി',
+        tagline: 'നന്മയുടെ വെളിച്ചം • വിട്ടുവീഴ്ചയില്ലാത്ത പത്രപ്രവർത്തനം',
+        cityEdition: 'കോഴിക്കോട് & തൃശ്ശൂർ എഡിഷൻ • ഇന്ന്, 16 ഒക്ടോബർ 2026',
+        news: [
+          {
+            id: 2001,
+            newspaper: 'മാതൃഭൂമി',
+            headline: 'ടി20 പരമ്പര: ഇന്ത്യയ്ക്ക് ഉജ്ജ്വല വിജയം; യുവതാരങ്ങൾ കരുത്തുതെളിയിച്ചു!',
+            summary: 'ആവേശകരമായ അവസാന ഓവറിൽ അവിസ്മരണീയ പ്രകടനം കാഴ്ചവെച്ച് ഇന്ത്യൻ ടീം വിജയം സ്വന്തമാക്കി. കാണികൾ ആവേശക്കടലിൽ.',
+            category: 'കായികം',
+            readTime: '40 സെക്കൻഡ് വായന',
+            image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '20 മിനിറ്റ് മുൻപ്'
+          },
+          {
+            id: 2002,
+            newspaper: 'മാതൃഭൂമി',
+            headline: 'കൊച്ചി ബിനാലെ 2026 തീയതികൾ പ്രഖ്യാപിച്ചു; 40 രാജ്യങ്ങളിൽ നിന്നുള്ള കലാകാരന്മാർ എത്തും',
+            summary: 'ഫോർട്ട് കൊച്ചിയിലെ ചരിത്ര വേദികളിൽ വിപുലമായ തയ്യാറെടുപ്പുകൾ ആരംഭിച്ചു. വിദേശ വിനോദസഞ്ചാരികളുടെ ബുക്കിംഗിൽ വലിയ വർധനവ്.',
+            category: 'കല & സംസ്കാരം',
+            readTime: '30 സെക്കൻഡ് വായന',
+            image: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '2 മണിക്കൂർ മുൻപ്'
+          }
+        ]
+      }
+    ]
+  },
+  mr: {
+    code: 'mr',
+    label: 'मराठी (Marathi)',
+    nativeName: 'मराठी वृत्तपत्र',
+    flag: '🇮🇳',
+    papers: [
+      {
+        name: 'लोकमत (Lokmat)',
+        masthead: 'लोकमत',
+        tagline: 'महाराष्ट्राचे नंबर १ वृत्तपत्र • जनसामान्यांचा बुलंद आवाज',
+        cityEdition: 'मुंबई व पुणे आवृत्ती • आज, १६ ऑक्टोबर २०२६',
+        news: [
+          {
+            id: 2101,
+            newspaper: 'लोकमत',
+            headline: 'मुंबई-पुणे एक्सप्रेसवेवर स्वयंचलित हायपर-ट्रॅफिक प्रणाली सुरू; प्रवासाचा वेळ अर्धा झाला!',
+            summary: 'नवीन एआय संचलित कॅमेरा सिस्टीम आणि स्मार्ट लेनमुळे वाहतूक कोंडी पूर्णपणे दूर झाली असून प्रवाशांना मोठा दिलासा मिळाला आहे.',
+            category: 'पायाभूत सुविधा',
+            readTime: '४५ सेकंद वाचन',
+            image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '१५ मिनिटांपूर्वी'
+          },
+          {
+            id: 2102,
+            newspaper: 'लोकमत',
+            headline: 'महाराष्ट्राच्या अस्सल खाद्यसंस्कृतीला जागतिक मानांकन; पुरणपोळी व मिसळची आंतरराष्ट्रीय ख्याती',
+            summary: 'जागतिक फूड परिषदेत पारंपरिक महाराष्ट्रीयन पदार्थांना विशेष वारसा दर्जा मिळाला असून जगभरातील शेफनी कौतुक केले.',
+            category: 'संस्कृती व खाद्य',
+            readTime: '३५ सेकंद वाचन',
+            image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '४० मिनिटांपूर्वी'
+          },
+          {
+            id: 2103,
+            newspaper: 'लोकमत',
+            headline: 'शेतकऱ्यांसाठी दिवसा अखंड मोफत वीज देणारी महा-सौर योजना संपूर्ण राज्यात लागू',
+            summary: 'कृषी पंपांना दिवसा १२ तास सौर ऊर्जा देण्याच्या प्रकल्पाने लाखो शेतकऱ्यांना डिझेलच्या खर्चातून कायमची मुक्ती मिळवून दिली आहे.',
+            category: 'कृषी व ग्रामीण',
+            readTime: '३० सेकंद वाचन',
+            image: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '१ तास पूर्वी'
+          }
+        ]
+      },
+      {
+        name: 'महाराष्ट्र टाइम्स (Maharashtra Times)',
+        masthead: 'महाराष्ट्र टाइम्स',
+        tagline: 'प्रत्येक बातमीवर ठाम • महाराष्ट्राचा अग्रगण्य आवाज',
+        cityEdition: 'मेट्रो मुंबई आवृत्ती • आज, १६ ऑक्टोबर २०२६',
+        news: [
+          {
+            id: 2201,
+            newspaper: 'महाराष्ट्र टाइम्स',
+            headline: 'भारतीय क्रिकेट संघाची टी२० मालिकेत विजयी आगेकूच; युवा खेळाडूंचे धडाकेबाज प्रदर्शन!',
+            summary: 'उत्कंठावर्धक सामन्यात शेवटच्या षटकात भारताने विजय मिळवला. वानखेडे स्टेडियमवर प्रेक्षकांचा प्रचंड उत्साह.',
+            category: 'क्रीडा विश्व',
+            readTime: '४० सेकंद वाचन',
+            image: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '२० मिनिटांपूर्वी'
+          },
+          {
+            id: 2202,
+            newspaper: 'महाराष्ट्र टाइम्स',
+            headline: 'दिवाळी सणानिमित्त बाजारपेठांमध्ये खरेदीची मोठी गर्दी; इलेक्ट्रॉनिक्स व कपड्यांची विक्रमी विक्री',
+            summary: 'दादर, लालबाग आणि एफसी रोडवर ग्राहकांची अफाट गर्दी. डिजिटल पेमेंट आणि विशेष ऑफर्समुळे व्यापारी वर्गात उत्साहाचे वातावरण.',
+            category: 'बाजार व व्यापार',
+            readTime: '३० सेकंद वाचन',
+            image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '२ तास पूर्वी'
+          }
+        ]
+      }
+    ]
   }
 };
 
@@ -2072,17 +2363,54 @@ const MultilingualTodayNewspaper: React.FC = () => {
   return (
     <div className="space-y-4">
       
-      {/* 1. LANGUAGE SELECTOR BAR */}
-      <div className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
-        <div className="flex items-center gap-2">
-          <Globe className="w-4 h-4 text-amber-500" />
-          <span className="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider">
-            Choose Newspaper Language:
-          </span>
+      {/* 1. LUXURY LANGUAGE SELECTION SUITE WITH PROMINENT DROPDOWN */}
+      <div className="p-3.5 sm:p-4 rounded-3xl bg-slate-900/90 border border-amber-500/30 shadow-xl space-y-3 backdrop-blur-md">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
+              <Globe className="w-4 h-4 animate-spin-slow" />
+            </div>
+            <div>
+              <span className="text-xs font-black text-white uppercase tracking-wider block">
+                Choose Newspaper Language
+              </span>
+              <span className="text-[10px] text-slate-400">
+                Select your preferred language to switch live news &amp; editorial editions
+              </span>
+            </div>
+          </div>
+
+          {/* High-end Styled Dropdown Selector */}
+          <div className="relative w-full sm:w-72">
+            <select
+              value={selectedLang}
+              onChange={(e) => {
+                setSelectedLang(e.target.value as NewsLanguage);
+                setSelectedPaperIdx(0);
+                setActiveShortIdx(0);
+              }}
+              className="w-full appearance-none bg-slate-950 text-amber-300 font-black text-xs sm:text-sm px-3.5 py-2.5 pr-10 rounded-2xl border-2 border-amber-400/60 shadow-lg shadow-amber-500/10 focus:outline-hidden focus:ring-2 focus:ring-amber-400 cursor-pointer"
+            >
+              <option value="en">🇬🇧 English (The Hindu, TOI, Indian Express)</option>
+              <option value="ta">🇮🇳 தமிழ் (Tamil - தினத்தந்தி, தினமலர், தினகரன்)</option>
+              <option value="hi">🇮🇳 हिन्दी (Hindi - दैनिक जागरण, नवभारत टाइम्स)</option>
+              <option value="te">🇮🇳 తెలుగు (Telugu - నమస్తే తెలంగాణ, ఈనాడు)</option>
+              <option value="kn">🇮🇳 ಕನ್ನಡ (Kannada - ವಿಜಯ ಕರ್ನಾಟಕ, ಕನ್ನಡ ಪ್ರಭ)</option>
+              <option value="ml">🇮🇳 മലയാളം (Malayalam - മലയാള മനോരമ, മാതൃഭൂമി)</option>
+              <option value="mr">🇮🇳 मराठी (Marathi - लोकमत, महाराष्ट्र टाइम्स)</option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-amber-400">
+              <ChevronRight className="w-4 h-4 rotate-90" />
+            </div>
+          </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-1.5 w-full sm:w-auto">
-          {(['en', 'ta', 'hi', 'te'] as NewsLanguage[]).map((langKey) => {
+        {/* Quick Language Switcher Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-2 border-t border-white/5">
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider shrink-0 mr-1">
+            Quick Switch:
+          </span>
+          {(['en', 'ta', 'hi', 'te', 'kn', 'ml', 'mr'] as NewsLanguage[]).map((langKey) => {
             const config = MULTILINGUAL_NEWS_DATA[langKey];
             const isSelected = selectedLang === langKey;
             return (
@@ -2093,14 +2421,14 @@ const MultilingualTodayNewspaper: React.FC = () => {
                   setSelectedPaperIdx(0);
                   setActiveShortIdx(0);
                 }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer border ${
+                className={`px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer whitespace-nowrap border shrink-0 ${
                   isSelected
-                    ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md scale-102 font-display'
-                    : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
+                    ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md font-black scale-102'
+                    : 'bg-slate-950/80 text-slate-300 border-white/10 hover:bg-slate-800'
                 }`}
               >
                 <span>{config.flag}</span>
-                <span>{config.label}</span>
+                <span>{config.label.split(' ')[0]}</span>
               </button>
             );
           })}
@@ -2459,6 +2787,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
 }) => {
   const [activeTab, setActiveTab] = useState<'games' | 'news' | 'music'>('games');
   const [activeGame, setActiveGame] = useState<'ludo' | 'snakes' | 'sudoku'>('ludo');
+  const [dismissTimeUp, setDismissTimeUp] = useState(false);
 
   // Real-time delivery countdown calculation
   const [secondsLeft, setSecondsLeft] = useState<number>(() => {
@@ -2489,29 +2818,29 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
   const waiter = getAssignedWaiter(order?.tableNumber || 12);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-5 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/90 backdrop-blur-md animate-in fade-in duration-200">
       <div 
-        className="w-full max-w-3xl max-h-[94vh] bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+        className="w-full max-w-5xl h-[94vh] sm:h-[90vh] bg-slate-950 text-slate-100 rounded-3xl shadow-2xl border border-amber-500/25 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         
         {/* Top Header Bar */}
-        <div className="p-3.5 sm:p-4 bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 text-white border-b border-slate-800 flex items-center justify-between shrink-0">
+        <div className="px-4 py-3 bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 text-white border-b border-white/10 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 flex items-center justify-center font-black shadow-md shrink-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 flex items-center justify-center font-black shadow-md shrink-0">
               <Gamepad2 className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-black text-sm sm:text-base font-display">
+                <h3 className="font-black text-sm sm:text-base font-display tracking-tight text-white">
                   Table-Side Entertainment Lounge
                 </h3>
-                <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-black border border-amber-500/30">
+                <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-black border border-amber-500/40">
                   Table {order?.tableNumber || 12}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">
-                Play original board games & read today's multilingual newspapers while waiting
+              <p className="text-[11px] text-slate-400 hidden sm:block">
+                Original interactive board games &amp; live multilingual daily newspapers
               </p>
             </div>
           </div>
@@ -2523,7 +2852,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
                 onClose();
                 onOpenTracker?.();
               }}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono text-xs font-black cursor-pointer hover:bg-amber-500/30 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono text-xs font-black cursor-pointer hover:bg-amber-500/30 transition-colors"
               title="Click to view full kitchen tracker"
             >
               <Clock className="w-3.5 h-3.5 animate-pulse text-amber-400" />
@@ -2534,7 +2863,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
 
             <button
               onClick={onClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+              className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
               title="Close"
             >
               <X className="w-5 h-5" />
@@ -2542,32 +2871,45 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
           </div>
         </div>
 
-        {/* TIME UP REMINDER ALERT */}
-        {isTimeUp && (
-          <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white p-3 px-4 flex items-center justify-between gap-3 text-xs shadow-md animate-in slide-in-from-top-2 shrink-0">
-            <div className="flex items-center gap-2.5">
-              <span className="text-xl animate-bounce">🔔</span>
-              <div>
-                <span className="font-black text-sm block">
-                  Time's Up! Your Feast is Fresh & Ready!
-                </span>
-                <span className="text-[11px] text-emerald-100">
-                  Waiter {waiter.fullName} is serving your order to Table {order?.tableNumber || 12}. Enjoy your dining!
-                </span>
-              </div>
+        {/* TIME UP REMINDER ALERT (SLEEK, COMPACT & DISMISSIBLE) */}
+        {isTimeUp && !dismissTimeUp && (
+          <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white px-3.5 py-2 flex items-center justify-between gap-2.5 text-xs shadow-md border-b border-emerald-400/30 shrink-0 animate-in slide-in-from-top-1">
+            <div className="flex items-center gap-2">
+              <span className="text-base animate-bounce">🔔</span>
+              <span className="font-extrabold text-xs">
+                Your Feast is Fresh &amp; Ready! Waiter {waiter.fullName} is serving Table {order?.tableNumber || 12}.
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => {
+                  onClose();
+                  onOpenTracker?.();
+                }}
+                className="px-2.5 py-1 rounded-lg bg-white/20 hover:bg-white/30 text-white text-[10px] font-black transition-colors cursor-pointer whitespace-nowrap"
+              >
+                Track Order →
+              </button>
+              <button
+                onClick={() => setDismissTimeUp(true)}
+                className="p-1 rounded-md text-emerald-100 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                title="Dismiss banner"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
         )}
 
-        {/* Main Tab Switcher: Luxury Glass Segmented Bar */}
-        <div className="p-3 bg-slate-900 border-b border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+        {/* TIER 1: MAIN NAVIGATION BAR (CENTERED LUXURY SEGMENTED DOCK) */}
+        <div className="px-3 sm:px-6 py-2.5 bg-slate-900/90 border-b border-white/10 flex items-center justify-center shrink-0">
+          <div className="grid grid-cols-3 gap-2 w-full max-w-xl">
             <button
               onClick={() => setActiveTab('games')}
-              className={`flex-1 sm:flex-none px-4 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              className={`py-2 px-3 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 activeTab === 'games'
-                  ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 shadow-lg shadow-amber-500/25 scale-102 ring-1 ring-amber-400/50'
-                  : 'text-slate-400 hover:text-white hover:bg-white/[0.06] border border-transparent'
+                  ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 shadow-lg shadow-amber-500/25 scale-102 ring-1 ring-amber-300'
+                  : 'text-slate-400 hover:text-white bg-slate-950/70 hover:bg-slate-800 border border-white/5'
               }`}
             >
               <Gamepad2 className="w-4 h-4" />
@@ -2576,10 +2918,10 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
 
             <button
               onClick={() => setActiveTab('news')}
-              className={`flex-1 sm:flex-none px-4 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              className={`py-2 px-3 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 activeTab === 'news'
-                  ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 shadow-lg shadow-amber-500/25 scale-102 ring-1 ring-amber-400/50'
-                  : 'text-slate-400 hover:text-white hover:bg-white/[0.06] border border-transparent'
+                  ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 shadow-lg shadow-amber-500/25 scale-102 ring-1 ring-amber-300'
+                  : 'text-slate-400 hover:text-white bg-slate-950/70 hover:bg-slate-800 border border-white/5'
               }`}
             >
               <Newspaper className="w-4 h-4" />
@@ -2588,86 +2930,62 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
 
             <button
               onClick={() => setActiveTab('music')}
-              className={`flex-1 sm:flex-none px-4 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              className={`py-2 px-3 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 activeTab === 'music'
-                  ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 shadow-lg shadow-amber-500/25 scale-102 ring-1 ring-amber-400/50'
-                  : 'text-slate-400 hover:text-white hover:bg-white/[0.06] border border-transparent'
+                  ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 shadow-lg shadow-amber-500/25 scale-102 ring-1 ring-amber-300'
+                  : 'text-slate-400 hover:text-white bg-slate-950/70 hover:bg-slate-800 border border-white/5'
               }`}
             >
               <Music className="w-4 h-4" />
               <span>Music Lounge</span>
             </button>
           </div>
+        </div>
 
-          {/* Sub-selector for games */}
-          {activeTab === 'games' && (
-            <div className="hidden sm:flex items-center gap-1.5 bg-slate-950 p-1 rounded-2xl border border-white/10">
+        {/* TIER 2: GAME SUB-SELECTOR (DEDICATED ROW - ZERO COLLISION WITH MAIN TABS!) */}
+        {activeTab === 'games' && (
+          <div className="px-3 sm:px-6 py-2 bg-slate-950 border-b border-white/10 flex flex-col sm:flex-row items-center justify-between gap-2 shrink-0">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 hidden sm:inline">
+              Choose Arcade Challenge:
+            </span>
+
+            <div className="flex items-center justify-center gap-2 w-full sm:w-auto">
               <button
                 onClick={() => setActiveGame('ludo')}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-                  activeGame === 'ludo' 
-                    ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 shadow-md font-black' 
-                    : 'text-slate-400 hover:text-slate-200'
+                className={`flex-1 sm:flex-none px-4 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
+                  activeGame === 'ludo'
+                    ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 border-amber-300 shadow-md scale-102'
+                    : 'bg-slate-900/90 text-slate-400 border-white/10 hover:text-white hover:bg-slate-800'
                 }`}
               >
-                🎲 Ludo Board
+                🎲 Royal Ludo 15×15
               </button>
               <button
                 onClick={() => setActiveGame('snakes')}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-                  activeGame === 'snakes' 
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-md font-black' 
-                    : 'text-slate-400 hover:text-slate-200'
+                className={`flex-1 sm:flex-none px-4 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
+                  activeGame === 'snakes'
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 border-emerald-300 shadow-md scale-102'
+                    : 'bg-slate-900/90 text-slate-400 border-white/10 hover:text-white hover:bg-slate-800'
                 }`}
               >
                 🐍 Snakes &amp; Ladders
               </button>
               <button
                 onClick={() => setActiveGame('sudoku')}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
-                  activeGame === 'sudoku' 
-                    ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md font-black' 
-                    : 'text-slate-400 hover:text-slate-200'
+                className={`flex-1 sm:flex-none px-4 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer border ${
+                  activeGame === 'sudoku'
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-blue-300 shadow-md scale-102'
+                    : 'bg-slate-900/90 text-slate-400 border-white/10 hover:text-white hover:bg-slate-800'
                 }`}
               >
                 🧩 9×9 Sudoku
               </button>
             </div>
-          )}
-        </div>
-
-        {/* Mobile Sub-selector pills for games */}
-        {activeTab === 'games' && (
-          <div className="flex sm:hidden items-center justify-center gap-1.5 p-2 bg-slate-950 border-b border-white/[0.08]">
-            <button
-              onClick={() => setActiveGame('ludo')}
-              className={`flex-1 py-1.5 rounded-xl text-xs font-bold text-center ${
-                activeGame === 'ludo' ? 'bg-amber-400 text-slate-950 font-black' : 'text-slate-400'
-              }`}
-            >
-              🎲 Ludo
-            </button>
-            <button
-              onClick={() => setActiveGame('snakes')}
-              className={`flex-1 py-1.5 rounded-xl text-xs font-bold text-center ${
-                activeGame === 'snakes' ? 'bg-emerald-500 text-slate-950 font-black' : 'text-slate-400'
-              }`}
-            >
-              🐍 Snakes
-            </button>
-            <button
-              onClick={() => setActiveGame('sudoku')}
-              className={`flex-1 py-1.5 rounded-xl text-xs font-bold text-center ${
-                activeGame === 'sudoku' ? 'bg-blue-500 text-white font-black' : 'text-slate-400'
-              }`}
-            >
-              🧩 Sudoku
-            </button>
           </div>
         )}
 
         {/* Tab Body Content */}
-        <div className="p-3.5 sm:p-6 overflow-y-auto flex-1 space-y-4">
+        <div className="p-3 sm:p-5 overflow-y-auto flex-1 space-y-4">
           {activeTab === 'games' && (
             <div>
               {activeGame === 'ludo' && <OriginalLudoGame />}
@@ -2682,19 +3000,19 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
         </div>
 
         {/* Footer */}
-        <div className="p-3 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs shrink-0">
-          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+        <div className="p-2.5 sm:p-3 bg-slate-950 border-t border-white/10 flex items-center justify-between text-xs shrink-0">
+          <div className="flex items-center gap-2 text-slate-400">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="hidden sm:inline">Real-time games & multilingual live news active</span>
+            <span className="hidden sm:inline">Real-time games &amp; multilingual live news active</span>
             <span className="sm:hidden">Active while waiting</span>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold transition-all cursor-pointer"
+              className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 font-bold border border-white/10 transition-all cursor-pointer text-xs"
             >
-              Minimize & Keep Playing
+              Minimize &amp; Keep Playing
             </button>
           </div>
         </div>

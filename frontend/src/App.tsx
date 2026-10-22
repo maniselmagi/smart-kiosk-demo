@@ -18,6 +18,7 @@ import { ManagementDashboard } from './components/dashboard/ManagementDashboard'
 import { LanguageSelectionModal } from './components/kiosk/LanguageSelectionModal';
 import { LanguageEntryScreen } from './components/kiosk/LanguageEntryScreen';
 import { CustomerTableAllocationScreen } from './components/kiosk/CustomerTableAllocationScreen';
+import CallWaiterModal from './components/common/CallWaiterModal';
 import { MenuItem, Order } from './types';
 
 const MainAppContent: React.FC = () => {
@@ -44,6 +45,7 @@ const MainAppContent: React.FC = () => {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isEntertainmentOpen, setIsEntertainmentOpen] = useState(false);
   const [isFinishMealOpen, setIsFinishMealOpen] = useState(false);
+  const [isCallWaiterOpen, setIsCallWaiterOpen] = useState(false);
   const [activeCompletedOrder, setActiveCompletedOrder] = useState<Order | null>(null);
 
   // Fresh reactive order from activeOrders so supervisor/waiter status updates sync live
@@ -100,6 +102,7 @@ const MainAppContent: React.FC = () => {
                   onOpenCart={() => setIsCartOpen(true)}
                   onOpenTrackOrder={() => setIsTrackerOpen(true)}
                   onOpenEntertainment={() => setIsEntertainmentOpen(true)}
+                  onCallWaiter={() => setIsCallWaiterOpen(true)}
                 />
 
                 <MenuScreen
@@ -185,6 +188,11 @@ const MainAppContent: React.FC = () => {
       <FeedbackModal
         isOpen={isFeedbackOpen}
         onClose={() => setIsFeedbackOpen(false)}
+      />
+
+      <CallWaiterModal
+        isOpen={isCallWaiterOpen}
+        onClose={() => setIsCallWaiterOpen(false)}
       />
 
       <LanguageSelectionModal

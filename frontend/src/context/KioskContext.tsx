@@ -245,6 +245,10 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const updateAutoMeal = () => {
       const autoMeal = getAutoMealTime();
       setMealTimeState(autoMeal);
+      // Requirement: Dinner menu is night mode theme
+      if (autoMeal === 'dinner') {
+        setThemeState('dark');
+      }
     };
 
     updateAutoMeal();

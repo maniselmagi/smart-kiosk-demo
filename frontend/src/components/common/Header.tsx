@@ -114,56 +114,6 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* CENTER: Relocated Quick Actions (Track Order, Games, Call Waiter - Freed up from occupying whole menu space) */}
-          <div className="flex items-center gap-1.5 md:gap-2">
-            {onOpenTrackOrder && (
-              <button
-                type="button"
-                onClick={onOpenTrackOrder}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all active:scale-95 cursor-pointer border shadow-xs ${
-                  activeTableOrder
-                    ? 'bg-emerald-500 text-white border-emerald-400 animate-pulse shadow-emerald-500/20'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200/80 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
-                }`}
-                title="Track Live Order"
-              >
-                <Activity className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Track Order</span>
-                {activeTableOrder && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
-                )}
-              </button>
-            )}
-
-            {onOpenEntertainment && (
-              <button
-                type="button"
-                onClick={onOpenEntertainment}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200 border border-amber-300/80 dark:border-amber-700/80 hover:bg-amber-200 dark:hover:bg-amber-900/60 transition-all active:scale-95 cursor-pointer shadow-xs"
-                title="Play Games & Read E-Papers"
-              >
-                <Gamepad2 className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-                <span className="hidden sm:inline">Games &amp; News</span>
-              </button>
-            )}
-
-            {onCallWaiter && (
-              <button
-                type="button"
-                onClick={onCallWaiter}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all active:scale-95 cursor-pointer border shadow-xs ${
-                  pendingAlertsForThisTable > 0
-                    ? 'bg-rose-500 text-white border-rose-400 shadow-rose-500/30 animate-bounce'
-                    : 'bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border-rose-200/80 dark:border-rose-900/60 hover:bg-rose-100 dark:hover:bg-rose-900/40'
-                }`}
-                title={`Call assigned waiter (${assignedWaiter.fullName})`}
-              >
-                <Bell className="w-3.5 h-3.5" />
-                <span className="hidden md:inline">Call Waiter</span>
-              </button>
-            )}
-          </div>
-
           {/* RIGHT: Clock, Waiter Name, Cart, Mode Toggle */}
           <div className="flex items-center gap-1.5 md:gap-2.5 shrink-0">
             

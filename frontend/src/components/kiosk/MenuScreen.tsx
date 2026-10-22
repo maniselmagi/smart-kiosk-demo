@@ -620,23 +620,23 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
 
       </div>
 
-      {/* 7. FLOATING QUICK ACTION DOCK (Bottom-Right Floating Pill - Takes ZERO space from main menu layout!) */}
-      <aside aria-label="Quick Actions Dock" className="fixed bottom-6 right-6 z-30 flex items-center gap-2 p-1.5 rounded-full bg-slate-900/90 dark:bg-slate-800/90 backdrop-blur-md border border-slate-700/80 shadow-2xl animate-fade-in select-none">
+      {/* 7. FLOATING QUICK ACTION DOCK (Show Only Bottom - "its perfect place") */}
+      <aside aria-label="Quick Actions Dock" className="fixed bottom-6 right-6 z-40 flex items-center gap-2 p-1.5 sm:p-2 rounded-full bg-slate-950/95 dark:bg-slate-900/95 backdrop-blur-md border border-amber-500/30 shadow-[0_10px_35px_rgba(0,0,0,0.4)] animate-fade-in select-none">
         
         {/* Track Order Floating Button */}
         {onOpenOrderTracker && (
           <button
             type="button"
             onClick={onOpenOrderTracker}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold transition-all active:scale-95 cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-sm ${
               activeTableOrder 
-                ? 'bg-emerald-500 text-white animate-pulse shadow-md shadow-emerald-500/30' 
-                : 'text-slate-200 hover:bg-slate-800'
+                ? 'bg-emerald-500 text-white animate-pulse shadow-emerald-500/40' 
+                : 'bg-slate-800/80 hover:bg-slate-700 text-white'
             }`}
             title={activeTableOrder ? `Track Order #${activeTableOrder.orderNumber}` : 'Track Kitchen Order'}
           >
-            <Activity className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Track</span>
+            <Activity className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="font-extrabold">Track Order</span>
             {activeTableOrder && (
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
             )}
@@ -648,11 +648,11 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
           <button
             type="button"
             onClick={onOpenEntertainment}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold text-amber-300 hover:bg-slate-800 transition-all active:scale-95 cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 transition-all active:scale-95 cursor-pointer shadow-sm"
             title="Play Games & Read E-Papers"
           >
             <Gamepad2 className="w-3.5 h-3.5 text-amber-400" />
-            <span className="hidden sm:inline">Games</span>
+            <span className="font-extrabold">Games &amp; News</span>
           </button>
         )}
 
@@ -660,15 +660,15 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
         <button
           type="button"
           onClick={() => setIsCallWaiterOpen(true)}
-          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold transition-all active:scale-95 cursor-pointer ${
+          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-sm ${
             pendingAlertsForThisTable > 0
-              ? 'bg-rose-500 text-white animate-bounce shadow-md shadow-rose-500/30'
-              : 'text-rose-300 hover:bg-slate-800'
+              ? 'bg-rose-500 text-white animate-bounce shadow-rose-500/40'
+              : 'bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30'
           }`}
           title={`Call waiter (${assignedWaiter.fullName}) to Table ${tableNumber}`}
         >
-          <Bell className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Waiter</span>
+          <Bell className="w-3.5 h-3.5 text-rose-400" />
+          <span className="font-extrabold">Call Waiter</span>
         </button>
 
       </aside>

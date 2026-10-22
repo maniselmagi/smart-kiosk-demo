@@ -2,16 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useKiosk } from '../../context/KioskContext';
 import { Category } from '../../types';
 import { 
-  Sparkles, 
   Flame, 
-  Tag, 
   ArrowRight, 
-  Crown,
-  ChevronLeft,
-  ChevronRight,
-  Clock,
+  ChevronLeft, 
+  ChevronRight, 
   Star,
-  CheckCircle2
+  Clock,
+  Sparkles
 } from 'lucide-react';
 import restaurantFoodImg from '../../assets/restaurant_food_welcome.jpg';
 
@@ -30,81 +27,71 @@ export const PromoAdBanner: React.FC<PromoAdBannerProps> = ({ onSelectCategory }
       return [
         {
           id: 'morning-offer',
-          badge: '🌅 SUNRISE BREAKFAST OFFER • TODAY ONLY',
-          badgeColor: 'bg-amber-500 text-slate-950 font-black',
+          badge: '🌅 SUNRISE SPECIAL • TODAY ONLY',
+          badgeColor: 'bg-amber-400 text-slate-950 font-black',
           title: 'Crispy Ghee Dosa & Degree Filter Coffee',
           highlightText: 'Good Food, Good Mood',
-          subtitle: 'Golden slow-roasted dosa prepared with pure cow ghee, served with 3 stone-ground chutneys & aromatic degree coffee.',
+          subtitle: 'Golden slow-roasted dosa prepared with pure cow ghee & 3 stone-ground chutneys.',
           discountPill: 'Get 40% OFF',
-          discountSubtext: 'on morning breakfast orders',
-          ctaText: 'Order Breakfast Now',
+          discountSubtext: 'Breakfast Special',
+          ctaText: 'Order Breakfast',
           categoryTarget: 'Starters' as Category,
-          accentColor: 'from-amber-400 to-yellow-500',
-          typeBadge: 'Special Offer',
-          rating: '4.9 (140+ reviews)'
+          rating: '4.9 ⭐'
         },
         {
           id: 'morning-combo',
-          badge: '🍱 MORNING CHEF VALUE COMBO',
+          badge: '🍱 MORNING CHEF COMBO',
           badgeColor: 'bg-emerald-500 text-white font-black',
           title: 'Royal Breakfast Executive Combo Spread',
           highlightText: 'Chef Combo Deal',
-          subtitle: 'Crispy Ghee Roast Dosa + 2 Medu Vadas + Kesari + Kumbakonam Degree Filter Coffee @ Special Price ₹199 (Save ₹70).',
+          subtitle: 'Ghee Roast Dosa + 2 Medu Vadas + Kesari + Filter Coffee @ ₹199 (Save ₹70).',
           discountPill: 'Save ₹70',
-          discountSubtext: 'Special Combo ₹199',
+          discountSubtext: 'Special ₹199',
           ctaText: 'Explore Combos',
           categoryTarget: 'Combo' as Category,
-          accentColor: 'from-emerald-500 to-teal-600',
-          typeBadge: 'Chef Combo',
-          rating: '4.8 (85+ reviews)'
+          rating: '4.8 ⭐'
         },
         {
           id: 'morning-signature',
           badge: '👑 ROYAL EMBER SIGNATURE',
           badgeColor: 'bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-black',
-          title: 'Authentic Degree Filter Coffee & Ghee Roast',
-          highlightText: 'Signature Blend',
-          subtitle: 'Freshly decoted chicory-blend coffee whipped with unadulterated cow milk in traditional brass dabarah with slow-roasted melt-in-mouth kesari.',
+          title: 'Kumbakonam Degree Filter Coffee & Ghee Roast',
+          highlightText: 'Signature Heritage',
+          subtitle: 'Decoted chicory blend whipped with unadulterated milk in brass dabarah.',
           discountPill: 'Chef Signature',
-          discountSubtext: 'Handcrafted Heritage',
+          discountSubtext: 'Royal Heritage',
           ctaText: 'View Signatures',
           categoryTarget: 'Signature' as Category,
-          accentColor: 'from-amber-500 to-orange-600',
-          typeBadge: 'Signature Dish',
-          rating: '5.0 (210+ reviews)'
+          rating: '5.0 ⭐'
         }
       ];
     } else if (mealTime === 'lunch') {
       return [
         {
           id: 'lunch-offer',
-          badge: '☀️ GRAND AFTERNOON LUNCH FEAST',
+          badge: '☀️ GRAND LUNCH FEAST',
           badgeColor: 'bg-orange-500 text-white font-black',
           title: 'Royal Grand Meals Thali — 12-Item Luxury Spread',
           highlightText: 'Good Food, Good Mood',
-          subtitle: 'Authentic South & North Indian traditional curries, fresh artisanal naans, aromatic basmati rice & unlimited royal desserts.',
+          subtitle: 'Traditional South & North Indian curries, artisanal naans, basmati rice & sweets.',
           discountPill: 'Get 40% OFF',
-          discountSubtext: 'on grand lunch thalis',
+          discountSubtext: 'Grand Lunch Thali',
           ctaText: 'Order Lunch Feast',
           categoryTarget: 'Main Course' as Category,
-          accentColor: 'from-orange-400 to-amber-500',
-          typeBadge: 'Lunch Special',
-          rating: '4.9 (180+ reviews)'
+          rating: '4.9 ⭐'
         },
         {
           id: 'lunch-combo',
-          badge: '🍱 POPULAR EXECUTIVE CHEF COMBO',
+          badge: '🍱 EXECUTIVE CHEF COMBO',
           badgeColor: 'bg-emerald-500 text-white font-black',
-          title: 'Royal Paneer Makhani & Butter Naan Combo',
+          title: 'Paneer Makhani & Garlic Naan Executive Combo',
           highlightText: 'Value Combo Deal',
-          subtitle: 'Rich creamy Makhani curry + 2 Tandoor Garlic Naans + Jeera Pulao + Chilled Mango Lassi @ Special Price ₹499 (Save ₹120).',
+          subtitle: 'Creamy Makhani + 2 Garlic Naans + Jeera Pulao + Mango Lassi @ ₹499 (Save ₹120).',
           discountPill: 'Save ₹120',
-          discountSubtext: 'Special Price ₹499',
+          discountSubtext: 'Special ₹499',
           ctaText: 'Explore Combos',
           categoryTarget: 'Combo' as Category,
-          accentColor: 'from-emerald-500 to-teal-600',
-          typeBadge: 'Chef Combo',
-          rating: '4.8 (115+ reviews)'
+          rating: '4.8 ⭐'
         },
         {
           id: 'lunch-signature',
@@ -112,14 +99,12 @@ export const PromoAdBanner: React.FC<PromoAdBannerProps> = ({ onSelectCategory }
           badgeColor: 'bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-black',
           title: 'Awadhi Slow-Dum Royal Handi Biryani',
           highlightText: 'Royal Signature',
-          subtitle: 'Aromatic aged basmati cooked in sealed clay handi with tender spiced cuts, saffron ghee, fried onions & chilled burani raita.',
+          subtitle: 'Aged basmati slow-dum cooked in sealed clay handi with saffron ghee & burani raita.',
           discountPill: 'Chef Signature',
-          discountSubtext: 'Piping Hot Service',
+          discountSubtext: 'Piping Hot',
           ctaText: 'View Signatures',
           categoryTarget: 'Signature' as Category,
-          accentColor: 'from-amber-500 to-orange-600',
-          typeBadge: 'Signature Dish',
-          rating: '5.0 (320+ reviews)'
+          rating: '5.0 ⭐'
         }
       ];
     } else {
@@ -127,18 +112,16 @@ export const PromoAdBanner: React.FC<PromoAdBannerProps> = ({ onSelectCategory }
       return [
         {
           id: 'dinner-offer',
-          badge: '🌙 EVENING DINNER & LATE NIGHT SIZZLER',
-          badgeColor: 'bg-amber-500 text-slate-950 font-black',
+          badge: '🌙 EVENING DINNER & LATE SIZZLER',
+          badgeColor: 'bg-amber-400 text-slate-950 font-black',
           title: 'Cast-Iron Sizzling Tandoor & Grill Platters',
           highlightText: 'Good Food, Good Mood',
-          subtitle: 'Charcoal-grilled kebabs, smoked malai tikkas & clay-oven delights served piping hot to your table till 2:00 AM.',
+          subtitle: 'Charcoal-grilled kebabs, malai tikkas & smoky delights served hot till 2:00 AM.',
           discountPill: 'Get 50% OFF',
-          discountSubtext: 'on evening sizzler platters',
+          discountSubtext: 'Evening Sizzler',
           ctaText: 'Order Dinner Now',
           categoryTarget: 'Main Course' as Category,
-          accentColor: 'from-amber-400 to-orange-500',
-          typeBadge: 'Dinner Special',
-          rating: '4.9 (240+ reviews)'
+          rating: '4.9 ⭐'
         },
         {
           id: 'dinner-combo',
@@ -146,14 +129,12 @@ export const PromoAdBanner: React.FC<PromoAdBannerProps> = ({ onSelectCategory }
           badgeColor: 'bg-emerald-500 text-white font-black',
           title: 'Royal Makhani & Sizzling Brownie Feast Combo',
           highlightText: 'Dinner Combo',
-          subtitle: 'Tandoori Sizzler Platter + 2 Butter Naans + Dal Makhani + Sizzling Walnut Fudge Brownie with Vanilla Scoop @ ₹549.',
+          subtitle: 'Tandoori Sizzler + 2 Butter Naans + Dal Makhani + Sizzling Walnut Fudge Brownie @ ₹549.',
           discountPill: 'Save ₹130',
-          discountSubtext: 'Complete Dinner Combo',
+          discountSubtext: 'Complete Combo',
           ctaText: 'Explore Combos',
           categoryTarget: 'Combo' as Category,
-          accentColor: 'from-emerald-500 to-teal-600',
-          typeBadge: 'Value Combo',
-          rating: '4.9 (160+ reviews)'
+          rating: '4.9 ⭐'
         },
         {
           id: 'dinner-signature',
@@ -161,20 +142,17 @@ export const PromoAdBanner: React.FC<PromoAdBannerProps> = ({ onSelectCategory }
           badgeColor: 'bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-black',
           title: 'Signature Butter Chicken & Sizzling Brownie',
           highlightText: 'Royal Signature',
-          subtitle: 'Silky satin makhani gravy infused with butter, kasuri methi & tender tandoori cuts, followed by smoking hot sizzling brownie.',
+          subtitle: 'Silky satin makhani gravy infused with butter & kasuri methi + smoking hot brownie.',
           discountPill: 'Chef Signature',
-          discountSubtext: 'Table-Side Experience',
+          discountSubtext: 'Signature Feast',
           ctaText: 'View Signatures',
           categoryTarget: 'Signature' as Category,
-          accentColor: 'from-amber-500 to-orange-600',
-          typeBadge: 'Signature Dish',
-          rating: '5.0 (450+ reviews)'
+          rating: '5.0 ⭐'
         }
       ];
     }
   }, [mealTime]);
 
-  // Reset to slide 0 when mealTime changes
   useEffect(() => {
     setCurrentSlide(0);
   }, [mealTime]);
@@ -207,176 +185,145 @@ export const PromoAdBanner: React.FC<PromoAdBannerProps> = ({ onSelectCategory }
   return (
     <section 
       aria-label="Promotional Slide Bar"
-      className="mb-6 select-none relative group"
+      className="mb-4 select-none relative group"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {/* Slide Container Styled like the Reference Image (Chicken Grill House Theme) */}
-      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-amber-50/80 via-white to-amber-50/40 dark:from-slate-900 dark:via-slate-850 dark:to-slate-900 border border-amber-200/80 dark:border-slate-800 shadow-sm hover:shadow-md transition-all duration-300">
+      {/* Streamlined Compact Slide Container (Reduced Height for Faster Visibility of Food Items) */}
+      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-amber-50/80 via-white to-amber-50/30 dark:from-slate-900 dark:via-slate-850 dark:to-slate-900 border border-amber-200/80 dark:border-slate-800 shadow-xs hover:shadow-md transition-all duration-300">
         
-        {/* Decorative Golden Ambient Aura / Curve in Background */}
-        <div className="absolute top-0 right-0 w-80 sm:w-96 h-full bg-gradient-to-l from-amber-200/40 via-amber-100/30 to-transparent dark:from-amber-500/10 dark:via-amber-500/5 dark:to-transparent rounded-l-full pointer-events-none" />
-        <div className="absolute -top-12 -left-12 w-48 h-48 bg-amber-400/15 rounded-full blur-3xl pointer-events-none" />
+        {/* Soft Golden Ambient Blob */}
+        <div className="absolute top-0 right-0 w-64 h-full bg-gradient-to-l from-amber-200/30 via-amber-100/20 to-transparent dark:from-amber-500/10 dark:to-transparent rounded-l-full pointer-events-none" />
 
-        <div className="relative z-10 p-5 sm:p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="relative z-10 p-4 sm:p-4 md:p-5 flex items-center justify-between gap-4">
           
-          {/* LEFT COLUMN: Headline, Eyebrow & Actions */}
-          <div className="flex-1 space-y-3 sm:space-y-4 max-w-xl text-left">
+          {/* LEFT: Compact Headline & Quick CTA */}
+          <div className="flex-1 space-y-2 text-left min-w-0">
             
-            {/* Top Eyebrow Badge & Rating Pill */}
+            {/* Eyebrow & Rating */}
             <div className="flex items-center gap-2 flex-wrap">
-              <span className={`px-3 py-1 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-wider shadow-xs flex items-center gap-1.5 ${slide.badgeColor}`}>
-                <Flame className="w-3.5 h-3.5" />
+              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-xs flex items-center gap-1 ${slide.badgeColor}`}>
+                <Flame className="w-3 h-3" />
                 <span>{slide.badge}</span>
               </span>
 
-              <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 shadow-xs">
-                <Star className="w-3 h-3 fill-amber-400 text-amber-500" />
-                <span>{slide.rating}</span>
-              </div>
+              <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                {slide.rating}
+              </span>
             </div>
 
-            {/* Main Catchy Headline (Good Food, Good Mood Style from Image) */}
+            {/* Title (Streamlined height) */}
             <div>
-              <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">
+              <span className="text-[11px] font-black uppercase tracking-wider text-amber-600 dark:text-amber-400 block leading-tight">
                 {slide.highlightText}
               </span>
-              <h2 className="font-display font-black text-2xl sm:text-3xl md:text-4xl text-slate-900 dark:text-white tracking-tight leading-tight mt-1">
+              <h2 className="font-display font-black text-lg sm:text-xl md:text-2xl text-slate-900 dark:text-white tracking-tight leading-snug line-clamp-1 mt-0.5">
                 {slide.title}
               </h2>
             </div>
 
-            {/* Subtitle Description */}
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium leading-relaxed max-w-lg">
+            {/* 1-2 Line Subtitle */}
+            <p className="text-xs text-slate-600 dark:text-slate-300 font-medium line-clamp-1 sm:line-clamp-2 leading-relaxed">
               {slide.subtitle}
             </p>
 
-            {/* Trust Badges (like reference image: 500+ / 15 mins / 100% Quality) */}
-            <div className="flex items-center gap-4 text-[11px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 pt-1">
-              <div className="flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-amber-500" />
-                <span>Fast Service</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                <span>100% Fresh</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Crown className="w-3.5 h-3.5 text-amber-500" />
-                <span>Royal Quality</span>
-              </div>
-            </div>
-
-            {/* Action Buttons: Yellow Pill Button (Reference Image Style) */}
-            <div className="pt-2 flex items-center gap-3">
+            {/* Action Button: Compact Sunny Yellow Pill */}
+            <div className="pt-1 flex items-center gap-2.5">
               <button
                 type="button"
                 onClick={handleCta}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs sm:text-sm shadow-md shadow-amber-400/30 hover:scale-105 active:scale-95 transition-all cursor-pointer group"
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs shadow-xs hover:scale-105 active:scale-95 transition-all cursor-pointer"
               >
                 <span>{slide.ctaText}</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
 
               <button
                 type="button"
                 onClick={() => onSelectCategory && onSelectCategory('All')}
-                className="px-5 py-3 rounded-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold text-xs sm:text-sm border border-slate-200 dark:border-slate-700 shadow-xs active:scale-95 transition-all cursor-pointer"
+                className="px-3.5 py-1.5 rounded-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs border border-slate-200 dark:border-slate-700 shadow-xs active:scale-95 transition-all cursor-pointer hidden sm:inline-block"
               >
-                Explore Full Menu
+                Explore Menu
               </button>
             </div>
 
           </div>
 
-          {/* RIGHT COLUMN: Circular Plate Presentation with Floating Hot Deal Card (Image Style) */}
-          <div className="relative shrink-0 flex items-center justify-center w-64 sm:w-72 md:w-80 aspect-square">
+          {/* RIGHT: Compact Circular Food Plate & Floating Hot Deal Pill */}
+          <div className="relative shrink-0 flex items-center justify-center w-28 sm:w-36 md:w-44 aspect-square">
             
-            {/* Soft Organic Backdrop Blob */}
-            <div className="absolute inset-2 rounded-full bg-gradient-to-tr from-amber-400/20 via-amber-300/30 to-yellow-400/20 dark:from-amber-500/20 dark:to-transparent animate-pulse-subtle pointer-events-none" />
-
-            {/* Circular Food Plate Image */}
+            {/* Compact Plate Photo */}
             <div 
               onClick={handleCta}
-              className="relative w-52 sm:w-60 md:w-64 h-52 sm:h-60 md:h-64 rounded-full overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800 cursor-pointer group-hover:scale-102 transition-transform duration-500"
+              className="relative w-24 sm:w-32 md:w-38 h-24 sm:h-32 md:h-38 rounded-full overflow-hidden shadow-lg border-2 border-white dark:border-slate-800 cursor-pointer hover:scale-105 transition-transform duration-300"
             >
               <img
                 src={restaurantFoodImg}
                 alt={slide.title}
-                className="w-full h-full object-cover object-center filter brightness-[0.98] contrast-[1.02]"
+                className="w-full h-full object-cover object-center filter brightness-[0.98]"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent pointer-events-none" />
             </div>
 
-            {/* Floating "Hot Deal" Card (Exactly like the Reference Image!) */}
-            <div className="absolute -bottom-2 -right-2 sm:bottom-2 sm:right-0 bg-white dark:bg-slate-900 rounded-2xl p-3 sm:p-3.5 shadow-xl border border-slate-200/90 dark:border-slate-700 max-w-[170px] sm:max-w-[190px] animate-float-gentle text-left select-none">
-              <div className="flex items-center gap-1.5 text-rose-500 text-[10px] sm:text-xs font-black uppercase">
-                <Flame className="w-3.5 h-3.5 fill-rose-500" />
+            {/* Compact Floating "Hot Deal" Sticker */}
+            <div className="absolute -bottom-1 -right-1 bg-white dark:bg-slate-900 rounded-xl p-1.5 sm:p-2 shadow-lg border border-slate-200/90 dark:border-slate-700 max-w-[110px] sm:max-w-[130px] text-left select-none">
+              <div className="flex items-center gap-1 text-rose-500 text-[9px] font-black uppercase">
+                <Flame className="w-2.5 h-2.5 fill-rose-500" />
                 <span>Hot Deal</span>
               </div>
-              <h4 className="font-display font-black text-xs sm:text-sm text-slate-900 dark:text-white leading-tight mt-0.5">
+              <h4 className="font-display font-black text-[11px] sm:text-xs text-slate-900 dark:text-white leading-tight">
                 {slide.discountPill}
               </h4>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate mt-0.5">
-                {slide.discountSubtext}
-              </p>
-              <button
-                type="button"
-                onClick={handleCta}
-                className="mt-2 w-full py-1 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-950 font-black text-[10px] tracking-wide uppercase transition-colors text-center"
-              >
-                Order Now
-              </button>
             </div>
 
           </div>
 
         </div>
 
-        {/* BOTTOM SLIDE CONTROLLER BAR: Arrows & Pagination Dots */}
-        <div className="px-5 sm:px-8 py-3 bg-amber-100/50 dark:bg-slate-950/50 border-t border-amber-200/60 dark:border-slate-800/80 flex items-center justify-between">
+        {/* BOTTOM SLIDE CONTROLLER BAR: Slim 28px Strip */}
+        <div className="px-4 sm:px-6 py-1.5 bg-amber-100/40 dark:bg-slate-950/40 border-t border-amber-200/50 dark:border-slate-800/60 flex items-center justify-between text-xs">
           
-          {/* Slide Indicator Dots */}
-          <div className="flex items-center gap-2">
+          {/* Indicator Dots */}
+          <div className="flex items-center gap-1.5">
             {slides.map((s, idx) => (
               <button
                 key={s.id}
                 type="button"
                 onClick={() => setCurrentSlide(idx)}
-                className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
+                className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
                   currentSlide === idx 
-                    ? 'w-8 bg-amber-500 shadow-sm' 
-                    : 'w-2.5 bg-slate-300 dark:bg-slate-700 hover:bg-amber-400'
+                    ? 'w-6 bg-amber-500 shadow-xs' 
+                    : 'w-2 bg-slate-300 dark:bg-slate-700 hover:bg-amber-400'
                 }`}
                 title={`Go to slide ${idx + 1}`}
                 aria-label={`Slide ${idx + 1}`}
               />
             ))}
-            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 ml-2">
+            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 ml-1.5">
               Offer {currentSlide + 1} of {slides.length}
             </span>
           </div>
 
-          {/* Previous / Next Arrow Controls */}
-          <div className="flex items-center gap-1.5">
+          {/* Previous / Next Arrows */}
+          <div className="flex items-center gap-1">
             <button
               type="button"
               onClick={handlePrev}
-              className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-amber-400 hover:text-slate-950 flex items-center justify-center transition-colors shadow-xs cursor-pointer active:scale-95"
+              className="w-6 h-6 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-amber-400 hover:text-slate-950 flex items-center justify-center transition-colors shadow-xs cursor-pointer active:scale-95"
               title="Previous offer"
               aria-label="Previous offer"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-3.5 h-3.5" />
             </button>
 
             <button
               type="button"
               onClick={handleNext}
-              className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-amber-400 hover:text-slate-950 flex items-center justify-center transition-colors shadow-xs cursor-pointer active:scale-95"
+              className="w-6 h-6 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-amber-400 hover:text-slate-950 flex items-center justify-center transition-colors shadow-xs cursor-pointer active:scale-95"
               title="Next offer"
               aria-label="Next offer"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
 

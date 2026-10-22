@@ -230,14 +230,25 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
           <div className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar py-1">
             {categoriesList.map((cat) => {
               const isActive = selectedCategory === cat.key;
+              const isComboBtn = cat.key === 'Combo';
+              const isSignatureBtn = cat.key === 'Signature';
+
               return (
                 <button
                   key={cat.key}
                   type="button"
                   onClick={() => setSelectedCategory(cat.key)}
-                  className={`px-4 py-2 rounded-2xl flex items-center gap-2 shrink-0 transition-all duration-200 cursor-pointer border active:scale-95 shadow-xs ${
+                  className={`px-4 py-2 rounded-2xl flex items-center gap-2 shrink-0 transition-all duration-200 cursor-pointer border active:scale-95 shadow-xs relative ${
                     isActive
-                      ? 'bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-400 text-slate-950 border-amber-400 shadow-md shadow-amber-400/25 font-black scale-102'
+                      ? isSignatureBtn
+                        ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 border-amber-300 shadow-lg shadow-amber-500/35 font-black scale-105 ring-2 ring-amber-400/50'
+                        : isComboBtn
+                        ? 'bg-gradient-to-r from-emerald-400 via-teal-400 to-emerald-500 text-slate-950 border-emerald-300 shadow-lg shadow-emerald-500/35 font-black scale-105 ring-2 ring-emerald-400/50'
+                        : 'bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-400 text-slate-950 border-amber-400 shadow-md shadow-amber-400/25 font-black scale-102'
+                      : isSignatureBtn
+                      ? 'bg-gradient-to-r from-amber-950/70 via-slate-900 to-amber-950/50 text-amber-300 border-amber-400/80 shadow-[0_0_15px_rgba(245,158,11,0.2)] hover:border-amber-300 hover:scale-102 ring-1 ring-amber-400/30'
+                      : isComboBtn
+                      ? 'bg-gradient-to-r from-emerald-950/70 via-slate-900 to-emerald-950/50 text-emerald-300 border-emerald-500/80 shadow-[0_0_15px_rgba(16,185,129,0.2)] hover:border-emerald-400 hover:scale-102 ring-1 ring-emerald-500/30'
                       : 'bg-white dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-white/[0.08] hover:border-amber-400/50 hover:text-amber-400'
                   }`}
                 >
@@ -245,6 +256,16 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                   <span className="text-xs sm:text-sm font-extrabold whitespace-nowrap">
                     {cat.label}
                   </span>
+                  {isSignatureBtn && (
+                    <span className="px-1.5 py-0.2 rounded-full bg-amber-400/20 text-amber-300 text-[9px] font-black uppercase tracking-wider border border-amber-400/40">
+                      Top
+                    </span>
+                  )}
+                  {isComboBtn && (
+                    <span className="px-1.5 py-0.2 rounded-full bg-emerald-400/20 text-emerald-300 text-[9px] font-black uppercase tracking-wider border border-emerald-400/40">
+                      Save ₹
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -405,6 +426,10 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                   className={`group relative rounded-3xl transition-all duration-300 overflow-hidden flex flex-col justify-between cursor-pointer border p-3.5 sm:p-4 ${
                     !item.isAvailable
                       ? 'opacity-65 border-slate-200 dark:border-slate-800 grayscale-[0.4] bg-white dark:bg-slate-900/60'
+                      : item.isSignature
+                      ? 'bg-gradient-to-b from-amber-950/30 via-slate-900/95 to-slate-950 border-2 border-amber-400/80 shadow-[0_6px_30px_rgba(245,158,11,0.22)] ring-1 ring-amber-400/40 hover:shadow-[0_12px_45px_rgba(245,158,11,0.35)] hover:-translate-y-2'
+                      : item.isCombo
+                      ? 'bg-gradient-to-b from-emerald-950/30 via-slate-900/95 to-slate-950 border-2 border-emerald-500/80 shadow-[0_6px_30px_rgba(16,185,129,0.2)] ring-1 ring-emerald-500/40 hover:shadow-[0_12px_45px_rgba(16,185,129,0.3)] hover:-translate-y-2'
                       : 'bg-white dark:bg-slate-900/90 border-slate-200/80 dark:border-white/[0.08] shadow-[0_4px_20px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_25px_rgba(0,0,0,0.3)] hover:shadow-xl hover:border-amber-400/50 hover:-translate-y-1.5'
                   }`}
                 >
@@ -463,18 +488,18 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                       </button>
                     </div>
 
-                    {/* Signature / Combo Bottom-Left Badge */}
+                    {/* Signature / Combo Bottom-Left Badge (Prominently Highlighted) */}
                     {item.isSignature && (
-                      <div className="absolute bottom-2 left-2 px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider shadow-sm flex items-center gap-1">
-                        <Crown className="w-3 h-3 text-slate-950" />
-                        <span>Signature</span>
+                      <div className="absolute bottom-2 left-2 px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 text-[10px] font-black uppercase tracking-wider shadow-md shadow-amber-500/40 flex items-center gap-1.5 border border-amber-300">
+                        <Crown className="w-3.5 h-3.5 text-slate-950 fill-slate-950" />
+                        <span>★ Royal Signature</span>
                       </div>
                     )}
 
                     {item.isCombo && (
-                      <div className="absolute bottom-2 left-2 px-2.5 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-black uppercase tracking-wider shadow-sm flex items-center gap-1">
-                        <Tag className="w-3 h-3 text-white" />
-                        <span>Combo</span>
+                      <div className="absolute bottom-2 left-2 px-3 py-1 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[10px] font-black uppercase tracking-wider shadow-md shadow-emerald-500/40 flex items-center gap-1.5 border border-emerald-300/60">
+                        <Tag className="w-3.5 h-3.5 text-white" />
+                        <span>🍱 Chef Combo Deal</span>
                       </div>
                     )}
 

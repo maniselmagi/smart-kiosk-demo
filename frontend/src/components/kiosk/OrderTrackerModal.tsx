@@ -1,19 +1,18 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useKiosk } from '../../context/KioskContext';
 import { Order, OrderStatus } from '../../types';
 import { 
   CheckCircle2, 
-  Clock, 
   ChefHat, 
   UtensilsCrossed, 
   Sparkles, 
   X, 
-  Star, 
   Receipt,
-  User,
   Bell,
   Timer,
-  Gamepad2
+  Gamepad2,
+  Flame,
+  ArrowRight
 } from 'lucide-react';
 import { getAssignedWaiter } from '../../utils/waiterAssignment';
 
@@ -31,8 +30,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
   isOpen, 
   onClose, 
   onOpenReceipt, 
-  onOpenEntertainment,
-  onOpenFinishMeal 
+  onOpenEntertainment
 }) => {
   const { t, callWaiter } = useKiosk();
 
@@ -75,32 +73,41 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
     ? 100
     : order.status === 'READY'
     ? 90
-    : Math.min(85, Math.max(10, Math.round((elapsedSeconds / totalPrepSeconds) * 100)));
+    : Math.min(88, Math.max(12, Math.round((elapsedSeconds / totalPrepSeconds) * 100)));
 
-  const steps: { key: OrderStatus; label: string; icon: React.ReactNode; desc: string }[] = [
+  // SVG Radar circle calculation (radius 54 -> circumference ~339.29)
+  const radius = 54;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (progressPercent / 100) * circumference;
+
+  const steps: { key: OrderStatus; label: string; icon: React.ReactNode; desc: string; tag: string }[] = [
     {
       key: 'NEW',
       label: t.statusReceived,
       icon: <CheckCircle2 className="w-5 h-5" />,
-      desc: `Confirmed by Supervisor & Waiter ${waiter.name} (${waiter.initial})`,
+      desc: `Confirmed by Floor Supervisor & Waiter ${waiter.name}`,
+      tag: 'Step 1 • Ticket Queued',
     },
     {
       key: 'PREPARING',
       label: t.statusPreparing,
       icon: <ChefHat className="w-5 h-5" />,
-      desc: 'Chef cooking on line • Delivery timer actively ticking',
+      desc: 'Chef cooking on fire line • Fresh ingredients simmering',
+      tag: 'Step 2 • On the Fire',
     },
     {
       key: 'READY',
       label: t.statusReady,
       icon: <UtensilsCrossed className="w-5 h-5" />,
-      desc: `Plated hot • Waiter ${waiter.name} delivering to Table ${order.tableNumber}`,
+      desc: `Plated hot with garnishes • Waiter ${waiter.name} bringing to Table ${order.tableNumber}`,
+      tag: 'Step 3 • Dispatched',
     },
     {
       key: 'COMPLETED',
       label: t.statusServed,
       icon: <Sparkles className="w-5 h-5" />,
-      desc: 'Dishes served at table • Enjoy your meal!',
+      desc: 'Dishes delivered directly to your table. Bon Appétit!',
+      tag: 'Step 4 • Meal Served',
     },
   ];
 
@@ -117,223 +124,297 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
   const currentIndex = getStepIndex(order.status);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-6 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-300">
       <div 
-        className="w-full max-w-xl bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200"
+        className="w-full max-w-xl bg-slate-900/95 text-slate-100 rounded-3xl shadow-[0_25px_70px_rgba(0,0,0,0.85)] border border-white/10 overflow-hidden flex flex-col max-h-[94vh] animate-in zoom-in-95 duration-300 relative backdrop-blur-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        
-        {/* Tracker Header */}
-        <div className="p-6 bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 text-white flex items-center justify-between border-b border-slate-700/60">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-brand-500/20 text-brand-400 flex items-center justify-center font-black text-base border border-brand-500/30 shadow-inner">
-              #{order.orderNumber}
+        {/* Ambient Top Glow */}
+        <div className="absolute top-0 left-1/4 right-1/4 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent blur-[2px]" />
+
+        {/* TRACKER HEADER: Modern Luxury Minimal */}
+        <div className="p-5 sm:p-6 bg-gradient-to-b from-slate-850 to-slate-900 border-b border-white/[0.08] flex items-center justify-between">
+          <div className="flex items-center gap-3.5">
+            <div className="relative">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400/20 via-orange-500/20 to-amber-600/30 text-amber-400 flex items-center justify-center font-black text-base border border-amber-400/40 shadow-inner">
+                #{order.orderNumber}
+              </div>
+              <span className="absolute -bottom-1 -right-1 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
+              </span>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs uppercase tracking-wider font-extrabold text-brand-400">
+                <span className="text-[11px] uppercase tracking-wider font-extrabold text-amber-400 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/30">
                   Table {order.tableNumber}
                 </span>
-                <span className="text-xs text-slate-400">•</span>
-                <span className="text-xs text-slate-300">
+                <span className="text-xs text-slate-500">•</span>
+                <span className="text-xs font-semibold text-slate-300">
                   {order.items.reduce((a, b) => a + b.quantity, 0)} Items
                 </span>
               </div>
-              <h3 className="text-xl font-black font-display text-white">
-                Live Kitchen Progress
+              <h3 className="text-xl font-black font-display text-white mt-0.5 tracking-tight flex items-center gap-2">
+                <span>Live Kitchen Tracker</span>
               </h3>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700/60 transition-colors cursor-pointer"
+            className="w-10 h-10 rounded-2xl bg-white/[0.05] hover:bg-white/[0.12] text-slate-400 hover:text-white transition-all flex items-center justify-center cursor-pointer border border-white/5 active:scale-95"
+            aria-label="Close Tracker"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Live Synchronized Kitchen Stepper */}
-        <div className="p-6 overflow-y-auto space-y-5 flex-1">
+        {/* SCROLLABLE TRACKER BODY */}
+        <div className="p-5 sm:p-6 overflow-y-auto space-y-6 flex-1 custom-scrollbar">
           
-          {/* ASSIGNED WAITER INFO HEADER CHIP */}
-          <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs ${waiter.avatarBg}`}>
-                {waiter.initial}
-              </div>
-              <div>
-                <span className="text-[10px] uppercase font-black text-slate-400 block tracking-wider">
-                  Assigned Table Waiter
-                </span>
-                <span className="text-xs font-black text-slate-900 dark:text-white">
-                  {waiter.fullName} <span className="font-normal text-slate-400">({waiter.zone})</span>
-                </span>
-              </div>
-            </div>
+          {/* CIRCULAR RADAR COUNTDOWN HERO CARD */}
+          <div className="relative p-5 rounded-3xl bg-gradient-to-br from-slate-800/80 via-slate-850/90 to-slate-900/90 border border-white/10 shadow-2xl overflow-hidden">
+            {/* Ambient Backlight */}
+            <div className="absolute -right-8 -top-8 w-44 h-44 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
+            <div className="absolute -left-8 -bottom-8 w-44 h-44 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
 
-            <button
-              type="button"
-              onClick={() => callWaiter('Need Assistance')}
-              className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-[11px] font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 flex items-center gap-1 transition-colors cursor-pointer"
-            >
-              <Bell className="w-3 h-3 text-amber-500" />
-              <span>Call Waiter {waiter.initial}</span>
-            </button>
-          </div>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-5 relative z-10">
+              
+              {/* Animated SVG Circular Progress Radar */}
+              <div className="relative flex items-center justify-center shrink-0">
+                <svg className="w-32 h-32 -rotate-90 transform">
+                  {/* Background Track */}
+                  <circle
+                    cx="64"
+                    cy="64"
+                    r={radius}
+                    className="text-slate-800 stroke-current"
+                    strokeWidth="8"
+                    fill="transparent"
+                  />
+                  {/* Progress Glow Track */}
+                  <circle
+                    cx="64"
+                    cy="64"
+                    r={radius}
+                    className="text-amber-400 stroke-current transition-all duration-1000 ease-out"
+                    strokeWidth="8"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={strokeDashoffset}
+                    strokeLinecap="round"
+                    fill="transparent"
+                  />
+                </svg>
 
-          {/* REAL-TIME DELIVER TIME COUNTDOWN CARD */}
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/15 via-brand-500/10 to-emerald-500/10 border border-amber-500/30 shadow-xs space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center">
-                  <Timer className="w-5 h-5 animate-spin-slow" />
+                {/* Radar Center Content */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                  {order.status === 'COMPLETED' ? (
+                    <>
+                      <Sparkles className="w-7 h-7 text-emerald-400 animate-bounce" />
+                      <span className="text-[11px] font-black text-emerald-300 uppercase tracking-wider mt-0.5">Ready!</span>
+                    </>
+                  ) : order.status === 'READY' ? (
+                    <>
+                      <UtensilsCrossed className="w-7 h-7 text-amber-400 animate-pulse" />
+                      <span className="text-[11px] font-black text-amber-300 uppercase tracking-wider mt-0.5">Plated</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-2xl font-black text-white font-mono tracking-tight leading-none">
+                        {formattedCountdown}
+                      </span>
+                      <span className="text-[10px] text-amber-400/90 font-black uppercase tracking-wider mt-1">
+                        Est. Time
+                      </span>
+                    </>
+                  )}
                 </div>
-                <div>
-                  <span className="text-[10px] font-black text-amber-800 dark:text-amber-400 uppercase tracking-wider block">
-                    Live Delivery Time Countdown
-                  </span>
-                  <div className="flex items-baseline gap-1.5">
-                    {order.status === 'COMPLETED' ? (
-                      <span className="text-xl font-black text-emerald-600 dark:text-emerald-400 font-display">
-                        Delivered & Served!
-                      </span>
-                    ) : order.status === 'READY' ? (
-                      <span className="text-xl font-black text-emerald-600 dark:text-emerald-400 font-display">
-                        Plated & Dispatched!
-                      </span>
-                    ) : (
-                      <>
-                        <span className="text-2xl font-black text-slate-900 dark:text-white font-mono tracking-tight">
-                          {formattedCountdown}
-                        </span>
-                        <span className="text-xs text-slate-500 font-bold">remaining</span>
-                      </>
-                    )}
+              </div>
+
+              {/* Status Meta */}
+              <div className="flex-1 text-center sm:text-left space-y-2">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-black">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Real-Time Kitchen Sync Active</span>
+                </div>
+
+                <h4 className="text-lg font-black text-white font-display">
+                  {order.status === 'COMPLETED'
+                    ? 'Dishes Served at Your Table!'
+                    : order.status === 'READY'
+                    ? `Waiter ${waiter.name} is Delivering to Table ${order.tableNumber}`
+                    : 'Artisanal Dishes Being Cooked Fresh'}
+                </h4>
+
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Total kitchen prep window: <strong className="text-slate-200">{order.estimatedPrepTime} minutes</strong>. Every dish is cooked to order with hot plating.
+                </p>
+
+                {/* Progress Mini Bar */}
+                <div className="pt-1 space-y-1">
+                  <div className="flex justify-between text-[11px] font-bold text-slate-400">
+                    <span>Kitchen Completion</span>
+                    <span className="text-amber-400 font-mono font-black">{progressPercent}%</span>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden p-0.5">
+                    <div 
+                      className="h-full rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-emerald-400 transition-all duration-1000 ease-out shadow-[0_0_12px_rgba(245,158,11,0.5)]"
+                      style={{ width: `${progressPercent}%` }}
+                    />
                   </div>
                 </div>
               </div>
 
-              <div className="text-right">
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-[11px] font-black">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  Live Sync
-                </span>
-                <span className="block text-[10px] text-slate-400 mt-1 font-medium">
-                  Est. {order.estimatedPrepTime}m total
-                </span>
-              </div>
             </div>
 
-            {/* Dynamic Real-Time Progress Bar */}
-            <div className="space-y-1">
-              <div className="flex justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400">
-                <span>Cooking Progress</span>
-                <span>{progressPercent}%</span>
-              </div>
-              <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                <div 
-                  className="h-full rounded-full bg-gradient-to-r from-amber-500 via-brand-500 to-emerald-500 transition-all duration-1000 ease-out"
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Play Games & Digital News Lounge CTA */}
+            {/* Play Games & Digital News Lounge CTA Banner */}
             {onOpenEntertainment && (
-              <div className="pt-2 border-t border-amber-500/20 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-base">🎮</span>
-                  <span className="text-[11px] font-extrabold text-amber-900 dark:text-amber-300">
-                    Bored waiting? Play Ludo, Sudoku or Read News Shorts!
+              <div className="mt-4 pt-4 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/30">
+                    <Gamepad2 className="w-4 h-4 animate-pulse" />
+                  </div>
+                  <span className="text-xs font-bold text-slate-200">
+                    Bored waiting? Play <span className="text-amber-400 font-extrabold">Ludo, Sudoku</span> or Read Live News!
                   </span>
                 </div>
+
                 <button
                   type="button"
                   onClick={() => {
                     onClose();
                     onOpenEntertainment();
                   }}
-                  className="py-1.5 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs shadow-sm flex items-center gap-1 active:scale-95 transition-all cursor-pointer whitespace-nowrap animate-pulse"
+                  className="w-full sm:w-auto py-2 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs shadow-md shadow-amber-500/25 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
                 >
-                  <Gamepad2 className="w-3.5 h-3.5" />
-                  <span>Play Games →</span>
+                  <span>Play Games Lounge</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-950" />
                 </button>
               </div>
             )}
           </div>
 
-          {/* Stepper Timeline */}
-          <div className="relative pl-6 space-y-6 before:absolute before:left-[1.85rem] before:top-3 before:bottom-3 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-800">
-            {steps.map((step, idx) => {
-              const isPast = idx < currentIndex;
-              const isCurrent = idx === currentIndex;
+          {/* ASSIGNED WAITER CONCIERGE CARD */}
+          <div className="p-4 rounded-2xl bg-slate-850/70 border border-white/[0.08] flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-black text-sm shadow-md ${waiter.avatarBg} text-white border border-white/20`}>
+                {waiter.initial}
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-black text-amber-400/90 block tracking-wider">
+                  Assigned Floor Attendant
+                </span>
+                <span className="text-sm font-black text-white">
+                  {waiter.fullName} <span className="font-normal text-xs text-slate-400">({waiter.zone})</span>
+                </span>
+                <p className="text-[11px] text-slate-400">
+                  Dedicated to Table {order.tableNumber} for prompt service
+                </p>
+              </div>
+            </div>
 
-              return (
-                <div key={step.key} className="relative flex items-start gap-4">
-                  {/* Status Node Icon */}
-                  <div className={`relative z-10 w-9 h-9 rounded-2xl flex items-center justify-center font-bold text-sm transition-all duration-300 ${
-                    isCurrent
-                      ? 'bg-brand-600 text-white shadow-lg shadow-brand-500/30 ring-4 ring-brand-100 dark:ring-brand-950 animate-pulse'
-                      : isPast
-                      ? 'bg-emerald-500 text-white'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700'
-                  }`}>
-                    {step.icon}
-                  </div>
-
-                  {/* Step Description */}
-                  <div className="pt-0.5 flex-1">
-                    <div className="flex items-center justify-between">
-                      <h4 className={`text-sm font-black transition-colors ${
-                        isCurrent
-                          ? 'text-brand-600 dark:text-brand-400'
-                          : isPast
-                          ? 'text-slate-900 dark:text-slate-100'
-                          : 'text-slate-400 dark:text-slate-500'
-                      }`}>
-                        {step.label}
-                      </h4>
-                      {isCurrent && (
-                        <span className="text-[11px] font-black uppercase text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-950 px-2 py-0.5 rounded-full border border-brand-200/50 dark:border-brand-800/50">
-                          In Progress
-                        </span>
-                      )}
-                      {isPast && (
-                        <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
-                          Done ✓
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                      {step.desc}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
+            <button
+              type="button"
+              onClick={() => callWaiter('Need Assistance')}
+              className="px-3 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-xs font-bold text-slate-200 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
+            >
+              <Bell className="w-3.5 h-3.5 text-amber-400" />
+              <span>Call Waiter</span>
+            </button>
           </div>
 
-          {/* Ordered Dishes List */}
-          <div>
-            <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2">
-              Cooking for Table {order.tableNumber}:
-            </span>
-            <div className="divide-y divide-slate-100 dark:divide-slate-800 border border-slate-100 dark:border-slate-800 rounded-2xl overflow-hidden">
+          {/* HIGH-TECH INTERACTIVE TIMELINE */}
+          <div className="space-y-4">
+            <h4 className="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <Flame className="w-3.5 h-3.5 text-amber-400" />
+              <span>Order Preparation Timeline</span>
+            </h4>
+
+            <div className="relative pl-6 space-y-6 before:absolute before:left-[1.85rem] before:top-3 before:bottom-3 before:w-0.5 before:bg-gradient-to-b before:from-amber-400 before:via-emerald-400 before:to-slate-800">
+              {steps.map((step, idx) => {
+                const isPast = idx < currentIndex;
+                const isCurrent = idx === currentIndex;
+
+                return (
+                  <div key={step.key} className="relative flex items-start gap-4">
+                    {/* Status Node Icon */}
+                    <div className={`relative z-10 w-9 h-9 rounded-2xl flex items-center justify-center font-bold text-sm transition-all duration-300 ${
+                      isCurrent
+                        ? 'bg-gradient-to-tr from-amber-400 to-amber-500 text-slate-950 shadow-lg shadow-amber-500/40 ring-4 ring-amber-400/20 scale-110'
+                        : isPast
+                        ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/30'
+                        : 'bg-slate-800 text-slate-500 border border-white/10'
+                    }`}>
+                      {step.icon}
+                    </div>
+
+                    {/* Step Description Card */}
+                    <div className={`p-3.5 rounded-2xl border transition-all flex-1 ${
+                      isCurrent
+                        ? 'bg-slate-800/90 border-amber-400/40 shadow-lg'
+                        : isPast
+                        ? 'bg-slate-850/50 border-white/5 opacity-90'
+                        : 'bg-slate-900/30 border-white/5 opacity-50'
+                    }`}>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className={`text-xs font-black ${
+                          isCurrent ? 'text-amber-400' : isPast ? 'text-slate-200' : 'text-slate-400'
+                        }`}>
+                          {step.label}
+                        </span>
+                        
+                        {isCurrent && (
+                          <span className="text-[10px] font-black uppercase tracking-wider text-amber-950 bg-amber-400 px-2 py-0.5 rounded-full shadow-xs">
+                            Active Step
+                          </span>
+                        )}
+                        {isPast && (
+                          <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                            Completed ✓
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-xs text-slate-400 mt-1 leading-snug">
+                        {step.desc}
+                      </p>
+                      
+                      <span className="text-[10px] text-slate-500 font-mono block mt-1.5">
+                        {step.tag}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ORDERED DISHES MINIATURES */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black uppercase tracking-wider text-slate-400">
+                Dishes in This Ticket ({order.items.length})
+              </span>
+              <span className="text-xs font-bold text-amber-400 font-display">
+                Total ₹{order.total}
+              </span>
+            </div>
+
+            <div className="divide-y divide-white/[0.06] border border-white/[0.08] rounded-2xl overflow-hidden bg-slate-850/50">
               {order.items.map((item) => (
-                <div key={item.cartItemId} className="p-3 bg-white dark:bg-slate-850 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2.5">
-                    <img src={item.image} alt={item.name} className="w-10 h-10 rounded-xl object-cover" />
+                <div key={item.cartItemId} className="p-3 flex items-center justify-between text-xs hover:bg-white/[0.02] transition-colors">
+                  <div className="flex items-center gap-3">
+                    <img src={item.image} alt={item.name} className="w-11 h-11 rounded-xl object-cover border border-white/10" />
                     <div>
-                      <span className="font-bold text-slate-800 dark:text-slate-200">
+                      <span className="font-bold text-slate-200 block">
                         {item.quantity}× {item.name}
                       </span>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                      <p className="text-[11px] text-slate-400">
                         {item.spiceLevel} spice {item.customizations.length > 0 && `• ${item.customizations.join(', ')}`}
                       </p>
                     </div>
                   </div>
-                  <span className="font-bold text-slate-700 dark:text-slate-200 font-display">
+                  <span className="font-black text-amber-400 font-display text-sm">
                     ₹{item.price * item.quantity}
                   </span>
                 </div>
@@ -343,12 +424,12 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
 
         </div>
 
-        {/* Modal Bottom Actions */}
-        <div className="p-4 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
+        {/* MODAL BOTTOM BAR */}
+        <div className="p-4 sm:p-5 bg-slate-900 border-t border-white/[0.08] flex items-center justify-between gap-3 shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition-colors cursor-pointer"
+            className="px-5 py-3 rounded-2xl bg-white/[0.06] hover:bg-white/[0.12] text-slate-300 hover:text-white text-xs font-bold transition-all cursor-pointer border border-white/10 active:scale-95"
           >
             Close Tracker
           </button>
@@ -359,7 +440,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
               onClose();
               onOpenReceipt();
             }}
-            className="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 text-xs font-black shadow-md shadow-amber-500/25 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            className="flex-1 py-3 px-5 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 text-xs font-black shadow-lg shadow-amber-500/25 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <Receipt className="w-4 h-4 text-slate-950" />
             <span>View Digital Receipt</span>
@@ -372,3 +453,4 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
 };
 
 export default OrderTrackerModal;
+

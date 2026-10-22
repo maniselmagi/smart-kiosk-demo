@@ -44,26 +44,215 @@ interface CustomerEntertainmentModalProps {
 }
 
 // ============================================================================
-// 1. ORIGINAL TYPE LUDO BOARD (Authentic 4-Quadrant Cross Board with 2 Players)
+// 1. AUTHENTIC 15×15 INTERACTIVE LUDO BOARD (With Real Token Movement on Cells)
 // ============================================================================
+// Main 52 perimeter track coordinates in clockwise order [row, col] (0-indexed, 0..14)
+const LUDO_TRACK_COORDS: [number, number][] = [
+  [6, 1],  // 0: Red Start ★
+  [6, 2],  // 1
+  [6, 3],  // 2
+  [6, 4],  // 3
+  [6, 5],  // 4
+  [5, 6],  // 5
+  [4, 6],  // 6
+  [3, 6],  // 7
+  [2, 6],  // 8: Safe Star ★
+  [1, 6],  // 9
+  [0, 6],  // 10
+  [0, 7],  // 11
+  [0, 8],  // 12
+  [1, 8],  // 13: Green Start ★
+  [2, 8],  // 14
+  [3, 8],  // 15
+  [4, 8],  // 16
+  [5, 8],  // 17
+  [6, 9],  // 18
+  [6, 10], // 19
+  [6, 11], // 20
+  [6, 12], // 21: Safe Star ★
+  [6, 13], // 22
+  [6, 14], // 23
+  [7, 14], // 24
+  [8, 14], // 25
+  [8, 13], // 26: Yellow Start ★ (Player Start)
+  [8, 12], // 27
+  [8, 11], // 28
+  [8, 10], // 29
+  [8, 9],  // 30
+  [9, 8],  // 31
+  [10, 8], // 32
+  [11, 8], // 33
+  [12, 8], // 34: Safe Star ★
+  [13, 8], // 35
+  [14, 8], // 36
+  [14, 7], // 37
+  [14, 6], // 38
+  [13, 6], // 39: Blue Start ★
+  [12, 6], // 40
+  [11, 6], // 41
+  [10, 6], // 42
+  [9, 6],  // 43
+  [8, 5],  // 44
+  [8, 4],  // 45
+  [8, 3],  // 46
+  [8, 2],  // 47: Safe Star ★
+  [8, 1],  // 48
+  [8, 0],  // 49
+  [7, 0],  // 50
+  [6, 0]   // 51
+];
+
+// Safe tiles on 52 track where tokens cannot be captured
+const SAFE_CELL_INDICES = new Set([0, 8, 13, 21, 26, 34, 39, 47]);
+
+// Yellow Home Runway [row, col] for steps 51..55 (Step 56 is Home Triangle)
+const YELLOW_HOME_RUNWAY: [number, number][] = [
+  [7, 13], // 51
+  [7, 12], // 52
+  [7, 11], // 53
+  [7, 10], // 54
+  [7, 9]   // 55
+];
+
+// Red Home Runway [row, col] for steps 51..55
+const RED_HOME_RUNWAY: [number, number][] = [
+  [7, 1],  // 51
+  [7, 2],  // 52
+  [7, 3],  // 53
+  [7, 4],  // 54
+  [7, 5]   // 55
+];
+
 const OriginalLudoGame: React.FC = () => {
-  // 2 tokens for Player (Yellow), 2 tokens for Chef Bot (Red)
-  // State: -1 = in base yard, 0..51 = main track, 100+ = home stretch, 200 = Finished Home
+  // Tokens representation:
+  // -1 = In Base Yard
+  // 0..50 = On 52-tile circuit track
+  // 51..55 = In Home Runway
+  // 56 = In Central Home Triangle (Finished!)
   const [playerTokens, setPlayerTokens] = useState<[number, number]>([-1, -1]);
   const [botTokens, setBotTokens] = useState<[number, number]>([-1, -1]);
   const [diceRoll, setDiceRoll] = useState<number | null>(null);
   const [isRolling, setIsRolling] = useState(false);
   const [turn, setTurn] = useState<'player' | 'bot'>('player');
+  const [waitingForMove, setWaitingForMove] = useState(false);
   const [winner, setWinner] = useState<string | null>(null);
   const [gameLog, setGameLog] = useState<string[]>([
-    'Welcome to Royal Ludo! Roll a 6 to release your token from base.'
+    '🎲 Welcome to Royal Ludo! Roll a 6 to deploy your gold coins to the track.'
   ]);
 
-  // Track is 28 tiles circular sprint for fast kiosk dining play
-  const MAX_TRACK = 24;
+  // Convert player token step to (r, c)
+  const getPlayerTokenPos = (step: number): [number, number] | null => {
+    if (step === -1) return null;
+    if (step >= 0 && step <= 50) {
+      const trackIdx = (26 + step) % 52;
+      return LUDO_TRACK_COORDS[trackIdx];
+    }
+    if (step >= 51 && step <= 55) {
+      return YELLOW_HOME_RUNWAY[step - 51];
+    }
+    if (step >= 56) {
+      return [7, 8]; // Center Home
+    }
+    return null;
+  };
 
-  const rollDice = () => {
-    if (isRolling || winner || turn !== 'player') return;
+  // Convert bot token step to (r, c)
+  const getBotTokenPos = (step: number): [number, number] | null => {
+    if (step === -1) return null;
+    if (step >= 0 && step <= 50) {
+      return LUDO_TRACK_COORDS[step];
+    }
+    if (step >= 51 && step <= 55) {
+      return RED_HOME_RUNWAY[step - 51];
+    }
+    if (step >= 56) {
+      return [7, 6]; // Center Home
+    }
+    return null;
+  };
+
+  // Can player token move with current dice roll?
+  const canPlayerMoveToken = (tokenIdx: 0 | 1): boolean => {
+    if (diceRoll === null || turn !== 'player' || !waitingForMove || winner) return false;
+    const step = playerTokens[tokenIdx];
+    if (step === 56) return false; // Already in Home
+    if (step === -1) {
+      return diceRoll === 6; // Needs a 6 to deploy
+    }
+    return step + diceRoll <= 56;
+  };
+
+  // Execute Player Move
+  const handlePlayerMove = (tokenIdx: 0 | 1) => {
+    if (!canPlayerMoveToken(tokenIdx) || diceRoll === null) return;
+
+    setWaitingForMove(false);
+    const step = playerTokens[tokenIdx];
+    let newStep = step;
+
+    if (step === -1 && diceRoll === 6) {
+      newStep = 0; // Deploys to Start Cell (Track Index 26)
+      setGameLog((l) => [`🚀 Gold Coin P${tokenIdx + 1} deployed to Start!`, ...l.slice(0, 3)]);
+    } else if (step >= 0 && step + diceRoll <= 56) {
+      newStep = step + diceRoll;
+      if (newStep === 56) {
+        setGameLog((l) => [`🏆 Gold Coin P${tokenIdx + 1} reached Home!`, ...l.slice(0, 3)]);
+      } else {
+        setGameLog((l) => [`👉 Gold Coin P${tokenIdx + 1} advanced to Step ${newStep}.`, ...l.slice(0, 3)]);
+      }
+    }
+
+    const nextPlayerTokens: [number, number] = tokenIdx === 0 
+      ? [newStep, playerTokens[1]] 
+      : [playerTokens[0], newStep];
+
+    setPlayerTokens(nextPlayerTokens);
+
+    // Check Capture if on main track
+    let captured = false;
+    if (newStep >= 0 && newStep <= 50) {
+      const myTrackIdx = (26 + newStep) % 52;
+      if (!SAFE_CELL_INDICES.has(myTrackIdx)) {
+        // Check bot tokens
+        setBotTokens((prevBot) => {
+          let [b1, b2] = prevBot;
+          let hit = false;
+          if (b1 >= 0 && b1 <= 50 && b1 === myTrackIdx) {
+            b1 = -1;
+            hit = true;
+            captured = true;
+            setGameLog((l) => [`💥 BOOM! You captured Chef Bot's B1 back to base!`, ...l.slice(0, 3)]);
+          } else if (b2 >= 0 && b2 <= 50 && b2 === myTrackIdx) {
+            b2 = -1;
+            hit = true;
+            captured = true;
+            setGameLog((l) => [`💥 BOOM! You captured Chef Bot's B2 back to base!`, ...l.slice(0, 3)]);
+          }
+          return [b1, b2];
+        });
+      }
+    }
+
+    // Win check
+    if (nextPlayerTokens[0] === 56 && nextPlayerTokens[1] === 56) {
+      setWinner('🎉 You conquered Royal Ludo! Champions Trophy Awarded 🏆');
+      return;
+    }
+
+    // Next turn logic (rolling 6 or capturing grants an extra turn)
+    if (diceRoll === 6 || captured) {
+      setGameLog((l) => [`⭐ Bonus Turn earned! Roll again!`, ...l.slice(0, 3)]);
+      setDiceRoll(null);
+    } else {
+      setTurn('bot');
+      setDiceRoll(null);
+      setTimeout(runBotTurn, 900);
+    }
+  };
+
+  // Roll Dice Handler
+  const handleRollDice = () => {
+    if (isRolling || winner || turn !== 'player' || waitingForMove) return;
     setIsRolling(true);
 
     setTimeout(() => {
@@ -71,129 +260,165 @@ const OriginalLudoGame: React.FC = () => {
       setDiceRoll(roll);
       setIsRolling(false);
 
-      // Player move logic
-      setPlayerTokens((prev) => {
-        const [t1, t2] = prev;
-        let newT1 = t1;
-        let newT2 = t2;
-        let moved = false;
+      // Check how many tokens can move
+      const can0 = playerTokens[0] === -1 ? roll === 6 : (playerTokens[0] < 56 && playerTokens[0] + roll <= 56);
+      const can1 = playerTokens[1] === -1 ? roll === 6 : (playerTokens[1] < 56 && playerTokens[1] + roll <= 56);
 
-        if (roll === 6) {
-          if (t1 === -1) {
-            newT1 = 0;
-            moved = true;
-            setGameLog((l) => [`🎲 You rolled a 6! Token #1 deployed to Track 0!`, ...l.slice(0, 3)]);
-          } else if (t2 === -1) {
-            newT2 = 0;
-            moved = true;
-            setGameLog((l) => [`🎲 You rolled a 6! Token #2 deployed to Track 0!`, ...l.slice(0, 3)]);
-          } else {
-            newT1 = Math.min(MAX_TRACK, t1 + roll);
-            moved = true;
-            setGameLog((l) => [`🎲 You rolled a 6! Token #1 advanced to ${newT1}.`, ...l.slice(0, 3)]);
-          }
+      if (!can0 && !can1) {
+        setGameLog((l) => [`🎲 Rolled a ${roll}. No moves possible! Turn passing...`, ...l.slice(0, 3)]);
+        setTimeout(() => {
+          setTurn('bot');
+          setDiceRoll(null);
+          setTimeout(runBotTurn, 900);
+        }, 1100);
+      } else {
+        setWaitingForMove(true);
+        setGameLog((l) => [`🎲 Rolled a ${roll}! Tap a gold coin to move it.`, ...l.slice(0, 3)]);
+      }
+    }, 450);
+  };
+
+  // Chef Bot Turn (Autonomous AI)
+  const runBotTurn = () => {
+    if (winner) return;
+    setIsRolling(true);
+
+    setTimeout(() => {
+      const botRoll = Math.floor(Math.random() * 6) + 1;
+      setDiceRoll(botRoll);
+      setIsRolling(false);
+
+      setBotTokens((prev) => {
+        let [b1, b2] = prev;
+        let chosenIdx: 0 | 1 | null = null;
+        let willDeploy = false;
+
+        // Bot move priority:
+        // 1. If 6 and someone in base, deploy!
+        if (botRoll === 6 && b1 === -1) {
+          b1 = 0;
+          chosenIdx = 0;
+          willDeploy = true;
+          setGameLog((l) => [`🤖 Chef Bot rolled a 6 and deployed B1 to track!`, ...l.slice(0, 3)]);
+        } else if (botRoll === 6 && b2 === -1) {
+          b2 = 0;
+          chosenIdx = 1;
+          willDeploy = true;
+          setGameLog((l) => [`🤖 Chef Bot rolled a 6 and deployed B2 to track!`, ...l.slice(0, 3)]);
         } else {
-          // Advance active token
-          if (t1 >= 0 && t1 < MAX_TRACK) {
-            newT1 = Math.min(MAX_TRACK, t1 + roll);
-            moved = true;
-            setGameLog((l) => [`🎲 You rolled a ${roll}! Token #1 at tile ${newT1}.`, ...l.slice(0, 3)]);
-          } else if (t2 >= 0 && t2 < MAX_TRACK) {
-            newT2 = Math.min(MAX_TRACK, t2 + roll);
-            moved = true;
-            setGameLog((l) => [`🎲 You rolled a ${roll}! Token #2 at tile ${newT2}.`, ...l.slice(0, 3)]);
+          // Check who can advance
+          const canB1 = b1 >= 0 && b1 + botRoll <= 56;
+          const canB2 = b2 >= 0 && b2 + botRoll <= 56;
+
+          if (canB1 && canB2) {
+            // Pick the one furthest ahead or closer to home
+            if (b1 >= b2) {
+              b1 += botRoll;
+              chosenIdx = 0;
+            } else {
+              b2 += botRoll;
+              chosenIdx = 1;
+            }
+          } else if (canB1) {
+            b1 += botRoll;
+            chosenIdx = 0;
+          } else if (canB2) {
+            b2 += botRoll;
+            chosenIdx = 1;
+          }
+        }
+
+        if (chosenIdx !== null && !willDeploy) {
+          const val = chosenIdx === 0 ? b1 : b2;
+          if (val === 56) {
+            setGameLog((l) => [`🤖 Chef Bot coin reached Home!`, ...l.slice(0, 3)]);
           } else {
-            setGameLog((l) => [`🎲 Rolled a ${roll}. Need a 6 to bring token out of base!`, ...l.slice(0, 3)]);
+            setGameLog((l) => [`🤖 Chef Bot moved B${chosenIdx! + 1} to step ${val}.`, ...l.slice(0, 3)]);
+          }
+        } else if (chosenIdx === null) {
+          setGameLog((l) => [`🤖 Chef Bot rolled a ${botRoll}. No moves possible.`, ...l.slice(0, 3)]);
+        }
+
+        // Check Bot Capture of Player
+        let botCaptured = false;
+        if (chosenIdx !== null) {
+          const botPos = chosenIdx === 0 ? b1 : b2;
+          if (botPos >= 0 && botPos <= 50 && !SAFE_CELL_INDICES.has(botPos)) {
+            setPlayerTokens((prevPlayer) => {
+              let [p1, p2] = prevPlayer;
+              const p1Track = p1 >= 0 && p1 <= 50 ? (26 + p1) % 52 : -99;
+              const p2Track = p2 >= 0 && p2 <= 50 ? (26 + p2) % 52 : -99;
+
+              if (p1Track === botPos) {
+                p1 = -1;
+                botCaptured = true;
+                setGameLog((l) => [`⚠️ Oh no! Chef Bot captured your Gold P1! Back to base.`, ...l.slice(0, 3)]);
+              } else if (p2Track === botPos) {
+                p2 = -1;
+                botCaptured = true;
+                setGameLog((l) => [`⚠️ Oh no! Chef Bot captured your Gold P2! Back to base.`, ...l.slice(0, 3)]);
+              }
+              return [p1, p2];
+            });
           }
         }
 
         // Win check
-        if (newT1 >= MAX_TRACK && newT2 >= MAX_TRACK) {
-          setWinner('You won the Ludo Championship! 🏆');
+        if (b1 === 56 && b2 === 56) {
+          setWinner('Chef Bot conquered Home! Better luck next dining round.');
+          return [b1, b2];
         }
 
-        return [newT1, newT2];
+        // Pass turn or extra turn
+        if (botRoll === 6 || botCaptured) {
+          setTimeout(runBotTurn, 1000);
+        } else {
+          setTimeout(() => {
+            setTurn('player');
+            setDiceRoll(null);
+          }, 800);
+        }
+
+        return [b1, b2];
       });
-
-      // Pass turn to bot if not rolling a 6
-      if (roll !== 6) {
-        setTurn('bot');
-        setTimeout(runBotTurn, 1000);
-      }
-    }, 500);
-  };
-
-  const runBotTurn = () => {
-    if (winner) return;
-    const botRoll = Math.floor(Math.random() * 6) + 1;
-    setDiceRoll(botRoll);
-
-    setBotTokens((prev) => {
-      const [b1, b2] = prev;
-      let newB1 = b1;
-      let newB2 = b2;
-
-      if (botRoll === 6) {
-        if (b1 === -1) {
-          newB1 = 0;
-          setGameLog((l) => [`🤖 Chef Bot rolled a 6 and deployed Token #1!`, ...l.slice(0, 3)]);
-        } else if (b2 === -1) {
-          newB2 = 0;
-          setGameLog((l) => [`🤖 Chef Bot rolled a 6 and deployed Token #2!`, ...l.slice(0, 3)]);
-        } else {
-          newB1 = Math.min(MAX_TRACK, b1 + botRoll);
-          setGameLog((l) => [`🤖 Chef Bot advanced Token #1 to ${newB1}.`, ...l.slice(0, 3)]);
-        }
-      } else {
-        if (b1 >= 0 && b1 < MAX_TRACK) {
-          newB1 = Math.min(MAX_TRACK, b1 + botRoll);
-          setGameLog((l) => [`🤖 Chef Bot rolled ${botRoll}, moving to tile ${newB1}.`, ...l.slice(0, 3)]);
-        } else if (b2 >= 0 && b2 < MAX_TRACK) {
-          newB2 = Math.min(MAX_TRACK, b2 + botRoll);
-          setGameLog((l) => [`🤖 Chef Bot rolled ${botRoll}, moving to tile ${newB2}.`, ...l.slice(0, 3)]);
-        } else {
-          setGameLog((l) => [`🤖 Chef Bot rolled ${botRoll}. No tokens on track.`, ...l.slice(0, 3)]);
-        }
-      }
-
-      if (newB1 >= MAX_TRACK && newB2 >= MAX_TRACK) {
-        setWinner('Chef Bot conquered Home! Try again next round.');
-      } else {
-        setTurn('player');
-      }
-
-      return [newB1, newB2];
-    });
+    }, 600);
   };
 
   const resetGame = () => {
     setPlayerTokens([-1, -1]);
     setBotTokens([-1, -1]);
     setDiceRoll(null);
+    setWaitingForMove(false);
     setTurn('player');
     setWinner(null);
-    setGameLog(['Game reset! Roll a 6 to deploy your gold tokens.']);
+    setGameLog(['Game reset! Roll a 6 to deploy your gold tokens to the track.']);
   };
 
+  // Lookup who is at cell [r, c]
+  const p1Pos = getPlayerTokenPos(playerTokens[0]);
+  const p2Pos = getPlayerTokenPos(playerTokens[1]);
+  const b1Pos = getBotTokenPos(botTokens[0]);
+  const b2Pos = getBotTokenPos(botTokens[1]);
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h4 className="font-black text-sm md:text-base text-slate-900 dark:text-white flex items-center gap-2">
+          <h4 className="font-black text-sm md:text-base text-white flex items-center gap-2">
             <span>🎲 Royal Ludo Master</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400 font-bold border border-amber-500/30">
-              Classic 4-Quadrant Board
+            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-400/15 text-amber-300 font-extrabold border border-amber-400/30">
+              Interactive 15×15 Board
             </span>
           </h4>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Roll 6 to leave base. Race tokens to Home Triangle against Chef Bot!
+          <p className="text-xs text-slate-400 mt-0.5">
+            Roll 6 to leave base. Tap gleaming tokens to walk on the board cells!
           </p>
         </div>
 
         <button
           onClick={resetGame}
-          className="p-1.5 px-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors"
+          className="p-2 px-3 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-slate-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer border border-white/10 active:scale-95 transition-all"
         >
           <RotateCcw className="w-3.5 h-3.5" />
           <span>New Game</span>
@@ -201,187 +426,381 @@ const OriginalLudoGame: React.FC = () => {
       </div>
 
       {winner && (
-        <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/25 via-emerald-500/25 to-brand-500/25 border-2 border-amber-500/40 text-center animate-in zoom-in-95">
-          <Trophy className="w-7 h-7 text-amber-500 mx-auto mb-1 animate-bounce" />
-          <span className="font-black text-sm text-slate-900 dark:text-white block">{winner}</span>
+        <div className="p-4 rounded-3xl bg-gradient-to-r from-amber-500/25 via-emerald-500/25 to-amber-500/25 border-2 border-amber-400/40 text-center animate-in zoom-in-95 shadow-xl">
+          <Trophy className="w-8 h-8 text-amber-400 mx-auto mb-1 animate-bounce" />
+          <span className="font-black text-base text-white block">{winner}</span>
         </div>
       )}
 
-      {/* AUTHENTIC 4-QUADRANT LUDO BOARD SVG & GRID */}
-      <div className="max-w-[380px] sm:max-w-[420px] mx-auto p-3.5 rounded-3xl bg-slate-950 border-4 border-amber-600/40 shadow-2xl relative select-none">
+      {/* AUTHENTIC 15×15 LUDO BOARD CANVAS */}
+      <div className="p-3 sm:p-4 rounded-3xl bg-slate-950 border-2 border-amber-500/40 shadow-2xl relative select-none">
         
-        {/* Ludo Board Framework */}
-        <div className="aspect-square w-full grid grid-cols-3 grid-rows-3 gap-1 rounded-2xl bg-slate-900 p-1 border border-slate-700/80">
-          
-          {/* Top-Left Quadrant: RED YARD (Chef Bot) */}
-          <div className="bg-rose-700 rounded-xl p-2.5 flex flex-col justify-between border-2 border-rose-800 shadow-inner">
-            <span className="text-[10px] font-black uppercase text-rose-200 tracking-wider">Chef Bot (Red)</span>
-            <div className="bg-white/90 dark:bg-slate-950/80 rounded-lg p-2 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center">
-              <div className={`w-6 h-6 rounded-full border-2 border-rose-900 flex items-center justify-center text-[10px] font-black ${botTokens[0] === -1 ? 'bg-rose-600 text-white animate-pulse' : 'bg-slate-300 opacity-40'}`}>
-                {botTokens[0] === -1 ? 'B1' : '✓'}
+        <div 
+          className="aspect-square w-full rounded-2xl bg-slate-900 border border-white/10 p-1 shadow-inner relative overflow-hidden"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(15, minmax(0, 1fr))',
+            gridTemplateRows: 'repeat(15, minmax(0, 1fr))',
+            gap: '1px'
+          }}
+        >
+          {/* 1. TOP-LEFT YARD: RED (Chef Bot) */}
+          <div 
+            style={{ gridColumn: '1 / span 6', gridRow: '1 / span 6' }}
+            className="bg-gradient-to-br from-rose-700 to-rose-900 rounded-xl p-2.5 flex flex-col justify-between border border-rose-600/50 shadow-inner relative"
+          >
+            <span className="text-[10px] font-black uppercase text-rose-200 tracking-wider flex items-center gap-1">
+              <span>👨‍🍳 Chef Bot</span>
+            </span>
+
+            {/* Inner Yard Circle with 2 token pockets */}
+            <div className="bg-slate-950/80 rounded-xl p-2.5 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center border border-rose-500/30">
+              {/* Bot Token 1 Pocket */}
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 border-2 border-dashed border-rose-500/50 flex items-center justify-center relative">
+                {botTokens[0] === -1 ? (
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 text-white flex items-center justify-center text-[10px] font-black shadow-md border border-rose-300">
+                    B1
+                  </div>
+                ) : (
+                  <span className="text-[9px] text-slate-600 font-bold">B1</span>
+                )}
               </div>
-              <div className={`w-6 h-6 rounded-full border-2 border-rose-900 flex items-center justify-center text-[10px] font-black ${botTokens[1] === -1 ? 'bg-rose-600 text-white animate-pulse' : 'bg-slate-300 opacity-40'}`}>
-                {botTokens[1] === -1 ? 'B2' : '✓'}
+
+              {/* Bot Token 2 Pocket */}
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 border-2 border-dashed border-rose-500/50 flex items-center justify-center relative">
+                {botTokens[1] === -1 ? (
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 text-white flex items-center justify-center text-[10px] font-black shadow-md border border-rose-300">
+                    B2
+                  </div>
+                ) : (
+                  <span className="text-[9px] text-slate-600 font-bold">B2</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* 2. TOP-RIGHT YARD: GREEN (North Yard) */}
+          <div 
+            style={{ gridColumn: '10 / span 6', gridRow: '1 / span 6' }}
+            className="bg-gradient-to-br from-emerald-700 to-emerald-900 rounded-xl p-2.5 flex flex-col justify-between border border-emerald-600/50 shadow-inner relative"
+          >
+            <span className="text-[10px] font-black uppercase text-emerald-200 tracking-wider">Green Yard</span>
+            <div className="bg-slate-950/80 rounded-xl p-2.5 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center border border-emerald-500/30">
+              <div className="w-7 h-7 rounded-full bg-emerald-950/60 border border-emerald-500/40 flex items-center justify-center text-[9px] text-emerald-400 font-bold">G1</div>
+              <div className="w-7 h-7 rounded-full bg-emerald-950/60 border border-emerald-500/40 flex items-center justify-center text-[9px] text-emerald-400 font-bold">G2</div>
+            </div>
+          </div>
+
+          {/* 3. BOTTOM-LEFT YARD: BLUE (South Yard) */}
+          <div 
+            style={{ gridColumn: '1 / span 6', gridRow: '10 / span 6' }}
+            className="bg-gradient-to-br from-blue-700 to-blue-900 rounded-xl p-2.5 flex flex-col justify-between border border-blue-600/50 shadow-inner relative"
+          >
+            <span className="text-[10px] font-black uppercase text-blue-200 tracking-wider">Blue Yard</span>
+            <div className="bg-slate-950/80 rounded-xl p-2.5 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center border border-blue-500/30">
+              <div className="w-7 h-7 rounded-full bg-blue-950/60 border border-blue-500/40 flex items-center justify-center text-[9px] text-blue-400 font-bold">U1</div>
+              <div className="w-7 h-7 rounded-full bg-blue-950/60 border border-blue-500/40 flex items-center justify-center text-[9px] text-blue-400 font-bold">U2</div>
+            </div>
+          </div>
+
+          {/* 4. BOTTOM-RIGHT YARD: YELLOW (PLAYER GOLD COINS) */}
+          <div 
+            style={{ gridColumn: '10 / span 6', gridRow: '10 / span 6' }}
+            className="bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-600 rounded-xl p-2.5 flex flex-col justify-between border-2 border-amber-300 shadow-xl relative"
+          >
+            <span className="text-[10px] font-black uppercase text-slate-950 tracking-wider flex items-center justify-between">
+              <span>👑 You (Gold)</span>
+              <span className="text-[9px] font-mono bg-slate-950 text-amber-400 px-1.5 py-0.2 rounded-full">Base</span>
+            </span>
+
+            {/* Inner Yard Circle with 2 interactive player token pockets */}
+            <div className="bg-slate-950/90 rounded-xl p-2.5 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center border border-amber-400/40 shadow-inner">
+              {/* Player Token 1 in Base */}
+              <div 
+                onClick={() => canPlayerMoveToken(0) && handlePlayerMove(0)}
+                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 border-2 border-dashed border-amber-400/50 flex items-center justify-center relative transition-all ${
+                  canPlayerMoveToken(0) ? 'ring-4 ring-amber-400 animate-bounce cursor-pointer' : ''
+                }`}
+                title="Gold Coin P1"
+              >
+                {playerTokens[0] === -1 ? (
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 text-slate-950 flex items-center justify-center text-[10px] font-black shadow-md border border-white">
+                    P1
+                  </div>
+                ) : (
+                  <span className="text-[9px] text-slate-600 font-bold">P1</span>
+                )}
+              </div>
+
+              {/* Player Token 2 in Base */}
+              <div 
+                onClick={() => canPlayerMoveToken(1) && handlePlayerMove(1)}
+                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-slate-900 border-2 border-dashed border-amber-400/50 flex items-center justify-center relative transition-all ${
+                  canPlayerMoveToken(1) ? 'ring-4 ring-amber-400 animate-bounce cursor-pointer' : ''
+                }`}
+                title="Gold Coin P2"
+              >
+                {playerTokens[1] === -1 ? (
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 text-slate-950 flex items-center justify-center text-[10px] font-black shadow-md border border-white">
+                    P2
+                  </div>
+                ) : (
+                  <span className="text-[9px] text-slate-600 font-bold">P2</span>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Top-Center: NORTH TRACK (Green Home Runway) */}
-          <div className="bg-slate-800 rounded-xl grid grid-cols-3 grid-rows-6 gap-0.5 p-1 border border-slate-700 text-[8px] text-slate-400 font-bold">
-            {Array.from({ length: 18 }).map((_, i) => (
-              <div 
-                key={i} 
-                className={`flex items-center justify-center rounded-xs ${
-                  i % 3 === 1 ? 'bg-emerald-600/70 text-white' : i === 7 ? 'bg-emerald-500 text-black font-black' : 'bg-slate-850'
-                }`}
-              >
-                {i === 7 ? '★' : ''}
-              </div>
-            ))}
-          </div>
-
-          {/* Top-Right Quadrant: GREEN YARD */}
-          <div className="bg-emerald-700 rounded-xl p-2.5 flex flex-col justify-between border-2 border-emerald-800 shadow-inner">
-            <span className="text-[10px] font-black uppercase text-emerald-200 tracking-wider">North Yard</span>
-            <div className="bg-white/90 dark:bg-slate-950/80 rounded-lg p-2 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center">
-              <div className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[9px] font-bold">G1</div>
-              <div className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[9px] font-bold">G2</div>
+          {/* 5. CENTER: LUDO TRIANGULAR HOME */}
+          <div 
+            style={{ gridColumn: '7 / span 3', gridRow: '7 / span 3' }}
+            className="bg-gradient-to-tr from-amber-500 via-rose-600 to-emerald-600 rounded-xl border-2 border-white flex flex-col items-center justify-center text-white text-center p-1 relative shadow-lg"
+          >
+            <Trophy className="w-5 h-5 text-amber-300 drop-shadow-md animate-pulse" />
+            <span className="text-[8px] font-black tracking-widest uppercase">HOME</span>
+            
+            {/* Finished Tokens inside Home */}
+            <div className="flex gap-1 mt-0.5">
+              {playerTokens[0] === 56 && <span className="w-2.5 h-2.5 rounded-full bg-amber-400 border border-white" title="P1 Home" />}
+              {playerTokens[1] === 56 && <span className="w-2.5 h-2.5 rounded-full bg-amber-400 border border-white" title="P2 Home" />}
+              {botTokens[0] === 56 && <span className="w-2.5 h-2.5 rounded-full bg-rose-500 border border-white" title="B1 Home" />}
+              {botTokens[1] === 56 && <span className="w-2.5 h-2.5 rounded-full bg-rose-500 border border-white" title="B2 Home" />}
             </div>
           </div>
 
-          {/* Center-Left: WEST TRACK (Red Home Runway) */}
-          <div className="bg-slate-800 rounded-xl grid grid-cols-6 grid-rows-3 gap-0.5 p-1 border border-slate-700 text-[8px] text-slate-400 font-bold">
-            {Array.from({ length: 18 }).map((_, i) => (
-              <div 
-                key={i} 
-                className={`flex items-center justify-center rounded-xs ${
-                  Math.floor(i / 6) === 1 ? 'bg-rose-600/70 text-white' : i === 1 ? 'bg-rose-500 text-black font-black' : 'bg-slate-850'
+          {/* 6. ALL 52 TRACK SQUARES & RUNWAYS RENDERING */}
+          {LUDO_TRACK_COORDS.map(([r, c], trackIdx) => {
+            const isSafe = SAFE_CELL_INDICES.has(trackIdx);
+            const isRedStart = trackIdx === 0;
+            const isYellowStart = trackIdx === 26;
+
+            // Check if P1, P2, B1, B2 are at this track square
+            const hasP1 = p1Pos && p1Pos[0] === r && p1Pos[1] === c && playerTokens[0] < 56;
+            const hasP2 = p2Pos && p2Pos[0] === r && p2Pos[1] === c && playerTokens[1] < 56;
+            const hasB1 = b1Pos && b1Pos[0] === r && b1Pos[1] === c && botTokens[0] < 56;
+            const hasB2 = b2Pos && b2Pos[0] === r && b2Pos[1] === c && botTokens[1] < 56;
+
+            const canP1MoveHere = hasP1 && canPlayerMoveToken(0);
+            const canP2MoveHere = hasP2 && canPlayerMoveToken(1);
+
+            return (
+              <div
+                key={`track-${trackIdx}`}
+                style={{ gridColumn: c + 1, gridRow: r + 1 }}
+                onClick={() => {
+                  if (canP1MoveHere) handlePlayerMove(0);
+                  else if (canP2MoveHere) handlePlayerMove(1);
+                }}
+                className={`relative flex items-center justify-center rounded-xs transition-colors text-[8px] font-bold ${
+                  isRedStart
+                    ? 'bg-rose-600 text-white'
+                    : isYellowStart
+                    ? 'bg-amber-500 text-slate-950 font-black'
+                    : isSafe
+                    ? 'bg-slate-700 text-amber-400 font-black'
+                    : 'bg-slate-800/80 hover:bg-slate-750'
                 }`}
               >
-                {i === 1 ? '★' : ''}
+                {/* Safe Star Icon */}
+                {isSafe && !hasP1 && !hasP2 && !hasB1 && !hasB2 && (
+                  <span className="text-[9px]">★</span>
+                )}
+
+                {/* VISIBLE INTERACTIVE COINS ON BOARD CELLS */}
+                {hasP1 && (
+                  <div 
+                    className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 text-slate-950 border border-white flex items-center justify-center font-black text-[8px] shadow-lg ${
+                      canP1MoveHere ? 'ring-2 ring-white animate-bounce cursor-pointer scale-110' : ''
+                    }`}
+                    title="P1 - Tap to Move"
+                  >
+                    P1
+                  </div>
+                )}
+
+                {hasP2 && (
+                  <div 
+                    className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 text-slate-950 border border-white flex items-center justify-center font-black text-[8px] shadow-lg ${
+                      canP2MoveHere ? 'ring-2 ring-white animate-bounce cursor-pointer scale-110' : ''
+                    }`}
+                    title="P2 - Tap to Move"
+                  >
+                    P2
+                  </div>
+                )}
+
+                {hasB1 && (
+                  <div 
+                    className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 text-white border border-white flex items-center justify-center font-black text-[8px] shadow-lg"
+                    title="Chef Bot B1"
+                  >
+                    B1
+                  </div>
+                )}
+
+                {hasB2 && (
+                  <div 
+                    className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 text-white border border-white flex items-center justify-center font-black text-[8px] shadow-lg"
+                    title="Chef Bot B2"
+                  >
+                    B2
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
+            );
+          })}
 
-          {/* CENTER: LUDO TRIANGULAR HOME */}
-          <div className="bg-gradient-to-tr from-amber-500 via-rose-600 to-blue-600 rounded-xl border-2 border-white flex flex-col items-center justify-center text-white text-center p-1 relative shadow-lg">
-            <span className="text-xl">🏆</span>
-            <span className="text-[9px] font-black tracking-widest uppercase">HOME</span>
-          </div>
+          {/* 7. YELLOW HOME RUNWAY CELLS */}
+          {YELLOW_HOME_RUNWAY.map(([r, c], i) => {
+            const hasP1 = p1Pos && p1Pos[0] === r && p1Pos[1] === c;
+            const hasP2 = p2Pos && p2Pos[0] === r && p2Pos[1] === c;
+            const canP1 = hasP1 && canPlayerMoveToken(0);
+            const canP2 = hasP2 && canPlayerMoveToken(1);
 
-          {/* Center-Right: EAST TRACK (Blue Home Runway) */}
-          <div className="bg-slate-800 rounded-xl grid grid-cols-6 grid-rows-3 gap-0.5 p-1 border border-slate-700 text-[8px] text-slate-400 font-bold">
-            {Array.from({ length: 18 }).map((_, i) => (
-              <div 
-                key={i} 
-                className={`flex items-center justify-center rounded-xs ${
-                  Math.floor(i / 6) === 1 ? 'bg-blue-600/70 text-white' : i === 16 ? 'bg-blue-500 text-black font-black' : 'bg-slate-850'
-                }`}
+            return (
+              <div
+                key={`yellow-runway-${i}`}
+                style={{ gridColumn: c + 1, gridRow: r + 1 }}
+                onClick={() => {
+                  if (canP1) handlePlayerMove(0);
+                  else if (canP2) handlePlayerMove(1);
+                }}
+                className="bg-amber-400/90 text-slate-950 flex items-center justify-center rounded-xs font-black text-[8px]"
               >
-                {i === 16 ? '★' : ''}
+                {hasP1 && (
+                  <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white text-slate-950 border border-amber-600 flex items-center justify-center font-black text-[8px] ${canP1 ? 'animate-bounce ring-2 ring-slate-950 cursor-pointer' : ''}`}>
+                    P1
+                  </div>
+                )}
+                {hasP2 && (
+                  <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white text-slate-950 border border-amber-600 flex items-center justify-center font-black text-[8px] ${canP2 ? 'animate-bounce ring-2 ring-slate-950 cursor-pointer' : ''}`}>
+                    P2
+                  </div>
+                )}
+                {!hasP1 && !hasP2 && <span className="opacity-60">▶</span>}
               </div>
-            ))}
-          </div>
+            );
+          })}
 
-          {/* Bottom-Left Quadrant: BLUE YARD */}
-          <div className="bg-blue-700 rounded-xl p-2.5 flex flex-col justify-between border-2 border-blue-800 shadow-inner">
-            <span className="text-[10px] font-black uppercase text-blue-200 tracking-wider">South Yard</span>
-            <div className="bg-white/90 dark:bg-slate-950/80 rounded-lg p-2 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center">
-              <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[9px] font-bold">U1</div>
-              <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-[9px] font-bold">U2</div>
-            </div>
-          </div>
+          {/* 8. RED HOME RUNWAY CELLS */}
+          {RED_HOME_RUNWAY.map(([r, c], i) => {
+            const hasB1 = b1Pos && b1Pos[0] === r && b1Pos[1] === c;
+            const hasB2 = b2Pos && b2Pos[0] === r && b2Pos[1] === c;
 
-          {/* Bottom-Center: SOUTH TRACK (Yellow Home Runway) */}
-          <div className="bg-slate-800 rounded-xl grid grid-cols-3 grid-rows-6 gap-0.5 p-1 border border-slate-700 text-[8px] text-slate-400 font-bold">
-            {Array.from({ length: 18 }).map((_, i) => (
-              <div 
-                key={i} 
-                className={`flex items-center justify-center rounded-xs ${
-                  i % 3 === 1 ? 'bg-amber-500/80 text-black font-black' : i === 10 ? 'bg-amber-400 text-black font-black' : 'bg-slate-850'
-                }`}
+            return (
+              <div
+                key={`red-runway-${i}`}
+                style={{ gridColumn: c + 1, gridRow: r + 1 }}
+                className="bg-rose-600/90 text-white flex items-center justify-center rounded-xs font-bold text-[8px]"
               >
-                {i === 10 ? '★' : ''}
+                {hasB1 && (
+                  <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white text-rose-700 border border-rose-900 flex items-center justify-center font-black text-[8px]">
+                    B1
+                  </div>
+                )}
+                {hasB2 && (
+                  <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white text-rose-700 border border-rose-900 flex items-center justify-center font-black text-[8px]">
+                    B2
+                  </div>
+                )}
+                {!hasB1 && !hasB2 && <span className="opacity-60">▶</span>}
               </div>
-            ))}
-          </div>
-
-          {/* Bottom-Right Quadrant: YELLOW YARD (PLAYER) */}
-          <div className="bg-amber-500 rounded-xl p-2.5 flex flex-col justify-between border-2 border-amber-600 shadow-inner">
-            <span className="text-[10px] font-black uppercase text-slate-950 tracking-wider">You (Gold Token)</span>
-            <div className="bg-white/90 dark:bg-slate-950/80 rounded-lg p-2 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center">
-              <div className={`w-6 h-6 rounded-full border-2 border-amber-600 flex items-center justify-center text-[10px] font-black ${playerTokens[0] === -1 ? 'bg-amber-500 text-slate-950 animate-bounce' : 'bg-slate-300 opacity-40'}`}>
-                {playerTokens[0] === -1 ? 'P1' : '✓'}
-              </div>
-              <div className={`w-6 h-6 rounded-full border-2 border-amber-600 flex items-center justify-center text-[10px] font-black ${playerTokens[1] === -1 ? 'bg-amber-500 text-slate-950 animate-bounce' : 'bg-slate-300 opacity-40'}`}>
-                {playerTokens[1] === -1 ? 'P2' : '✓'}
-              </div>
-            </div>
-          </div>
+            );
+          })}
 
         </div>
 
-        {/* Live Token Status Pills */}
-        <div className="flex items-center justify-between text-xs font-bold pt-3 px-1">
+        {/* STATUS FOOTER BAR */}
+        <div className="flex items-center justify-between text-xs font-bold pt-3 px-1 border-t border-white/[0.08] mt-3">
           <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-amber-500 inline-block" />
-            <span className="text-amber-400 text-[11px]">
-              You: T1 ({playerTokens[0] === -1 ? 'Base' : `${playerTokens[0]}/${MAX_TRACK}`}) • T2 ({playerTokens[1] === -1 ? 'Base' : `${playerTokens[1]}/${MAX_TRACK}`})
+            <span className="w-3 h-3 rounded-full bg-amber-400 inline-block shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+            <span className="text-amber-300 text-[11px]">
+              You: P1 ({playerTokens[0] === -1 ? 'Base' : playerTokens[0] === 56 ? '🏆 Home' : `Step ${playerTokens[0]}`}) • P2 ({playerTokens[1] === -1 ? 'Base' : playerTokens[1] === 56 ? '🏆 Home' : `Step ${playerTokens[1]}`})
             </span>
           </div>
+
           <div className="flex items-center gap-2">
             <span className="w-3 h-3 rounded-full bg-rose-500 inline-block" />
             <span className="text-rose-400 text-[11px]">
-              Chef: T1 ({botTokens[0] === -1 ? 'Base' : `${botTokens[0]}/${MAX_TRACK}`}) • T2 ({botTokens[1] === -1 ? 'Base' : `${botTokens[1]}/${MAX_TRACK}`})
+              Chef: B1 ({botTokens[0] === -1 ? 'Base' : botTokens[0] === 56 ? '🏆 Home' : `Step ${botTokens[0]}`}) • B2 ({botTokens[1] === -1 ? 'Base' : botTokens[1] === 56 ? '🏆 Home' : `Step ${botTokens[1]}`})
             </span>
           </div>
         </div>
+
       </div>
 
-      {/* Interactive Roll Action Bar */}
-      <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className={`w-14 h-14 rounded-2xl bg-white dark:bg-slate-800 border-2 border-amber-500 flex items-center justify-center font-black text-3xl shadow-lg transition-transform ${isRolling ? 'rotate-180 scale-110' : ''}`}>
+      {/* DICES & ACTION CONTROLS */}
+      <div className="p-4 rounded-3xl bg-slate-900/90 border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+        <div className="flex items-center gap-4 w-full sm:w-auto">
+          {/* Animated 3D Die */}
+          <div className={`w-14 h-14 rounded-2xl bg-gradient-to-tr from-slate-800 to-slate-900 border-2 border-amber-400 flex items-center justify-center font-black text-3xl shadow-lg transition-transform ${isRolling ? 'rotate-180 scale-110' : ''}`}>
             {diceRoll !== null ? diceRoll : '🎲'}
           </div>
+
           <div>
-            <span className="text-[11px] font-bold text-slate-400 block">
-              Active Turn:
+            <span className="text-[11px] font-bold text-slate-400 block uppercase tracking-wider">
+              Turn Status
             </span>
-            <span className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+            <span className="text-xs font-black text-white flex items-center gap-1.5 mt-0.5">
               {turn === 'player' ? (
                 <>
-                  <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                  <span>Your Turn (Roll 6 to launch)</span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+                  <span className="text-amber-300">
+                    {waitingForMove ? 'Tap a glowing gold coin to advance!' : 'Your Turn (Roll 6 to launch from base)'}
+                  </span>
                 </>
               ) : (
                 <>
-                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-                  <span>Chef Bot Rolling...</span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
+                  <span className="text-rose-300">Chef Bot Playing...</span>
                 </>
               )}
             </span>
           </div>
         </div>
 
-        <button
-          onClick={rollDice}
-          disabled={turn !== 'player' || isRolling || !!winner}
-          className={`py-3 px-5 rounded-2xl font-black text-xs transition-all flex items-center gap-2 shadow-xl ${
-            turn === 'player' && !winner
-              ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-slate-950 active:scale-95 cursor-pointer shadow-amber-500/25 ring-2 ring-amber-400/40'
-              : 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
-          }`}
-        >
-          <Dices className="w-4 h-4" />
-          <span>{isRolling ? 'Rolling...' : 'Roll Dice 🎲'}</span>
-        </button>
+        {/* Buttons: Roll Dice or Quick Move Coins */}
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          {!waitingForMove ? (
+            <button
+              onClick={handleRollDice}
+              disabled={turn !== 'player' || isRolling || !!winner}
+              className={`w-full sm:w-auto py-3 px-6 rounded-2xl font-black text-xs transition-all flex items-center justify-center gap-2 shadow-xl ${
+                turn === 'player' && !winner
+                  ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 active:scale-95 cursor-pointer shadow-amber-500/25 ring-2 ring-amber-400/40'
+                  : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5'
+              }`}
+            >
+              <Dices className="w-4 h-4 text-slate-950" />
+              <span>{isRolling ? 'Rolling Dice...' : 'Roll Dice 🎲'}</span>
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              {canPlayerMoveToken(0) && (
+                <button
+                  onClick={() => handlePlayerMove(0)}
+                  className="flex-1 sm:flex-none py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-black text-xs shadow-md animate-bounce cursor-pointer active:scale-95"
+                >
+                  Move Gold P1 ➔
+                </button>
+              )}
+              {canPlayerMoveToken(1) && (
+                <button
+                  onClick={() => handlePlayerMove(1)}
+                  className="flex-1 sm:flex-none py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-black text-xs shadow-md animate-bounce cursor-pointer active:scale-95"
+                >
+                  Move Gold P2 ➔
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Mini Game Commentary */}
-      <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 text-[11px] font-mono text-slate-500 dark:text-slate-400 space-y-1">
+      {/* Mini Game Commentary Feed */}
+      <div className="p-3 rounded-2xl bg-slate-900 border border-white/10 text-[11px] font-mono text-slate-400 space-y-1 shadow-inner">
         {gameLog.map((log, i) => (
-          <div key={i} className={i === 0 ? 'text-amber-600 dark:text-amber-400 font-bold' : ''}>
+          <div key={i} className={i === 0 ? 'text-amber-400 font-bold' : ''}>
             {log}
           </div>
         ))}
@@ -389,6 +808,7 @@ const OriginalLudoGame: React.FC = () => {
     </div>
   );
 };
+
 
 // ============================================================================
 // 2. ORIGINAL SNAKES & LADDERS (AUTHENTIC 100-TILE BOARD / PARAMAPATHAM)
@@ -2136,30 +2556,18 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
                 </span>
               </div>
             </div>
-
-            {onFinishMeal && (
-              <button
-                onClick={() => {
-                  onClose();
-                  onFinishMeal();
-                }}
-                className="px-3.5 py-1.5 rounded-xl bg-white text-emerald-900 font-black text-xs hover:bg-emerald-50 active:scale-95 transition-all shrink-0 cursor-pointer shadow-xs"
-              >
-                Finish Meal & Feedback →
-              </button>
-            )}
           </div>
         )}
 
-        {/* Main Tab Switcher */}
-        <div className="p-2 sm:p-2.5 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 shrink-0">
-          <div className="flex items-center gap-1.5 w-full sm:w-auto">
+        {/* Main Tab Switcher: Luxury Glass Segmented Bar */}
+        <div className="p-3 bg-slate-900 border-b border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               onClick={() => setActiveTab('games')}
-              className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 sm:flex-none px-4 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 activeTab === 'games'
-                  ? 'bg-amber-500 text-slate-950 font-black shadow-md'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'
+                  ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 shadow-lg shadow-amber-500/25 scale-102 ring-1 ring-amber-400/50'
+                  : 'text-slate-400 hover:text-white hover:bg-white/[0.06] border border-transparent'
               }`}
             >
               <Gamepad2 className="w-4 h-4" />
@@ -2168,10 +2576,10 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
 
             <button
               onClick={() => setActiveTab('news')}
-              className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 sm:flex-none px-4 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 activeTab === 'news'
-                  ? 'bg-amber-500 text-slate-950 font-black shadow-md'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'
+                  ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 shadow-lg shadow-amber-500/25 scale-102 ring-1 ring-amber-400/50'
+                  : 'text-slate-400 hover:text-white hover:bg-white/[0.06] border border-transparent'
               }`}
             >
               <Newspaper className="w-4 h-4" />
@@ -2180,10 +2588,10 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
 
             <button
               onClick={() => setActiveTab('music')}
-              className={`flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`flex-1 sm:flex-none px-4 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 activeTab === 'music'
-                  ? 'bg-amber-500 text-slate-950 font-black shadow-md'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'
+                  ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 shadow-lg shadow-amber-500/25 scale-102 ring-1 ring-amber-400/50'
+                  : 'text-slate-400 hover:text-white hover:bg-white/[0.06] border border-transparent'
               }`}
             >
               <Music className="w-4 h-4" />
@@ -2193,30 +2601,36 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
 
           {/* Sub-selector for games */}
           {activeTab === 'games' && (
-            <div className="hidden sm:flex items-center gap-1 bg-slate-200 dark:bg-slate-800 p-1 rounded-xl">
+            <div className="hidden sm:flex items-center gap-1.5 bg-slate-950 p-1 rounded-2xl border border-white/10">
               <button
                 onClick={() => setActiveGame('ludo')}
-                className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                  activeGame === 'ludo' ? 'bg-white dark:bg-slate-900 text-amber-500 shadow-xs font-black' : 'text-slate-500'
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                  activeGame === 'ludo' 
+                    ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 shadow-md font-black' 
+                    : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                Ludo Board
+                🎲 Ludo Board
               </button>
               <button
                 onClick={() => setActiveGame('snakes')}
-                className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                  activeGame === 'snakes' ? 'bg-white dark:bg-slate-900 text-emerald-500 shadow-xs font-black' : 'text-slate-500'
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                  activeGame === 'snakes' 
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-md font-black' 
+                    : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                Snakes & Ladders
+                🐍 Snakes &amp; Ladders
               </button>
               <button
                 onClick={() => setActiveGame('sudoku')}
-                className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                  activeGame === 'sudoku' ? 'bg-white dark:bg-slate-900 text-blue-500 shadow-xs font-black' : 'text-slate-500'
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                  activeGame === 'sudoku' 
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md font-black' 
+                    : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                9×9 Sudoku
+                🧩 9×9 Sudoku
               </button>
             </div>
           )}
@@ -2224,30 +2638,30 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
 
         {/* Mobile Sub-selector pills for games */}
         {activeTab === 'games' && (
-          <div className="flex sm:hidden items-center justify-center gap-1 p-2 bg-slate-100 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800">
+          <div className="flex sm:hidden items-center justify-center gap-1.5 p-2 bg-slate-950 border-b border-white/[0.08]">
             <button
               onClick={() => setActiveGame('ludo')}
-              className={`flex-1 py-1 rounded-lg text-xs font-bold text-center ${
-                activeGame === 'ludo' ? 'bg-amber-500 text-slate-950 font-black' : 'text-slate-500'
+              className={`flex-1 py-1.5 rounded-xl text-xs font-bold text-center ${
+                activeGame === 'ludo' ? 'bg-amber-400 text-slate-950 font-black' : 'text-slate-400'
               }`}
             >
-              Ludo
+              🎲 Ludo
             </button>
             <button
               onClick={() => setActiveGame('snakes')}
-              className={`flex-1 py-1 rounded-lg text-xs font-bold text-center ${
-                activeGame === 'snakes' ? 'bg-amber-500 text-slate-950 font-black' : 'text-slate-500'
+              className={`flex-1 py-1.5 rounded-xl text-xs font-bold text-center ${
+                activeGame === 'snakes' ? 'bg-emerald-500 text-slate-950 font-black' : 'text-slate-400'
               }`}
             >
-              Snakes & Ladders
+              🐍 Snakes
             </button>
             <button
               onClick={() => setActiveGame('sudoku')}
-              className={`flex-1 py-1 rounded-lg text-xs font-bold text-center ${
-                activeGame === 'sudoku' ? 'bg-amber-500 text-slate-950 font-black' : 'text-slate-500'
+              className={`flex-1 py-1.5 rounded-xl text-xs font-bold text-center ${
+                activeGame === 'sudoku' ? 'bg-blue-500 text-white font-black' : 'text-slate-400'
               }`}
             >
-              Sudoku
+              🧩 Sudoku
             </button>
           </div>
         )}

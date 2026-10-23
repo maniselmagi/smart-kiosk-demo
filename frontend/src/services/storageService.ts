@@ -5,6 +5,12 @@ import {
   INITIAL_STAFF_ALERTS, 
   INITIAL_FEEDBACK 
 } from '../data/initialData';
+import { 
+  pushOrderToCloud, 
+  updateCloudOrderStatus, 
+  pushWaiterCallToCloud, 
+  pushFeedbackToCloud 
+} from './supabaseClient';
 
 export const STORAGE_KEYS = {
   MENU_ITEMS: 'royal_ember_menu_items_v9',
@@ -100,6 +106,8 @@ export const storageService = {
     } catch (e) {
       console.error(e);
     }
+    // Asynchronous Cloud Sync to Supabase PostgreSQL
+    pushOrderToCloud(order).catch((err) => console.warn('[Cloud Sync] Order push error:', err));
     return updated;
   },
 
@@ -113,12 +121,18 @@ export const storageService = {
 
   updateOrderStatus(orderId: string, status: Order['status']) {
     const orders = this.getOrders();
-    const updated = orders.map((o) => 
-      o.id === orderId 
-        ? { ...o, status, updatedAt: new Date().toISOString() } 
-        : o
-    );
+    let targetOrderNumber: number | null = null;
+    const updated = orders.map((o) => {
+      if (o.id === orderId) {
+        targetOrderNumber = o.orderNumber;
+        return { ...o, status, updatedAt: new Date().toISOString() };
+      }
+      return o;
+    });
     this.saveOrders(updated);
+    if (targetOrderNumber) {
+      updateCloudOrderStatus(targetOrderNumber, status).catch((err) => console.warn('[Cloud Sync] Status update error:', err));
+    }
     return updated;
   },
 
@@ -173,6 +187,8 @@ export const storageService = {
     const alerts = this.getStaffAlerts();
     const updated = [alert, ...alerts];
     this.saveStaffAlerts(updated);
+    // Cloud sync waiter request to Supabase
+    pushWaiterCallToCloud(alert.tableNumber, alert.type).catch((err) => console.warn('[Cloud Sync] Waiter call error:', err));
     return updated;
   },
 
@@ -207,6 +223,8 @@ export const storageService = {
     const current = this.getFeedback();
     const updated = [item, ...current];
     this.saveFeedback(updated);
+    // Cloud sync customer feedback to Supabase
+    pushFeedbackToCloud(item).catch((err) => console.warn('[Cloud Sync] Feedback error:', err));
     return updated;
   },
 

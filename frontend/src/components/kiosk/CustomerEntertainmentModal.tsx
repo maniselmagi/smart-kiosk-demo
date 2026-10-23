@@ -434,9 +434,9 @@ const OriginalLudoGame: React.FC = () => {
       {/* 2-COLUMN BALANCED RESPONSIVE LAYOUT */}
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5 sm:gap-4 items-start">
         
-        {/* LEFT COLUMN: PERFECTLY PROPORTIONED 15×15 LUDO BOARD */}
+        {/* LEFT COLUMN: PERFECTLY PROPORTIONED 15×15 LUDO BOARD WITH INCREASED BOARD HEIGHT */}
         <div className="sm:col-span-7 flex flex-col items-center">
-          <div className="w-full max-w-[390px] sm:max-w-[420px] md:max-w-[440px] p-2 sm:p-2.5 rounded-2xl bg-slate-950 border-2 border-amber-500/40 shadow-2xl relative select-none">
+          <div className="w-full max-w-[460px] sm:max-w-[490px] md:max-w-[520px] p-2.5 sm:p-3 rounded-2xl bg-slate-950 border-2 border-amber-500/40 shadow-2xl relative select-none">
             
             <div 
               className="aspect-square w-full rounded-xl bg-slate-900 border border-white/10 p-0.5 sm:p-1 shadow-inner relative overflow-hidden"
@@ -2819,7 +2819,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/90 backdrop-blur-md animate-in fade-in duration-200">
       <div 
-        className="w-full max-w-5xl lg:max-w-6xl h-[96vh] sm:h-[94vh] bg-slate-950 text-slate-100 rounded-3xl shadow-2xl border border-amber-500/25 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+        className="w-full max-w-5xl h-[92vh] sm:h-[90vh] bg-slate-950 text-slate-100 rounded-3xl shadow-2xl border border-amber-500/25 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         

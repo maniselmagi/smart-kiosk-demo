@@ -401,24 +401,24 @@ const OriginalLudoGame: React.FC = () => {
   const b2Pos = getBotTokenPos(botTokens[1]);
 
   return (
-    <div className="space-y-3 max-w-4xl mx-auto">
+    <div className="space-y-3.5 max-w-5xl mx-auto">
       {/* Top Header */}
-      <div className="flex items-center justify-between bg-slate-900/60 p-2.5 px-3.5 rounded-2xl border border-white/5">
+      <div className="flex items-center justify-between bg-slate-900/60 p-2.5 px-4 rounded-2xl border border-white/5">
         <div>
-          <h4 className="font-black text-xs sm:text-sm text-white flex items-center gap-2">
+          <h4 className="font-black text-xs sm:text-sm md:text-base text-white flex items-center gap-2">
             <span>🎲 Royal Ludo Master</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-extrabold border border-amber-400/30">
+            <span className="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-extrabold border border-amber-400/30">
               15×15 Board
             </span>
           </h4>
-          <p className="text-[11px] text-slate-400">
+          <p className="text-[11px] sm:text-xs text-slate-400">
             Roll 6 to leave base. Tap gleaming tokens or use the action buttons to advance!
           </p>
         </div>
 
         <button
           onClick={resetGame}
-          className="p-1.5 px-3 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-slate-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer border border-white/10 active:scale-95 transition-all"
+          className="p-2 px-3.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-slate-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer border border-white/10 active:scale-95 transition-all"
         >
           <RotateCcw className="w-3.5 h-3.5" />
           <span>New Game</span>
@@ -426,21 +426,21 @@ const OriginalLudoGame: React.FC = () => {
       </div>
 
       {winner && (
-        <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/25 via-emerald-500/25 to-amber-500/25 border-2 border-amber-400/60 text-center animate-in zoom-in-95 shadow-xl">
+        <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/25 via-emerald-500/25 to-amber-500/25 border-2 border-amber-400/60 text-center animate-in zoom-in-95 shadow-xl">
           <Trophy className="w-6 h-6 text-amber-400 mx-auto mb-1 animate-bounce" />
           <span className="font-black text-xs sm:text-sm text-white block">{winner}</span>
         </div>
       )}
 
-      {/* 2-COLUMN RESPONSIVE LAYOUT (Perfect for Tablet & Desktop >= 640px) */}
-      <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-start">
+      {/* 2-COLUMN RESPONSIVE LAYOUT (Prominent, High-Visibility Ludo Board) */}
+      <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
         
-        {/* LEFT COLUMN: 15×15 LUDO BOARD (Constrained width so it fits in Tablet Viewport!) */}
+        {/* LEFT COLUMN: TALL & SPACIOUS 15×15 LUDO BOARD */}
         <div className="sm:col-span-7 flex flex-col items-center">
-          <div className="w-full max-w-[320px] sm:max-w-[340px] p-2 rounded-2xl bg-slate-950 border-2 border-amber-500/40 shadow-2xl relative select-none">
+          <div className="w-full max-w-[430px] sm:max-w-[460px] md:max-w-[490px] lg:max-w-[515px] p-2 sm:p-2.5 rounded-2xl bg-slate-950 border-2 border-amber-500/40 shadow-2xl relative select-none">
             
             <div 
-              className="aspect-square w-full rounded-xl bg-slate-900 border border-white/10 p-0.5 shadow-inner relative overflow-hidden"
+              className="aspect-square w-full rounded-xl bg-slate-900 border border-white/10 p-0.5 sm:p-1 shadow-inner relative overflow-hidden"
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(15, minmax(0, 1fr))',
@@ -451,31 +451,31 @@ const OriginalLudoGame: React.FC = () => {
               {/* 1. TOP-LEFT YARD: RED (Chef Bot) */}
               <div 
                 style={{ gridColumn: '1 / span 6', gridRow: '1 / span 6' }}
-                className="bg-gradient-to-br from-rose-700 to-rose-900 rounded-lg p-2 flex flex-col justify-between border border-rose-600/50 shadow-inner relative"
+                className="bg-gradient-to-br from-rose-700 to-rose-900 rounded-lg p-2 sm:p-2.5 flex flex-col justify-between border border-rose-600/50 shadow-inner relative"
               >
-                <span className="text-[9px] font-black uppercase text-rose-200 tracking-wider flex items-center gap-1">
+                <span className="text-[10px] sm:text-xs font-black uppercase text-rose-200 tracking-wider flex items-center gap-1">
                   <span>👨‍🍳 Chef Bot</span>
                 </span>
 
                 {/* Inner Yard Circle with 2 token pockets */}
-                <div className="bg-slate-950/80 rounded-lg p-2 grid grid-cols-2 gap-1.5 aspect-square items-center justify-items-center border border-rose-500/30">
-                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-900 border border-dashed border-rose-500/50 flex items-center justify-center relative">
+                <div className="bg-slate-950/80 rounded-lg p-2.5 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center border border-rose-500/30">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-900 border border-dashed border-rose-500/50 flex items-center justify-center relative">
                     {botTokens[0] === -1 ? (
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 text-white flex items-center justify-center text-[9px] font-black shadow-md border border-rose-300">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 text-white flex items-center justify-center text-[10px] sm:text-xs font-black shadow-md border border-rose-300">
                         B1
                       </div>
                     ) : (
-                      <span className="text-[8px] text-slate-600 font-bold">B1</span>
+                      <span className="text-[9px] text-slate-600 font-bold">B1</span>
                     )}
                   </div>
 
-                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-900 border border-dashed border-rose-500/50 flex items-center justify-center relative">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-900 border border-dashed border-rose-500/50 flex items-center justify-center relative">
                     {botTokens[1] === -1 ? (
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 text-white flex items-center justify-center text-[9px] font-black shadow-md border border-rose-300">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 text-white flex items-center justify-center text-[10px] sm:text-xs font-black shadow-md border border-rose-300">
                         B2
                       </div>
                     ) : (
-                      <span className="text-[8px] text-slate-600 font-bold">B2</span>
+                      <span className="text-[9px] text-slate-600 font-bold">B2</span>
                     )}
                   </div>
                 </div>
@@ -484,70 +484,70 @@ const OriginalLudoGame: React.FC = () => {
               {/* 2. TOP-RIGHT YARD: GREEN */}
               <div 
                 style={{ gridColumn: '10 / span 6', gridRow: '1 / span 6' }}
-                className="bg-gradient-to-br from-emerald-700 to-emerald-900 rounded-lg p-2 flex flex-col justify-between border border-emerald-600/50 shadow-inner relative"
+                className="bg-gradient-to-br from-emerald-700 to-emerald-900 rounded-lg p-2 sm:p-2.5 flex flex-col justify-between border border-emerald-600/50 shadow-inner relative"
               >
-                <span className="text-[9px] font-black uppercase text-emerald-200 tracking-wider">Green Yard</span>
-                <div className="bg-slate-950/80 rounded-lg p-2 grid grid-cols-2 gap-1.5 aspect-square items-center justify-items-center border border-emerald-500/30">
-                  <div className="w-6 h-6 rounded-full bg-emerald-950/60 border border-emerald-500/40 flex items-center justify-center text-[8px] text-emerald-400 font-bold">G1</div>
-                  <div className="w-6 h-6 rounded-full bg-emerald-950/60 border border-emerald-500/40 flex items-center justify-center text-[8px] text-emerald-400 font-bold">G2</div>
+                <span className="text-[10px] sm:text-xs font-black uppercase text-emerald-200 tracking-wider">Green Yard</span>
+                <div className="bg-slate-950/80 rounded-lg p-2.5 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center border border-emerald-500/30">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-emerald-950/60 border border-emerald-500/40 flex items-center justify-center text-[9px] sm:text-[10px] text-emerald-400 font-bold">G1</div>
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-emerald-950/60 border border-emerald-500/40 flex items-center justify-center text-[9px] sm:text-[10px] text-emerald-400 font-bold">G2</div>
                 </div>
               </div>
 
               {/* 3. BOTTOM-LEFT YARD: BLUE */}
               <div 
                 style={{ gridColumn: '1 / span 6', gridRow: '10 / span 6' }}
-                className="bg-gradient-to-br from-blue-700 to-blue-900 rounded-lg p-2 flex flex-col justify-between border border-blue-600/50 shadow-inner relative"
+                className="bg-gradient-to-br from-blue-700 to-blue-900 rounded-lg p-2 sm:p-2.5 flex flex-col justify-between border border-blue-600/50 shadow-inner relative"
               >
-                <span className="text-[9px] font-black uppercase text-blue-200 tracking-wider">Blue Yard</span>
-                <div className="bg-slate-950/80 rounded-lg p-2 grid grid-cols-2 gap-1.5 aspect-square items-center justify-items-center border border-blue-500/30">
-                  <div className="w-6 h-6 rounded-full bg-blue-950/60 border border-blue-500/40 flex items-center justify-center text-[8px] text-blue-400 font-bold">U1</div>
-                  <div className="w-6 h-6 rounded-full bg-blue-950/60 border border-blue-500/40 flex items-center justify-center text-[8px] text-blue-400 font-bold">U2</div>
+                <span className="text-[10px] sm:text-xs font-black uppercase text-blue-200 tracking-wider">Blue Yard</span>
+                <div className="bg-slate-950/80 rounded-lg p-2.5 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center border border-blue-500/30">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-blue-950/60 border border-blue-500/40 flex items-center justify-center text-[9px] sm:text-[10px] text-blue-400 font-bold">U1</div>
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-blue-950/60 border border-blue-500/40 flex items-center justify-center text-[9px] sm:text-[10px] text-blue-400 font-bold">U2</div>
                 </div>
               </div>
 
               {/* 4. BOTTOM-RIGHT YARD: YELLOW (PLAYER GOLD COINS) */}
               <div 
                 style={{ gridColumn: '10 / span 6', gridRow: '10 / span 6' }}
-                className="bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-600 rounded-lg p-2 flex flex-col justify-between border-2 border-amber-300 shadow-xl relative"
+                className="bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-600 rounded-lg p-2 sm:p-2.5 flex flex-col justify-between border-2 border-amber-300 shadow-xl relative"
               >
-                <span className="text-[9px] font-black uppercase text-slate-950 tracking-wider flex items-center justify-between">
+                <span className="text-[10px] sm:text-xs font-black uppercase text-slate-950 tracking-wider flex items-center justify-between">
                   <span>👑 You (Gold)</span>
-                  <span className="text-[8px] font-mono bg-slate-950 text-amber-400 px-1 rounded-full">Base</span>
+                  <span className="text-[9px] font-mono bg-slate-950 text-amber-400 px-1.5 py-0.5 rounded-full">Base</span>
                 </span>
 
                 {/* Inner Yard with interactive player tokens */}
-                <div className="bg-slate-950/90 rounded-lg p-2 grid grid-cols-2 gap-1.5 aspect-square items-center justify-items-center border border-amber-400/40 shadow-inner">
+                <div className="bg-slate-950/90 rounded-lg p-2.5 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center border border-amber-400/40 shadow-inner">
                   {/* Player Token 1 */}
                   <div 
                     onClick={() => canPlayerMoveToken(0) && handlePlayerMove(0)}
-                    className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-900 border border-dashed border-amber-400/50 flex items-center justify-center relative transition-all ${
+                    className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-900 border border-dashed border-amber-400/50 flex items-center justify-center relative transition-all ${
                       canPlayerMoveToken(0) ? 'ring-2 ring-amber-400 animate-bounce cursor-pointer' : ''
                     }`}
                     title="Gold Coin P1"
                   >
                     {playerTokens[0] === -1 ? (
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 text-slate-950 flex items-center justify-center text-[9px] font-black shadow-md border border-white">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 text-slate-950 flex items-center justify-center text-[10px] sm:text-xs font-black shadow-md border border-white">
                         P1
                       </div>
                     ) : (
-                      <span className="text-[8px] text-slate-600 font-bold">P1</span>
+                      <span className="text-[9px] text-slate-600 font-bold">P1</span>
                     )}
                   </div>
 
                   {/* Player Token 2 */}
                   <div 
                     onClick={() => canPlayerMoveToken(1) && handlePlayerMove(1)}
-                    className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-slate-900 border border-dashed border-amber-400/50 flex items-center justify-center relative transition-all ${
+                    className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-900 border border-dashed border-amber-400/50 flex items-center justify-center relative transition-all ${
                       canPlayerMoveToken(1) ? 'ring-2 ring-amber-400 animate-bounce cursor-pointer' : ''
                     }`}
                     title="Gold Coin P2"
                   >
                     {playerTokens[1] === -1 ? (
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 text-slate-950 flex items-center justify-center text-[9px] font-black shadow-md border border-white">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 text-slate-950 flex items-center justify-center text-[10px] sm:text-xs font-black shadow-md border border-white">
                         P2
                       </div>
                     ) : (
-                      <span className="text-[8px] text-slate-600 font-bold">P2</span>
+                      <span className="text-[9px] text-slate-600 font-bold">P2</span>
                     )}
                   </div>
                 </div>
@@ -556,16 +556,16 @@ const OriginalLudoGame: React.FC = () => {
               {/* 5. CENTER: LUDO TRIANGULAR HOME */}
               <div 
                 style={{ gridColumn: '7 / span 3', gridRow: '7 / span 3' }}
-                className="bg-gradient-to-tr from-amber-500 via-rose-600 to-emerald-600 rounded-lg border border-white flex flex-col items-center justify-center text-white text-center p-0.5 relative shadow-lg"
+                className="bg-gradient-to-tr from-amber-500 via-rose-600 to-emerald-600 rounded-lg border border-white flex flex-col items-center justify-center text-white text-center p-1 relative shadow-lg"
               >
-                <Trophy className="w-4 h-4 text-amber-300 drop-shadow-md animate-pulse" />
-                <span className="text-[7px] font-black tracking-widest uppercase">HOME</span>
+                <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-amber-300 drop-shadow-md animate-pulse" />
+                <span className="text-[8px] sm:text-[9px] font-black tracking-widest uppercase">HOME</span>
                 
-                <div className="flex gap-0.5 mt-0.5">
-                  {playerTokens[0] === 56 && <span className="w-2 h-2 rounded-full bg-amber-400 border border-white" title="P1 Home" />}
-                  {playerTokens[1] === 56 && <span className="w-2 h-2 rounded-full bg-amber-400 border border-white" title="P2 Home" />}
-                  {botTokens[0] === 56 && <span className="w-2 h-2 rounded-full bg-rose-500 border border-white" title="B1 Home" />}
-                  {botTokens[1] === 56 && <span className="w-2 h-2 rounded-full bg-rose-500 border border-white" title="B2 Home" />}
+                <div className="flex gap-1 mt-1">
+                  {playerTokens[0] === 56 && <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-amber-400 border border-white shadow-sm" title="P1 Home" />}
+                  {playerTokens[1] === 56 && <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-amber-400 border border-white shadow-sm" title="P2 Home" />}
+                  {botTokens[0] === 56 && <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-rose-500 border border-white shadow-sm" title="B1 Home" />}
+                  {botTokens[1] === 56 && <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-rose-500 border border-white shadow-sm" title="B2 Home" />}
                 </div>
               </div>
 
@@ -591,7 +591,7 @@ const OriginalLudoGame: React.FC = () => {
                       if (canP1MoveHere) handlePlayerMove(0);
                       else if (canP2MoveHere) handlePlayerMove(1);
                     }}
-                    className={`relative flex items-center justify-center rounded-xs transition-colors text-[7px] font-bold ${
+                    className={`relative flex items-center justify-center rounded-xs transition-colors text-[8px] sm:text-[9px] font-bold ${
                       isRedStart
                         ? 'bg-rose-600 text-white'
                         : isYellowStart
@@ -602,12 +602,12 @@ const OriginalLudoGame: React.FC = () => {
                     }`}
                   >
                     {isSafe && !hasP1 && !hasP2 && !hasB1 && !hasB2 && (
-                      <span className="text-[8px]">★</span>
+                      <span className="text-[10px] sm:text-xs">★</span>
                     )}
 
                     {hasP1 && (
                       <div 
-                        className={`w-4 h-4 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 text-slate-950 border border-white flex items-center justify-center font-black text-[7px] shadow-lg ${
+                        className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 text-slate-950 border border-white flex items-center justify-center font-black text-[8px] sm:text-[9px] shadow-lg ${
                           canP1MoveHere ? 'ring-2 ring-white animate-bounce cursor-pointer scale-110' : ''
                         }`}
                         title="P1 - Tap to Move"
@@ -618,7 +618,7 @@ const OriginalLudoGame: React.FC = () => {
 
                     {hasP2 && (
                       <div 
-                        className={`w-4 h-4 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 text-slate-950 border border-white flex items-center justify-center font-black text-[7px] shadow-lg ${
+                        className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-500 text-slate-950 border border-white flex items-center justify-center font-black text-[8px] sm:text-[9px] shadow-lg ${
                           canP2MoveHere ? 'ring-2 ring-white animate-bounce cursor-pointer scale-110' : ''
                         }`}
                         title="P2 - Tap to Move"
@@ -629,7 +629,7 @@ const OriginalLudoGame: React.FC = () => {
 
                     {hasB1 && (
                       <div 
-                        className="w-4 h-4 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 text-white border border-white flex items-center justify-center font-black text-[7px] shadow-lg"
+                        className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 text-white border border-white flex items-center justify-center font-black text-[8px] sm:text-[9px] shadow-lg"
                         title="Chef Bot B1"
                       >
                         B1
@@ -638,7 +638,7 @@ const OriginalLudoGame: React.FC = () => {
 
                     {hasB2 && (
                       <div 
-                        className="w-4 h-4 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 text-white border border-white flex items-center justify-center font-black text-[7px] shadow-lg"
+                        className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gradient-to-tr from-rose-600 to-rose-400 text-white border border-white flex items-center justify-center font-black text-[8px] sm:text-[9px] shadow-lg"
                         title="Chef Bot B2"
                       >
                         B2
@@ -663,19 +663,19 @@ const OriginalLudoGame: React.FC = () => {
                       if (canP1) handlePlayerMove(0);
                       else if (canP2) handlePlayerMove(1);
                     }}
-                    className="bg-amber-400/90 text-slate-950 flex items-center justify-center rounded-xs font-black text-[7px]"
+                    className="bg-amber-400/90 text-slate-950 flex items-center justify-center rounded-xs font-black text-[8px] sm:text-[9px]"
                   >
                     {hasP1 && (
-                      <div className={`w-4 h-4 rounded-full bg-white text-slate-950 border border-amber-600 flex items-center justify-center font-black text-[7px] ${canP1 ? 'animate-bounce ring-1 ring-slate-950 cursor-pointer' : ''}`}>
+                      <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white text-slate-950 border border-amber-600 flex items-center justify-center font-black text-[8px] sm:text-[9px] ${canP1 ? 'animate-bounce ring-1 ring-slate-950 cursor-pointer' : ''}`}>
                         P1
                       </div>
                     )}
                     {hasP2 && (
-                      <div className={`w-4 h-4 rounded-full bg-white text-slate-950 border border-amber-600 flex items-center justify-center font-black text-[7px] ${canP2 ? 'animate-bounce ring-1 ring-slate-950 cursor-pointer' : ''}`}>
+                      <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white text-slate-950 border border-amber-600 flex items-center justify-center font-black text-[8px] sm:text-[9px] ${canP2 ? 'animate-bounce ring-1 ring-slate-950 cursor-pointer' : ''}`}>
                         P2
                       </div>
                     )}
-                    {!hasP1 && !hasP2 && <span className="opacity-60 text-[6px]">▶</span>}
+                    {!hasP1 && !hasP2 && <span className="opacity-60 text-[7px] sm:text-[8px]">▶</span>}
                   </div>
                 );
               })}
@@ -689,19 +689,19 @@ const OriginalLudoGame: React.FC = () => {
                   <div
                     key={`red-runway-${i}`}
                     style={{ gridColumn: c + 1, gridRow: r + 1 }}
-                    className="bg-rose-600/90 text-white flex items-center justify-center rounded-xs font-bold text-[7px]"
+                    className="bg-rose-600/90 text-white flex items-center justify-center rounded-xs font-bold text-[8px] sm:text-[9px]"
                   >
                     {hasB1 && (
-                      <div className="w-4 h-4 rounded-full bg-white text-rose-700 border border-rose-900 flex items-center justify-center font-black text-[7px]">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white text-rose-700 border border-rose-900 flex items-center justify-center font-black text-[8px] sm:text-[9px]">
                         B1
                       </div>
                     )}
                     {hasB2 && (
-                      <div className="w-4 h-4 rounded-full bg-white text-rose-700 border border-rose-900 flex items-center justify-center font-black text-[7px]">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white text-rose-700 border border-rose-900 flex items-center justify-center font-black text-[8px] sm:text-[9px]">
                         B2
                       </div>
                     )}
-                    {!hasB1 && !hasB2 && <span className="opacity-60 text-[6px]">▶</span>}
+                    {!hasB1 && !hasB2 && <span className="opacity-60 text-[7px] sm:text-[8px]">▶</span>}
                   </div>
                 );
               })}
@@ -709,17 +709,17 @@ const OriginalLudoGame: React.FC = () => {
             </div>
 
             {/* STATUS FOOTER BAR */}
-            <div className="flex items-center justify-between text-[11px] font-bold pt-2 px-1 border-t border-white/[0.08] mt-2">
+            <div className="flex items-center justify-between text-xs font-bold pt-2.5 px-1.5 border-t border-white/[0.08] mt-2.5">
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
-                <span className="text-amber-300 text-[10px]">
+                <span className="text-amber-300 text-[11px] sm:text-xs">
                   You: P1 ({playerTokens[0] === -1 ? 'Base' : playerTokens[0] === 56 ? '🏆 Home' : `S${playerTokens[0]}`}) • P2 ({playerTokens[1] === -1 ? 'Base' : playerTokens[1] === 56 ? '🏆 Home' : `S${playerTokens[1]}`})
                 </span>
               </div>
 
               <div className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block" />
-                <span className="text-rose-400 text-[10px]">
+                <span className="text-rose-400 text-[11px] sm:text-xs">
                   Chef: B1 ({botTokens[0] === -1 ? 'Base' : botTokens[0] === 56 ? '🏆 Home' : `S${botTokens[0]}`}) • B2 ({botTokens[1] === -1 ? 'Base' : botTokens[1] === 56 ? '🏆 Home' : `S${botTokens[1]}`})
                 </span>
               </div>
@@ -728,25 +728,25 @@ const OriginalLudoGame: React.FC = () => {
           </div>
         </div>
 
-        {/* RIGHT COLUMN: ACTION & CONTROL DESK (ALWAYS VISIBLE AT EYE LEVEL ON TABLET) */}
-        <div className="sm:col-span-5 flex flex-col space-y-2.5 w-full">
+        {/* RIGHT COLUMN: ACTION & CONTROL DESK */}
+        <div className="sm:col-span-5 flex flex-col space-y-3 w-full">
           
           {/* Action Box: Dice & Move Selection */}
-          <div className="p-3.5 rounded-2xl bg-slate-900/95 border border-amber-500/30 shadow-xl space-y-3 backdrop-blur-md">
+          <div className="p-4 sm:p-5 rounded-2xl bg-slate-900/95 border border-amber-500/30 shadow-xl space-y-3.5 backdrop-blur-md">
             
             {/* Turn Header */}
-            <div className="flex items-center justify-between pb-2 border-b border-white/10">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+            <div className="flex items-center justify-between pb-2.5 border-b border-white/10">
+              <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-400">
                 Active Turn
               </span>
               <div className="flex items-center gap-1.5">
                 {turn === 'player' ? (
-                  <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40 text-[10px] font-black animate-pulse">
+                  <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40 text-[11px] sm:text-xs font-black animate-pulse">
                     <span className="w-2 h-2 rounded-full bg-amber-400" />
                     YOUR TURN
                   </span>
                 ) : (
-                  <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10px] font-black">
+                  <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[11px] sm:text-xs font-black">
                     <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
                     CHEF BOT PLAYING
                   </span>
@@ -755,18 +755,18 @@ const OriginalLudoGame: React.FC = () => {
             </div>
 
             {/* 3D Dice Display & Guidance */}
-            <div className="flex items-center gap-3 bg-slate-950/80 p-2.5 rounded-xl border border-white/5">
-              <div className={`w-13 h-13 rounded-xl bg-gradient-to-tr from-slate-800 to-slate-900 border-2 border-amber-400 text-amber-300 flex items-center justify-center font-black text-2xl shadow-lg transition-transform ${isRolling ? 'rotate-180 scale-110' : ''}`}>
+            <div className="flex items-center gap-3.5 bg-slate-950/80 p-3 rounded-xl border border-white/5">
+              <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-tr from-slate-800 to-slate-900 border-2 border-amber-400 text-amber-300 flex items-center justify-center font-black text-2xl sm:text-3xl shadow-lg transition-transform ${isRolling ? 'rotate-180 scale-110' : ''}`}>
                 {diceRoll !== null ? diceRoll : '🎲'}
               </div>
-              <div className="flex-1">
-                <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">
+              <div className="flex-1 min-w-0">
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 block uppercase tracking-wider">
                   Dice Outcome
                 </span>
-                <span className="text-xs font-black text-white block mt-0.5">
+                <span className="text-xs sm:text-sm font-black text-white block mt-0.5">
                   {turn === 'player' ? (
                     waitingForMove ? (
-                      <span className="text-amber-300 font-extrabold">Rolled a {diceRoll}! Pick a coin to move 👇</span>
+                      <span className="text-amber-300 font-extrabold">Rolled a {diceRoll}! Pick coin 👇</span>
                     ) : (
                       <span>Roll dice to start your turn</span>
                     )
@@ -774,7 +774,7 @@ const OriginalLudoGame: React.FC = () => {
                     <span className="text-rose-300">Chef Bot is taking turn...</span>
                   )}
                 </span>
-                <span className="text-[10px] text-slate-400">
+                <span className="text-[11px] text-slate-400 block mt-0.5 truncate">
                   {playerTokens[0] === -1 && playerTokens[1] === -1 ? 'Need a 6 to deploy from base' : 'Aim to conquer Center Home 🏆'}
                 </span>
               </div>
@@ -785,40 +785,40 @@ const OriginalLudoGame: React.FC = () => {
               <button
                 onClick={handleRollDice}
                 disabled={turn !== 'player' || isRolling || !!winner}
-                className={`w-full py-3 px-4 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2 shadow-xl ${
+                className={`w-full py-3.5 sm:py-4 px-4 rounded-xl font-black text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-xl ${
                   turn === 'player' && !winner
                     ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 active:scale-95 cursor-pointer shadow-amber-500/25 ring-2 ring-amber-400/50'
                     : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5'
                 }`}
               >
-                <Dices className="w-4 h-4 text-slate-950" />
+                <Dices className="w-4.5 h-4.5 text-slate-950" />
                 <span>{isRolling ? 'Rolling Dice...' : 'Roll Dice 🎲'}</span>
               </button>
             ) : (
               /* PROMINENT MOVE GOLD P1 / P2 BUTTONS (CLEARLY VISIBLE IN TABLET VIEW) */
-              <div className="space-y-2 bg-gradient-to-b from-amber-500/15 to-amber-500/5 border-2 border-amber-400/60 p-2.5 rounded-xl animate-in zoom-in-95">
+              <div className="space-y-2 bg-gradient-to-b from-amber-500/15 to-amber-500/5 border-2 border-amber-400/60 p-3 rounded-xl animate-in zoom-in-95">
                 <div className="flex items-center justify-between pb-0.5">
-                  <span className="text-[10px] font-black uppercase text-amber-300 tracking-wider">
+                  <span className="text-[10px] sm:text-xs font-black uppercase text-amber-300 tracking-wider">
                     👉 Move Your Gold Token:
                   </span>
-                  <span className="text-[10px] font-mono font-black text-amber-400 bg-slate-950 px-2 py-0.5 rounded-full border border-amber-400/40">
+                  <span className="text-[10px] sm:text-xs font-mono font-black text-amber-400 bg-slate-950 px-2 py-0.5 rounded-full border border-amber-400/40">
                     Rolled {diceRoll}
                   </span>
                 </div>
 
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-2">
                   {canPlayerMoveToken(0) && (
                     <button
                       onClick={() => handlePlayerMove(0)}
-                      className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 ring-2 ring-white flex items-center justify-between cursor-pointer active:scale-95 animate-pulse transition-all"
+                      className="w-full py-3 px-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/25 ring-2 ring-white flex items-center justify-between cursor-pointer active:scale-95 animate-pulse transition-all"
                     >
-                      <span className="flex items-center gap-1.5">
+                      <span className="flex items-center gap-2">
                         <span className="w-5 h-5 rounded-full bg-slate-950 text-amber-400 flex items-center justify-center text-[10px] font-black">
                           P1
                         </span>
                         <span>Move Gold P1 ➔</span>
                       </span>
-                      <span className="text-[10px] bg-slate-950/20 px-2 py-0.5 rounded-md font-mono">
+                      <span className="text-[10px] sm:text-[11px] bg-slate-950/20 px-2.5 py-0.5 rounded-md font-mono">
                         {playerTokens[0] === -1 ? 'Deploy to Track 🚀' : `Advance +${diceRoll} steps`}
                       </span>
                     </button>
@@ -827,22 +827,22 @@ const OriginalLudoGame: React.FC = () => {
                   {canPlayerMoveToken(1) && (
                     <button
                       onClick={() => handlePlayerMove(1)}
-                      className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 ring-2 ring-white flex items-center justify-between cursor-pointer active:scale-95 animate-pulse transition-all"
+                      className="w-full py-3 px-3.5 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs sm:text-sm shadow-lg shadow-amber-500/25 ring-2 ring-white flex items-center justify-between cursor-pointer active:scale-95 animate-pulse transition-all"
                     >
-                      <span className="flex items-center gap-1.5">
+                      <span className="flex items-center gap-2">
                         <span className="w-5 h-5 rounded-full bg-slate-950 text-amber-400 flex items-center justify-center text-[10px] font-black">
                           P2
                         </span>
                         <span>Move Gold P2 ➔</span>
                       </span>
-                      <span className="text-[10px] bg-slate-950/20 px-2 py-0.5 rounded-md font-mono">
+                      <span className="text-[10px] sm:text-[11px] bg-slate-950/20 px-2.5 py-0.5 rounded-md font-mono">
                         {playerTokens[1] === -1 ? 'Deploy to Track 🚀' : `Advance +${diceRoll} steps`}
                       </span>
                     </button>
                   )}
                 </div>
 
-                <p className="text-[10px] text-amber-200/90 text-center pt-0.5">
+                <p className="text-[10px] sm:text-[11px] text-amber-200/90 text-center pt-0.5">
                   💡 Tip: You can also tap the bouncing gold token directly on the board!
                 </p>
               </div>
@@ -850,8 +850,8 @@ const OriginalLudoGame: React.FC = () => {
           </div>
 
           {/* Commentary & Move Log */}
-          <div className="p-2.5 rounded-xl bg-slate-900/80 border border-white/10 text-[10px] font-mono text-slate-400 space-y-1 shadow-inner">
-            <span className="text-[9px] font-sans font-black uppercase tracking-wider text-slate-500 block mb-0.5">
+          <div className="p-3 rounded-xl bg-slate-900/80 border border-white/10 text-[10px] sm:text-[11px] font-mono text-slate-400 space-y-1.5 shadow-inner max-h-44 sm:max-h-56 overflow-y-auto custom-scrollbar">
+            <span className="text-[10px] font-sans font-black uppercase tracking-wider text-slate-500 block mb-1">
               Live Battle Feed
             </span>
             {gameLog.map((log, i) => (
@@ -2820,7 +2820,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/90 backdrop-blur-md animate-in fade-in duration-200">
       <div 
-        className="w-full max-w-5xl h-[94vh] sm:h-[90vh] bg-slate-950 text-slate-100 rounded-3xl shadow-2xl border border-amber-500/25 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+        className="w-full max-w-5xl lg:max-w-6xl h-[96vh] sm:h-[94vh] bg-slate-950 text-slate-100 rounded-3xl shadow-2xl border border-amber-500/25 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         
@@ -2985,7 +2985,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
         )}
 
         {/* Tab Body Content */}
-        <div className="p-3 sm:p-5 overflow-y-auto flex-1 space-y-4">
+        <div className="p-2.5 sm:p-3.5 overflow-y-auto flex-1 space-y-3 custom-scrollbar">
           {activeTab === 'games' && (
             <div>
               {activeGame === 'ludo' && <OriginalLudoGame />}

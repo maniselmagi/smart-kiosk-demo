@@ -127,18 +127,25 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
 
   if (!isOpen || !activeOrder) return null;
 
-  // Add extra preparation minutes when food is taking longer
-  const handleAddExtraMinutes = (extraMins: number = 5) => {
-    const newPrepTime = (activeOrder.estimatedPrepTime || 12) + extraMins;
-    updateOrder(activeOrder.id, {
-      estimatedPrepTime: newPrepTime,
-      createdAt: new Date().toISOString()
-    });
-    setSecondsLeft(extraMins * 60);
-    showToast(`+${extraMins} extra preparation minutes added. Chef notified!`);
-  };
+  // Kitchen supervisor extra delay clock (5 minutes default set by kitchen)
+  const [delaySecondsLeft, setDelaySecondsLeft] = useState<number>(300);
 
-  // Claim free small food compensation (100% Free / ₹0)
+  useEffect(() => {
+    if (secondsLeft === 0 && activeOrder.status !== 'READY' && activeOrder.status !== 'COMPLETED') {
+      const timer = setInterval(() => {
+        setDelaySecondsLeft((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+      return () => clearInterval(timer);
+    } else {
+      setDelaySecondsLeft(300);
+    }
+  }, [secondsLeft, activeOrder.status]);
+
+  const delayMins = Math.floor(delaySecondsLeft / 60);
+  const delaySecs = delaySecondsLeft % 60;
+  const formattedDelayClock = `${String(delayMins).padStart(2, '0')}:${String(delaySecs).padStart(2, '0')}`;
+
+  // Claim free small food compensation (100% Free / ₹0) - chosen by customer
   const handleClaimComplimentarySnack = (snack: typeof COMPLIMENTARY_SNACKS[0]) => {
     const compItem: CartItem = {
       cartItemId: `comp-${Date.now()}-${snack.id}`,
@@ -156,8 +163,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
     };
 
     const updatedItems = [...activeOrder.items, compItem];
-    const extraMins = 5;
-    const newPrepTime = (activeOrder.estimatedPrepTime || 12) + extraMins;
+    const newPrepTime = (activeOrder.estimatedPrepTime || 12) + 5;
 
     updateOrder(activeOrder.id, {
       items: updatedItems,
@@ -165,9 +171,8 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
       createdAt: new Date().toISOString()
     });
 
-    setSecondsLeft(extraMins * 60);
     setIsCompClaimed(true);
-    showToast(`🎉 Complimentary ${snack.name} added to your order for ₹0!`);
+    showToast(`🎉 Complimentary ${snack.name} added to Table ${activeOrder.tableNumber} for ₹0!`);
   };
 
   const waiter = getAssignedWaiter(activeOrder.tableNumber);
@@ -250,34 +255,35 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
         {/* Ambient Top Glow */}
         <div className="absolute top-0 left-1/4 right-1/4 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent blur-[2px]" />
 
-        {/* TRACKER HEADER: Modern Luxury Minimal */}
+        {/* TRACKER HEADER: Luxury Executive Ticket Badge */}
         <div className="p-5 sm:p-6 bg-gradient-to-b from-slate-850 to-slate-900 border-b border-white/[0.08] flex items-center justify-between">
           <div className="flex items-center gap-3.5">
-            <div className="relative">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400/20 via-orange-500/20 to-amber-600/30 text-amber-400 flex items-center justify-center font-black text-base border border-amber-400/40 shadow-inner">
-                #{activeOrder.orderNumber}
-              </div>
-              <span className="absolute -bottom-1 -right-1 flex h-3 w-3">
+            <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-slate-950/80 border border-amber-500/30 shadow-inner">
+              <span className="relative flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
               </span>
+              <div className="flex flex-col">
+                <span className="text-[9px] font-mono tracking-widest text-slate-400 uppercase font-bold leading-none">Ticket</span>
+                <span className="text-sm font-black font-mono text-amber-400 leading-tight">#{activeOrder.orderNumber}</span>
+              </div>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] uppercase tracking-wider font-extrabold text-amber-400 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/30">
+                <span className="text-[11px] uppercase tracking-wider font-extrabold text-amber-300 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/25">
                   Table {activeOrder.tableNumber}
                 </span>
                 <span className="text-xs text-slate-500">•</span>
                 <span className="text-xs font-semibold text-slate-300">
-                  {activeOrder.items.reduce((a, b) => a + b.quantity, 0)} Items
+                  {activeOrder.items.reduce((a, b) => a + b.quantity, 0)} {activeOrder.items.reduce((a, b) => a + b.quantity, 0) === 1 ? 'Dish' : 'Dishes'}
                 </span>
                 {allOrders.length > 1 && (
-                  <span className="text-[10px] font-bold bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30">
-                    {allOrders.length} Active Orders
+                  <span className="text-[10px] font-bold bg-amber-500/15 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30">
+                    {allOrders.length} Tickets
                   </span>
                 )}
               </div>
-              <h3 className="text-xl font-black font-display text-white mt-0.5 tracking-tight flex items-center gap-2">
+              <h3 className="text-lg font-black font-display text-white mt-0.5 tracking-tight flex items-center gap-2">
                 <span>Live Kitchen Tracker</span>
               </h3>
             </div>
@@ -292,14 +298,15 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
           </button>
         </div>
 
-        {/* MULTI-ORDER SELECTOR BAR: Shows when table has placed multiple orders */}
+        {/* MULTI-ORDER SELECTOR BAR: Luxury Segmented Control */}
         {allOrders.length > 1 && (
-          <div className="flex items-center gap-2 overflow-x-auto p-3 sm:px-6 bg-slate-850/90 border-b border-white/[0.08] custom-scrollbar">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider shrink-0">
-              Your Orders:
+          <div className="px-5 sm:px-6 py-2.5 bg-slate-950/80 border-b border-white/[0.06] flex items-center gap-3 overflow-x-auto custom-scrollbar">
+            <span className="text-[10px] uppercase font-black tracking-widest text-slate-400 shrink-0 flex items-center gap-1.5">
+              <Receipt className="w-3.5 h-3.5 text-amber-400" />
+              Active Tickets ({allOrders.length}):
             </span>
             <div className="flex items-center gap-2">
-              {allOrders.map((ord, idx) => {
+              {allOrders.map((ord) => {
                 const isSelected = ord.id === activeOrder.id;
                 const itemCount = ord.items.reduce((s, i) => s + i.quantity, 0);
                 return (
@@ -310,20 +317,21 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                       setSelectedOrderId(ord.id);
                       setIsCompClaimed(false);
                     }}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 border ${
+                    className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs transition-all cursor-pointer shrink-0 border ${
                       isSelected
-                        ? 'bg-amber-400 text-slate-950 border-amber-400 shadow-md shadow-amber-400/25 scale-[1.02]'
-                        : 'bg-white/[0.05] hover:bg-white/[0.12] text-slate-300 border-white/10'
+                        ? 'bg-amber-400/15 text-amber-300 border-amber-400/60 shadow-[0_0_12px_rgba(245,158,11,0.2)] font-bold'
+                        : 'bg-white/[0.04] hover:bg-white/[0.08] text-slate-400 hover:text-slate-200 border-white/5 font-medium'
                     }`}
                   >
-                    <span>Order #{ord.orderNumber}</span>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-extrabold ${
-                      isSelected ? 'bg-slate-950/20 text-slate-950' : 'bg-white/10 text-amber-300'
-                    }`}>
-                      {itemCount} items • ₹{ord.total}
-                    </span>
-                    <span className={`text-[9px] uppercase px-1.5 py-0.2 rounded font-semibold ${
-                      ord.status === 'READY' ? 'bg-emerald-500/30 text-emerald-300' : 'bg-slate-700/50 text-slate-300'
+                    <span className="font-mono text-white">#{ord.orderNumber}</span>
+                    <span className="text-slate-500">•</span>
+                    <span className="text-[11px] text-slate-300">{itemCount} {itemCount === 1 ? 'item' : 'items'}</span>
+                    <span className="text-slate-500">•</span>
+                    <span className="font-mono text-amber-300 font-semibold">₹{ord.total}</span>
+                    <span className={`text-[9px] uppercase px-1.5 py-0.2 rounded font-bold ${
+                      ord.status === 'READY'
+                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                        : 'bg-slate-700/60 text-slate-300 border border-white/10'
                     }`}>
                       {ord.status}
                     </span>
@@ -387,8 +395,15 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                     </>
                   ) : isDelayed ? (
                     <>
-                      <AlertCircle className="w-7 h-7 text-amber-400 animate-pulse" />
-                      <span className="text-[10px] font-black text-amber-300 uppercase tracking-wider mt-0.5">Finishing...</span>
+                      <span className="text-2xl font-black text-amber-400 font-mono tracking-tight leading-none animate-pulse">
+                        {formattedDelayClock}
+                      </span>
+                      <span className="text-[10px] text-amber-300 font-bold uppercase tracking-wider mt-1">
+                        Chef Finishing
+                      </span>
+                      <span className="text-[9px] text-slate-400 font-medium">
+                        +5m by Kitchen
+                      </span>
                     </>
                   ) : (
                     <>
@@ -401,11 +416,11 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                       <button
                         type="button"
                         onClick={() => setSecondsLeft(0)}
-                        title="Simulate countdown completion"
+                        title="Simulate delay countdown"
                         className="mt-1 text-[9px] text-amber-400/70 hover:text-amber-300 flex items-center gap-0.5 underline font-medium cursor-pointer"
                       >
                         <Zap className="w-2.5 h-2.5" />
-                        <span>Test Delay</span>
+                        <span>Simulate Delay</span>
                       </button>
                     </>
                   )}
@@ -452,79 +467,92 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
 
             </div>
 
-            {/* REQUIREMENT 1: CHEF DELAY NOTIFICATION & COMPLIMENTARY FOOD (₹0 FREE) */}
+            {/* CHEF DELAY & COMPLIMENTARY FOOD (₹0 FREE ON THE HOUSE) */}
             {isDelayed && (
-              <div className="mt-4 pt-4 border-t border-amber-400/30 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-amber-950/30 border border-amber-400/30 shadow-lg">
-                  <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-amber-400/20 text-amber-400 flex items-center justify-center shrink-0 border border-amber-400/40 mt-0.5">
-                      <Clock className="w-5 h-5 animate-spin" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                          <AlertCircle className="w-3.5 h-3.5" />
-                          Food Still Being Prepared
-                        </span>
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => handleAddExtraMinutes(3)}
-                            className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-amber-200 text-[11px] font-bold transition-all border border-white/10 active:scale-95 cursor-pointer"
-                          >
-                            +3 Mins
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleAddExtraMinutes(5)}
-                            className="px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 text-[11px] font-black transition-all shadow-xs active:scale-95 cursor-pointer flex items-center gap-1"
-                          >
-                            <Plus className="w-3 h-3" />
-                            <span>+5 Mins Delay</span>
-                          </button>
-                        </div>
+              <div className="mt-4 pt-4 border-t border-amber-500/30 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-slate-900/90 via-slate-850 to-amber-950/30 border border-amber-500/30 shadow-xl">
+                  
+                  {/* Top Kitchen Notice */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3.5 mb-3.5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/30 shadow-inner">
+                        <Clock className="w-5 h-5 animate-spin" />
                       </div>
-                      <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                        Your gourmet order is taking slightly longer to achieve authentic flavors and piping-hot plating. As our heartfelt apology, <strong>please choose any complimentary snack below on the house (₹0 Free of Charge)!</strong>
-                      </p>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-black uppercase tracking-wider text-amber-400">
+                            Kitchen Delay Notice
+                          </span>
+                          <span className="text-[10px] font-bold text-amber-300 bg-amber-400/15 px-2 py-0.5 rounded-full border border-amber-400/30">
+                            +5 Mins Added by Chef
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-300 mt-0.5">
+                          Our culinary line is ensuring authentic flavors & sizzling hot plating.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Running Delay Clock */}
+                    <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-amber-400/10 border border-amber-400/30 self-start sm:self-center">
+                      <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                      <span className="text-[11px] font-semibold text-slate-300">Finishing In:</span>
+                      <span className="font-mono text-sm font-black text-amber-400 tracking-wider">
+                        {formattedDelayClock}
+                      </span>
                     </div>
                   </div>
 
-                  {/* COMPLIMENTARY SMALL FOOD PICKER */}
+                  {/* Complimentary Food Section */}
                   {!isCompClaimed ? (
-                    <div className="mt-3 pt-3 border-t border-amber-400/20">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[11px] font-black uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
-                          <Gift className="w-3.5 h-3.5 text-amber-400" />
-                          Choose Free Delay Compensation Bite (₹0 Charge):
-                        </span>
-                        <span className="text-[10px] text-emerald-400 font-bold bg-emerald-400/10 px-2 py-0.5 rounded-full border border-emerald-400/30">
-                          100% Free
+                    <div className="space-y-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                        <div className="flex items-center gap-2">
+                          <Gift className="w-4 h-4 text-amber-400" />
+                          <h6 className="text-xs font-black uppercase tracking-wider text-white">
+                            Complimentary Apology Bite • On The House
+                          </h6>
+                        </div>
+                        <span className="text-[11px] font-extrabold text-emerald-400 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30 self-start sm:self-auto">
+                          ₹0 Free of Charge
                         </span>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <p className="text-xs text-slate-400 leading-relaxed">
+                        Please choose any freshly made starter below. Our kitchen will rush this to your table immediately while your main meal finishes cooking.
+                      </p>
+
+                      {/* Food Cards Grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
                         {COMPLIMENTARY_SNACKS.map((snack) => (
                           <div
                             key={snack.id}
-                            className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/80 border border-white/10 hover:border-amber-400/50 transition-all group"
+                            className="p-3 rounded-2xl bg-slate-900/90 border border-white/10 hover:border-amber-400/40 transition-all flex flex-col justify-between group shadow-sm hover:shadow-md"
                           >
-                            <div className="flex items-center gap-2.5">
-                              <img
-                                src={snack.image}
-                                alt={snack.name}
-                                className="w-10 h-10 rounded-lg object-cover border border-white/10 shrink-0"
-                              />
-                              <div>
-                                <span className="text-xs font-bold text-white block group-hover:text-amber-300 transition-colors">
+                            <div className="flex items-start gap-3">
+                              <div className="relative shrink-0">
+                                <img
+                                  src={snack.image}
+                                  alt={snack.name}
+                                  className="w-14 h-14 rounded-xl object-cover border border-white/10 group-hover:scale-105 transition-transform duration-300"
+                                />
+                                <span className="absolute -top-1.5 -left-1.5 px-1.5 py-0.5 rounded-md bg-emerald-500 text-[9px] font-black text-slate-950 uppercase tracking-wider shadow-xs">
+                                  ₹0 Free
+                                </span>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <span className="text-xs font-bold text-white block group-hover:text-amber-300 transition-colors leading-snug">
                                   {snack.name}
                                 </span>
-                                <div className="flex items-center gap-1.5">
+                                <p className="text-[10px] text-slate-400 mt-0.5 line-clamp-1">
+                                  {snack.desc}
+                                </p>
+                                <div className="flex items-center gap-1.5 mt-1">
                                   <span className="text-[10px] line-through text-slate-500 font-bold">
                                     ₹{snack.originalPrice}
                                   </span>
-                                  <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/20 px-1.5 py-0.2 rounded font-mono">
-                                    ₹0 Free
+                                  <span className="text-[10px] font-extrabold text-emerald-400">
+                                    Free On The House
                                   </span>
                                 </div>
                               </div>
@@ -533,22 +561,29 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                             <button
                               type="button"
                               onClick={() => handleClaimComplimentarySnack(snack)}
-                              className="px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-[11px] shadow-sm transition-all active:scale-95 cursor-pointer whitespace-nowrap"
+                              className="mt-3 w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xs shadow-sm transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
                             >
-                              Select Free
+                              <Gift className="w-3.5 h-3.5 text-slate-950" />
+                              <span>Claim Complimentary (₹0)</span>
                             </button>
                           </div>
                         ))}
                       </div>
                     </div>
                   ) : (
-                    <div className="mt-3 p-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center gap-2.5 text-xs text-emerald-300">
-                      <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
-                      <span>
-                        <strong>Complimentary treat selected!</strong> Chef is rushing this free bite to your table with +5 extra minutes prep time.
-                      </span>
+                    <div className="p-4 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center gap-3 text-xs text-emerald-300">
+                      <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30">
+                        <Sparkles className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="font-bold block text-white">Complimentary Dish Added to Table {activeOrder.tableNumber}!</span>
+                        <span className="text-emerald-300 text-[11px]">
+                          The kitchen has received this priority ticket at ₹0 Free of Charge. It will be served hot immediately.
+                        </span>
+                      </div>
                     </div>
                   )}
+
                 </div>
               </div>
             )}

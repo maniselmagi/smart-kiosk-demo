@@ -83,6 +83,8 @@ interface KioskContextType {
     splitBillDetails?: Order['splitBillDetails']
   ) => Order;
   updateOrderStatus: (orderId: string, status: OrderStatus) => void;
+  updateOrder: (orderId: string, updates: Partial<Order>) => void;
+  completeAllTableOrders: (tableNum: number) => void;
   toggleItemAvailability: (itemId: string) => void;
   staffAlerts: StaffAlert[];
   callWaiter: (type: StaffAlert['type']) => void;
@@ -579,6 +581,17 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setActiveOrders(updated);
   };
 
+  const updateOrder = (orderId: string, updates: Partial<Order>) => {
+    const updated = storageService.updateOrder(orderId, updates);
+    setActiveOrders(updated);
+  };
+
+  const completeAllTableOrders = (tableNum: number) => {
+    const updated = storageService.completeAllTableOrders(tableNum);
+    setActiveOrders(updated);
+    setCurrentTrackedOrderId(null);
+  };
+
   const toggleItemAvailability = (itemId: string) => {
     const updated = storageService.toggleItemAvailability(itemId);
     setMenuItems(updated);
@@ -673,6 +686,8 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setCurrentTrackedOrder: (order) => setCurrentTrackedOrderId(order ? order.id : null),
         placeOrder,
         updateOrderStatus,
+        updateOrder,
+        completeAllTableOrders,
         toggleItemAvailability,
         staffAlerts,
         callWaiter,

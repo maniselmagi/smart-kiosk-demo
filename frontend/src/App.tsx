@@ -29,6 +29,8 @@ const MainAppContent: React.FC = () => {
     activeOrders,
     currentTrackedOrder, 
     setCurrentTrackedOrder,
+    tableNumber,
+    completeAllTableOrders,
     isLanguageModalOpen,
     setIsLanguageModalOpen
   } = useKiosk();
@@ -48,6 +50,11 @@ const MainAppContent: React.FC = () => {
   const [isCallWaiterOpen, setIsCallWaiterOpen] = useState(false);
   const [activeCompletedOrder, setActiveCompletedOrder] = useState<Order | null>(null);
 
+  // All active orders for this specific table (for multi-order tracking)
+  const allActiveTableOrders = React.useMemo(() => {
+    return activeOrders.filter((o) => o.tableNumber === tableNumber && o.status !== 'COMPLETED');
+  }, [activeOrders, tableNumber]);
+
   // Fresh reactive order from activeOrders so supervisor/waiter status updates sync live
   const liveTrackedOrder = React.useMemo(() => {
     const targetId = activeCompletedOrder?.id || currentTrackedOrder?.id;
@@ -55,8 +62,8 @@ const MainAppContent: React.FC = () => {
       const match = activeOrders.find((o) => o.id === targetId);
       if (match) return match;
     }
-    return activeCompletedOrder || currentTrackedOrder;
-  }, [activeOrders, activeCompletedOrder, currentTrackedOrder]);
+    return activeCompletedOrder || currentTrackedOrder || allActiveTableOrders[0] || null;
+  }, [activeOrders, activeCompletedOrder, currentTrackedOrder, allActiveTableOrders]);
 
   const handleOrderSuccess = (newOrder: Order) => {
     setActiveCompletedOrder(newOrder);
@@ -156,6 +163,7 @@ const MainAppContent: React.FC = () => {
 
       <OrderTrackerModal
         order={liveTrackedOrder}
+        orders={allActiveTableOrders}
         isOpen={isTrackerOpen}
         onClose={() => setIsTrackerOpen(false)}
         onOpenReceipt={() => setIsReceiptOpen(true)}
@@ -182,6 +190,7 @@ const MainAppContent: React.FC = () => {
           setIsReceiptOpen(false);
           setIsEntertainmentOpen(false);
           setActiveCompletedOrder(null);
+          completeAllTableOrders(tableNumber);
         }}
       />
 

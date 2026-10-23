@@ -24,7 +24,7 @@ export const FinishMealModal: React.FC<FinishMealModalProps> = ({
   onClose,
   onFinishDiningSuccess,
 }) => {
-  const { tableNumber, submitFeedback, updateOrderStatus, showToast } = useKiosk();
+  const { tableNumber, submitFeedback, updateOrderStatus, completeAllTableOrders, showToast } = useKiosk();
 
   // Waiter for this table
   const targetTable = order?.tableNumber || tableNumber || 12;
@@ -74,6 +74,7 @@ export const FinishMealModal: React.FC<FinishMealModalProps> = ({
     if (order?.id) {
       updateOrderStatus(order.id, 'COMPLETED');
     }
+    completeAllTableOrders(targetTable);
 
     setIsSubmitted(true);
     showToast(`Dining completed! Thank you for your valuable feedback.`);

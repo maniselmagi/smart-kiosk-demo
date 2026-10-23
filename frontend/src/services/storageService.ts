@@ -122,6 +122,33 @@ export const storageService = {
     return updated;
   },
 
+  updateOrder(orderId: string, updates: Partial<Order>) {
+    const orders = this.getOrders();
+    const updated = orders.map((o) => 
+      o.id === orderId 
+        ? { ...o, ...updates, updatedAt: new Date().toISOString() } 
+        : o
+    );
+    this.saveOrders(updated);
+    return updated;
+  },
+
+  completeAllTableOrders(tableNumber: number) {
+    const orders = this.getOrders();
+    const updated = orders.map((o) => 
+      o.tableNumber === tableNumber && o.status !== 'COMPLETED'
+        ? { ...o, status: 'COMPLETED' as const, updatedAt: new Date().toISOString() }
+        : o
+    );
+    this.saveOrders(updated);
+    try {
+      localStorage.removeItem(STORAGE_KEYS.LAST_ORDER_ID);
+    } catch (e) {
+      // safe ignore
+    }
+    return updated;
+  },
+
   getStaffAlerts(): StaffAlert[] {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.STAFF_ALERTS);

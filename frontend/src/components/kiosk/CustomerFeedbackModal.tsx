@@ -32,7 +32,7 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
   onOpenReceipt,
   onReturnToMenu,
 }) => {
-  const { tableNumber, submitFeedback, updateOrderStatus, showToast } = useKiosk();
+  const { tableNumber, submitFeedback, updateOrderStatus, completeAllTableOrders, showToast } = useKiosk();
 
   const targetTable = order?.tableNumber || tableNumber || 12;
   const waiter = getAssignedWaiter(targetTable);
@@ -108,6 +108,7 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
     if (order?.id) {
       updateOrderStatus(order.id, 'COMPLETED');
     }
+    completeAllTableOrders(targetTable);
 
     setIsSubmitted(true);
     showToast(`Thank you! Feedback recorded for Waiter ${waiter.name}.`);

@@ -123,7 +123,11 @@ const RED_HOME_RUNWAY: [number, number][] = [
   [7, 5]   // 55
 ];
 
-const OriginalLudoGame: React.FC = () => {
+interface OriginalLudoGameProps {
+  order?: any;
+}
+
+const OriginalLudoGame: React.FC<OriginalLudoGameProps> = ({ order }) => {
   // Tokens representation:
   // -1 = In Base Yard
   // 0..50 = On 52-tile circuit track
@@ -394,6 +398,13 @@ const OriginalLudoGame: React.FC = () => {
     setGameLog(['Game reset! Roll a 6 to deploy your gold tokens to the track.']);
   };
 
+  // Automatically reset this game when the order is fully completed or meal finished
+  useEffect(() => {
+    if (!order || order?.status === 'COMPLETED') {
+      resetGame();
+    }
+  }, [order?.status, order?.id]);
+
   const p1Pos = getPlayerTokenPos(playerTokens[0]);
   const p2Pos = getPlayerTokenPos(playerTokens[1]);
   const b1Pos = getBotTokenPos(botTokens[0]);
@@ -431,12 +442,11 @@ const OriginalLudoGame: React.FC = () => {
         </div>
       )}
 
-      {/* 2-COLUMN BALANCED RESPONSIVE LAYOUT */}
-      <div className="grid grid-cols-1 sm:grid-cols-12 gap-3.5 sm:gap-4 items-start">
+      {/* FULL-WIDTH STACKED LAYOUT: 15×15 BOARD ON TOP, ACTIVE TURN AT BOTTOM */}
+      <div className="flex flex-col items-center space-y-2.5 w-full">
         
-        {/* LEFT COLUMN: PERFECTLY PROPORTIONED 15×15 LUDO BOARD WITH INCREASED BOARD HEIGHT */}
-        <div className="sm:col-span-7 flex flex-col items-center">
-          <div className="w-full max-w-[460px] sm:max-w-[490px] md:max-w-[520px] p-2.5 sm:p-3 rounded-2xl bg-slate-950 border-2 border-amber-500/40 shadow-2xl relative select-none">
+        {/* FULL WIDTH 15×15 LUDO BOARD */}
+        <div className="w-full max-w-[340px] sm:max-w-[360px] md:max-w-[370px] p-2 rounded-2xl bg-slate-950 border-2 border-amber-500/40 shadow-2xl relative select-none">
             
             <div 
               className="aspect-square w-full rounded-xl bg-slate-900 border border-white/10 p-0.5 sm:p-1 shadow-inner relative overflow-hidden"
@@ -725,141 +735,103 @@ const OriginalLudoGame: React.FC = () => {
             </div>
 
           </div>
-        </div>
 
-        {/* RIGHT COLUMN: ACTION & CONTROL DESK */}
-        <div className="sm:col-span-5 flex flex-col space-y-3 w-full">
-          
-          {/* Action Box: Dice & Move Selection */}
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-900/95 border border-amber-500/30 shadow-xl space-y-3 backdrop-blur-md">
+        {/* ACTIVE TURN SECTION PLACED AT THE BOTTOM */}
+        <div className="w-full max-w-[340px] sm:max-w-[360px] md:max-w-[370px]">
+          <div className="p-2.5 sm:p-3 rounded-2xl bg-slate-900/95 border border-amber-500/30 shadow-xl space-y-2 backdrop-blur-md">
             
             {/* Turn Header */}
-            <div className="flex items-center justify-between pb-2 border-b border-white/10">
-              <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-slate-400">
-                Active Turn
+            <div className="flex items-center justify-between pb-1.5 border-b border-white/10">
+              <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                <span>Active Turn</span>
               </span>
               <div className="flex items-center gap-1.5">
                 {turn === 'player' ? (
-                  <span className="flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40 text-[10px] sm:text-[11px] font-black animate-pulse">
-                    <span className="w-2 h-2 rounded-full bg-amber-400" />
+                  <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40 text-[10px] font-black animate-pulse">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                     YOUR TURN
                   </span>
                 ) : (
-                  <span className="flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10px] sm:text-[11px] font-black">
-                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                  <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10px] font-black">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
                     CHEF BOT PLAYING
                   </span>
                 )}
               </div>
             </div>
 
-            {/* 3D Dice Display & Guidance */}
-            <div className="flex items-center gap-3 bg-slate-950/80 p-2.5 rounded-xl border border-white/5">
-              <div className={`w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-slate-800 to-slate-900 border-2 border-amber-400 text-amber-300 flex items-center justify-center font-black text-2xl shadow-lg transition-transform ${isRolling ? 'rotate-180 scale-110' : ''}`}>
-                {diceRoll !== null ? diceRoll : '🎲'}
-              </div>
-              <div className="flex-1 min-w-0">
-                <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">
-                  Dice Outcome
-                </span>
-                <span className="text-xs sm:text-sm font-black text-white block mt-0.5">
-                  {turn === 'player' ? (
-                    waitingForMove ? (
-                      <span className="text-amber-300 font-extrabold">Rolled a {diceRoll}! Pick coin 👇</span>
+            {/* Controls: Responsive Grid (Dice Outcome + Actions) */}
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-center">
+              {/* 3D Dice Display & Guidance */}
+              <div className="sm:col-span-5 flex items-center gap-2.5 bg-slate-950/80 p-2 rounded-xl border border-white/5">
+                <div className={`w-11 h-11 rounded-xl bg-gradient-to-tr from-slate-800 to-slate-900 border-2 border-amber-400 text-amber-300 flex items-center justify-center font-black text-xl shadow-lg shrink-0 transition-transform ${isRolling ? 'rotate-180 scale-110' : ''}`}>
+                  {diceRoll !== null ? diceRoll : '🎲'}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="text-[9px] font-bold text-slate-400 block uppercase tracking-wider">
+                    Outcome
+                  </span>
+                  <span className="text-xs font-black text-white block truncate">
+                    {turn === 'player' ? (
+                      waitingForMove ? (
+                        <span className="text-amber-300 font-extrabold">Rolled {diceRoll}! Move</span>
+                      ) : (
+                        <span>Roll to move</span>
+                      )
                     ) : (
-                      <span>Roll dice to start your turn</span>
-                    )
-                  ) : (
-                    <span className="text-rose-300">Chef Bot is taking turn...</span>
-                  )}
-                </span>
-                <span className="text-[10px] text-slate-400 block mt-0.5 truncate">
-                  {playerTokens[0] === -1 && playerTokens[1] === -1 ? 'Need a 6 to deploy from base' : 'Aim to conquer Center Home 🏆'}
-                </span>
+                      <span className="text-rose-300">Bot rolling...</span>
+                    )}
+                  </span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="sm:col-span-7 w-full">
+                {!waitingForMove ? (
+                  <button
+                    onClick={handleRollDice}
+                    disabled={turn !== 'player' || isRolling || !!winner}
+                    className={`w-full py-2.5 px-3 rounded-xl font-black text-xs transition-all flex items-center justify-center gap-2 shadow-lg ${
+                      turn === 'player' && !winner
+                        ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 active:scale-95 cursor-pointer shadow-amber-500/25 ring-2 ring-amber-400/50'
+                        : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5'
+                    }`}
+                  >
+                    <Dices className="w-4 h-4 text-slate-950" />
+                    <span>{isRolling ? 'Rolling...' : 'Roll Dice 🎲'}</span>
+                  </button>
+                ) : (
+                  <div className="space-y-1.5 bg-gradient-to-b from-amber-500/15 to-amber-500/5 border border-amber-400/50 p-2 rounded-xl">
+                    <div className="flex gap-2">
+                      {canPlayerMoveToken(0) && (
+                        <button
+                          onClick={() => handlePlayerMove(0)}
+                          className="flex-1 py-1.5 px-2.5 rounded-lg bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 text-slate-950 font-black text-xs shadow ring-1 ring-white flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+                        >
+                          <span className="w-4 h-4 rounded-full bg-slate-950 text-amber-400 flex items-center justify-center text-[9px] font-black">P1</span>
+                          <span>Move P1 ➔</span>
+                        </button>
+                      )}
+                      {canPlayerMoveToken(1) && (
+                        <button
+                          onClick={() => handlePlayerMove(1)}
+                          className="flex-1 py-1.5 px-2.5 rounded-lg bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 text-slate-950 font-black text-xs shadow ring-1 ring-white flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+                        >
+                          <span className="w-4 h-4 rounded-full bg-slate-950 text-amber-400 flex items-center justify-center text-[9px] font-black">P2</span>
+                          <span>Move P2 ➔</span>
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-[9px] text-amber-200/90 text-center">
+                      💡 Tap your gold coin directly on the board!
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* PRIMARY ACTION BUTTONS: ROLL DICE vs PROMINENT MOVE GOLD P1 & MOVE GOLD P2 */}
-            {!waitingForMove ? (
-              <button
-                onClick={handleRollDice}
-                disabled={turn !== 'player' || isRolling || !!winner}
-                className={`w-full py-3 px-4 rounded-xl font-black text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-xl ${
-                  turn === 'player' && !winner
-                    ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 active:scale-95 cursor-pointer shadow-amber-500/25 ring-2 ring-amber-400/50'
-                    : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-white/5'
-                }`}
-              >
-                <Dices className="w-4 h-4 text-slate-950" />
-                <span>{isRolling ? 'Rolling Dice...' : 'Roll Dice 🎲'}</span>
-              </button>
-            ) : (
-              /* PROMINENT MOVE GOLD P1 / P2 BUTTONS (CLEARLY VISIBLE IN TABLET VIEW) */
-              <div className="space-y-2 bg-gradient-to-b from-amber-500/15 to-amber-500/5 border-2 border-amber-400/60 p-2.5 rounded-xl animate-in zoom-in-95">
-                <div className="flex items-center justify-between pb-0.5">
-                  <span className="text-[10px] font-black uppercase text-amber-300 tracking-wider">
-                    👉 Move Your Gold Token:
-                  </span>
-                  <span className="text-[10px] font-mono font-black text-amber-400 bg-slate-950 px-2 py-0.5 rounded-full border border-amber-400/40">
-                    Rolled {diceRoll}
-                  </span>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  {canPlayerMoveToken(0) && (
-                    <button
-                      onClick={() => handlePlayerMove(0)}
-                      className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 ring-2 ring-white flex items-center justify-between cursor-pointer active:scale-95 animate-pulse transition-all"
-                    >
-                      <span className="flex items-center gap-2">
-                        <span className="w-5 h-5 rounded-full bg-slate-950 text-amber-400 flex items-center justify-center text-[10px] font-black">
-                          P1
-                        </span>
-                        <span>Move Gold P1 ➔</span>
-                      </span>
-                      <span className="text-[10px] bg-slate-950/20 px-2 py-0.5 rounded-md font-mono">
-                        {playerTokens[0] === -1 ? 'Deploy to Track 🚀' : `Advance +${diceRoll} steps`}
-                      </span>
-                    </button>
-                  )}
-
-                  {canPlayerMoveToken(1) && (
-                    <button
-                      onClick={() => handlePlayerMove(1)}
-                      className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/25 ring-2 ring-white flex items-center justify-between cursor-pointer active:scale-95 animate-pulse transition-all"
-                    >
-                      <span className="flex items-center gap-2">
-                        <span className="w-5 h-5 rounded-full bg-slate-950 text-amber-400 flex items-center justify-center text-[10px] font-black">
-                          P2
-                        </span>
-                        <span>Move Gold P2 ➔</span>
-                      </span>
-                      <span className="text-[10px] bg-slate-950/20 px-2 py-0.5 rounded-md font-mono">
-                        {playerTokens[1] === -1 ? 'Deploy to Track 🚀' : `Advance +${diceRoll} steps`}
-                      </span>
-                    </button>
-                  )}
-                </div>
-
-                <p className="text-[10px] text-amber-200/90 text-center pt-0.5">
-                  💡 Tip: You can also tap the bouncing gold token directly on the board!
-                </p>
-              </div>
-            )}
           </div>
-
-          {/* Commentary & Move Log */}
-          <div className="p-3 rounded-xl bg-slate-900/80 border border-white/10 text-[10px] font-mono text-slate-400 space-y-1 shadow-inner max-h-36 sm:max-h-44 overflow-y-auto custom-scrollbar">
-            <span className="text-[9px] font-sans font-black uppercase tracking-wider text-slate-500 block mb-0.5">
-              Live Battle Feed
-            </span>
-            {gameLog.map((log, i) => (
-              <div key={i} className={i === 0 ? 'text-amber-400 font-bold' : ''}>
-                {log}
-              </div>
-            ))}
-          </div>
-
         </div>
 
       </div>
@@ -2987,7 +2959,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
         <div className="p-2.5 sm:p-3.5 overflow-y-auto flex-1 space-y-3 custom-scrollbar">
           {activeTab === 'games' && (
             <div>
-              {activeGame === 'ludo' && <OriginalLudoGame />}
+              {activeGame === 'ludo' && <OriginalLudoGame order={order} />}
               {activeGame === 'snakes' && <OriginalSnakesAndLadders />}
               {activeGame === 'sudoku' && <OriginalSudokuGame />}
             </div>

@@ -48,6 +48,17 @@ h1, h2, h3, h4, .font-display {
   background: rgba(107, 114, 128, 0.7);
 }
 
+.custom-kds-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.custom-kds-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.45);
+  border-radius: 9999px;
+}
+.custom-kds-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.8);
+}
+
 /* Luxury Glassmorphism Utilities */
 .glass-luxury {
   background: rgba(11, 17, 32, 0.82);

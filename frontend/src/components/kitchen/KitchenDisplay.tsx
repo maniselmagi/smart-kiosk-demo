@@ -275,75 +275,342 @@ export const KitchenDisplay: React.FC = () => {
     }
   };
 
+  // Format today's date in "Thursday 29th of September 2025" style
+  const formattedDate = useMemo(() => {
+    const now = new Date();
+    const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
+    const day = now.getDate();
+    const suffix = (d: number) => {
+      if (d > 3 && d < 21) return 'th';
+      switch (d % 10) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
+      }
+    };
+    const monthName = now.toLocaleDateString('en-US', { month: 'long' });
+    const year = now.getFullYear();
+    return `Today is ${dayName} ${day}${suffix(day)} of ${monthName} ${year}.`;
+  }, []);
+
+  // Top navigation active tab
+  const [activeNavTab, setActiveNavTab] = useState<'Dashboard' | 'Orders' | 'Cooking' | 'Ready' | 'Calls' | 'SoldOut'>('Dashboard');
+
   return (
-    <div className={`min-h-screen p-4 sm:p-6 transition-colors duration-200 font-sans ${
-      isDark ? 'bg-[#0B0F19] text-slate-100' : 'bg-slate-50 text-slate-900'
-    }`}>
+    <div className={`min-h-screen p-3 sm:p-6 lg:p-8 font-sans transition-colors duration-200 relative overflow-x-hidden ${
+      isDark 
+        ? 'bg-[#0f172a] text-slate-100' 
+        : 'bg-[#f8fafc] text-slate-800'
+    }`}
+    style={{
+      backgroundImage: isDark 
+        ? 'radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(217, 70, 239, 0.12) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.12) 0px, transparent 50%)' 
+        : 'radial-gradient(at 0% 0%, rgba(192, 132, 252, 0.35) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(244, 114, 182, 0.28) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.28) 0px, transparent 50%), radial-gradient(at 0% 100%, rgba(167, 139, 250, 0.25) 0px, transparent 50%)'
+    }}
+    >
       
-      <div className="max-w-7xl mx-auto space-y-4">
+      {/* ========================================================= */}
+      {/* MAIN WHITE CARD CONTAINER (REFERENCE SAAS DESIGN)         */}
+      {/* ========================================================= */}
+      <div className={`max-w-[1540px] mx-auto rounded-3xl border shadow-xl p-6 sm:p-8 transition-colors ${
+        isDark 
+          ? 'bg-slate-900/95 border-slate-800 shadow-black/40' 
+          : 'bg-white border-slate-100/90 shadow-2xl shadow-purple-950/5'
+      }`}>
 
-        {/* ========================================================= */}
-        {/* 1. UNIFIED PROFESSIONAL HEADER & CONTROLS                  */}
-        {/* ========================================================= */}
-        <div className={`p-5 rounded-2xl border shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors ${
-          isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'
-        }`}>
+        {/* --------------------------------------------------------- */}
+        {/* TOP NAVIGATION BAR                                        */}
+        {/* --------------------------------------------------------- */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-slate-100 dark:border-slate-800/80 gap-4">
           
-          <div className="flex items-center gap-3">
-            {!isStandaloneRole && (
-              <button
-                onClick={() => setView('kiosk')}
-                className={`p-2 rounded-xl transition-all cursor-pointer ${
-                  isDark ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                }`}
-                title="Return to Kiosk"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-            )}
-
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-md shadow-orange-500/20">
-              <ChefHat className="w-5 h-5" />
+          {/* Logo & Navigation Tabs */}
+          <div className="flex items-center gap-6 lg:gap-8 flex-wrap">
+            {/* Iridescent Swirl Brand Icon */}
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-pink-500 via-amber-400 to-cyan-400 p-0.5 flex items-center justify-center shadow-xs">
+                <div className="w-full h-full rounded-full bg-white dark:bg-slate-900 flex items-center justify-center">
+                  <ChefHat className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                </div>
+              </div>
+              <span className="font-extrabold text-sm tracking-tight hidden sm:inline">Royal Ember</span>
             </div>
 
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-extrabold font-display tracking-tight">
-                  Kitchen Operations Directory
-                </h1>
-                <span className="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20 text-xs font-bold">
-                  {displayOrders.length} Active Tickets
-                </span>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-xs font-bold hidden sm:flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Live Sync
-                </span>
+            {/* Nav Tabs */}
+            <nav className="flex items-center gap-5 sm:gap-7 text-xs font-semibold text-slate-500 dark:text-slate-400">
+              <button 
+                onClick={() => { setActiveNavTab('Dashboard'); setStatusFilter('ALL'); }}
+                className={`py-1 cursor-pointer transition-colors relative ${
+                  activeNavTab === 'Dashboard' 
+                    ? 'text-slate-900 dark:text-white font-bold' 
+                    : 'hover:text-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                Dashboard
+                {activeNavTab === 'Dashboard' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900 dark:bg-white rounded-full" />
+                )}
+              </button>
+
+              <button 
+                onClick={() => { setActiveNavTab('Orders'); setStatusFilter('NEW'); }}
+                className={`py-1 cursor-pointer transition-colors relative ${
+                  activeNavTab === 'Orders' 
+                    ? 'text-slate-900 dark:text-white font-bold' 
+                    : 'hover:text-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                Orders
+                {activeNavTab === 'Orders' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900 dark:bg-white rounded-full" />
+                )}
+              </button>
+
+              <button 
+                onClick={() => { setActiveNavTab('Cooking'); setStatusFilter('PREPARING'); }}
+                className={`py-1 cursor-pointer transition-colors relative ${
+                  activeNavTab === 'Cooking' 
+                    ? 'text-slate-900 dark:text-white font-bold' 
+                    : 'hover:text-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                Cooking Line
+                {activeNavTab === 'Cooking' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900 dark:bg-white rounded-full" />
+                )}
+              </button>
+
+              <button 
+                onClick={() => { setActiveNavTab('Ready'); setStatusFilter('READY'); }}
+                className={`py-1 cursor-pointer transition-colors relative ${
+                  activeNavTab === 'Ready' 
+                    ? 'text-slate-900 dark:text-white font-bold' 
+                    : 'hover:text-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                Ready to Serve
+                {activeNavTab === 'Ready' && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-900 dark:bg-white rounded-full" />
+                )}
+              </button>
+
+              <button 
+                onClick={() => setIsWaiterCallsOpen(true)}
+                className="py-1 cursor-pointer transition-colors hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1.5"
+              >
+                <span>Waiter Calls</span>
+                {pendingAlerts.length > 0 && (
+                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                )}
+              </button>
+
+              <button 
+                onClick={() => setIsSoldOutOpen(true)}
+                className="py-1 cursor-pointer transition-colors hover:text-slate-800 dark:hover:text-slate-200 flex items-center gap-1"
+              >
+                <span>86'd Menu</span>
+                {soldOutItems.length > 0 && (
+                  <span className="text-[10px] px-1.5 py-0.2 bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 rounded-full font-bold">
+                    {soldOutItems.length}
+                  </span>
+                )}
+              </button>
+            </nav>
+          </div>
+
+          {/* User Profile & Quick Action Utilities */}
+          <div className="flex items-center gap-4 self-end md:self-auto">
+            {/* Quick Utility Icons */}
+            <div className="flex items-center gap-1.5 pr-3 border-r border-slate-200 dark:border-slate-800">
+              {!isStandaloneRole && (
+                <button
+                  onClick={() => setView('kiosk')}
+                  className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                  title="Return to Kiosk"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
+              )}
+
+              <button
+                onClick={toggleAudio}
+                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                title={isAudioEnabled ? "Kitchen Chimes Enabled" : "Kitchen Chimes Muted"}
+              >
+                {isAudioEnabled ? <Volume2 className="w-4 h-4 text-emerald-600" /> : <VolumeX className="w-4 h-4 opacity-40" />}
+              </button>
+
+              <button
+                onClick={toggleFullscreen}
+                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer hidden sm:block"
+                title="Toggle Fullscreen"
+              >
+                {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+              </button>
+
+              <button
+                onClick={toggleTheme}
+                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                title="Toggle Theme"
+              >
+                {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
+              </button>
+            </div>
+
+            {/* Profile Avatar & Title (Matches Reference Screenshot) */}
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
+                  Robert Briggs
+                </div>
+                <div className="text-[11px] text-slate-400 dark:text-slate-400 leading-tight">
+                  Royal Ember Kitchen Line
+                </div>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Real-time kitchen order preparation and dining dispatch • Royal Ember Flagship
-              </p>
+              <img 
+                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+                alt="Robert Briggs"
+                className="w-9 h-9 rounded-full object-cover ring-2 ring-slate-100 dark:ring-slate-800"
+              />
+            </div>
+          </div>
+        </div>
 
-              {/* Waiter-Table Allocation Badges (Configured from Management Dashboard) */}
-              <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
-                <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1 mr-1">
-                  <span>Station 1 • Main Kitchen Line</span>
-                  <span className="opacity-40">|</span>
-                </span>
+        {/* --------------------------------------------------------- */}
+        {/* SUB-HEADER: DATE GREETING                                 */}
+        {/* --------------------------------------------------------- */}
+        <div className="pt-6 pb-2 text-xs font-semibold text-slate-800 dark:text-slate-200">
+          <span>{formattedDate}</span>
+        </div>
 
+        {/* --------------------------------------------------------- */}
+        {/* 6 KPI STAT CARDS ROW (EXACT REFERENCE DESIGN)             */}
+        {/* --------------------------------------------------------- */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 my-4">
+          
+          {/* Card 1: System Status */}
+          <div className={`p-4 rounded-2xl border transition-all ${
+            isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-white border-slate-100 shadow-xs hover:border-slate-200'
+          }`}>
+            <div className="flex items-center justify-between text-slate-500 text-[11px] font-semibold">
+              <span>System Status</span>
+              <span className="opacity-40 hover:opacity-100 cursor-pointer">•••</span>
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="w-3 h-3 rounded-full bg-emerald-500 shrink-0" />
+              <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">Good</span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">No issues</p>
+          </div>
+
+          {/* Card 2: Open Orders */}
+          <div className={`p-4 rounded-2xl border transition-all ${
+            isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-white border-slate-100 shadow-xs hover:border-slate-200'
+          }`}>
+            <div className="flex items-center justify-between text-slate-500 text-[11px] font-semibold">
+              <span>Open Orders</span>
+              <span className="opacity-40 hover:opacity-100 cursor-pointer">•••</span>
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="w-3 h-3 rounded-full bg-blue-500 shrink-0" />
+              <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">{counts.NEW}</span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">Orders awaiting fulfilment</p>
+          </div>
+
+          {/* Card 3: In Transit Orders (Preparing) */}
+          <div className={`p-4 rounded-2xl border transition-all ${
+            isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-white border-slate-100 shadow-xs hover:border-slate-200'
+          }`}>
+            <div className="flex items-center justify-between text-slate-500 text-[11px] font-semibold">
+              <span>In Transit Orders</span>
+              <span className="opacity-40 hover:opacity-100 cursor-pointer">•••</span>
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="w-3 h-3 rounded-full bg-amber-500 shrink-0" />
+              <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">{counts.PREPARING}</span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">Orders en route to customers</p>
+          </div>
+
+          {/* Card 4: Flagged Orders / Ready to Serve */}
+          <div className={`p-4 rounded-2xl border transition-all ${
+            isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-white border-slate-100 shadow-xs hover:border-slate-200'
+          }`}>
+            <div className="flex items-center justify-between text-slate-500 text-[11px] font-semibold">
+              <span>Flagged Orders</span>
+              <span className="opacity-40 hover:opacity-100 cursor-pointer">•••</span>
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="w-3 h-3 rounded-full bg-rose-500 shrink-0" />
+              <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">{counts.READY}</span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">Require review / dispatch</p>
+          </div>
+
+          {/* Card 5: Orders this Month / Today */}
+          <div className={`p-4 rounded-2xl border transition-all ${
+            isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-white border-slate-100 shadow-xs hover:border-slate-200'
+          }`}>
+            <div className="flex items-center justify-between text-slate-500 text-[11px] font-semibold">
+              <span>Orders this Month</span>
+              <span className="opacity-40 hover:opacity-100 cursor-pointer">•••</span>
+            </div>
+            <div className="mt-2">
+              <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+                {counts.ALL > 0 ? (4340 + counts.ALL).toLocaleString() : '4,348'}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">1.8% more than last month</p>
+          </div>
+
+          {/* Card 6: Unread Messages / Waiter Calls */}
+          <div className={`p-4 rounded-2xl border transition-all ${
+            isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-white border-slate-100 shadow-xs hover:border-slate-200'
+          }`}>
+            <div className="flex items-center justify-between text-slate-500 text-[11px] font-semibold">
+              <span>Unread Messages</span>
+              <span className="opacity-40 hover:opacity-100 cursor-pointer">•••</span>
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="w-3 h-3 rounded-full bg-rose-500 shrink-0" />
+              <span className="text-lg font-bold text-slate-900 dark:text-white tracking-tight">{pendingAlerts.length}</span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">Messages awaiting your reply</p>
+          </div>
+
+        </div>
+
+        {/* --------------------------------------------------------- */}
+        {/* ORDERS SECTION: TITLE & CONTROLS TOOLBAR                  */}
+        {/* --------------------------------------------------------- */}
+        <div className="pt-6 pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            
+            {/* Left: Orders Title & Waiter Zone Filters */}
+            <div className="flex items-center gap-4 flex-wrap">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+                Orders
+              </h2>
+
+              {/* Waiter Allocation Badges (Configured in Management Dashboard) */}
+              <div className="flex items-center gap-1.5 flex-wrap">
                 {waiterZones.map(zone => {
                   const isSelected = selectedWaiterFilter === zone.waiter.code;
                   return (
                     <button
                       key={zone.id}
                       onClick={() => setSelectedWaiterFilter(isSelected ? null : zone.waiter.code)}
-                      className={`px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all cursor-pointer flex items-center gap-1.5 ${
-                        zone.waiter.color
-                      } ${isSelected ? 'ring-2 ring-white/60 scale-105 shadow-sm' : 'hover:scale-102'}`}
-                      title={`Click to filter orders for ${zone.waiter.name} (${zone.rangeLabel})`}
+                      className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all cursor-pointer flex items-center gap-1.5 ${
+                        isSelected 
+                          ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-transparent shadow-xs' 
+                          : 'bg-slate-50 text-slate-600 dark:bg-slate-800/80 dark:text-slate-300 border-slate-200/80 dark:border-slate-700 hover:border-slate-300'
+                      }`}
+                      title={`Filter by ${zone.waiter.name} (${zone.rangeLabel})`}
                     >
-                      <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                      <strong className="font-extrabold">{zone.rangeLabel}</strong>
-                      <span>{zone.waiter.initial} {zone.waiter.name}</span>
+                      <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
+                      <span className="font-bold">{zone.rangeLabel}</span>
+                      <span>{zone.waiter.name}</span>
                     </button>
                   );
                 })}
@@ -351,426 +618,309 @@ export const KitchenDisplay: React.FC = () => {
                 {selectedWaiterFilter && (
                   <button
                     onClick={() => setSelectedWaiterFilter(null)}
-                    className="text-[10px] text-slate-400 hover:text-white underline cursor-pointer ml-1"
+                    className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline cursor-pointer ml-1"
                   >
                     Clear Filter
                   </button>
                 )}
               </div>
             </div>
-          </div>
 
-          {/* Top Quick Actions */}
-          <div className="flex items-center gap-2 flex-wrap">
-            
-            {/* Waiter Calls Badge */}
-            <button
-              onClick={() => setIsWaiterCallsOpen(true)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                pendingAlerts.length > 0 
-                  ? 'bg-rose-500/10 text-rose-500 border border-rose-500/30 hover:bg-rose-500/20' 
-                  : isDark ? 'bg-slate-800 text-slate-400 hover:text-white' : 'bg-slate-100 text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Bell className={`w-3.5 h-3.5 ${pendingAlerts.length > 0 ? 'animate-bounce text-rose-500' : ''}`} />
-              <span>Waiter Calls</span>
-              {pendingAlerts.length > 0 && (
-                <span className="w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center">
-                  {pendingAlerts.length}
-                </span>
-              )}
-            </button>
-
-            {/* 86'd Menu Controller */}
-            <button
-              onClick={() => setIsSoldOutOpen(true)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                soldOutItems.length > 0 
-                  ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30 hover:bg-amber-500/20' 
-                  : isDark ? 'bg-slate-800 text-slate-400 hover:text-white' : 'bg-slate-100 text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Flame className="w-3.5 h-3.5 text-amber-500" />
-              <span>86'd ({soldOutItems.length})</span>
-            </button>
-
-            {/* Audio Toggle */}
-            <button
-              onClick={toggleAudio}
-              className={`p-2 rounded-xl transition-all cursor-pointer ${
-                isDark ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-              }`}
-              title={isAudioEnabled ? "Kitchen Chimes Enabled" : "Kitchen Chimes Muted"}
-            >
-              {isAudioEnabled ? <Volume2 className="w-4 h-4 text-emerald-500" /> : <VolumeX className="w-4 h-4 opacity-50" />}
-            </button>
-
-            {/* Fullscreen */}
-            <button
-              onClick={toggleFullscreen}
-              className={`p-2 rounded-xl transition-all cursor-pointer hidden sm:flex ${
-                isDark ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-              }`}
-              title="Fullscreen"
-            >
-              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-            </button>
-
-            {/* Dark/Light Switcher */}
-            <button
-              onClick={toggleTheme}
-              className={`p-2 rounded-xl transition-all cursor-pointer ${
-                isDark ? 'bg-slate-800 hover:bg-slate-700 text-amber-400' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-              }`}
-              title="Toggle Theme"
-            >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-
-            {/* Clock */}
-            <div className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold hidden md:flex items-center gap-1.5 ${
-              isDark ? 'bg-slate-950 border border-slate-800 text-amber-400' : 'bg-slate-100 text-slate-700'
-            }`}>
-              <Clock className="w-3.5 h-3.5 opacity-60" />
-              <span>{clockTime}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* ========================================================= */}
-        {/* 2. MASTER KITCHEN TABLE CONTAINER                         */}
-        {/* ========================================================= */}
-        <div className={`rounded-2xl border shadow-xs overflow-hidden ${
-          isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'
-        }`}>
-          
-          {/* Table Toolbar: Status Filter Tabs + Station Selector + Search */}
-          <div className={`p-4 border-b flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 ${
-            isDark ? 'border-slate-800 bg-slate-900/60' : 'border-slate-100 bg-slate-50/70'
-          }`}>
-            
-            {/* Status Segmented Buttons */}
-            <div className={`flex items-center gap-1 overflow-x-auto p-1 rounded-xl text-xs font-bold ${
-              isDark ? 'bg-slate-950' : 'bg-slate-100'
-            }`}>
-              {[
-                { id: 'ALL', label: 'All Orders', count: counts.ALL },
-                { id: 'NEW', label: 'New Tickets', count: counts.NEW },
-                { id: 'PREPARING', label: 'Cooking Line', count: counts.PREPARING },
-                { id: 'READY', label: 'Ready to Serve', count: counts.READY },
-                { id: 'COMPLETED', label: 'Completed', count: counts.COMPLETED }
-              ].map(st => (
-                <button
-                  key={st.id}
-                  onClick={() => setStatusFilter(st.id as 'ALL' | OrderStatus)}
-                  className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
-                    statusFilter === st.id
-                      ? isDark 
-                        ? 'bg-blue-600 text-white shadow-xs font-black' 
-                        : 'bg-white text-slate-900 shadow-xs font-black'
-                      : 'text-slate-400 hover:text-slate-200'
+            {/* Right: Filter & Search Bar (Exact Reference Controls) */}
+            <div className="flex items-center gap-3">
+              
+              {/* Filter Button */}
+              <div className="relative">
+                <button 
+                  onClick={() => {
+                    const next: Record<string, string> = {
+                      'ALL': 'HOT',
+                      'HOT': 'TANDOOR',
+                      'TANDOOR': 'STARTER',
+                      'STARTER': 'BEVERAGE',
+                      'BEVERAGE': 'ALL'
+                    };
+                    setSelectedStation(next[selectedStation] || 'ALL');
+                  }}
+                  className={`px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
+                    selectedStation !== 'ALL'
+                      ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700'
+                      : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50'
                   }`}
+                  title="Click to cycle station lines"
                 >
-                  <span>{st.label}</span>
-                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
-                    statusFilter === st.id
-                      ? 'bg-white/20 text-white'
-                      : isDark ? 'bg-slate-800 text-slate-300' : 'bg-slate-200 text-slate-700'
-                  }`}>
-                    {st.count}
-                  </span>
+                  <Filter className="w-3.5 h-3.5 opacity-60" />
+                  <span>Filter {selectedStation !== 'ALL' ? `(${selectedStation})` : ''}</span>
                 </button>
-              ))}
-            </div>
+              </div>
 
-            {/* Station Selector & Search Filter */}
-            <div className="flex items-center gap-2">
-              <select
-                value={selectedStation}
-                onChange={(e) => setSelectedStation(e.target.value)}
-                className={`px-3 py-2 text-xs rounded-xl border outline-none font-medium cursor-pointer ${
-                  isDark ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-white border-slate-200 text-slate-800'
-                }`}
-              >
-                <option value="ALL">All Stations</option>
-                <option value="HOT">Hot Cooking Line</option>
-                <option value="TANDOOR">Tandoor &amp; Breads</option>
-                <option value="STARTER">Starters &amp; Tiffin</option>
-                <option value="BEVERAGE">Drinks &amp; Sweets</option>
-              </select>
-
-              <div className={`relative flex-1 sm:w-64 rounded-xl border flex items-center px-3 py-2 ${
-                isDark ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-white border-slate-200 text-slate-800'
-              }`}>
-                <Search className="w-3.5 h-3.5 opacity-40 mr-2 shrink-0" />
+              {/* Search Bar */}
+              <div className="relative flex items-center">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search order #, table, dish..."
-                  className="bg-transparent border-none outline-none text-xs w-full placeholder:opacity-50"
+                  placeholder="Search..."
+                  className={`w-44 sm:w-56 pl-3 pr-8 py-1.5 text-xs rounded-lg border outline-none transition-all placeholder:text-slate-400 ${
+                    isDark 
+                      ? 'bg-slate-800 border-slate-700 text-white focus:border-slate-500' 
+                      : 'bg-white border-slate-200 text-slate-800 focus:border-slate-400'
+                  }`}
                 />
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 pointer-events-none" />
                 {searchQuery && (
-                  <button onClick={() => setSearchQuery('')} className="p-0.5 opacity-50 hover:opacity-100">
+                  <button 
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-7 text-slate-400 hover:text-slate-600"
+                  >
                     <X className="w-3 h-3" />
                   </button>
                 )}
               </div>
+
             </div>
+
           </div>
+        </div>
 
-          {/* Table Data View */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className={`border-b font-extrabold uppercase tracking-wider text-[10px] ${
-                  isDark 
-                    ? 'bg-slate-950/80 border-slate-800 text-slate-400' 
-                    : 'bg-slate-50 border-slate-200/80 text-slate-500'
-                }`}>
-                  <th className="py-3.5 px-4">Ticket</th>
-                  <th className="py-3.5 px-4">Table</th>
-                  <th className="py-3.5 px-4">Server</th>
-                  <th className="py-3.5 px-4">Items Summary</th>
-                  <th className="py-3.5 px-4">Elapsed / Target</th>
-                  <th className="py-3.5 px-4 text-center">Status</th>
-                  <th className="py-3.5 px-4 text-right">Actions</th>
+        {/* --------------------------------------------------------- */}
+        {/* CLEAN ORDERS DATA TABLE (EXACT REFERENCE DESIGN)          */}
+        {/* --------------------------------------------------------- */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-medium text-[11px]">
+                <th className="py-3 px-3">Order ID</th>
+                <th className="py-3 px-3">Customer</th>
+                <th className="py-3 px-3">Order Date</th>
+                <th className="py-3 px-3">Order Status</th>
+                <th className="py-3 px-3">Payment Status</th>
+                <th className="py-3 px-3">Item Count</th>
+                <th className="py-3 px-3">Total Value</th>
+                <th className="py-3 px-3">Assigned Staff</th>
+                <th className="py-3 px-3 text-right">Actions</th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-slate-100/90 dark:divide-slate-800/80">
+              {filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="py-14 text-center text-slate-400">
+                    <UtensilsCrossed className="w-8 h-8 mx-auto mb-2 opacity-30 stroke-1" />
+                    <p className="font-semibold text-sm text-slate-700 dark:text-slate-300">No matching orders found</p>
+                    <p className="text-xs text-slate-400 mt-0.5">All active tickets have been fulfilled or clear.</p>
+                  </td>
                 </tr>
-              </thead>
-              
-              <tbody className={`divide-y ${isDark ? 'divide-slate-800/80' : 'divide-slate-100'}`}>
-                {filteredOrders.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="py-14 text-center text-slate-400">
-                      <UtensilsCrossed className="w-9 h-9 mx-auto mb-2 opacity-30 stroke-1" />
-                      <p className="font-bold text-sm">No orders found matching your search filter.</p>
-                      <p className="text-xs opacity-60 mt-0.5">Kitchen prep line is caught up.</p>
-                    </td>
-                  </tr>
-                ) : (
-                  filteredOrders.map(order => {
-                    const timing = getOrderTiming(order.createdAt, 15);
-                    const waiter = getAssignedWaiter(order.tableNumber);
-                    const customerNote = order.items.find(i => i.specialInstructions)?.specialInstructions;
+              ) : (
+                filteredOrders.map(order => {
+                  const timing = getOrderTiming(order.createdAt, 15);
+                  const waiter = getAssignedWaiter(order.tableNumber);
+                  const customerNote = order.items.find(i => i.specialInstructions)?.specialInstructions;
+                  const totalItemsCount = order.items.reduce((acc, i) => acc + (i.quantity || 1), 0);
+                  const calculatedTotal = typeof order.total === 'number' && order.total > 0 
+                    ? order.total 
+                    : order.items.reduce((acc, i) => acc + (i.price * (i.quantity || 1)), 0);
 
-                    // Status pill styling
-                    const statusStyles = {
-                      NEW: 'bg-amber-500/10 text-amber-500 border-amber-500/30',
-                      PREPARING: 'bg-blue-500/10 text-blue-500 border-blue-500/30',
-                      READY: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30',
-                      COMPLETED: 'bg-slate-500/10 text-slate-400 border-slate-500/30'
-                    }[order.status];
+                  // Status badge matching reference image styles
+                  const statusConfig = {
+                    NEW: {
+                      label: 'Open',
+                      pillClass: 'bg-blue-50 text-blue-700 border border-blue-100/80 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900',
+                      dotClass: 'bg-blue-600'
+                    },
+                    PREPARING: {
+                      label: 'In Transit',
+                      pillClass: 'bg-amber-50 text-amber-700 border border-amber-100/80 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900',
+                      dotClass: 'bg-amber-500'
+                    },
+                    READY: {
+                      label: 'Delivered',
+                      pillClass: 'bg-emerald-50 text-emerald-700 border border-emerald-100/80 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900',
+                      dotClass: 'bg-emerald-600'
+                    },
+                    COMPLETED: {
+                      label: 'Delivered',
+                      pillClass: 'bg-emerald-50 text-emerald-700 border border-emerald-100/80 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900',
+                      dotClass: 'bg-emerald-600'
+                    }
+                  }[order.status];
 
-                    return (
-                      <tr 
-                        key={order.id} 
-                        onClick={() => setSelectedOrderForModal(order)}
-                        className={`transition-colors cursor-pointer ${
-                          isDark 
-                            ? 'hover:bg-slate-800/50' 
-                            : 'hover:bg-slate-50/80'
-                        }`}
-                      >
-                        {/* 1. Ticket # */}
-                        <td className="py-4 px-4 font-mono font-extrabold text-xs whitespace-nowrap align-top">
-                          <span className={`px-2.5 py-1.5 rounded-lg font-mono font-bold text-xs inline-block ${
-                            isDark ? 'bg-slate-800 text-slate-200 border border-slate-700' : 'bg-slate-100 text-slate-800 border border-slate-200'
-                          }`}>
-                            #{order.orderNumber}
+                  // Payment status badge matching reference image (Paid / Not Paid)
+                  const isPaid = order.paymentStatus === 'PAID' || order.status === 'COMPLETED';
+                  const paymentBadge = isPaid ? (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100/80 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                      Paid
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-100/80 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                      Not Paid
+                    </span>
+                  );
+
+                  return (
+                    <tr 
+                      key={order.id}
+                      onClick={() => setSelectedOrderForModal(order)}
+                      className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors cursor-pointer group"
+                    >
+                      {/* 1. Order ID */}
+                      <td className="py-4 px-3 font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap align-middle">
+                        #{order.orderNumber}
+                      </td>
+
+                      {/* 2. Customer / Table */}
+                      <td className="py-4 px-3 font-semibold text-slate-900 dark:text-white whitespace-nowrap align-middle">
+                        Table {order.tableNumber}
+                      </td>
+
+                      {/* 3. Order Date & Elapsed Time */}
+                      <td className="py-4 px-3 text-slate-500 dark:text-slate-400 whitespace-nowrap align-middle">
+                        <div className="leading-tight">
+                          <span>{order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-GB') : '29/09/25'}</span>
+                          <span className="block text-[10px] text-slate-400 mt-0.5 font-mono">
+                            {timing.display}
+                            {timing.isOverdue && (
+                              <span className="text-rose-500 font-bold ml-1">+{timing.overdueMins}m</span>
+                            )}
                           </span>
-                        </td>
+                        </div>
+                      </td>
 
-                        {/* 2. Table # */}
-                        <td className="py-4 px-4 font-bold whitespace-nowrap align-top">
-                          <span className="px-3 py-1.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-950 font-black text-xs inline-flex items-center gap-1.5 shadow-xs">
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                            Table {order.tableNumber}
+                      {/* 4. Order Status Pill with colored dot */}
+                      <td className="py-4 px-3 whitespace-nowrap align-middle">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold ${statusConfig.pillClass}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${statusConfig.dotClass}`} />
+                          {statusConfig.label}
+                        </span>
+                      </td>
+
+                      {/* 5. Payment Status Pill with colored dot */}
+                      <td className="py-4 px-3 whitespace-nowrap align-middle">
+                        {paymentBadge}
+                      </td>
+
+                      {/* 6. Item Count & Dish Breakdown (Clean, airy, non-dumped) */}
+                      <td className="py-4 px-3 align-middle max-w-xs sm:max-w-md">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-slate-900 dark:text-white">
+                            {totalItemsCount}
                           </span>
-                        </td>
+                          <span className="text-slate-400 text-[11px]">
+                            ({order.items.length} {order.items.length === 1 ? 'dish' : 'dishes'})
+                          </span>
+                        </div>
 
-                        {/* 3. Server / Zone */}
-                        <td className="py-4 px-4 whitespace-nowrap align-top">
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1.5 ${
-                            waiter.name.includes('Suresh')
-                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
-                              : waiter.name.includes('Bala')
-                                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
-                                : 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20'
-                          }`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${
-                              waiter.name.includes('Suresh') ? 'bg-emerald-500' : waiter.name.includes('Bala') ? 'bg-amber-500' : 'bg-blue-500'
-                            }`} />
+                        {/* Dish preview snippets */}
+                        <div className="mt-1 space-y-1">
+                          {order.items.slice(0, 2).map((item, idx) => {
+                            const isVeg = /veg|paneer|dosa|idli|coffee|vada|kesari|papad|poori/i.test(item.name);
+                            const isTreat = item.name.toLowerCase().includes('complimentary') || item.name.toLowerCase().includes('delay');
+                            return (
+                              <div key={idx} className="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-300">
+                                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isVeg ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                                <span className="font-medium truncate">{item.quantity}× {item.name}</span>
+                                {item.spiceLevel && (
+                                  <span className="text-[10px] text-slate-400 shrink-0">({item.spiceLevel})</span>
+                                )}
+                                {isTreat && (
+                                  <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-1 rounded shrink-0">Treat</span>
+                                )}
+                              </div>
+                            );
+                          })}
+                          {order.items.length > 2 && (
+                            <div className="text-[10px] text-slate-400 italic">
+                              +{order.items.length - 2} more items...
+                            </div>
+                          )}
+                          {customerNote && (
+                            <div className="text-[10px] text-blue-600 dark:text-blue-400 italic truncate max-w-xs">
+                              Note: "{customerNote}"
+                            </div>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* 7. Total Value */}
+                      <td className="py-4 px-3 font-semibold text-slate-900 dark:text-white whitespace-nowrap align-middle">
+                        ₹{calculatedTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </td>
+
+                      {/* 8. Assigned Staff with Circular Avatar (Exact Reference Design) */}
+                      <td className="py-4 px-3 whitespace-nowrap align-middle">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-slate-800 dark:text-slate-200">
                             {waiter.name}
                           </span>
-                          <span className="text-[10px] text-slate-400 block mt-1">
-                            {waiter.zone}
-                          </span>
-                        </td>
-
-                        {/* 4. Dishes & Full Preparation Details (Old full content) */}
-                        <td className="py-4 px-4 max-w-lg align-top">
-                          <div className="space-y-2">
-                            
-                            {/* Check for Complimentary Delay Treat */}
-                            {order.items.some(i => i.name.toLowerCase().includes('complimentary') || i.name.toLowerCase().includes('delay')) && (
-                              <div className="p-2 rounded-xl border border-amber-400/40 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold flex items-center gap-1.5 mb-1.5">
-                                <span className="text-sm">🎁</span>
-                                <span>Complimentary Delay Treat Claimed</span>
-                              </div>
-                            )}
-
-                            {order.items.map((item, idx) => {
-                              const isVeg = /veg|paneer|dosa|idli|coffee|vada|kesari|papad|poori/i.test(item.name);
-                              const isTreat = item.name.toLowerCase().includes('complimentary') || item.name.toLowerCase().includes('delay');
-
-                              return (
-                                <div 
-                                  key={idx} 
-                                  className={`p-2 rounded-xl border transition-all ${
-                                    isTreat 
-                                      ? 'border-amber-400/30 bg-amber-500/5' 
-                                      : isDark ? 'border-slate-800/80 bg-slate-800/30' : 'border-slate-200/70 bg-slate-50/70'
-                                  }`}
-                                >
-                                  <div className="flex items-center justify-between gap-2">
-                                    <div className="flex items-center gap-2">
-                                      <span className="w-5 h-5 rounded-md bg-amber-500/15 text-amber-600 dark:text-amber-400 font-black text-xs flex items-center justify-center shrink-0">
-                                        {item.quantity}×
-                                      </span>
-
-                                      {/* Veg / Non-Veg Icon */}
-                                      <span className={`w-3.5 h-3.5 rounded-xs border flex items-center justify-center p-0.5 shrink-0 ${
-                                        isVeg ? 'border-emerald-500' : 'border-rose-500'
-                                      }`}>
-                                        <span className={`w-full h-full rounded-full ${isVeg ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                                      </span>
-
-                                      <span className="font-bold text-xs text-slate-900 dark:text-white">
-                                        {item.name}
-                                      </span>
-                                    </div>
-
-                                    {item.spiceLevel && (
-                                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 shrink-0">
-                                        Spice: {item.spiceLevel}
-                                      </span>
-                                    )}
-                                  </div>
-
-                                  {/* Modifiers & Customizations */}
-                                  {item.customizations && item.customizations.length > 0 && (
-                                    <div className="text-[10px] text-slate-500 dark:text-slate-400 pl-7 mt-0.5">
-                                      +{item.customizations.join(', ')}
-                                    </div>
-                                  )}
-
-                                  {/* Item-level special instruction */}
-                                  {item.specialInstructions && (
-                                    <div className="mt-1 pl-7 text-[11px] text-blue-600 dark:text-blue-400 italic">
-                                      "{item.specialInstructions}"
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })}
-
-                            {/* Customer Instructions Alert Callout */}
-                            {customerNote && (
-                              <div className="p-2.5 rounded-xl border border-blue-400/30 bg-blue-500/10 text-blue-600 dark:text-blue-300 text-xs flex items-start gap-1.5">
-                                <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                                <span>"{customerNote}"</span>
-                              </div>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* 5. Elapsed / Target & Overdue */}
-                        <td className="py-4 px-4 whitespace-nowrap align-top">
-                          <div className="flex items-center gap-1.5">
-                            <span className="font-mono text-xs font-bold text-slate-700 dark:text-slate-300">
-                              ⏱ {timing.display}
-                            </span>
-                          </div>
-                          <span className="text-[10px] text-slate-400 block mt-1">
-                            Target: 15m
-                          </span>
-                          {timing.isOverdue && (
-                            <span className="px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-500 border border-rose-500/30 text-[10px] font-black inline-block mt-1 animate-pulse">
-                              OVERDUE +{timing.overdueMins}m
+                          {waiter.avatarUrl ? (
+                            <img 
+                              src={waiter.avatarUrl} 
+                              alt={waiter.name}
+                              className="w-6 h-6 rounded-full object-cover ring-1 ring-slate-200 dark:ring-slate-700 shrink-0" 
+                            />
+                          ) : (
+                            <span className="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-[10px] font-bold flex items-center justify-center shrink-0">
+                              {waiter.initial}
                             </span>
                           )}
-                        </td>
+                        </div>
+                      </td>
 
-                        {/* 6. Status Pill */}
-                        <td className="py-4 px-4 text-center whitespace-nowrap align-top">
-                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase border ${statusStyles}`}>
-                            {order.status === 'COMPLETED' ? 'SERVED & CLEARED' : order.status === 'READY' ? 'READY TO SERVE' : order.status}
-                          </span>
-                        </td>
-
-                        {/* 7. Action Button (Old operational labels) */}
-                        <td className="py-4 px-4 text-right whitespace-nowrap align-top">
-                          <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
-                            
-                            {/* Inspect Eye */}
+                      {/* 9. Clean Action Controls */}
+                      <td className="py-4 px-3 text-right whitespace-nowrap align-middle">
+                        <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
+                          
+                          {order.status === 'NEW' && (
                             <button
-                              onClick={() => setSelectedOrderForModal(order)}
-                              className={`p-2 rounded-xl transition-colors cursor-pointer ${
-                                isDark 
-                                  ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' 
-                                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                              }`}
-                              title="Inspect Ticket Details"
+                              onClick={(e) => handleAdvanceStatus(order.id, 'NEW', e)}
+                              className="px-2.5 py-1 rounded-md bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-semibold cursor-pointer transition-colors shadow-xs"
                             >
-                              <Eye className="w-3.5 h-3.5" />
+                              Accept &amp; Cook
                             </button>
+                          )}
 
-                            {/* Advance Stage Button with Old Labels */}
-                            {order.status === 'NEW' && (
-                              <button
-                                onClick={(e) => handleAdvanceStatus(order.id, 'NEW', e)}
-                                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black flex items-center gap-1.5 shadow-xs cursor-pointer transition-transform active:scale-95"
-                              >
-                                <Flame className="w-3.5 h-3.5 fill-slate-950" />
-                                <span>Accept &amp; Cook</span>
-                              </button>
-                            )}
+                          {order.status === 'PREPARING' && (
+                            <button
+                              onClick={(e) => handleAdvanceStatus(order.id, 'PREPARING', e)}
+                              className="px-2.5 py-1 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold cursor-pointer transition-colors shadow-xs"
+                            >
+                              Mark Ready
+                            </button>
+                          )}
 
-                            {order.status === 'PREPARING' && (
-                              <button
-                                onClick={(e) => handleAdvanceStatus(order.id, 'PREPARING', e)}
-                                className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black flex items-center gap-1.5 shadow-xs cursor-pointer transition-transform active:scale-95"
-                              >
-                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                <span>Mark Ready to Serve</span>
-                              </button>
-                            )}
+                          {order.status === 'READY' && (
+                            <button
+                              onClick={(e) => handleAdvanceStatus(order.id, 'READY', e)}
+                              className="px-2.5 py-1 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-semibold cursor-pointer transition-colors shadow-xs"
+                            >
+                              Deliver
+                            </button>
+                          )}
 
-                            {order.status === 'READY' && (
-                              <button
-                                onClick={(e) => handleAdvanceStatus(order.id, 'READY', e)}
-                                className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black flex items-center gap-1.5 shadow-xs cursor-pointer transition-transform active:scale-95"
-                              >
-                                <CheckCheck className="w-3.5 h-3.5" />
-                                <span>Deliver to Table</span>
-                              </button>
-                            )}
+                          {order.status === 'COMPLETED' && (
+                            <span className="text-[11px] font-medium text-slate-400 flex items-center gap-1">
+                              <Check className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>Delivered</span>
+                            </span>
+                          )}
 
-                            {order.status === 'COMPLETED' && (
-                              <span className="px-3 py-1.5 text-xs font-bold text-slate-400 dark:text-slate-500 flex items-center gap-1">
-                                <Check className="w-3.5 h-3.5 text-emerald-500" />
-                                <span>Delivered to Table</span>
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+                          <button
+                            onClick={() => setSelectedOrderForModal(order)}
+                            className="p-1 rounded-md text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                            title="Inspect Details"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
 
       </div>

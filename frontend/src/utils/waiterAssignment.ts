@@ -7,6 +7,7 @@ export interface WaiterInfo {
   role: string;       // 'Section Captain' or 'Table Server'
   color: string;      // badge styling classes
   avatarBg: string;   // avatar styling classes
+  avatarUrl?: string; // photo avatar
 }
 
 export interface WaiterZoneConfig {
@@ -33,8 +34,9 @@ export const DEFAULT_WAITER_ZONES: WaiterZoneConfig[] = [
       initial: 'V',
       zone: 'T(1-5)',
       role: 'Section Waiter • Tables 1 to 5',
-      color: 'bg-blue-500/20 text-blue-400 border-blue-500/40',
+      color: 'bg-blue-50 text-blue-700 border-blue-200',
       avatarBg: 'bg-blue-600 text-white',
+      avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
     }
   },
   {
@@ -50,8 +52,9 @@ export const DEFAULT_WAITER_ZONES: WaiterZoneConfig[] = [
       initial: 'B',
       zone: 'T(6-10)',
       role: 'Section Waiter • Tables 6 to 10',
-      color: 'bg-amber-500/20 text-amber-400 border-amber-500/40',
+      color: 'bg-amber-50 text-amber-700 border-amber-200',
       avatarBg: 'bg-amber-600 text-white',
+      avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=80',
     }
   },
   {
@@ -67,8 +70,9 @@ export const DEFAULT_WAITER_ZONES: WaiterZoneConfig[] = [
       initial: 'S',
       zone: 'T(11-15)',
       role: 'Section Waiter • Tables 11 to 15',
-      color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40',
+      color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
       avatarBg: 'bg-emerald-600 text-white',
+      avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop&q=80',
     }
   },
   {
@@ -84,8 +88,9 @@ export const DEFAULT_WAITER_ZONES: WaiterZoneConfig[] = [
       initial: 'R',
       zone: 'T(16-20)',
       role: 'Section Waiter • Tables 16 to 20',
-      color: 'bg-purple-500/20 text-purple-400 border-purple-500/40',
+      color: 'bg-purple-50 text-purple-700 border-purple-200',
       avatarBg: 'bg-purple-600 text-white',
+      avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&auto=format&fit=crop&q=80',
     }
   }
 ];

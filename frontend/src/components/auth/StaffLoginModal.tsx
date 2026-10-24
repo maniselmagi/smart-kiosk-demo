@@ -13,52 +13,14 @@ import {
   Crown, 
   User, 
   Check,
-  AlertCircle
+  AlertCircle,
+  Eye,
+  EyeOff,
+  LogIn
 } from 'lucide-react';
+import { authService, UserCredential } from '../../services/authService';
 
-export interface StaffUser {
-  id: string;
-  name: string;
-  role: 'kitchen' | 'management';
-  title: string;
-  pin: string;
-  username: string;
-}
-
-export const STAFF_USERS: StaffUser[] = [
-  {
-    id: 'chef-vikram',
-    name: 'Chef Vikram Sharma',
-    role: 'kitchen',
-    title: 'Executive Head Chef',
-    pin: '1234',
-    username: 'chef_vikram',
-  },
-  {
-    id: 'cook-arjun',
-    name: 'Arjun Nair',
-    role: 'kitchen',
-    title: 'Senior Line Cook',
-    pin: '4321',
-    username: 'cook_arjun',
-  },
-  {
-    id: 'mgr-indiranagar',
-    name: 'Manager Indiranagar',
-    role: 'management',
-    title: 'General Store Manager',
-    pin: '9901',
-    username: 'manager_indiranagar',
-  },
-  {
-    id: 'sup-raj',
-    name: 'Raj Kumar',
-    role: 'management',
-    title: 'Floor Operations Lead',
-    pin: '5522',
-    username: 'supervisor_raj',
-  },
-];
+export type StaffUser = UserCredential;
 
 interface StaffLoginModalProps {
   isOpen: boolean;
@@ -69,25 +31,35 @@ interface StaffLoginModalProps {
 
 export const StaffLoginModal: React.FC<StaffLoginModalProps> = ({
   isOpen,
-  initialRole = 'kitchen',
+  initialRole = 'management',
   onClose,
   onLoginSuccess,
 }) => {
-  const [selectedRole, setSelectedRole] = useState<'kitchen' | 'management'>(initialRole);
+  const [selectedRole, setSelectedRole] = useState<'all' | 'kitchen' | 'management'>('all');
+  const [authMethod, setAuthMethod] = useState<'credentials' | 'pin'>('credentials');
+  
+  // Credentials state
+  const [username, setUsername] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  
+  // PIN state
   const [pin, setPin] = useState<string>('');
+  
+  // Feedback state
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [authenticatedStaff, setAuthenticatedStaff] = useState<StaffUser | null>(null);
-  const [authMethod, setAuthMethod] = useState<'pin' | 'credentials'>('pin');
+  const [usersList, setUsersList] = useState<UserCredential[]>([]);
 
-  // Username/Password alternative form
-  const [username, setUsername] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-
-  // Update selectedRole whenever initialRole changes or modal opens
+  // Load latest users from authService
   useEffect(() => {
     if (isOpen) {
-      setSelectedRole(initialRole);
+      const users = authService.getUsers();
+      setUsersList(users);
+      setSelectedRole(initialRole || 'all');
+      setUsername('');
+      setPassword('');
       setPin('');
       setErrorMessage(null);
       setIsSuccess(false);
@@ -95,111 +67,81 @@ export const StaffLoginModal: React.FC<StaffLoginModalProps> = ({
     }
   }, [isOpen, initialRole]);
 
-  // Filter staff by role
-  const roleStaff = STAFF_USERS.filter((s) => s.role === selectedRole);
+  // Listen for user updates
+  useEffect(() => {
+    const handleUpdate = () => {
+      setUsersList(authService.getUsers());
+    };
+    window.addEventListener('auth_users_updated', handleUpdate);
+    return () => window.removeEventListener('auth_users_updated', handleUpdate);
+  }, []);
 
-  const handleKeyPress = (num: string) => {
+  const handleCredentialsLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage(null);
+
+    const cleanUser = username.trim();
+    const cleanPass = password.trim();
+
+    if (!cleanUser || !cleanPass) {
+      setErrorMessage('Please enter both username and password.');
+      return;
+    }
+
+    const result = authService.authenticate(cleanUser, cleanPass);
+
+    if (result.success && result.user) {
+      // Check if role filter matches (if user specifically clicked Kitchen or Management tab)
+      if (selectedRole !== 'all' && result.user.role !== selectedRole) {
+        setErrorMessage(
+          `This account belongs to ${
+            result.user.role === 'management' ? 'Management Dashboard' : 'Kitchen KDS'
+          }. Please select the ${result.user.role} tab or Auto-Detect.`
+        );
+        return;
+      }
+
+      triggerLoginSuccess(result.user);
+    } else {
+      setErrorMessage(result.error || 'Invalid credentials. Default admin: admin / admin123');
+    }
+  };
+
+  const handlePinDigit = (digit: string) => {
     if (isSuccess) return;
     if (pin.length < 4) {
-      const nextPin = pin + num;
+      const nextPin = pin + digit;
       setPin(nextPin);
       setErrorMessage(null);
 
-      // If user typed 4 digits, trigger verification
       if (nextPin.length === 4) {
-        verifyPin(nextPin, selectedRole);
+        const preferredRole = selectedRole === 'all' ? undefined : selectedRole;
+        const result = authService.authenticatePin(nextPin, preferredRole);
+        if (result.success && result.user) {
+          triggerLoginSuccess(result.user);
+        } else {
+          setErrorMessage('Invalid 4-digit PIN. Try 9901 for Manager or 1234 for Kitchen.');
+          setTimeout(() => setPin(''), 600);
+        }
       }
     }
   };
 
-  const handleDelete = () => {
-    if (isSuccess) return;
-    setPin((prev) => prev.slice(0, -1));
+  const triggerLoginSuccess = (user: UserCredential) => {
+    setIsSuccess(true);
+    setAuthenticatedStaff(user);
     setErrorMessage(null);
+
+    setTimeout(() => {
+      onLoginSuccess(user.role, user);
+    }, 700);
   };
 
-  const handleClear = () => {
-    if (isSuccess) return;
-    setPin('');
+  const fillQuickPreset = (u: string, p: string, role?: 'management' | 'kitchen') => {
+    setUsername(u);
+    setPassword(p);
+    if (role) setSelectedRole(role);
     setErrorMessage(null);
-  };
-
-  const verifyPin = (inputPin: string, role: 'kitchen' | 'management') => {
-    // 1. Direct match with role's staff
-    const staffMatch = STAFF_USERS.find(
-      (s) => s.role === role && s.pin === inputPin
-    );
-
-    // 2. Cross-role match (if user entered a valid management PIN while on kitchen tab or vice-versa)
-    const crossMatch = STAFF_USERS.find((s) => s.pin === inputPin);
-
-    // 3. Fallback master demo PINs (1234 for kitchen, 9901 for management, 0000 master)
-    let matchedUser: StaffUser | null = staffMatch || null;
-
-    if (!matchedUser && crossMatch) {
-      matchedUser = crossMatch;
-    } else if (!matchedUser && (inputPin === '1234' || inputPin === '0000')) {
-      matchedUser = {
-        id: `demo-${role}`,
-        name: role === 'kitchen' ? 'Head Chef (Demo)' : 'Manager (Demo)',
-        role: role,
-        title: role === 'kitchen' ? 'Kitchen Station Lead' : 'Store Supervisor',
-        pin: inputPin,
-        username: `demo_${role}`,
-      };
-    }
-
-    if (matchedUser) {
-      setIsSuccess(true);
-      setAuthenticatedStaff(matchedUser);
-      setErrorMessage(null);
-
-      // Play short haptic/animation delay before closing and redirecting
-      setTimeout(() => {
-        onLoginSuccess(matchedUser!.role, matchedUser!);
-      }, 700);
-    } else {
-      setErrorMessage('Invalid 4-digit PIN. Tap a demo profile below or try again.');
-      // Shake effect timeout
-      setTimeout(() => {
-        setPin('');
-      }, 600);
-    }
-  };
-
-  const handleQuickPreset = (staff: StaffUser) => {
-    setSelectedRole(staff.role);
-    setPin(staff.pin);
-    setErrorMessage(null);
-    verifyPin(staff.pin, staff.role);
-  };
-
-  const handleFormLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    const matched = STAFF_USERS.find(
-      (s) =>
-        s.role === selectedRole &&
-        s.username.toLowerCase() === username.trim().toLowerCase()
-    );
-
-    if (matched || (username && password)) {
-      const userToUse: StaffUser = matched || {
-        id: `staff-${Date.now()}`,
-        name: username,
-        role: selectedRole,
-        title: selectedRole === 'kitchen' ? 'Kitchen Chef' : 'Operations Supervisor',
-        pin: '1234',
-        username: username,
-      };
-
-      setIsSuccess(true);
-      setAuthenticatedStaff(userToUse);
-      setTimeout(() => {
-        onLoginSuccess(selectedRole, userToUse);
-      }, 600);
-    } else {
-      setErrorMessage('Invalid username or password.');
-    }
   };
 
   if (!isOpen) return null;
@@ -211,12 +153,16 @@ export const StaffLoginModal: React.FC<StaffLoginModalProps> = ({
         {/* Ambient Top Glow Accent */}
         <div 
           className={`absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-32 blur-3xl pointer-events-none transition-colors duration-500 rounded-full ${
-            selectedRole === 'kitchen' ? 'bg-amber-500/25' : 'bg-indigo-500/25'
+            selectedRole === 'kitchen' 
+              ? 'bg-amber-500/25' 
+              : selectedRole === 'management' 
+              ? 'bg-blue-500/25' 
+              : 'bg-indigo-500/20'
           }`} 
         />
 
         {/* Top Header Bar */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-800">
+        <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-slate-800">
           <div className="flex items-center gap-2.5">
             <button
               onClick={onClose}
@@ -244,29 +190,25 @@ export const StaffLoginModal: React.FC<StaffLoginModalProps> = ({
           </button>
         </div>
 
-        {/* Role Selector Tabs: Kitchen vs Management */}
-        <div className="p-4 bg-slate-950/60 border-b border-slate-800">
-          <div className="grid grid-cols-2 gap-2 p-1 bg-slate-900 rounded-2xl border border-slate-800">
+        {/* Role Selector Tabs */}
+        <div className="p-3 bg-slate-950/60 border-b border-slate-800">
+          <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-900 rounded-2xl border border-slate-800 text-xs">
             
-            {/* Kitchen Station Tab */}
+            {/* Auto Detect Role */}
             <button
               type="button"
               onClick={() => {
-                setSelectedRole('kitchen');
-                setPin('');
+                setSelectedRole('all');
                 setErrorMessage(null);
               }}
-              className={`flex items-center justify-center gap-2.5 py-3 px-3 rounded-xl font-bold text-xs transition-all cursor-pointer ${
-                selectedRole === 'kitchen'
-                  ? 'bg-gradient-to-r from-amber-600 to-amber-500 text-white shadow-lg shadow-amber-500/20 scale-[1.02]'
+              className={`py-2 px-2 rounded-xl font-bold transition-all text-center cursor-pointer ${
+                selectedRole === 'all'
+                  ? 'bg-gradient-to-r from-slate-700 to-slate-800 text-white shadow-md border border-slate-600'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
               }`}
             >
-              <ChefHat className="w-4 h-4 shrink-0" />
-              <div className="text-left">
-                <div className="font-extrabold leading-tight">Kitchen Station</div>
-                <div className="text-[10px] font-normal opacity-85">KDS &amp; Order Line</div>
-              </div>
+              <div className="font-extrabold text-[11px] leading-tight">Auto-Detect</div>
+              <div className="text-[9px] opacity-75">By Username</div>
             </button>
 
             {/* Management Portal Tab */}
@@ -274,26 +216,45 @@ export const StaffLoginModal: React.FC<StaffLoginModalProps> = ({
               type="button"
               onClick={() => {
                 setSelectedRole('management');
-                setPin('');
                 setErrorMessage(null);
               }}
-              className={`flex items-center justify-center gap-2.5 py-3 px-3 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+              className={`py-2 px-2 rounded-xl font-bold transition-all text-center cursor-pointer ${
                 selectedRole === 'management'
-                  ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-lg shadow-indigo-500/20 scale-[1.02]'
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
               }`}
             >
-              <BarChart3 className="w-4 h-4 shrink-0" />
-              <div className="text-left">
-                <div className="font-extrabold leading-tight">Management Portal</div>
-                <div className="text-[10px] font-normal opacity-85">POS &amp; Analytics</div>
+              <div className="font-extrabold text-[11px] leading-tight flex items-center justify-center gap-1">
+                <BarChart3 className="w-3.5 h-3.5 shrink-0" />
+                <span>Management</span>
               </div>
+              <div className="text-[9px] opacity-75">Dashboard / POS</div>
+            </button>
+
+            {/* Kitchen Station Tab */}
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedRole('kitchen');
+                setErrorMessage(null);
+              }}
+              className={`py-2 px-2 rounded-xl font-bold transition-all text-center cursor-pointer ${
+                selectedRole === 'kitchen'
+                  ? 'bg-gradient-to-r from-amber-600 to-amber-500 text-white shadow-md shadow-amber-500/20'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+              }`}
+            >
+              <div className="font-extrabold text-[11px] leading-tight flex items-center justify-center gap-1">
+                <ChefHat className="w-3.5 h-3.5 shrink-0" />
+                <span>Kitchen KDS</span>
+              </div>
+              <div className="text-[9px] opacity-75">Order Prep Line</div>
             </button>
 
           </div>
         </div>
 
-        {/* Main Body: PIN Pad / Credentials */}
+        {/* Main Body: Username/Password OR PIN Pad */}
         <div className="p-6 flex flex-col items-center">
           
           {/* Success State Overlay */}
@@ -306,37 +267,120 @@ export const StaffLoginModal: React.FC<StaffLoginModalProps> = ({
                 Access Granted
               </h3>
               <p className="text-sm font-bold text-amber-400 mt-1">
-                {authenticatedStaff.name}
+                {authenticatedStaff.name} (@{authenticatedStaff.username})
               </p>
               <p className="text-xs text-slate-400 mt-0.5">
-                {authenticatedStaff.title} • Opening {selectedRole === 'kitchen' ? 'Kitchen KDS' : 'Management Dashboard'}...
+                {authenticatedStaff.title} • Opening {authenticatedStaff.role === 'kitchen' ? 'Kitchen KDS' : 'Management Dashboard'}...
               </p>
             </div>
           ) : (
             <>
-              {/* Method Toggle: Quick PIN vs Username */}
+              {/* Method Switcher Header */}
               <div className="w-full flex items-center justify-between mb-4 text-xs">
-                <span className="text-slate-400 font-semibold flex items-center gap-1.5">
-                  <KeyRound className="w-3.5 h-3.5 text-amber-400" />
-                  {authMethod === 'pin' ? 'Enter 4-Digit Station PIN' : 'Sign In with Username'}
+                <span className="text-slate-300 font-bold flex items-center gap-1.5">
+                  {authMethod === 'credentials' ? (
+                    <>
+                      <User className="w-3.5 h-3.5 text-blue-400" />
+                      <span>Enter Username &amp; Password</span>
+                    </>
+                  ) : (
+                    <>
+                      <KeyRound className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Enter 4-Digit Station PIN</span>
+                    </>
+                  )}
                 </span>
 
                 <button
                   type="button"
                   onClick={() => {
-                    setAuthMethod(authMethod === 'pin' ? 'credentials' : 'pin');
+                    setAuthMethod(authMethod === 'credentials' ? 'pin' : 'credentials');
                     setErrorMessage(null);
                   }}
-                  className="text-amber-400 hover:text-amber-300 font-bold hover:underline cursor-pointer"
+                  className="text-amber-400 hover:text-amber-300 font-bold hover:underline cursor-pointer flex items-center gap-1"
                 >
-                  {authMethod === 'pin' ? 'Use Username / Password' : 'Use Quick PIN Pad'}
+                  {authMethod === 'credentials' ? (
+                    <>
+                      <KeyRound className="w-3 h-3" />
+                      <span>Switch to PIN Pad</span>
+                    </>
+                  ) : (
+                    <>
+                      <User className="w-3 h-3" />
+                      <span>Switch to Username Login</span>
+                    </>
+                  )}
                 </button>
               </div>
 
-              {authMethod === 'pin' ? (
+              {/* Error Message */}
+              {errorMessage && (
+                <div className="w-full mb-4 p-3 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs font-semibold flex items-center gap-2 animate-shake">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
+              {/* A. CREDENTIALS FORM (Default Primary Method) */}
+              {authMethod === 'credentials' ? (
+                <form onSubmit={handleCredentialsLogin} className="w-full space-y-3.5 mb-4">
+                  <div>
+                    <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 block">
+                      Username
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 font-mono text-sm">@</span>
+                      <input
+                        type="text"
+                        required
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="e.g. admin or created user"
+                        className="w-full pl-8 pr-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                        Password
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="text-[10px] text-slate-400 hover:text-white flex items-center gap-1 cursor-pointer"
+                      >
+                        {showPassword ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                        <span>{showPassword ? 'Hide' : 'Show'}</span>
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wider text-white shadow-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 transition-all active:scale-98 cursor-pointer flex items-center justify-center gap-2 mt-2"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    <span>Login &amp; Open Station</span>
+                  </button>
+                </form>
+              ) : (
+                /* B. TOUCHSCREEN 4-DIGIT PIN PAD */
                 <div className="w-full flex flex-col items-center">
                   
-                  {/* PIN Display Indicators (4 Glowing Dots) */}
+                  {/* PIN Display Indicators */}
                   <div className="flex items-center gap-4 mb-4">
                     {[0, 1, 2, 3].map((index) => {
                       const isFilled = pin.length > index;
@@ -347,7 +391,7 @@ export const StaffLoginModal: React.FC<StaffLoginModalProps> = ({
                             isFilled
                               ? selectedRole === 'kitchen'
                                 ? 'bg-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.8)] scale-125'
-                                : 'bg-indigo-400 shadow-[0_0_12px_rgba(99,102,241,0.8)] scale-125'
+                                : 'bg-blue-400 shadow-[0_0_12px_rgba(59,130,246,0.8)] scale-125'
                               : 'bg-slate-800 border border-slate-700'
                           }`}
                         />
@@ -355,145 +399,94 @@ export const StaffLoginModal: React.FC<StaffLoginModalProps> = ({
                     })}
                   </div>
 
-                  {/* Error Notification */}
-                  {errorMessage && (
-                    <div className="w-full mb-3 p-2.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs font-semibold flex items-center justify-center gap-2 animate-shake">
-                      <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
-                      <span>{errorMessage}</span>
-                    </div>
-                  )}
-
-                  {/* 3x4 Numeric Touchpad */}
+                  {/* 3x4 Touchpad */}
                   <div className="grid grid-cols-3 gap-2.5 w-full max-w-xs mb-4">
                     {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((digit) => (
                       <button
                         key={digit}
                         type="button"
-                        onClick={() => handleKeyPress(digit)}
-                        className="h-13 rounded-2xl bg-slate-800/90 hover:bg-slate-700 active:bg-slate-600 text-xl font-bold font-mono text-white transition-all shadow-sm active:scale-95 border border-slate-700/60 cursor-pointer flex items-center justify-center"
+                        onClick={() => handlePinDigit(digit)}
+                        className="h-12 rounded-2xl bg-slate-800/90 hover:bg-slate-700 active:bg-slate-600 text-xl font-bold font-mono text-white transition-all shadow-sm active:scale-95 border border-slate-700/60 cursor-pointer flex items-center justify-center"
                       >
                         {digit}
                       </button>
                     ))}
 
-                    {/* Clear Button */}
                     <button
                       type="button"
-                      onClick={handleClear}
-                      className="h-13 rounded-2xl bg-slate-800/50 hover:bg-slate-700/70 active:bg-slate-600 text-xs font-bold text-slate-400 hover:text-white transition-all border border-slate-700/40 active:scale-95 cursor-pointer flex items-center justify-center uppercase tracking-wider"
+                      onClick={() => setPin('')}
+                      className="h-12 rounded-2xl bg-slate-800/50 hover:bg-slate-700/70 text-xs font-bold text-slate-400 hover:text-white transition-all border border-slate-700/40 active:scale-95 cursor-pointer flex items-center justify-center uppercase"
                     >
                       Clear
                     </button>
 
-                    {/* Zero */}
                     <button
                       type="button"
-                      onClick={() => handleKeyPress('0')}
-                      className="h-13 rounded-2xl bg-slate-800/90 hover:bg-slate-700 active:bg-slate-600 text-xl font-bold font-mono text-white transition-all shadow-sm active:scale-95 border border-slate-700/60 cursor-pointer flex items-center justify-center"
+                      onClick={() => handlePinDigit('0')}
+                      className="h-12 rounded-2xl bg-slate-800/90 hover:bg-slate-700 active:bg-slate-600 text-xl font-bold font-mono text-white transition-all shadow-sm active:scale-95 border border-slate-700/60 cursor-pointer flex items-center justify-center"
                     >
                       0
                     </button>
 
-                    {/* Backspace Button */}
                     <button
                       type="button"
-                      onClick={handleDelete}
-                      className="h-13 rounded-2xl bg-slate-800/50 hover:bg-slate-700/70 active:bg-slate-600 text-slate-400 hover:text-white transition-all border border-slate-700/40 active:scale-95 cursor-pointer flex items-center justify-center"
-                      title="Backspace"
+                      onClick={() => setPin(prev => prev.slice(0, -1))}
+                      className="h-12 rounded-2xl bg-slate-800/50 hover:bg-slate-700/70 text-slate-400 hover:text-white transition-all border border-slate-700/40 active:scale-95 cursor-pointer flex items-center justify-center"
                     >
                       <Delete className="w-5 h-5" />
                     </button>
                   </div>
-
                 </div>
-              ) : (
-                /* Form Login */
-                <form onSubmit={handleFormLogin} className="w-full space-y-3 mb-4">
-                  {errorMessage && (
-                    <div className="p-2.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs font-semibold flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
-                      <span>{errorMessage}</span>
-                    </div>
-                  )}
-
-                  <div>
-                    <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 block">
-                      Username / Staff ID
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder={selectedRole === 'kitchen' ? 'chef_vikram' : 'manager_indiranagar'}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1 block">
-                      Password or PIN
-                    </label>
-                    <input
-                      type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className={`w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wider text-white shadow-lg transition-all active:scale-98 cursor-pointer ${
-                      selectedRole === 'kitchen'
-                        ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-600/30'
-                        : 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-600/30'
-                    }`}
-                  >
-                    Authenticate &amp; Open Station
-                  </button>
-                </form>
               )}
 
-              {/* Quick 1-Tap Demo Staff Profiles */}
-              <div className="w-full pt-3 border-t border-slate-800">
+              {/* QUICK DEFAULT CREDENTIALS (1-Tap Fill & Test) */}
+              <div className="w-full pt-3.5 border-t border-slate-800">
                 <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between">
-                  <span>Fast Demo Staff Access (1-Tap):</span>
-                  <span className="text-amber-400 font-mono">PIN in badge</span>
+                  <span>Fast Demo Login Credentials:</span>
+                  <span className="text-amber-400">1-Tap to auto-fill</span>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  {roleStaff.map((staff) => (
-                    <button
-                      key={staff.id}
-                      type="button"
-                      onClick={() => handleQuickPreset(staff)}
-                      className="flex items-center justify-between p-2 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 hover:border-amber-500/40 transition-all text-left group cursor-pointer"
-                    >
-                      <div className="flex items-center gap-2 overflow-hidden">
-                        <div className="w-7 h-7 rounded-lg bg-slate-700 flex items-center justify-center text-amber-400 text-xs shrink-0 group-hover:scale-105 transition-transform">
-                          {selectedRole === 'kitchen' ? (
-                            <ChefHat className="w-4 h-4" />
-                          ) : (
-                            <ShieldCheck className="w-4 h-4" />
-                          )}
-                        </div>
-                        <div className="truncate">
-                          <div className="text-xs font-bold text-slate-200 group-hover:text-white truncate">
-                            {staff.name}
-                          </div>
-                          <div className="text-[10px] text-slate-400 truncate">
-                            {staff.title}
-                          </div>
-                        </div>
-                      </div>
-                      <span className="font-mono text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/40 text-amber-300 border border-amber-500/30 shrink-0">
-                        {staff.pin}
-                      </span>
-                    </button>
-                  ))}
+
+                <div className="grid grid-cols-2 gap-2 text-left">
+                  {/* Default Admin (Management) */}
+                  <button
+                    type="button"
+                    onClick={() => fillQuickPreset('admin', 'admin123', 'management')}
+                    className="p-2.5 rounded-xl bg-blue-950/40 hover:bg-blue-900/50 border border-blue-500/40 transition-all group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+                      <span className="text-xs font-extrabold text-blue-300">Default Admin</span>
+                    </div>
+                    <div className="text-[10px] text-slate-300 font-mono">
+                      User: <b className="text-white">admin</b>
+                    </div>
+                    <div className="text-[10px] text-slate-300 font-mono">
+                      Pass: <b className="text-white">admin123</b>
+                    </div>
+                  </button>
+
+                  {/* Default Kitchen */}
+                  <button
+                    type="button"
+                    onClick={() => fillQuickPreset('kitchen', 'kitchen123', 'kitchen')}
+                    className="p-2.5 rounded-xl bg-amber-950/40 hover:bg-amber-900/50 border border-amber-500/40 transition-all group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <ChefHat className="w-3.5 h-3.5 text-amber-400" />
+                      <span className="text-xs font-extrabold text-amber-300">Default Kitchen</span>
+                    </div>
+                    <div className="text-[10px] text-slate-300 font-mono">
+                      User: <b className="text-white">kitchen</b>
+                    </div>
+                    <div className="text-[10px] text-slate-300 font-mono">
+                      Pass: <b className="text-white">kitchen123</b>
+                    </div>
+                  </button>
                 </div>
+
+                <p className="text-[10px] text-slate-500 text-center mt-2.5">
+                  💡 Once logged in as Admin, create more users under <b>Staff &amp; Roles</b>.
+                </p>
               </div>
 
             </>
@@ -503,13 +496,13 @@ export const StaffLoginModal: React.FC<StaffLoginModalProps> = ({
 
         {/* Footer: Direct Customer Kiosk Link */}
         <div className="px-6 py-3.5 bg-slate-950/80 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
-          <span>Are you a customer?</span>
+          <span>Are you a guest?</span>
           <button
             type="button"
             onClick={onClose}
             className="text-amber-400 hover:text-amber-300 font-bold hover:underline cursor-pointer flex items-center gap-1"
           >
-            <span>Go to Customer Kiosk</span>
+            <span>Return to Dining Kiosk</span>
             <Sparkles className="w-3 h-3 text-amber-400" />
           </button>
         </div>

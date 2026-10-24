@@ -20,6 +20,7 @@ import { LanguageEntryScreen } from './components/kiosk/LanguageEntryScreen';
 import { CustomerTableAllocationScreen } from './components/kiosk/CustomerTableAllocationScreen';
 import CallWaiterModal from './components/common/CallWaiterModal';
 import { StaffLoginModal, StaffUser } from './components/auth/StaffLoginModal';
+import { authService } from './services/authService';
 import { MenuItem, Order } from './types';
 
 const MainAppContent: React.FC = () => {
@@ -51,12 +52,13 @@ const MainAppContent: React.FC = () => {
 
   const handleStaffLoginSuccess = (role: 'kitchen' | 'management', staffUser: StaffUser) => {
     setIsStaffLoginOpen(false);
+    authService.setCurrentUser(staffUser);
     if (role === 'kitchen') {
       setView('kitchen');
-      showToast(`Welcome back ${staffUser.name}! Kitchen Display active.`);
+      showToast(`Welcome back ${staffUser.name}! Logged into Kitchen KDS as @${staffUser.username}.`);
     } else {
       setView('dashboard');
-      showToast(`Welcome back ${staffUser.name}! Management Portal open.`);
+      showToast(`Welcome back ${staffUser.name}! Logged into Management Portal as @${staffUser.username}.`);
     }
   };
 

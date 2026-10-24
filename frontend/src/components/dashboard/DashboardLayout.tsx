@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useKiosk } from '../../context/KioskContext';
 import { 
   LayoutDashboard, 
@@ -50,6 +50,8 @@ interface NavItem {
   badgeColor?: string;
 }
 
+import { authService, UserCredential } from '../../services/authService';
+
 export const SIDEBAR_NAV_ITEMS: NavItem[] = [
   { id: 'overview', label: 'Dashboard Overview', icon: LayoutDashboard },
   { id: 'orders', label: 'Order Management', icon: ShoppingBag, badge: 'Live', badgeColor: 'bg-emerald-50 text-emerald-600 border border-emerald-200' },
@@ -92,10 +94,25 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     showToast 
   } = useKiosk();
 
+  const [currentUser, setCurrentUser] = useState<UserCredential | null>(() => authService.getCurrentUser());
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    const handleUserChange = () => {
+      setCurrentUser(authService.getCurrentUser());
+    };
+    window.addEventListener('auth_user_changed', handleUserChange);
+    return () => window.removeEventListener('auth_user_changed', handleUserChange);
+  }, []);
+
+  const handleLogout = () => {
+    authService.logout();
+    setView('kiosk');
+    showToast('Logged out of Management session.');
+  };
 
   const pendingOrdersCount = activeOrders.filter((o) => o.status !== 'COMPLETED').length;
   const pendingAlertsCount = staffAlerts.filter((a) => a.status === 'PENDING').length;
@@ -208,22 +225,23 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             <div className="p-2.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-xs flex items-center justify-between">
               <div className="flex items-center gap-2.5 overflow-hidden">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-sm">
-                  VS
+                  {(currentUser?.name || 'Administrator').split(' ').map(n => n[0]).slice(0, 2).join('')}
                 </div>
                 <div className="truncate">
                   <div className="text-xs font-bold text-slate-800 dark:text-white truncate">
-                    Vikram Sharma
+                    {currentUser?.name || 'System Administrator'}
                   </div>
-                  <div className="text-[10px] text-slate-600 dark:text-slate-400 font-medium truncate">
-                    General Manager
+                  <div className="text-[10px] text-slate-600 dark:text-slate-400 font-medium truncate flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                    <span>@{currentUser?.username || 'admin'} • {currentUser?.title || 'General Manager'}</span>
                   </div>
                 </div>
               </div>
 
               <button
-                onClick={() => setView('hub')}
+                onClick={handleLogout}
                 className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
-                title="Exit to Station Hub"
+                title="Log Out & Exit Management"
               >
                 <LogOut className="w-4 h-4" />
               </button>
@@ -413,43 +431,56 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 >
                   <div className="text-right hidden sm:block">
                     <div className="text-xs font-bold text-slate-800 dark:text-slate-100 leading-tight">
-                      Vikram S.
+                      {currentUser?.name || 'Administrator'}
                     </div>
                     <div className="text-[10px] text-slate-600 dark:text-slate-400 leading-tight">
-                      Store Manager
+                      @{currentUser?.username || 'admin'} ({currentUser?.role === 'kitchen' ? 'Kitchen KDS' : 'Management'})
                     </div>
                   </div>
                   <div className="relative">
                     <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
-                      VS
+                      {(currentUser?.name || 'Administrator').split(' ').map(n => n[0]).slice(0, 2).join('')}
                     </div>
                     <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900" />
                   </div>
                 </button>
 
                 {isProfileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-52 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-2 z-50 text-xs animate-in fade-in slide-in-from-top-1">
-                    <div className="p-2 border-b border-slate-100 dark:border-slate-800 mb-1">
-                      <div className="font-bold text-slate-900 dark:text-white">Vikram Sharma</div>
-                      <div className="text-[10px] text-slate-600 dark:text-slate-400">manager@royalember.com</div>
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 p-2 z-50 text-xs animate-in fade-in slide-in-from-top-1">
+                    <div className="p-2.5 border-b border-slate-100 dark:border-slate-800 mb-1">
+                      <div className="font-bold text-slate-900 dark:text-white">{currentUser?.name || 'Administrator'}</div>
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">@{currentUser?.username || 'admin'}</div>
+                      <div className="text-[10px] text-blue-600 dark:text-blue-400 font-medium mt-0.5">{currentUser?.title || 'General Manager'}</div>
                     </div>
+                    <button
+                      onClick={() => {
+                        onSelectTab('staff');
+                        setIsProfileDropdownOpen(false);
+                      }}
+                      className="w-full px-3 py-2 rounded-xl text-left hover:bg-slate-50 dark:hover:bg-slate-800 font-medium cursor-pointer flex items-center gap-2"
+                    >
+                      <Users className="w-3.5 h-3.5 text-blue-600" />
+                      <span>Manage User Credentials</span>
+                    </button>
                     <button
                       onClick={() => {
                         onSelectTab('settings');
                         setIsProfileDropdownOpen(false);
                       }}
-                      className="w-full px-3 py-2 rounded-xl text-left hover:bg-slate-50 dark:hover:bg-slate-800 font-medium cursor-pointer"
+                      className="w-full px-3 py-2 rounded-xl text-left hover:bg-slate-50 dark:hover:bg-slate-800 font-medium cursor-pointer flex items-center gap-2"
                     >
-                      Account Settings
+                      <Settings className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Account Settings</span>
                     </button>
                     <button
                       onClick={() => {
-                        setView('hub');
                         setIsProfileDropdownOpen(false);
+                        handleLogout();
                       }}
-                      className="w-full px-3 py-2 rounded-xl text-left text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-bold cursor-pointer"
+                      className="w-full px-3 py-2 rounded-xl text-left text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-bold cursor-pointer flex items-center gap-2 border-t border-slate-100 dark:border-slate-800 mt-1"
                     >
-                      Log Out / Switch Station
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>Log Out of Station</span>
                     </button>
                   </div>
                 )}

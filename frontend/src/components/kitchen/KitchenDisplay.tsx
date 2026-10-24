@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useKiosk } from '../../context/KioskContext';
-import type { OrderStatus, Order } from '../../types';
+import type { OrderStatus, Order, CartItem } from '../../types';
 import { storageService } from '../../services/storageService';
 import { 
   ChefHat, 
@@ -28,16 +28,19 @@ import {
   X,
   Coffee,
   Info,
-  Columns,
-  LayoutGrid,
+  Eye,
+  Printer,
+  ChevronRight,
+  Filter,
   UserCheck,
-  Send,
-  Timer
+  ArrowRight,
+  SlidersHorizontal,
+  Table as TableIcon
 } from 'lucide-react';
 import { getAssignedWaiter, WAITER_ZONES } from '../../utils/waiterAssignment';
 import { authService, UserCredential } from '../../services/authService';
 
-// Pleasant dual-tone kitchen order chime
+// Audio chime for real-time kitchen orders
 function playKitchenChime() {
   try {
     const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
@@ -67,11 +70,11 @@ function playKitchenChime() {
     osc2.start(now + 0.1);
     osc2.stop(now + 0.5);
   } catch {
-    // ignore
+    // safe fallback
   }
 }
 
-// Elapsed timer calculation
+// Elapsed timer helper: consistent, clean, avoiding huge numbers
 function getOrderTiming(createdAt: string | undefined, targetMinutes: number = 15) {
   if (!createdAt) {
     return { display: 'Just now', minutes: 1, percent: 10, isOverdue: false, overdueMins: 0 };
@@ -125,11 +128,13 @@ export const KitchenDisplay: React.FC = () => {
     return localStorage.getItem('kds_audio_enabled') !== 'false';
   });
 
-  // Station and Stage filtering
+  // Filter state
   const [selectedStation, setSelectedStation] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<'ALL' | OrderStatus>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
-  const [layoutMode, setLayoutMode] = useState<'kanban' | 'grid'>('kanban');
+
+  // Selected Order for Full Ticket Drawer Inspection
+  const [inspectedOrder, setInspectedOrder] = useState<Order | null>(null);
 
   // Modals
   const [isWaiterCallsOpen, setIsWaiterCallsOpen] = useState(false);
@@ -137,7 +142,7 @@ export const KitchenDisplay: React.FC = () => {
   const [isChefSelectorOpen, setIsChefSelectorOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Active Chef User
+  // Active Chef on Duty
   const [activeChef, setActiveChef] = useState<UserCredential | null>(() => {
     const user = authService.getCurrentUser();
     if (user && user.role === 'kitchen') return user;
@@ -156,7 +161,7 @@ export const KitchenDisplay: React.FC = () => {
     };
   });
 
-  // Clock
+  // Real-time Clock
   const [clockTime, setClockTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
 
   useEffect(() => {
@@ -265,7 +270,10 @@ export const KitchenDisplay: React.FC = () => {
   const handleAdvance = (order: Order, next: OrderStatus) => {
     updateOrderStatus(order.id, next);
     if (isAudioEnabled) playKitchenChime();
-    showToast(`Order #${order.orderNumber} (Table ${order.tableNumber}) updated to ${next}`);
+    showToast(`Order #${order.orderNumber} (Table ${order.tableNumber}) transitioned to ${next}`);
+    if (inspectedOrder && inspectedOrder.id === order.id) {
+      setInspectedOrder({ ...inspectedOrder, status: next });
+    }
   };
 
   return (
@@ -274,7 +282,7 @@ export const KitchenDisplay: React.FC = () => {
     }`}>
       
       {/* =========================================================================
-          TOP NAV: MATCHES RESTAURANT MANAGEMENT DASHBOARD (RIDAY STYLE)
+          TOP RESTAURANT HEADER (RIDAY STYLE)
       ========================================================================= */}
       <header className={`border-b px-4 py-3 md:px-6 transition-colors shadow-2xs ${
         isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/90'
@@ -302,16 +310,16 @@ export const KitchenDisplay: React.FC = () => {
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className={`text-lg font-black tracking-tight font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                    Kitchen Display System
+                    Kitchen Operations Board
                   </h1>
                   <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-[10px] font-black tracking-wider">
-                    KDS LIVE
+                    TABLE VIEW
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                   <span>Royal Ember</span>
                   <span>/</span>
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">Indiranagar Flagship Kitchen Line</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">Live Kitchen Order Management</span>
                 </div>
               </div>
             </div>
@@ -341,7 +349,7 @@ export const KitchenDisplay: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Header Navigation & Operational Tools */}
+          {/* Right Header Controls */}
           <div className="flex items-center flex-wrap gap-2 justify-between lg:justify-end">
             
             {/* Waiter Calls Badge Button */}
@@ -387,9 +395,7 @@ export const KitchenDisplay: React.FC = () => {
               className={`p-2 rounded-xl border transition-colors cursor-pointer ${
                 isAudioEnabled
                   ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800'
-                  : isDark
-                    ? 'bg-slate-800 text-slate-400 border-slate-700'
-                    : 'bg-slate-50 text-slate-400 border-slate-200'
+                  : isDark ? 'bg-slate-800 text-slate-400 border-slate-700' : 'bg-slate-50 text-slate-400 border-slate-200'
               }`}
               title={isAudioEnabled ? 'Chime sound is active' : 'Chime sound is muted'}
             >
@@ -449,8 +455,7 @@ export const KitchenDisplay: React.FC = () => {
       </header>
 
       {/* =========================================================================
-          EXECUTIVE KPI METRICS CARDS (4 IN A ROW)
-          (Explicitly styled with high-contrast text to avoid white-on-white bugs)
+          EXECUTIVE KPI METRIC CARDS (4 IN A ROW)
       ========================================================================= */}
       <section className="px-4 pt-4 md:px-6 max-w-[1920px] mx-auto w-full">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
@@ -483,7 +488,7 @@ export const KitchenDisplay: React.FC = () => {
             </div>
           </div>
 
-          {/* Card 2: In Preparation */}
+          {/* Card 2: Cooking Line */}
           <div 
             onClick={() => setStatusFilter(statusFilter === 'PREPARING' ? 'ALL' : 'PREPARING')}
             className={`p-4 rounded-2xl border transition-all cursor-pointer ${
@@ -571,7 +576,7 @@ export const KitchenDisplay: React.FC = () => {
       </section>
 
       {/* =========================================================================
-          CONTROL TOOLBAR: STATION SELECTOR & LAYOUT TOGGLE
+          CONTROL TOOLBAR: STATION SELECTOR & STATUS FILTERS
       ========================================================================= */}
       <section className="px-4 py-3 md:px-6 max-w-[1920px] mx-auto w-full">
         <div className={`p-3 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 ${
@@ -580,6 +585,7 @@ export const KitchenDisplay: React.FC = () => {
           
           {/* Station Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            <span className="text-xs font-bold text-slate-400 mr-1 hidden sm:inline">Station:</span>
             {[
               { id: 'ALL', label: 'All Stations' },
               { id: 'HOT', label: 'Hot Cooking' },
@@ -601,52 +607,46 @@ export const KitchenDisplay: React.FC = () => {
             ))}
           </div>
 
-          {/* Right Toolbar Controls */}
-          <div className="flex items-center gap-3 justify-between md:justify-end">
+          {/* Stage Filters & Waiter Legend */}
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
             
-            {/* Waiter zone badges */}
-            <div className="hidden lg:flex items-center gap-1.5">
-              {WAITER_ZONES.map((zone) => (
-                <span
-                  key={zone.rangeLabel}
-                  className={`px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold border flex items-center gap-1 ${zone.waiter.color}`}
+            {/* Status Stage Pills */}
+            {(['ALL', 'NEW', 'PREPARING', 'READY', 'COMPLETED'] as const).map((stage) => {
+              const label = 
+                stage === 'ALL' ? 'All Orders' :
+                stage === 'NEW' ? 'New' :
+                stage === 'PREPARING' ? 'Cooking' :
+                stage === 'READY' ? 'Ready' :
+                'Served';
+
+              const count = 
+                stage === 'ALL' ? displayOrders.length :
+                stage === 'NEW' ? metrics.newCount :
+                stage === 'PREPARING' ? metrics.prepCount :
+                stage === 'READY' ? metrics.readyCount :
+                metrics.completedCount;
+
+              const isSelected = statusFilter === stage;
+
+              return (
+                <button
+                  key={stage}
+                  onClick={() => setStatusFilter(stage)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer border ${
+                    isSelected
+                      ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-transparent shadow-xs'
+                      : isDark ? 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white' : 'bg-slate-100 text-slate-600 border-slate-200 hover:text-slate-900'
+                  }`}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                  {zone.rangeLabel}: {zone.waiter.initial}
-                </span>
-              ))}
-            </div>
-
-            {/* Layout Toggle */}
-            <div className={`p-1 rounded-xl border flex items-center gap-1 ${
-              isDark ? 'bg-slate-800 border-slate-700' : 'bg-slate-100 border-slate-200'
-            }`}>
-              <button
-                onClick={() => setLayoutMode('kanban')}
-                className={`p-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                  layoutMode === 'kanban'
-                    ? isDark ? 'bg-slate-700 text-white shadow-xs' : 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-400 hover:text-slate-600'
-                }`}
-                title="Kanban Board View"
-              >
-                <Columns className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline text-[11px]">Kanban</span>
-              </button>
-
-              <button
-                onClick={() => setLayoutMode('grid')}
-                className={`p-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                  layoutMode === 'grid'
-                    ? isDark ? 'bg-slate-700 text-white shadow-xs' : 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-400 hover:text-slate-600'
-                }`}
-                title="Grid Cards View"
-              >
-                <LayoutGrid className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline text-[11px]">Grid</span>
-              </button>
-            </div>
+                  <span>{label}</span>
+                  <span className={`px-1.5 py-0.2 rounded-full font-mono text-[10px] ${
+                    isSelected ? 'bg-white/20 text-white dark:bg-black/20 dark:text-black font-black' : 'bg-black/5 text-slate-500'
+                  }`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
 
           </div>
 
@@ -654,169 +654,389 @@ export const KitchenDisplay: React.FC = () => {
       </section>
 
       {/* =========================================================================
-          MAIN ORDER BOARD: CLEAN KANBAN OR GRID
+          MASTER KITCHEN OPERATIONS TABLE
+          (Clean, executive tabular design matching the Recent Orders table in reference)
       ========================================================================= */}
       <main className="flex-1 px-4 pb-6 md:px-6 max-w-[1920px] mx-auto w-full">
         
-        {layoutMode === 'kanban' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-start">
-            
-            {[
-              {
-                status: 'NEW' as OrderStatus,
-                title: 'New Tickets',
-                sub: 'Awaiting Acceptance',
-                count: metrics.newCount,
-                dotColor: 'bg-amber-500',
-                badgeBg: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800',
-                next: 'PREPARING' as OrderStatus,
-                actionText: 'Accept & Cook',
-                actionClass: 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-              },
-              {
-                status: 'PREPARING' as OrderStatus,
-                title: 'Cooking Line',
-                sub: 'Under Chef Preparation',
-                count: metrics.prepCount,
-                dotColor: 'bg-blue-500',
-                badgeBg: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800',
-                next: 'READY' as OrderStatus,
-                actionText: 'Mark Ready to Serve',
-                actionClass: 'bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white shadow-md shadow-emerald-600/20'
-              },
-              {
-                status: 'READY' as OrderStatus,
-                title: 'Ready to Serve',
-                sub: 'Waiter Alerted',
-                count: metrics.readyCount,
-                dotColor: 'bg-emerald-500',
-                badgeBg: 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800',
-                next: 'COMPLETED' as OrderStatus,
-                actionText: 'Deliver to Table',
-                actionClass: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md shadow-blue-600/20'
-              },
-              {
-                status: 'COMPLETED' as OrderStatus,
-                title: 'Served & Cleared',
-                sub: 'Finished & Delivered',
-                count: metrics.completedCount,
-                dotColor: 'bg-slate-400',
-                badgeBg: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700',
-                next: 'COMPLETED' as OrderStatus,
-                actionText: '✓ Served',
-                actionClass: 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-default'
-              }
-            ].map((col) => {
-              const ordersInCol = filteredOrders.filter(o => o.status === col.status);
+        <div className={`rounded-2xl border shadow-xs overflow-hidden ${
+          isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'
+        }`}>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className={`border-b text-[11px] font-black uppercase tracking-wider ${
+                  isDark ? 'bg-slate-800/80 border-slate-800 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'
+                }`}>
+                  <th className="py-3.5 px-4">Ticket &amp; Table</th>
+                  <th className="py-3.5 px-4">Server / Zone</th>
+                  <th className="py-3.5 px-4">Elapsed / Target</th>
+                  <th className="py-3.5 px-4 min-w-[320px]">Dishes &amp; Special Instructions</th>
+                  <th className="py-3.5 px-4 text-center">Stage Status</th>
+                  <th className="py-3.5 px-4 text-right">Quick Action</th>
+                </tr>
+              </thead>
+              <tbody className={`divide-y ${isDark ? 'divide-slate-800' : 'divide-slate-100'}`}>
+                {filteredOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-20 text-center text-slate-400">
+                      <UtensilsCrossed className="w-10 h-10 mx-auto mb-2 opacity-40" />
+                      <p className="font-bold text-sm">No kitchen orders matching your filters.</p>
+                      <p className="text-xs opacity-70 mt-1">Incoming table orders will appear here in real time.</p>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredOrders.map((order) => {
+                    const timing = getOrderTiming(order.createdAt, order.estimatedPrepTime);
+                    const waiter = getAssignedWaiter(order.tableNumber);
+                    const isOverdue = order.status !== 'COMPLETED' && timing.isOverdue;
 
-              return (
-                <div
-                  key={col.status}
-                  className={`rounded-2xl border flex flex-col min-h-[580px] transition-colors ${
-                    isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-100/60 border-slate-200/80'
-                  }`}
-                >
-                  
-                  {/* Column Header */}
-                  <div className={`p-4 rounded-t-2xl border-b flex items-center justify-between ${
-                    isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'
-                  }`}>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className={`w-2.5 h-2.5 rounded-full ${col.dotColor}`} />
-                        <h2 className={`font-black text-sm uppercase tracking-wide font-display ${
-                          isDark ? 'text-white' : 'text-slate-900'
-                        }`}>
-                          {col.title}
-                        </h2>
-                      </div>
-                      <p className="text-[11px] text-slate-400 mt-0.5">
-                        {col.sub}
-                      </p>
-                    </div>
+                    // Next Status
+                    const nextStatus: OrderStatus = 
+                      order.status === 'NEW' ? 'PREPARING' :
+                      order.status === 'PREPARING' ? 'READY' :
+                      'COMPLETED';
 
-                    <span className={`px-2.5 py-1 rounded-xl text-xs font-mono font-black border ${col.badgeBg}`}>
-                      {ordersInCol.length}
-                    </span>
-                  </div>
+                    // Action Button Styles
+                    const actionConfig = {
+                      NEW: {
+                        label: 'Start Cooking',
+                        icon: Flame,
+                        btnClass: 'bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-xs'
+                      },
+                      PREPARING: {
+                        label: 'Mark Ready',
+                        icon: CheckCircle2,
+                        btnClass: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs'
+                      },
+                      READY: {
+                        label: 'Serve Table',
+                        icon: Sparkles,
+                        btnClass: 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs'
+                      },
+                      COMPLETED: {
+                        label: 'Served ✓',
+                        icon: CheckCheck,
+                        btnClass: 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-default'
+                      }
+                    }[order.status];
 
-                  {/* Cards List in this Column */}
-                  <div className="p-3 space-y-3 flex-1 overflow-y-auto max-h-[calc(100vh-270px)] custom-kds-scrollbar">
-                    {ordersInCol.length === 0 ? (
-                      <div className={`py-16 text-center rounded-2xl border border-dashed ${
-                        isDark ? 'border-slate-800 text-slate-500' : 'border-slate-200 text-slate-400'
-                      }`}>
-                        <CheckCheck className="w-8 h-8 mx-auto mb-1.5 opacity-40" />
-                        <span className="text-xs font-bold block">No {col.title}</span>
-                        <span className="text-[11px] opacity-70">Kitchen line caught up</span>
-                      </div>
-                    ) : (
-                      ordersInCol.map((order) => (
-                        <KdsOrderCard
-                          key={order.id}
-                          order={order}
-                          isDark={isDark}
-                          actionText={col.actionText}
-                          actionClass={col.actionClass}
-                          onAdvance={() => handleAdvance(order, col.next)}
-                        />
-                      ))
-                    )}
-                  </div>
+                    const ActionIcon = actionConfig.icon;
 
-                </div>
-              );
-            })}
+                    // Status Badge Styling
+                    const statusBadgeClass = {
+                      NEW: 'bg-amber-50 text-amber-700 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800',
+                      PREPARING: 'bg-blue-50 text-blue-700 border-blue-300 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800',
+                      READY: 'bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800',
+                      COMPLETED: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                    }[order.status];
 
+                    return (
+                      <tr 
+                        key={order.id}
+                        className={`transition-colors ${
+                          isOverdue 
+                            ? isDark ? 'bg-rose-950/20 hover:bg-rose-950/30' : 'bg-rose-50/40 hover:bg-rose-50/70' 
+                            : isDark ? 'hover:bg-slate-800/50' : 'hover:bg-slate-50/80'
+                        }`}
+                      >
+                        
+                        {/* 1. Ticket # & Table */}
+                        <td className="py-3.5 px-4 align-top">
+                          <div className="flex items-center gap-2">
+                            <span className="px-2.5 py-1 rounded-xl bg-slate-900 text-white dark:bg-slate-800 font-extrabold text-xs font-mono shadow-2xs">
+                              Table {order.tableNumber}
+                            </span>
+                            <span className="font-mono font-bold text-sm text-slate-700 dark:text-slate-300">
+                              #{order.orderNumber}
+                            </span>
+                          </div>
+                          <span className="text-[10px] text-slate-400 block mt-1">
+                            {order.items.length} {order.items.length === 1 ? 'item' : 'items'} • Dine-In
+                          </span>
+                        </td>
+
+                        {/* 2. Server / Zone */}
+                        <td className="py-3.5 px-4 align-top">
+                          <div className="flex items-center gap-1.5">
+                            <span className={`px-2 py-0.5 rounded-lg text-xs font-bold border flex items-center gap-1 ${waiter.color}`}>
+                              <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                              <span>{waiter.name}</span>
+                            </span>
+                          </div>
+                          <span className="text-[10px] text-slate-400 block mt-1 font-mono">
+                            Zone {waiter.zone}
+                          </span>
+                        </td>
+
+                        {/* 3. Elapsed / Target */}
+                        <td className="py-3.5 px-4 align-top">
+                          <div className="flex items-center gap-1 text-slate-700 dark:text-slate-300 font-bold font-mono">
+                            <Clock className={`w-3.5 h-3.5 ${isOverdue ? 'text-rose-500' : 'text-slate-400'}`} />
+                            <span>{timing.display}</span>
+                          </div>
+                          <div className="mt-1 flex items-center gap-1.5">
+                            <span className="text-[10px] text-slate-400">Target: {order.estimatedPrepTime || 15}m</span>
+                            {isOverdue && (
+                              <span className="px-1.5 py-0.2 rounded bg-rose-50 text-rose-700 border border-rose-200 text-[9px] font-black">
+                                +{timing.overdueMins}m
+                              </span>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* 4. Ordered Items Breakdown */}
+                        <td className="py-3.5 px-4 align-top">
+                          <div className="space-y-1.5">
+                            {order.items.map((item, idx) => {
+                              const isComp = item.price === 0 || item.name.includes('Complimentary') || item.name.includes('🎁');
+
+                              return (
+                                <div key={item.cartItemId || idx} className="flex items-start gap-2">
+                                  <span className="px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono font-bold text-xs shrink-0 mt-0.5">
+                                    {item.quantity}x
+                                  </span>
+
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <span className={`font-bold ${
+                                        isComp 
+                                          ? 'text-amber-600 dark:text-amber-400 font-extrabold' 
+                                          : isDark ? 'text-slate-100' : 'text-slate-900'
+                                      }`}>
+                                        {item.name}
+                                      </span>
+
+                                      <span className={`w-2.5 h-2.5 rounded-xs border flex items-center justify-center shrink-0 ${
+                                        item.isVeg ? 'border-emerald-600' : 'border-rose-600'
+                                      }`}>
+                                        <span className={`w-1 h-1 rounded-full ${item.isVeg ? 'bg-emerald-600' : 'bg-rose-600'}`} />
+                                      </span>
+
+                                      {item.spiceLevel && (
+                                        <span className="px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px]">
+                                          {item.spiceLevel}
+                                        </span>
+                                      )}
+
+                                      {item.customizations && item.customizations.map((c, cIdx) => (
+                                        <span key={cIdx} className="text-[10px] text-slate-400">
+                                          +{c}
+                                        </span>
+                                      ))}
+                                    </div>
+
+                                    {item.specialInstructions && (
+                                      <div className="mt-0.5 text-[11px] text-blue-700 dark:text-blue-300 italic flex items-center gap-1">
+                                        <Info className="w-3 h-3 shrink-0" />
+                                        <span>"{item.specialInstructions}"</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </td>
+
+                        {/* 5. Stage Status Pill */}
+                        <td className="py-3.5 px-4 text-center align-top">
+                          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${statusBadgeClass}`}>
+                            <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                            {order.status}
+                          </span>
+                        </td>
+
+                        {/* 6. Quick Action Buttons */}
+                        <td className="py-3.5 px-4 text-right align-top">
+                          <div className="flex items-center justify-end gap-2">
+                            
+                            {/* Inspect Drawer Button */}
+                            <button
+                              onClick={() => setInspectedOrder(order)}
+                              className={`p-2 rounded-xl border transition-colors cursor-pointer ${
+                                isDark 
+                                  ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700' 
+                                  : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                              }`}
+                              title="Inspect Full Ticket"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </button>
+
+                            {/* Direct Advance Button */}
+                            {order.status !== 'COMPLETED' ? (
+                              <button
+                                onClick={() => handleAdvance(order, nextStatus)}
+                                className={`px-3.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 ${actionConfig.btnClass}`}
+                              >
+                                <ActionIcon className="w-3.5 h-3.5" />
+                                <span>{actionConfig.label}</span>
+                              </button>
+                            ) : (
+                              <span className="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 bg-slate-100 dark:bg-slate-800">
+                                ✓ Served
+                              </span>
+                            )}
+
+                          </div>
+                        </td>
+
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
           </div>
-        ) : (
-          /* GRID VIEW */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredOrders.length === 0 ? (
-              <div className="col-span-full py-20 text-center text-slate-400">
-                <UtensilsCrossed className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                <span className="text-sm font-bold block">No tickets matching filter</span>
-              </div>
-            ) : (
-              filteredOrders.map((order) => {
-                const nextStatus: OrderStatus = 
-                  order.status === 'NEW' ? 'PREPARING' :
-                  order.status === 'PREPARING' ? 'READY' :
-                  'COMPLETED';
 
-                const actionText = 
-                  order.status === 'NEW' ? 'Accept & Cook' :
-                  order.status === 'PREPARING' ? 'Mark Ready to Serve' :
-                  order.status === 'READY' ? 'Deliver to Table' :
-                  '✓ Served';
-
-                const actionClass = 
-                  order.status === 'NEW' ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-amber-500/20' :
-                  order.status === 'PREPARING' ? 'bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-emerald-600/20' :
-                  order.status === 'READY' ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-blue-600/20' :
-                  'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-default';
-
-                return (
-                  <KdsOrderCard
-                    key={order.id}
-                    order={order}
-                    isDark={isDark}
-                    actionText={actionText}
-                    actionClass={actionClass}
-                    onAdvance={() => handleAdvance(order, nextStatus)}
-                  />
-                );
-              })
-            )}
-          </div>
-        )}
+        </div>
 
       </main>
 
       {/* =========================================================================
-          MODALS
+          SLIDE-OVER DRAWER: FULL TICKET INSPECTOR
       ========================================================================= */}
-      {/* Waiter Calls */}
+      {inspectedOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className={`w-full max-w-md h-full shadow-2xl border-l flex flex-col justify-between ${
+            isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+          }`}>
+            
+            {/* Drawer Top */}
+            <div className={`p-5 border-b flex items-center justify-between ${
+              isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
+            }`}>
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black">
+                  #{inspectedOrder.orderNumber}
+                </div>
+                <div>
+                  <h3 className="font-black text-base">Table {inspectedOrder.tableNumber} Ticket</h3>
+                  <span className="text-xs text-slate-400">Order ID: {inspectedOrder.id}</span>
+                </div>
+              </div>
+
+              <button onClick={() => setInspectedOrder(null)} className="p-2 text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Drawer Content */}
+            <div className="p-5 overflow-y-auto flex-1 space-y-4">
+              
+              {/* Meta Box */}
+              <div className={`p-4 rounded-2xl border space-y-2 ${
+                isDark ? 'bg-slate-800/40 border-slate-800' : 'bg-slate-50 border-slate-200'
+              }`}>
+                <div className="flex justify-between text-xs">
+                  <span className="text-slate-400">Status:</span>
+                  <span className="font-black uppercase">{inspectedOrder.status}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-slate-400">Assigned Waiter:</span>
+                  <span className="font-bold">{getAssignedWaiter(inspectedOrder.tableNumber).fullName}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-slate-400">Logged Time:</span>
+                  <span className="font-mono">{new Date(inspectedOrder.createdAt).toLocaleTimeString()}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-slate-400">Est. Target:</span>
+                  <span className="font-mono font-bold">{inspectedOrder.estimatedPrepTime || 15} minutes</span>
+                </div>
+              </div>
+
+              {/* Items List */}
+              <div>
+                <h4 className="text-xs font-black uppercase text-slate-400 tracking-wider mb-2">
+                  Kitchen Items ({inspectedOrder.items.length})
+                </h4>
+                <div className="space-y-2">
+                  {inspectedOrder.items.map((item, idx) => (
+                    <div 
+                      key={item.cartItemId || idx}
+                      className={`p-3 rounded-2xl border ${
+                        isDark ? 'bg-slate-800/30 border-slate-800' : 'bg-white border-slate-200'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start">
+                        <span className="font-bold text-sm">
+                          {item.quantity}x {item.name}
+                        </span>
+                        <span className={`w-3 h-3 rounded-xs border flex items-center justify-center shrink-0 mt-0.5 ${
+                          item.isVeg ? 'border-emerald-600' : 'border-rose-600'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${item.isVeg ? 'bg-emerald-600' : 'bg-rose-600'}`} />
+                        </span>
+                      </div>
+
+                      <div className="mt-1 text-xs text-slate-400 space-y-0.5">
+                        {item.spiceLevel && <div>Spice: {item.spiceLevel}</div>}
+                        {item.customizations && item.customizations.length > 0 && (
+                          <div>Options: {item.customizations.join(', ')}</div>
+                        )}
+                        {item.specialInstructions && (
+                          <div className="text-blue-600 dark:text-blue-400 italic">
+                            Note: "{item.specialInstructions}"
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+
+            {/* Drawer Bottom Actions */}
+            <div className={`p-5 border-t space-y-2 ${
+              isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
+            }`}>
+              {inspectedOrder.status === 'NEW' && (
+                <button
+                  onClick={() => handleAdvance(inspectedOrder, 'PREPARING')}
+                  className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Flame className="w-4 h-4" />
+                  <span>Start Cooking (Advance to Preparing)</span>
+                </button>
+              )}
+
+              {inspectedOrder.status === 'PREPARING' && (
+                <button
+                  onClick={() => handleAdvance(inspectedOrder, 'READY')}
+                  className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Mark Ready to Serve</span>
+                </button>
+              )}
+
+              {inspectedOrder.status === 'READY' && (
+                <button
+                  onClick={() => handleAdvance(inspectedOrder, 'COMPLETED')}
+                  className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Mark as Served (Complete Ticket)</span>
+                </button>
+              )}
+
+              <button
+                onClick={() => setInspectedOrder(null)}
+                className="w-full py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs"
+              >
+                Close Drawer
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* Waiter Assistance Modal */}
       {isWaiterCallsOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
           <div className={`w-full max-w-xl rounded-3xl border shadow-2xl overflow-hidden ${
@@ -915,7 +1135,7 @@ export const KitchenDisplay: React.FC = () => {
         </div>
       )}
 
-      {/* Sold Out */}
+      {/* Sold Out Modal */}
       {isSoldOutOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
           <div className={`w-full max-w-2xl rounded-3xl border shadow-2xl overflow-hidden ${
@@ -991,7 +1211,7 @@ export const KitchenDisplay: React.FC = () => {
         </div>
       )}
 
-      {/* Chef Selector */}
+      {/* Chef Selector Modal */}
       {isChefSelectorOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
           <div className={`w-full max-w-md rounded-3xl border shadow-2xl overflow-hidden ${
@@ -1074,181 +1294,18 @@ export const KitchenDisplay: React.FC = () => {
         isDark ? 'bg-slate-900 border-slate-800 text-slate-500' : 'bg-white border-slate-200 text-slate-400'
       }`}>
         <div className="flex items-center gap-2">
-          <span className="font-bold text-slate-700 dark:text-slate-300">Royal Ember KDS</span>
+          <span className="font-bold text-slate-700 dark:text-slate-300">Royal Ember Master KDS</span>
           <span>•</span>
           <span>Synchronized with Table Kiosks &amp; Supabase Cloud</span>
         </div>
         <div className="flex items-center gap-3 text-[11px]">
           <span>Lead: <strong>{activeChef?.name}</strong></span>
           <span>•</span>
-          <span>Chimes: <strong>{isAudioEnabled ? 'Active' : 'Muted'}</strong></span>
+          <span>Audio: <strong>{isAudioEnabled ? 'Active' : 'Muted'}</strong></span>
         </div>
       </footer>
 
     </div>
-  );
-};
-
-// =============================================================================
-// SUBCOMPONENT: BRAND NEW REFINED RESTAURANT ORDER CARD
-// =============================================================================
-interface KdsOrderCardProps {
-  order: Order;
-  isDark: boolean;
-  actionText: string;
-  actionClass: string;
-  onAdvance: () => void;
-}
-
-const KdsOrderCard: React.FC<KdsOrderCardProps> = ({ order, isDark, actionText, actionClass, onAdvance }) => {
-  const timing = getOrderTiming(order.createdAt, order.estimatedPrepTime);
-  const waiter = getAssignedWaiter(order.tableNumber);
-  const compItem = order.items.find(i => i.price === 0 || i.name.includes('Complimentary') || i.name.includes('🎁'));
-
-  return (
-    <article className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
-      isDark 
-        ? 'bg-slate-900 border-slate-800 hover:border-slate-700 shadow-sm' 
-        : 'bg-white border-slate-200/90 hover:border-slate-300 shadow-xs hover:shadow-sm'
-    }`}>
-      
-      {/* Top Accent Stripe if Overdue */}
-      {order.status !== 'COMPLETED' && timing.isOverdue && (
-        <div className="h-1 bg-gradient-to-r from-rose-500 to-amber-500 w-full" />
-      )}
-
-      <div className="p-4 space-y-3">
-        
-        {/* Row 1: Table Badge, Order Number, Waiter */}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 rounded-xl bg-slate-900 text-white dark:bg-slate-800 font-extrabold text-xs">
-              Table {order.tableNumber}
-            </span>
-            <span className="font-mono font-bold text-sm text-slate-500 dark:text-slate-400">
-              #{order.orderNumber}
-            </span>
-          </div>
-
-          <span className={`px-2 py-0.5 rounded-lg text-xs font-bold border flex items-center gap-1 ${waiter.color}`}>
-            <span className="w-1.5 h-1.5 rounded-full bg-current" />
-            <span>{waiter.name}</span>
-          </span>
-        </div>
-
-        {/* Row 2: Elapsed Timer & Prep Progress Target */}
-        <div className="flex items-center justify-between text-xs">
-          <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400 font-medium">
-            <Clock className="w-3.5 h-3.5" />
-            <span className="font-mono">{timing.display}</span>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            {order.status !== 'COMPLETED' && timing.isOverdue ? (
-              <span className="px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-[10px] font-black tracking-wide">
-                OVERDUE +{timing.overdueMins}m
-              </span>
-            ) : (
-              <span className="text-[11px] text-slate-400">
-                Target: {order.estimatedPrepTime || 15}m
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Prep Progress Bar */}
-        {order.status !== 'COMPLETED' && (
-          <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
-            <div 
-              className={`h-full rounded-full transition-all duration-300 ${
-                timing.isOverdue 
-                  ? 'bg-rose-500' 
-                  : timing.percent > 70 
-                    ? 'bg-amber-500' 
-                    : 'bg-blue-500'
-              }`}
-              style={{ width: `${Math.min(100, timing.percent)}%` }}
-            />
-          </div>
-        )}
-
-        {/* Complimentary Treat Banner */}
-        {compItem && (
-          <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 flex items-center gap-2 text-xs text-amber-800 dark:text-amber-300 font-bold">
-            <Gift className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-            <span>Complimentary Delay Treat Claimed</span>
-          </div>
-        )}
-
-        {/* Items List */}
-        <div className={`rounded-xl p-3 space-y-2 border ${
-          isDark ? 'bg-slate-950/40 border-slate-800/80' : 'bg-slate-50/70 border-slate-100'
-        }`}>
-          {order.items.map((item, idx) => (
-            <div key={item.cartItemId || idx} className="text-xs">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-start gap-2 min-w-0">
-                  <span className="px-1.5 py-0.2 rounded bg-slate-200 dark:bg-slate-800 font-mono font-bold text-slate-800 dark:text-slate-200 text-xs shrink-0 mt-0.5">
-                    {item.quantity}x
-                  </span>
-                  <span className={`font-bold leading-snug break-words ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                    {item.name}
-                  </span>
-                </div>
-
-                <span className={`w-3 h-3 rounded-xs border flex items-center justify-center shrink-0 mt-0.5 ${
-                  item.isVeg ? 'border-emerald-600' : 'border-rose-600'
-                }`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${item.isVeg ? 'bg-emerald-600' : 'bg-rose-600'}`} />
-                </span>
-              </div>
-
-              {/* Spice & Modifiers */}
-              {(item.spiceLevel || (item.customizations && item.customizations.length > 0)) && (
-                <div className="flex flex-wrap items-center gap-1 mt-1 ml-6 text-[10px]">
-                  {item.spiceLevel && (
-                    <span className="text-slate-500 font-medium">
-                      Spice: {item.spiceLevel}
-                    </span>
-                  )}
-                  {item.customizations && item.customizations.map((c, cIdx) => (
-                    <span key={cIdx} className="text-slate-400">
-                      • {c}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* Special Instructions */}
-              {item.specialInstructions && (
-                <div className="mt-1 ml-6 p-1.5 rounded-lg bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/60 dark:border-blue-900/40 text-blue-800 dark:text-blue-300 text-[11px] flex items-start gap-1">
-                  <Info className="w-3 h-3 text-blue-500 shrink-0 mt-0.5" />
-                  <span className="italic">"{item.specialInstructions}"</span>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Action Button */}
-        <div className="pt-1">
-          {order.status === 'COMPLETED' ? (
-            <div className="text-center py-2 text-xs font-bold text-slate-400 bg-slate-100 dark:bg-slate-800/60 rounded-xl">
-              ✓ Delivered to Table
-            </div>
-          ) : (
-            <button
-              onClick={onAdvance}
-              className={`w-full py-2.5 px-4 rounded-xl font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98 ${actionClass}`}
-            >
-              <span>{actionText}</span>
-            </button>
-          )}
-        </div>
-
-      </div>
-
-    </article>
   );
 };
 

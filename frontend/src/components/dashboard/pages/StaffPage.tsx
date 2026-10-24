@@ -77,6 +77,11 @@ export const StaffPage: React.FC = () => {
 
   useEffect(() => {
     refreshUsers();
+    // Fetch live users from Supabase Cloud PostgreSQL so all devices see new credentials
+    authService.syncWithCloud().then(() => {
+      refreshUsers();
+    });
+
     const handleUpdate = () => refreshUsers();
     window.addEventListener('auth_users_updated', handleUpdate);
     return () => window.removeEventListener('auth_users_updated', handleUpdate);

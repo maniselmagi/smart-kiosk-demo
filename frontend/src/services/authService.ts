@@ -1,4 +1,4 @@
-import { pushUserToCloud, fetchUsersFromCloud } from './supabaseClient';
+import { pushUserToCloud, fetchUsersFromCloud, deleteUserFromCloud } from './supabaseClient';
 
 export interface UserCredential {
   id: string;
@@ -194,6 +194,9 @@ export const authService = {
       this.setCurrentUser(updatedUser);
     }
 
+    // Sync update to Supabase Cloud PostgreSQL
+    pushUserToCloud(updatedUser).catch(err => console.warn('[Cloud Sync] User update error:', err));
+
     return { success: true, user: updatedUser };
   },
 
@@ -215,6 +218,9 @@ export const authService = {
     if (current && current.id === id) {
       this.logout();
     }
+
+    // Delete from Supabase Cloud PostgreSQL
+    deleteUserFromCloud(target.username).catch(err => console.warn('[Cloud Sync] User deletion error:', err));
 
     return { success: true };
   },
@@ -316,22 +322,35 @@ export const authService = {
         let modified = false;
 
         for (const cu of cloudUsers) {
-          const exists = localUsers.some(lu => lu.username.toLowerCase() === cu.username.toLowerCase());
-          if (!exists) {
-            localUsers.push({
-              id: cu.id || `usr-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-              name: cu.full_name || cu.username,
-              username: cu.username.toLowerCase(),
-              password: cu.password_hash || 'admin123',
-              role: cu.role === 'STORE_MANAGER' ? 'management' : 'kitchen',
-              title: cu.role === 'STORE_MANAGER' ? 'General Manager' : 'Kitchen Station Lead',
-              pin: cu.pin_code || (cu.role === 'STORE_MANAGER' ? '9901' : '1234'),
-              department: cu.department || (cu.role === 'STORE_MANAGER' ? 'Management' : 'Kitchen Brigade'),
-              phone: cu.phone,
-              email: cu.email,
-              createdAt: cu.created_at || new Date().toISOString(),
-              isDefault: cu.username.toLowerCase() === 'admin',
-            });
+          const idx = localUsers.findIndex(lu => lu.username.toLowerCase() === cu.username.toLowerCase());
+          const role = (cu.role === 'STORE_MANAGER' || cu.role === 'FLOOR_SUPERVISOR') ? 'management' : 'kitchen';
+          const title = cu.role === 'STORE_MANAGER' ? 'General Manager' : cu.role === 'HEAD_CHEF' ? 'Executive Chef' : (cu.department || 'Staff');
+          
+          const cloudRecord: UserCredential = {
+            id: cu.id || `usr-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+            name: cu.full_name || cu.username,
+            username: cu.username.toLowerCase(),
+            password: cu.password_hash || 'admin123',
+            role: role,
+            title: title,
+            pin: cu.pin_code || (role === 'management' ? '9901' : '1234'),
+            department: cu.department || (role === 'management' ? 'Management' : 'Kitchen Brigade'),
+            phone: cu.phone,
+            email: cu.email,
+            createdAt: cu.created_at || new Date().toISOString(),
+            isDefault: cu.username.toLowerCase() === 'admin',
+          };
+
+          if (idx === -1) {
+            localUsers.push(cloudRecord);
+            modified = true;
+          } else {
+            // Keep local data in sync with cloud PostgreSQL
+            localUsers[idx] = {
+              ...localUsers[idx],
+              ...cloudRecord,
+              isDefault: localUsers[idx].isDefault
+            };
             modified = true;
           }
         }

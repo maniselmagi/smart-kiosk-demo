@@ -57,6 +57,11 @@ export const StaffLoginModal: React.FC<StaffLoginModalProps> = ({
     if (isOpen) {
       const users = authService.getUsers();
       setUsersList(users);
+      // Fetch latest credentials from Cloud PostgreSQL so logins on other devices work instantly
+      authService.syncWithCloud().then(() => {
+        setUsersList(authService.getUsers());
+      });
+
       setSelectedRole(initialRole || 'all');
       setUsername('');
       setPassword('');

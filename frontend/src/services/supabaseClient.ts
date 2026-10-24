@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { Order, OrderStatus, Feedback } from '../types';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://fgltjpftvxgauzpfrwh.supabase.co';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://fgltjpftvxgauzpsfrwh.supabase.co';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnbHRqcGZ0dnhnYXV6cHNmcndoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI3NDQxOTAsImV4cCI6MjEwODMyMDE5MH0.Sb1wJgmeuvxsfyf4T5FBjbq3g2vRDFvY02WgdlW35tM';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -284,4 +284,27 @@ export async function fetchUsersFromCloud(): Promise<any[] | null> {
     return null;
   }
 }
+
+/**
+ * Delete User from Supabase Cloud PostgreSQL
+ */
+export async function deleteUserFromCloud(username: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('users')
+      .delete()
+      .eq('username', username.toLowerCase());
+
+    if (error) {
+      console.warn('[Cloud DB] Delete user error:', error.message);
+      return false;
+    }
+    console.log(`[Cloud DB] User @${username} deleted from PostgreSQL!`);
+    return true;
+  } catch (err) {
+    console.warn('[Cloud DB] Delete user error:', err);
+    return false;
+  }
+}
+
 

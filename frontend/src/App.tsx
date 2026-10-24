@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { KioskProvider, useKiosk } from './context/KioskContext';
 import { DemoNavigation } from './components/common/DemoNavigation';
 import { Header } from './components/common/Header';
@@ -49,6 +49,11 @@ const MainAppContent: React.FC = () => {
     setStaffLoginTargetRole(role);
     setIsStaffLoginOpen(true);
   };
+
+  // Sync with Cloud PostgreSQL database on initial startup
+  useEffect(() => {
+    authService.syncWithCloud().catch((err) => console.warn('Cloud sync on startup:', err));
+  }, []);
 
   const handleStaffLoginSuccess = (role: 'kitchen' | 'management', staffUser: StaffUser) => {
     setIsStaffLoginOpen(false);

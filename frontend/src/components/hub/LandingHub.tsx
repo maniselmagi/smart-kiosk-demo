@@ -18,7 +18,15 @@ import {
   Moon
 } from 'lucide-react';
 
-export const LandingHub: React.FC = () => {
+interface LandingHubProps {
+  onStartCustomer?: () => void;
+  onOpenStaffLogin?: (role: 'kitchen' | 'management') => void;
+}
+
+export const LandingHub: React.FC<LandingHubProps> = ({
+  onStartCustomer,
+  onOpenStaffLogin
+}) => {
   const { setView, tableNumber, setTableNumber, activeOrders, staffAlerts, theme, toggleTheme, language, setLanguage } = useKiosk();
 
   const pendingOrders = activeOrders.filter((o) => o.status !== 'COMPLETED').length;
@@ -170,7 +178,13 @@ export const LandingHub: React.FC = () => {
 
             <div className="space-y-2 pt-2 border-t border-slate-700/60">
               <button
-                onClick={() => setView('kiosk')}
+                onClick={() => {
+                  if (onStartCustomer) {
+                    onStartCustomer();
+                  } else {
+                    setView('kiosk');
+                  }
+                }}
                 className="w-full py-3.5 px-4 rounded-2xl bg-brand-500 hover:bg-brand-600 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-brand-500/25 active:scale-98 group-hover:gap-3 cursor-pointer"
               >
                 <span>Open Customer Kiosk</span>
@@ -222,7 +236,13 @@ export const LandingHub: React.FC = () => {
 
             <div className="space-y-2 pt-2 border-t border-slate-700/60">
               <button
-                onClick={() => setView('kitchen')}
+                onClick={() => {
+                  if (onOpenStaffLogin) {
+                    onOpenStaffLogin('kitchen');
+                  } else {
+                    setView('kitchen');
+                  }
+                }}
                 className="w-full py-3.5 px-4 rounded-2xl bg-amber-600 hover:bg-amber-700 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-amber-600/25 active:scale-98 group-hover:gap-3 cursor-pointer"
               >
                 <span>Open Kitchen Display</span>
@@ -270,7 +290,13 @@ export const LandingHub: React.FC = () => {
 
             <div className="space-y-2 pt-2 border-t border-slate-700/60">
               <button
-                onClick={() => setView('dashboard')}
+                onClick={() => {
+                  if (onOpenStaffLogin) {
+                    onOpenStaffLogin('management');
+                  } else {
+                    setView('dashboard');
+                  }
+                }}
                 className="w-full py-3.5 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-600/25 active:scale-98 group-hover:gap-3 cursor-pointer"
               >
                 <span>Open Management Dashboard</span>

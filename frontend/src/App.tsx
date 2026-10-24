@@ -19,6 +19,7 @@ import { LanguageSelectionModal } from './components/kiosk/LanguageSelectionModa
 import { LanguageEntryScreen } from './components/kiosk/LanguageEntryScreen';
 import { CustomerTableAllocationScreen } from './components/kiosk/CustomerTableAllocationScreen';
 import CallWaiterModal from './components/common/CallWaiterModal';
+import { StaffLoginModal, StaffUser } from './components/auth/StaffLoginModal';
 import { MenuItem, Order } from './types';
 
 const MainAppContent: React.FC = () => {
@@ -26,6 +27,7 @@ const MainAppContent: React.FC = () => {
     view, 
     setView, 
     toastMessage, 
+    showToast,
     activeOrders,
     currentTrackedOrder, 
     setCurrentTrackedOrder,
@@ -37,6 +39,26 @@ const MainAppContent: React.FC = () => {
 
   // Kiosk inner sub-screen state: Step 1 (welcome) -> Step 2 (language) -> Step 3 (allocation) -> Step 4 (menu)
   const [kioskSubScreen, setKioskSubScreen] = useState<'welcome' | 'language' | 'allocation' | 'menu'>('welcome');
+
+  // Unified Staff Login state (Kitchen & Management)
+  const [isStaffLoginOpen, setIsStaffLoginOpen] = useState(false);
+  const [staffLoginTargetRole, setStaffLoginTargetRole] = useState<'kitchen' | 'management'>('kitchen');
+
+  const handleOpenStaffLogin = (role: 'kitchen' | 'management') => {
+    setStaffLoginTargetRole(role);
+    setIsStaffLoginOpen(true);
+  };
+
+  const handleStaffLoginSuccess = (role: 'kitchen' | 'management', staffUser: StaffUser) => {
+    setIsStaffLoginOpen(false);
+    if (role === 'kitchen') {
+      setView('kitchen');
+      showToast(`Welcome back ${staffUser.name}! Kitchen Display active.`);
+    } else {
+      setView('dashboard');
+      showToast(`Welcome back ${staffUser.name}! Management Portal open.`);
+    }
+  };
 
   // Modals state
   const [selectedItemForDetail, setSelectedItemForDetail] = useState<MenuItem | null>(null);
@@ -79,7 +101,15 @@ const MainAppContent: React.FC = () => {
 
       {/* Main View Router */}
       <main className="flex-1 flex flex-col">
-        {view === 'hub' && <LandingHub />}
+        {view === 'hub' && (
+          <LandingHub 
+            onStartCustomer={() => {
+              setView('kiosk');
+              setKioskSubScreen('language');
+            }}
+            onOpenStaffLogin={handleOpenStaffLogin}
+          />
+        )}
 
         {view === 'kitchen' && <KitchenDisplay />}
 
@@ -91,6 +121,8 @@ const MainAppContent: React.FC = () => {
               <WelcomeScreen
                 onStart={() => setKioskSubScreen('language')}
                 onOpenLanguage={() => setKioskSubScreen('language')}
+                onOpenKitchenLogin={() => handleOpenStaffLogin('kitchen')}
+                onOpenManagementLogin={() => handleOpenStaffLogin('management')}
               />
             )}
 
@@ -208,6 +240,14 @@ const MainAppContent: React.FC = () => {
         isOpen={isLanguageModalOpen && view === 'kiosk' && kioskSubScreen === 'menu'}
         onClose={() => setIsLanguageModalOpen(false)}
         onConfirm={() => setIsLanguageModalOpen(false)}
+      />
+
+      {/* Unified Kitchen & Management Staff Login Modal */}
+      <StaffLoginModal
+        isOpen={isStaffLoginOpen}
+        initialRole={staffLoginTargetRole}
+        onClose={() => setIsStaffLoginOpen(false)}
+        onLoginSuccess={handleStaffLoginSuccess}
       />
 
     </div>

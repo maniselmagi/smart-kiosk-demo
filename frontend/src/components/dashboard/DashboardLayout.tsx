@@ -53,6 +53,7 @@ interface NavItem {
 }
 
 import { authService, UserCredential } from '../../services/authService';
+import royalEmberLogo from '../../assets/royal_ember_logo.jpg';
 
 export const SIDEBAR_NAV_ITEMS: NavItem[] = [
   { id: 'overview', label: 'Dashboard Overview', icon: LayoutDashboard },
@@ -187,12 +188,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             <div className="flex items-center gap-3 overflow-hidden">
               <div 
                 onClick={isSidebarCollapsed ? toggleSidebarCollapse : undefined}
-                className={`w-11 h-11 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-amber-500 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0 ${
+                className={`w-11 h-11 rounded-2xl overflow-hidden ring-2 ring-amber-500/40 shadow-md shadow-amber-500/10 shrink-0 bg-slate-900 ${
                   isSidebarCollapsed ? 'cursor-pointer hover:scale-105 transition-transform' : ''
                 }`}
-                title={isSidebarCollapsed ? "Click to expand sidebar" : undefined}
+                title={isSidebarCollapsed ? "Click to expand sidebar" : "Royal Ember Official Brand"}
               >
-                <ChefHat className="w-6 h-6" />
+                <img 
+                  src={royalEmberLogo} 
+                  alt="Royal Ember Brand Logo" 
+                  className="w-full h-full object-cover" 
+                />
               </div>
               {!isSidebarCollapsed && (
                 <div className="overflow-hidden">
@@ -200,11 +205,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                     <h1 className="font-extrabold text-base tracking-tight font-display text-slate-900 dark:text-white truncate">
                       Royal Ember
                     </h1>
-                    <span className="px-1.5 py-0.2 rounded-md bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase tracking-wider border border-blue-200/50 dark:border-blue-800/50">
-                      SaaS
+                    <span className="px-1.5 py-0.2 rounded-md bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-wider border border-amber-200/50 dark:border-amber-800/50">
+                      Official
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium truncate">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">
                     Restaurant Admin Suite
                   </p>
                 </div>
@@ -361,6 +366,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               >
                 {isSidebarCollapsed ? <PanelLeftOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" /> : <PanelLeftClose className="w-5 h-5" />}
               </button>
+
+              {/* Official Brand Logo in Top Header */}
+              <div className="flex items-center gap-2.5 pr-2.5 border-r border-slate-200 dark:border-slate-800 shrink-0">
+                <img 
+                  src={royalEmberLogo} 
+                  alt="Royal Ember Logo" 
+                  className="w-9 h-9 rounded-xl object-cover ring-2 ring-amber-500/30 shadow-xs" 
+                />
+              </div>
 
               <div className="hidden sm:block shrink-0">
                 <h2 className="text-base font-bold text-slate-900 dark:text-white font-display tracking-tight leading-tight">

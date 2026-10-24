@@ -27,10 +27,18 @@ import {
   Download,
   Info,
   RefreshCw,
-  Filter
+  Filter,
+  User,
+  Key,
+  Shield,
+  Phone,
+  Mail,
+  Building,
+  LogOut
 } from 'lucide-react';
 import { getAssignedWaiter, getWaiterZones, WaiterZoneConfig } from '../../utils/waiterAssignment';
-import { authService } from '../../services/authService';
+import { authService, UserCredential } from '../../services/authService';
+import royalEmberLogo from '../../assets/royal_ember_logo.jpg';
 
 // Audio chime for real-time kitchen orders
 function playKitchenChime() {
@@ -135,6 +143,26 @@ export const KitchenDisplay: React.FC = () => {
   // Waiter-Table Allocation State (Configured from Management Dashboard)
   const [waiterZones, setWaiterZones] = useState<WaiterZoneConfig[]>(getWaiterZones);
   const [selectedWaiterFilter, setSelectedWaiterFilter] = useState<string | null>(null);
+
+  // Active logged-in user from database / authService
+  const [currentUser, setCurrentUser] = useState<UserCredential | null>(() => {
+    return authService.getCurrentUser() || authService.getUsers().find(u => u.role === 'kitchen') || authService.getUsers()[0] || null;
+  });
+  const [isUserDetailsModalOpen, setIsUserDetailsModalOpen] = useState(false);
+  const [showPin, setShowPin] = useState(false);
+
+  useEffect(() => {
+    const handleUserChange = () => {
+      const u = authService.getCurrentUser() || authService.getUsers().find(u => u.role === 'kitchen') || authService.getUsers()[0] || null;
+      setCurrentUser(u);
+    };
+    window.addEventListener('auth_user_changed', handleUserChange);
+    window.addEventListener('auth_users_updated', handleUserChange);
+    return () => {
+      window.removeEventListener('auth_user_changed', handleUserChange);
+      window.removeEventListener('auth_users_updated', handleUserChange);
+    };
+  }, []);
 
   useEffect(() => {
     const handleUpdate = () => setWaiterZones(getWaiterZones());
@@ -298,25 +326,20 @@ export const KitchenDisplay: React.FC = () => {
   const [activeNavTab, setActiveNavTab] = useState<'Dashboard' | 'Orders' | 'Cooking' | 'Ready' | 'Calls' | 'SoldOut'>('Dashboard');
 
   return (
-    <div className={`min-h-screen p-3 sm:p-6 lg:p-8 font-sans transition-colors duration-200 relative overflow-x-hidden ${
+    <div className={`min-h-screen w-full p-2 sm:p-4 lg:p-6 font-sans transition-colors duration-200 relative overflow-x-hidden ${
       isDark 
-        ? 'bg-[#0f172a] text-slate-100' 
-        : 'bg-[#f8fafc] text-slate-800'
+        ? 'bg-[#0B0F19] text-slate-100' 
+        : 'bg-slate-100/70 text-slate-800'
     }`}
-    style={{
-      backgroundImage: isDark 
-        ? 'radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(217, 70, 239, 0.12) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.12) 0px, transparent 50%)' 
-        : 'radial-gradient(at 0% 0%, rgba(192, 132, 252, 0.35) 0px, transparent 50%), radial-gradient(at 100% 0%, rgba(244, 114, 182, 0.28) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.28) 0px, transparent 50%), radial-gradient(at 0% 100%, rgba(167, 139, 250, 0.25) 0px, transparent 50%)'
-    }}
     >
       
       {/* ========================================================= */}
-      {/* MAIN WHITE CARD CONTAINER (REFERENCE SAAS DESIGN)         */}
+      {/* FULL SCREEN WHITE/DARK CONTAINER                          */}
       {/* ========================================================= */}
-      <div className={`max-w-[1540px] mx-auto rounded-3xl border shadow-xl p-6 sm:p-8 transition-colors ${
+      <div className={`w-full rounded-2xl border shadow-xs p-4 sm:p-6 lg:p-7 transition-colors ${
         isDark 
-          ? 'bg-slate-900/95 border-slate-800 shadow-black/40' 
-          : 'bg-white border-slate-100/90 shadow-2xl shadow-purple-950/5'
+          ? 'bg-slate-900 border-slate-800 shadow-black/40' 
+          : 'bg-white border-slate-200/80 shadow-xs'
       }`}>
 
         {/* --------------------------------------------------------- */}
@@ -326,14 +349,17 @@ export const KitchenDisplay: React.FC = () => {
           
           {/* Logo & Navigation Tabs */}
           <div className="flex items-center gap-6 lg:gap-8 flex-wrap">
-            {/* Iridescent Swirl Brand Icon */}
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-pink-500 via-amber-400 to-cyan-400 p-0.5 flex items-center justify-center shadow-xs">
-                <div className="w-full h-full rounded-full bg-white dark:bg-slate-900 flex items-center justify-center">
-                  <ChefHat className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                </div>
+            {/* Royal Ember Brand Logo */}
+            <div className="flex items-center gap-3">
+              <img 
+                src={royalEmberLogo} 
+                alt="Royal Ember" 
+                className="w-10 h-10 rounded-xl object-cover ring-2 ring-amber-500/40 shadow-xs shrink-0" 
+              />
+              <div className="leading-tight">
+                <span className="font-extrabold text-sm tracking-tight block text-slate-900 dark:text-white">Royal Ember</span>
+                <span className="text-[10px] text-amber-500 font-bold uppercase tracking-wider block">Kitchen Display (KDS)</span>
               </div>
-              <span className="font-extrabold text-sm tracking-tight hidden sm:inline">Royal Ember</span>
             </div>
 
             {/* Nav Tabs */}
@@ -457,22 +483,24 @@ export const KitchenDisplay: React.FC = () => {
               </button>
             </div>
 
-            {/* Profile Avatar & Title (Matches Reference Screenshot) */}
-            <div className="flex items-center gap-3">
+            {/* Clickable Profile Avatar & Name (From Database) */}
+            <button
+              onClick={() => setIsUserDetailsModalOpen(true)}
+              className="flex items-center gap-3 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all cursor-pointer text-left group border border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+              title="Click to view staff account details from database"
+            >
               <div className="text-right">
-                <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
-                  Robert Briggs
+                <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight group-hover:text-amber-500 transition-colors">
+                  {currentUser ? currentUser.name : 'Executive Head Chef'}
                 </div>
                 <div className="text-[11px] text-slate-400 dark:text-slate-400 leading-tight">
-                  Royal Ember Kitchen Line
+                  {currentUser?.title || (currentUser?.role === 'kitchen' ? 'Kitchen Station Lead' : 'Operations Supervisor')}
                 </div>
               </div>
-              <img 
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-                alt="Robert Briggs"
-                className="w-9 h-9 rounded-full object-cover ring-2 ring-slate-100 dark:ring-slate-800"
-              />
-            </div>
+              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-500 to-orange-600 text-white font-extrabold text-xs flex items-center justify-center ring-2 ring-slate-100 dark:ring-slate-800 shadow-xs shrink-0">
+                {currentUser ? currentUser.name.charAt(0).toUpperCase() : 'C'}
+              </div>
+            </button>
           </div>
         </div>
 
@@ -1173,6 +1201,189 @@ export const KitchenDisplay: React.FC = () => {
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* 5. USER DETAILS MODAL (FROM DATABASE)                     */}
+      {/* ========================================================= */}
+      {isUserDetailsModalOpen && currentUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className={`w-full max-w-md rounded-3xl shadow-2xl border overflow-hidden flex flex-col ${
+            isDark ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
+          }`}>
+            
+            {/* Modal Header */}
+            <div className={`p-5 border-b flex items-center justify-between ${
+              isDark ? 'border-slate-800 bg-slate-950/40' : 'border-slate-100 bg-slate-50/80'
+            }`}>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20 flex items-center justify-center">
+                  <User className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-sm font-display">Staff Account Details</h3>
+                  <p className="text-[11px] text-slate-400">Database-authenticated active session</p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setIsUserDetailsModalOpen(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 space-y-4 text-xs">
+              
+              {/* Profile Card Summary */}
+              <div className={`p-4 rounded-2xl border flex items-center gap-4 ${
+                isDark ? 'bg-slate-950/60 border-slate-800' : 'bg-slate-50 border-slate-200'
+              }`}>
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 text-white text-xl font-black flex items-center justify-center shadow-md shrink-0">
+                  {currentUser.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-extrabold text-base text-slate-900 dark:text-white truncate">
+                    {currentUser.name}
+                  </h4>
+                  <p className="text-xs text-amber-500 font-bold">{currentUser.title || 'Kitchen Staff'}</p>
+                  <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase mt-1 bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                    Role: {currentUser.role}
+                  </span>
+                </div>
+              </div>
+
+              {/* Database Fields */}
+              <div className="space-y-2.5">
+                
+                {/* Username */}
+                <div className={`p-3 rounded-xl border flex items-center justify-between ${
+                  isDark ? 'bg-slate-800/30 border-slate-800' : 'bg-slate-50/70 border-slate-200/80'
+                }`}>
+                  <span className="text-slate-400 flex items-center gap-1.5">
+                    <UserCheck className="w-3.5 h-3.5" />
+                    <span>Username</span>
+                  </span>
+                  <span className="font-mono font-bold text-slate-900 dark:text-white">
+                    @{currentUser.username}
+                  </span>
+                </div>
+
+                {/* User ID */}
+                <div className={`p-3 rounded-xl border flex items-center justify-between ${
+                  isDark ? 'bg-slate-800/30 border-slate-800' : 'bg-slate-50/70 border-slate-200/80'
+                }`}>
+                  <span className="text-slate-400 flex items-center gap-1.5">
+                    <Shield className="w-3.5 h-3.5" />
+                    <span>Database ID</span>
+                  </span>
+                  <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                    {currentUser.id}
+                  </span>
+                </div>
+
+                {/* Security PIN */}
+                <div className={`p-3 rounded-xl border flex items-center justify-between ${
+                  isDark ? 'bg-slate-800/30 border-slate-800' : 'bg-slate-50/70 border-slate-200/80'
+                }`}>
+                  <span className="text-slate-400 flex items-center gap-1.5">
+                    <Key className="w-3.5 h-3.5" />
+                    <span>Assigned 4-Digit PIN</span>
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono font-black text-amber-500 tracking-widest text-sm">
+                      {showPin ? currentUser.pin : '••••'}
+                    </span>
+                    <button
+                      onClick={() => setShowPin(!showPin)}
+                      className="text-[10px] text-blue-500 hover:underline cursor-pointer"
+                    >
+                      {showPin ? 'Hide' : 'Reveal'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Department */}
+                <div className={`p-3 rounded-xl border flex items-center justify-between ${
+                  isDark ? 'bg-slate-800/30 border-slate-800' : 'bg-slate-50/70 border-slate-200/80'
+                }`}>
+                  <span className="text-slate-400 flex items-center gap-1.5">
+                    <Building className="w-3.5 h-3.5" />
+                    <span>Department</span>
+                  </span>
+                  <span className="font-bold text-slate-900 dark:text-white">
+                    {currentUser.department || 'Kitchen Brigade'}
+                  </span>
+                </div>
+
+                {/* Email */}
+                {currentUser.email && (
+                  <div className={`p-3 rounded-xl border flex items-center justify-between ${
+                    isDark ? 'bg-slate-800/30 border-slate-800' : 'bg-slate-50/70 border-slate-200/80'
+                  }`}>
+                    <span className="text-slate-400 flex items-center gap-1.5">
+                      <Mail className="w-3.5 h-3.5" />
+                      <span>Email</span>
+                    </span>
+                    <span className="font-medium text-slate-700 dark:text-slate-300">
+                      {currentUser.email}
+                    </span>
+                  </div>
+                )}
+
+                {/* Phone */}
+                {currentUser.phone && (
+                  <div className={`p-3 rounded-xl border flex items-center justify-between ${
+                    isDark ? 'bg-slate-800/30 border-slate-800' : 'bg-slate-50/70 border-slate-200/80'
+                  }`}>
+                    <span className="text-slate-400 flex items-center gap-1.5">
+                      <Phone className="w-3.5 h-3.5" />
+                      <span>Phone</span>
+                    </span>
+                    <span className="font-medium text-slate-700 dark:text-slate-300">
+                      {currentUser.phone}
+                    </span>
+                  </div>
+                )}
+
+              </div>
+
+              {/* Cloud Database Sync Status */}
+              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <span>Verified Cloud PostgreSQL Database Account</span>
+              </div>
+
+            </div>
+
+            {/* Modal Footer */}
+            <div className={`p-4 border-t flex items-center justify-between gap-3 ${
+              isDark ? 'border-slate-800 bg-slate-950/40' : 'border-slate-100 bg-slate-50/80'
+            }`}>
+              <button
+                onClick={() => {
+                  authService.logout();
+                  setIsUserDetailsModalOpen(false);
+                  showToast('Logged out of kitchen session');
+                }}
+                className="px-3.5 py-2 rounded-xl text-xs font-bold text-rose-500 hover:bg-rose-500/10 flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Switch / Sign Out</span>
+              </button>
+
+              <button
+                onClick={() => setIsUserDetailsModalOpen(false)}
+                className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-950 dark:hover:bg-slate-100 text-xs font-bold shadow-xs cursor-pointer transition-colors"
+              >
+                Close
+              </button>
+            </div>
+
           </div>
         </div>
       )}

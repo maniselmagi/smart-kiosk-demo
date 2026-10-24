@@ -520,99 +520,150 @@ export const KitchenDisplay: React.FC = () => {
                         }`}
                       >
                         {/* 1. Ticket # */}
-                        <td className="py-3.5 px-4 font-mono font-extrabold text-xs whitespace-nowrap">
-                          <span className={`px-2 py-1 rounded-md font-bold ${
-                            isDark ? 'bg-slate-800 text-slate-200' : 'bg-slate-100 text-slate-800'
+                        <td className="py-4 px-4 font-mono font-extrabold text-xs whitespace-nowrap align-top">
+                          <span className={`px-2.5 py-1.5 rounded-lg font-mono font-bold text-xs inline-block ${
+                            isDark ? 'bg-slate-800 text-slate-200 border border-slate-700' : 'bg-slate-100 text-slate-800 border border-slate-200'
                           }`}>
                             #{order.orderNumber}
                           </span>
                         </td>
 
                         {/* 2. Table # */}
-                        <td className="py-3.5 px-4 font-bold whitespace-nowrap">
-                          <div className="flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-blue-500" />
-                            <span className="font-black text-xs">Table {order.tableNumber}</span>
-                          </div>
+                        <td className="py-4 px-4 font-bold whitespace-nowrap align-top">
+                          <span className="px-3 py-1.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-950 font-black text-xs inline-flex items-center gap-1.5 shadow-xs">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+                            Table {order.tableNumber}
+                          </span>
                         </td>
 
                         {/* 3. Server / Zone */}
-                        <td className="py-3.5 px-4 whitespace-nowrap">
-                          <span className="text-xs font-semibold text-slate-300 dark:text-slate-300">
+                        <td className="py-4 px-4 whitespace-nowrap align-top">
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1.5 ${
+                            waiter.name.includes('Suresh')
+                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                              : waiter.name.includes('Bala')
+                                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                                : 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20'
+                          }`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${
+                              waiter.name.includes('Suresh') ? 'bg-emerald-500' : waiter.name.includes('Bala') ? 'bg-amber-500' : 'bg-blue-500'
+                            }`} />
                             {waiter.name}
                           </span>
-                          <span className="text-[10px] text-slate-400 block">
+                          <span className="text-[10px] text-slate-400 block mt-1">
                             {waiter.zone}
                           </span>
                         </td>
 
-                        {/* 4. Items List */}
-                        <td className="py-3.5 px-4 max-w-md">
-                          <div className="space-y-1">
+                        {/* 4. Dishes & Full Preparation Details (Old full content) */}
+                        <td className="py-4 px-4 max-w-lg align-top">
+                          <div className="space-y-2">
+                            
+                            {/* Check for Complimentary Delay Treat */}
+                            {order.items.some(i => i.name.toLowerCase().includes('complimentary') || i.name.toLowerCase().includes('delay')) && (
+                              <div className="p-2 rounded-xl border border-amber-400/40 bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold flex items-center gap-1.5 mb-1.5">
+                                <span className="text-sm">🎁</span>
+                                <span>Complimentary Delay Treat Claimed</span>
+                              </div>
+                            )}
+
                             {order.items.map((item, idx) => {
                               const isVeg = /veg|paneer|dosa|idli|coffee|vada|kesari|papad|poori/i.test(item.name);
+                              const isTreat = item.name.toLowerCase().includes('complimentary') || item.name.toLowerCase().includes('delay');
+
                               return (
-                                <div key={idx} className="flex items-center gap-2 text-xs">
-                                  <span className="font-black text-amber-500 text-xs shrink-0">
-                                    {item.quantity}×
-                                  </span>
-                                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isVeg ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                                  <span className="font-bold truncate text-slate-800 dark:text-slate-100">
-                                    {item.name}
-                                  </span>
-                                  {item.spiceLevel && (
-                                    <span className="text-[10px] opacity-60 text-slate-400 shrink-0">
-                                      ({item.spiceLevel})
-                                    </span>
+                                <div 
+                                  key={idx} 
+                                  className={`p-2 rounded-xl border transition-all ${
+                                    isTreat 
+                                      ? 'border-amber-400/30 bg-amber-500/5' 
+                                      : isDark ? 'border-slate-800/80 bg-slate-800/30' : 'border-slate-200/70 bg-slate-50/70'
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2">
+                                      <span className="w-5 h-5 rounded-md bg-amber-500/15 text-amber-600 dark:text-amber-400 font-black text-xs flex items-center justify-center shrink-0">
+                                        {item.quantity}×
+                                      </span>
+
+                                      {/* Veg / Non-Veg Icon */}
+                                      <span className={`w-3.5 h-3.5 rounded-xs border flex items-center justify-center p-0.5 shrink-0 ${
+                                        isVeg ? 'border-emerald-500' : 'border-rose-500'
+                                      }`}>
+                                        <span className={`w-full h-full rounded-full ${isVeg ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                                      </span>
+
+                                      <span className="font-bold text-xs text-slate-900 dark:text-white">
+                                        {item.name}
+                                      </span>
+                                    </div>
+
+                                    {item.spiceLevel && (
+                                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 shrink-0">
+                                        Spice: {item.spiceLevel}
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  {/* Modifiers & Customizations */}
+                                  {item.customizations && item.customizations.length > 0 && (
+                                    <div className="text-[10px] text-slate-500 dark:text-slate-400 pl-7 mt-0.5">
+                                      +{item.customizations.join(', ')}
+                                    </div>
+                                  )}
+
+                                  {/* Item-level special instruction */}
+                                  {item.specialInstructions && (
+                                    <div className="mt-1 pl-7 text-[11px] text-blue-600 dark:text-blue-400 italic">
+                                      "{item.specialInstructions}"
+                                    </div>
                                   )}
                                 </div>
                               );
                             })}
 
-                            {/* Customer note if present */}
+                            {/* Customer Instructions Alert Callout */}
                             {customerNote && (
-                              <div className="text-[11px] text-amber-400 italic pt-0.5 flex items-center gap-1">
-                                <Info className="w-3 h-3 shrink-0" />
-                                <span className="truncate">"{customerNote}"</span>
+                              <div className="p-2.5 rounded-xl border border-blue-400/30 bg-blue-500/10 text-blue-600 dark:text-blue-300 text-xs flex items-start gap-1.5">
+                                <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                                <span>"{customerNote}"</span>
                               </div>
                             )}
                           </div>
                         </td>
 
-                        {/* 5. Elapsed / Target */}
-                        <td className="py-3.5 px-4 whitespace-nowrap">
+                        {/* 5. Elapsed / Target & Overdue */}
+                        <td className="py-4 px-4 whitespace-nowrap align-top">
                           <div className="flex items-center gap-1.5">
-                            <span className={`font-mono text-xs font-bold ${
-                              timing.isOverdue ? 'text-rose-500 animate-pulse font-black' : 'text-slate-400'
-                            }`}>
-                              {timing.display}
+                            <span className="font-mono text-xs font-bold text-slate-700 dark:text-slate-300">
+                              ⏱ {timing.display}
                             </span>
-                            {timing.isOverdue && (
-                              <span className="px-1.5 py-0.2 rounded bg-rose-500/10 text-rose-500 border border-rose-500/20 text-[10px] font-bold">
-                                +{timing.overdueMins}m
-                              </span>
-                            )}
                           </div>
-                          <span className="text-[10px] opacity-50 text-slate-400 block mt-0.5">
+                          <span className="text-[10px] text-slate-400 block mt-1">
                             Target: 15m
                           </span>
+                          {timing.isOverdue && (
+                            <span className="px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-500 border border-rose-500/30 text-[10px] font-black inline-block mt-1 animate-pulse">
+                              OVERDUE +{timing.overdueMins}m
+                            </span>
+                          )}
                         </td>
 
                         {/* 6. Status Pill */}
-                        <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                        <td className="py-4 px-4 text-center whitespace-nowrap align-top">
                           <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase border ${statusStyles}`}>
-                            {order.status}
+                            {order.status === 'COMPLETED' ? 'SERVED & CLEARED' : order.status === 'READY' ? 'READY TO SERVE' : order.status}
                           </span>
                         </td>
 
-                        {/* 7. Action Button */}
-                        <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                        {/* 7. Action Button (Old operational labels) */}
+                        <td className="py-4 px-4 text-right whitespace-nowrap align-top">
                           <div className="flex items-center justify-end gap-1.5" onClick={(e) => e.stopPropagation()}>
                             
                             {/* Inspect Eye */}
                             <button
                               onClick={() => setSelectedOrderForModal(order)}
-                              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                              className={`p-2 rounded-xl transition-colors cursor-pointer ${
                                 isDark 
                                   ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' 
                                   : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
@@ -622,41 +673,41 @@ export const KitchenDisplay: React.FC = () => {
                               <Eye className="w-3.5 h-3.5" />
                             </button>
 
-                            {/* Advance Stage Button */}
+                            {/* Advance Stage Button with Old Labels */}
                             {order.status === 'NEW' && (
                               <button
                                 onClick={(e) => handleAdvanceStatus(order.id, 'NEW', e)}
-                                className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black flex items-center gap-1 shadow-xs cursor-pointer transition-transform active:scale-95"
+                                className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-black flex items-center gap-1.5 shadow-xs cursor-pointer transition-transform active:scale-95"
                               >
-                                <Flame className="w-3 h-3 fill-slate-950" />
-                                <span>Start Cooking</span>
+                                <Flame className="w-3.5 h-3.5 fill-slate-950" />
+                                <span>Accept &amp; Cook</span>
                               </button>
                             )}
 
                             {order.status === 'PREPARING' && (
                               <button
                                 onClick={(e) => handleAdvanceStatus(order.id, 'PREPARING', e)}
-                                className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black flex items-center gap-1 shadow-xs cursor-pointer transition-transform active:scale-95"
+                                className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black flex items-center gap-1.5 shadow-xs cursor-pointer transition-transform active:scale-95"
                               >
-                                <CheckCircle2 className="w-3 h-3" />
-                                <span>Mark Ready</span>
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                <span>Mark Ready to Serve</span>
                               </button>
                             )}
 
                             {order.status === 'READY' && (
                               <button
                                 onClick={(e) => handleAdvanceStatus(order.id, 'READY', e)}
-                                className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black flex items-center gap-1 shadow-xs cursor-pointer transition-transform active:scale-95"
+                                className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black flex items-center gap-1.5 shadow-xs cursor-pointer transition-transform active:scale-95"
                               >
-                                <CheckCheck className="w-3 h-3" />
+                                <CheckCheck className="w-3.5 h-3.5" />
                                 <span>Deliver to Table</span>
                               </button>
                             )}
 
                             {order.status === 'COMPLETED' && (
-                              <span className="px-2.5 py-1 text-[11px] font-bold text-slate-500 flex items-center gap-1">
+                              <span className="px-3 py-1.5 text-xs font-bold text-slate-400 dark:text-slate-500 flex items-center gap-1">
                                 <Check className="w-3.5 h-3.5 text-emerald-500" />
-                                <span>Served</span>
+                                <span>Delivered to Table</span>
                               </span>
                             )}
                           </div>

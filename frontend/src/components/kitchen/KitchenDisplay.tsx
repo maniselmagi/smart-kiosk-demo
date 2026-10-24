@@ -25,10 +25,12 @@ import {
   Receipt,
   UserCheck,
   Download,
-  Info
+  Info,
+  RefreshCw,
+  Filter
 } from 'lucide-react';
 import { getAssignedWaiter } from '../../utils/waiterAssignment';
-import { authService, UserCredential } from '../../services/authService';
+import { authService } from '../../services/authService';
 
 // Audio chime for real-time kitchen orders
 function playKitchenChime() {
@@ -122,7 +124,7 @@ export const KitchenDisplay: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<'ALL' | OrderStatus>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Selected Order for Full Ticket Drawer / Modal
+  // Selected Order for Full Ticket Modal
   const [selectedOrderForModal, setSelectedOrderForModal] = useState<Order | null>(null);
 
   // Modals
@@ -257,16 +259,16 @@ export const KitchenDisplay: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen p-4 sm:p-6 transition-colors duration-200 ${
+    <div className={`min-h-screen p-4 sm:p-6 transition-colors duration-200 font-sans ${
       isDark ? 'bg-[#0B0F19] text-slate-100' : 'bg-slate-50 text-slate-900'
     }`}>
       
-      <div className="max-w-7xl mx-auto space-y-5">
+      <div className="max-w-7xl mx-auto space-y-4">
 
         {/* ========================================================= */}
-        {/* 1. TOP HEADER & OPERATIONS BAR                            */}
+        {/* 1. UNIFIED PROFESSIONAL HEADER & CONTROLS                  */}
         {/* ========================================================= */}
-        <div className={`p-4 sm:p-5 rounded-2xl border shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors ${
+        <div className={`p-5 rounded-2xl border shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors ${
           isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'
         }`}>
           
@@ -289,21 +291,24 @@ export const KitchenDisplay: React.FC = () => {
 
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg sm:text-xl font-extrabold font-display tracking-tight">
-                  Kitchen Operations Ledger
+                <h1 className="text-xl font-extrabold font-display tracking-tight">
+                  Kitchen Operations Directory
                 </h1>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-xs font-bold flex items-center gap-1">
+                <span className="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-500 border border-blue-500/20 text-xs font-bold">
+                  {displayOrders.length} Active Tickets
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-xs font-bold hidden sm:flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   Live Sync
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">
-                Executive prep line order tracking • Royal Ember Indiranagar
+                Real-time kitchen order preparation and dining dispatch • Royal Ember Flagship
               </p>
             </div>
           </div>
 
-          {/* Quick Tools */}
+          {/* Top Quick Actions */}
           <div className="flex items-center gap-2 flex-wrap">
             
             {/* Waiter Calls Badge */}
@@ -381,164 +386,103 @@ export const KitchenDisplay: React.FC = () => {
         </div>
 
         {/* ========================================================= */}
-        {/* 2. EXECUTIVE KPI SUMMARY METRIC CARDS                     */}
-        {/* ========================================================= */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          
-          <button
-            onClick={() => setStatusFilter('NEW')}
-            className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
-              statusFilter === 'NEW'
-                ? 'bg-amber-500/10 border-amber-500/50 shadow-sm ring-1 ring-amber-500/30'
-                : isDark ? 'bg-slate-900 border-slate-800 hover:border-slate-700' : 'bg-white border-slate-200 hover:border-amber-300'
-            }`}
-          >
-            <span className="text-[11px] font-bold text-amber-500 uppercase tracking-wider block">
-              New Tickets
-            </span>
-            <div className="text-2xl font-black font-display mt-1">
-              {counts.NEW}
-            </div>
-            <span className="text-[10px] text-slate-400 mt-0.5 block">Awaiting chef acceptance</span>
-          </button>
-
-          <button
-            onClick={() => setStatusFilter('PREPARING')}
-            className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
-              statusFilter === 'PREPARING'
-                ? 'bg-blue-500/10 border-blue-500/50 shadow-sm ring-1 ring-blue-500/30'
-                : isDark ? 'bg-slate-900 border-slate-800 hover:border-slate-700' : 'bg-white border-slate-200 hover:border-blue-300'
-            }`}
-          >
-            <span className="text-[11px] font-bold text-blue-500 uppercase tracking-wider block">
-              Cooking Line
-            </span>
-            <div className="text-2xl font-black font-display mt-1">
-              {counts.PREPARING}
-            </div>
-            <span className="text-[10px] text-slate-400 mt-0.5 block">Under chef preparation</span>
-          </button>
-
-          <button
-            onClick={() => setStatusFilter('READY')}
-            className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
-              statusFilter === 'READY'
-                ? 'bg-emerald-500/10 border-emerald-500/50 shadow-sm ring-1 ring-emerald-500/30'
-                : isDark ? 'bg-slate-900 border-slate-800 hover:border-slate-700' : 'bg-white border-slate-200 hover:border-emerald-300'
-            }`}
-          >
-            <span className="text-[11px] font-bold text-emerald-500 uppercase tracking-wider block">
-              Ready to Serve
-            </span>
-            <div className="text-2xl font-black font-display mt-1">
-              {counts.READY}
-            </div>
-            <span className="text-[10px] text-slate-400 mt-0.5 block">Waiter alerted for pickup</span>
-          </button>
-
-          <button
-            onClick={() => setStatusFilter('COMPLETED')}
-            className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
-              statusFilter === 'COMPLETED'
-                ? 'bg-slate-800 border-slate-600 shadow-sm ring-1 ring-slate-500/30'
-                : isDark ? 'bg-slate-900 border-slate-800 hover:border-slate-700' : 'bg-white border-slate-200 hover:border-slate-400'
-            }`}
-          >
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-              Served &amp; Cleared
-            </span>
-            <div className="text-2xl font-black font-display mt-1">
-              {counts.COMPLETED}
-            </div>
-            <span className="text-[10px] text-slate-400 mt-0.5 block">Delivered to dining table</span>
-          </button>
-        </div>
-
-        {/* ========================================================= */}
-        {/* 3. FILTER, STATION TABS & SEARCH BAR                       */}
-        {/* ========================================================= */}
-        <div className={`p-4 rounded-2xl border shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 ${
-          isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'
-        }`}>
-          
-          {/* Status Tabs */}
-          <div className={`flex items-center gap-1 overflow-x-auto p-1 rounded-xl text-xs font-bold ${
-            isDark ? 'bg-slate-950' : 'bg-slate-100'
-          }`}>
-            {(['ALL', 'NEW', 'PREPARING', 'READY', 'COMPLETED'] as const).map(st => (
-              <button
-                key={st}
-                onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-all cursor-pointer ${
-                  statusFilter === st
-                    ? isDark 
-                      ? 'bg-blue-600 text-white shadow-xs font-black' 
-                      : 'bg-white text-slate-900 shadow-xs font-black'
-                    : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                {st === 'ALL' ? 'All Orders' : st} ({counts[st]})
-              </button>
-            ))}
-          </div>
-
-          {/* Station Selector & Search */}
-          <div className="flex items-center gap-2">
-            <select
-              value={selectedStation}
-              onChange={(e) => setSelectedStation(e.target.value)}
-              className={`px-3 py-2 text-xs rounded-xl border outline-none font-medium cursor-pointer ${
-                isDark ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-slate-100 border-slate-200 text-slate-800'
-              }`}
-            >
-              <option value="ALL">All Kitchen Stations</option>
-              <option value="HOT">Hot Cooking Line</option>
-              <option value="TANDOOR">Tandoor &amp; Breads</option>
-              <option value="STARTER">Starters &amp; Tiffin</option>
-              <option value="BEVERAGE">Drinks &amp; Sweets</option>
-            </select>
-
-            <div className={`relative flex-1 sm:w-64 rounded-xl border flex items-center px-3 py-2 ${
-              isDark ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-slate-100 border-slate-200 text-slate-800'
-            }`}>
-              <Search className="w-3.5 h-3.5 opacity-40 mr-2 shrink-0" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search ticket #, table..."
-                className="bg-transparent border-none outline-none text-xs w-full placeholder:opacity-50"
-              />
-              {searchQuery && (
-                <button onClick={() => setSearchQuery('')} className="p-0.5 opacity-50 hover:opacity-100">
-                  <X className="w-3 h-3" />
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* ========================================================= */}
-        {/* 4. PROFESSIONAL KITCHEN OPERATIONS DATA TABLE             */}
+        {/* 2. MASTER KITCHEN TABLE CONTAINER                         */}
         {/* ========================================================= */}
         <div className={`rounded-2xl border shadow-xs overflow-hidden ${
           isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'
         }`}>
+          
+          {/* Table Toolbar: Status Filter Tabs + Station Selector + Search */}
+          <div className={`p-4 border-b flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 ${
+            isDark ? 'border-slate-800 bg-slate-900/60' : 'border-slate-100 bg-slate-50/70'
+          }`}>
+            
+            {/* Status Segmented Buttons */}
+            <div className={`flex items-center gap-1 overflow-x-auto p-1 rounded-xl text-xs font-bold ${
+              isDark ? 'bg-slate-950' : 'bg-slate-100'
+            }`}>
+              {[
+                { id: 'ALL', label: 'All Orders', count: counts.ALL },
+                { id: 'NEW', label: 'New Tickets', count: counts.NEW },
+                { id: 'PREPARING', label: 'Cooking Line', count: counts.PREPARING },
+                { id: 'READY', label: 'Ready to Serve', count: counts.READY },
+                { id: 'COMPLETED', label: 'Completed', count: counts.COMPLETED }
+              ].map(st => (
+                <button
+                  key={st.id}
+                  onClick={() => setStatusFilter(st.id as 'ALL' | OrderStatus)}
+                  className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
+                    statusFilter === st.id
+                      ? isDark 
+                        ? 'bg-blue-600 text-white shadow-xs font-black' 
+                        : 'bg-white text-slate-900 shadow-xs font-black'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <span>{st.label}</span>
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                    statusFilter === st.id
+                      ? 'bg-white/20 text-white'
+                      : isDark ? 'bg-slate-800 text-slate-300' : 'bg-slate-200 text-slate-700'
+                  }`}>
+                    {st.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* Station Selector & Search Filter */}
+            <div className="flex items-center gap-2">
+              <select
+                value={selectedStation}
+                onChange={(e) => setSelectedStation(e.target.value)}
+                className={`px-3 py-2 text-xs rounded-xl border outline-none font-medium cursor-pointer ${
+                  isDark ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-white border-slate-200 text-slate-800'
+                }`}
+              >
+                <option value="ALL">All Stations</option>
+                <option value="HOT">Hot Cooking Line</option>
+                <option value="TANDOOR">Tandoor &amp; Breads</option>
+                <option value="STARTER">Starters &amp; Tiffin</option>
+                <option value="BEVERAGE">Drinks &amp; Sweets</option>
+              </select>
+
+              <div className={`relative flex-1 sm:w-64 rounded-xl border flex items-center px-3 py-2 ${
+                isDark ? 'bg-slate-950 border-slate-800 text-slate-200' : 'bg-white border-slate-200 text-slate-800'
+              }`}>
+                <Search className="w-3.5 h-3.5 opacity-40 mr-2 shrink-0" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search order #, table, dish..."
+                  className="bg-transparent border-none outline-none text-xs w-full placeholder:opacity-50"
+                />
+                {searchQuery && (
+                  <button onClick={() => setSearchQuery('')} className="p-0.5 opacity-50 hover:opacity-100">
+                    <X className="w-3 h-3" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Table Data View */}
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className={`border-b font-extrabold uppercase tracking-wider text-[10px] ${
                   isDark 
-                    ? 'bg-slate-950/70 border-slate-800 text-slate-400' 
+                    ? 'bg-slate-950/80 border-slate-800 text-slate-400' 
                     : 'bg-slate-50 border-slate-200/80 text-slate-500'
                 }`}>
                   <th className="py-3.5 px-4">Ticket</th>
                   <th className="py-3.5 px-4">Table</th>
                   <th className="py-3.5 px-4">Server</th>
-                  <th className="py-3.5 px-4">Dishes &amp; Preparation Details</th>
+                  <th className="py-3.5 px-4">Items Summary</th>
                   <th className="py-3.5 px-4">Elapsed / Target</th>
                   <th className="py-3.5 px-4 text-center">Status</th>
-                  <th className="py-3.5 px-4 text-right">Kitchen Action</th>
+                  <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               
@@ -547,7 +491,7 @@ export const KitchenDisplay: React.FC = () => {
                   <tr>
                     <td colSpan={7} className="py-14 text-center text-slate-400">
                       <UtensilsCrossed className="w-9 h-9 mx-auto mb-2 opacity-30 stroke-1" />
-                      <p className="font-bold text-sm">No orders matching your active filter.</p>
+                      <p className="font-bold text-sm">No orders found matching your search filter.</p>
                       <p className="text-xs opacity-60 mt-0.5">Kitchen prep line is caught up.</p>
                     </td>
                   </tr>
@@ -602,7 +546,7 @@ export const KitchenDisplay: React.FC = () => {
                           </span>
                         </td>
 
-                        {/* 4. Items List (Clean, not dumped) */}
+                        {/* 4. Items List */}
                         <td className="py-3.5 px-4 max-w-md">
                           <div className="space-y-1">
                             {order.items.map((item, idx) => {
@@ -729,7 +673,7 @@ export const KitchenDisplay: React.FC = () => {
       </div>
 
       {/* ========================================================= */}
-      {/* 5. CLEAN TICKET DETAIL MODAL                              */}
+      {/* 3. TICKET DETAIL MODAL                                    */}
       {/* ========================================================= */}
       {selectedOrderForModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
@@ -785,7 +729,7 @@ export const KitchenDisplay: React.FC = () => {
               {/* Items List */}
               <div className="space-y-2">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
-                  Dishes &amp; Recipe Instructions ({selectedOrderForModal.items.length})
+                  Dishes &amp; Preparation Details ({selectedOrderForModal.items.length})
                 </span>
 
                 {selectedOrderForModal.items.map((item, idx) => {

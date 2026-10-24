@@ -121,8 +121,7 @@ const MainAppContent: React.FC = () => {
               <WelcomeScreen
                 onStart={() => setKioskSubScreen('language')}
                 onOpenLanguage={() => setKioskSubScreen('language')}
-                onOpenKitchenLogin={() => handleOpenStaffLogin('kitchen')}
-                onOpenManagementLogin={() => handleOpenStaffLogin('management')}
+                onOpenStaffLogin={() => handleOpenStaffLogin('kitchen')}
               />
             )}
 

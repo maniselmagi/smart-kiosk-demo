@@ -11,22 +11,19 @@ import {
   Clock, 
   Wine,
   Crown,
-  ChefHat,
-  BarChart3
+  ShieldCheck
 } from 'lucide-react';
 
 interface WelcomeScreenProps {
   onStart: () => void;
   onOpenLanguage?: () => void;
-  onOpenKitchenLogin?: () => void;
-  onOpenManagementLogin?: () => void;
+  onOpenStaffLogin?: () => void;
 }
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ 
   onStart,
   onOpenLanguage,
-  onOpenKitchenLogin,
-  onOpenManagementLogin
+  onOpenStaffLogin
 }) => {
   const { 
     theme, 
@@ -111,12 +108,27 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           </span>
         </div>
 
-        {/* Theme Toggle Button */}
-        <div className="pointer-events-auto">
+        {/* Top Right Controls: Staff Mode Login (Management & Kitchen) + Theme Toggle */}
+        <div className="pointer-events-auto flex items-center gap-2">
+          {/* Mode Change / Staff Login (Kitchen & Management) */}
+          <button
+            type="button"
+            onClick={onOpenStaffLogin}
+            className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full bg-black/55 hover:bg-black/80 backdrop-blur-md text-amber-300 hover:text-white transition-all border border-amber-500/40 hover:border-amber-300 active:scale-95 cursor-pointer shadow-xl text-xs font-bold group"
+            title="Staff Station Login (Management & Kitchen)"
+            aria-label="Staff Login"
+          >
+            <ShieldCheck className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
+            <span className="font-display tracking-wider text-[11px] uppercase">
+              Login
+            </span>
+          </button>
+
+          {/* Theme Toggle Button */}
           <button
             type="button"
             onClick={toggleTheme}
-            className="p-2.5 sm:p-3 rounded-full bg-black/45 hover:bg-black/65 backdrop-blur-md text-amber-300 hover:text-white transition-all border border-white/20 active:scale-95 cursor-pointer shadow-xl"
+            className="p-2 sm:p-2.5 rounded-full bg-black/45 hover:bg-black/65 backdrop-blur-md text-amber-300 hover:text-white transition-all border border-white/20 active:scale-95 cursor-pointer shadow-xl"
             title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             aria-label="Toggle Theme"
           >
@@ -208,113 +220,54 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
 
         </div>
 
-        {/* 4. THREE ROLE ICON BUTTONS: CUSTOMER | KITCHEN | MANAGEMENT */}
-        <div className={`pt-4 sm:pt-6 w-full max-w-2xl mx-auto transition-all duration-1000 delay-400 ease-out ${
+        {/* 4. BOTTOM ACTION CONTROLLER PILL (Balanced & Ergonomic for Tablet Touch with Open Animation) */}
+        <div className={`pt-6 sm:pt-8 md:pt-10 w-full max-w-xl mx-auto transition-all duration-1000 delay-400 ease-out ${
           isOpenAnimated ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-90'
         }`}>
-          
-          {/* 1. Featured Primary Customer Button (Direct Language Selection - NO LOGIN) */}
-          <div className="mb-3">
-            <button
-              type="button"
-              onClick={() => {
-                if (onOpenLanguage) {
-                  onOpenLanguage();
-                } else {
-                  onStart();
-                }
-              }}
-              className="w-full p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-600 hover:from-amber-400 hover:via-amber-500 hover:to-yellow-500 text-slate-950 font-black shadow-xl shadow-amber-500/25 border-2 border-amber-300/70 flex items-center justify-between gap-3 sm:gap-4 transition-all duration-200 active:scale-[0.98] cursor-pointer group"
-            >
-              <div className="flex items-center gap-3 sm:gap-4 text-left">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-slate-950 text-amber-400 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform shrink-0">
-                  <Utensils className="w-6 h-6 sm:w-7 sm:h-7" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-royal text-lg sm:text-2xl font-black uppercase tracking-wider text-slate-950">
-                      Customer Dining
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full bg-slate-950 text-amber-300 text-[10px] font-black uppercase tracking-wide">
-                      Direct Access
-                    </span>
-                  </div>
-                  <p className="text-xs sm:text-sm text-slate-900 font-bold opacity-90 mt-0.5">
-                    Tap to Choose Language &amp; Order Food • No Login Needed
-                  </p>
-                </div>
-              </div>
-
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-950/15 flex items-center justify-center text-slate-950 group-hover:translate-x-1.5 transition-transform shrink-0">
-                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-            </button>
-          </div>
-
-          {/* 2 & 3: Kitchen Station & Management Buttons (Open Staff Login Screen) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
+          <div className="p-2 sm:p-2.5 rounded-full bg-slate-100 dark:bg-slate-900/95 border border-slate-200/90 dark:border-slate-800 shadow-2xl flex items-center justify-between gap-3 animate-pulse-ring">
             
-            {/* Kitchen Icon Button */}
+            {/* Left Circular Button (Food Cloche / Menu Icon) */}
             <button
               type="button"
-              onClick={onOpenKitchenLogin}
-              className="p-3.5 sm:p-4 rounded-2xl bg-slate-100 dark:bg-slate-900/90 hover:bg-slate-200 dark:hover:bg-slate-850 border border-slate-200/90 dark:border-slate-800 hover:border-amber-500/60 shadow-md flex items-center justify-between gap-3 transition-all duration-200 active:scale-[0.98] cursor-pointer text-left group"
+              onClick={onOpenLanguage || onStart}
+              className="w-13 h-13 sm:w-15 sm:h-15 rounded-full bg-white dark:bg-slate-850 text-slate-800 dark:text-slate-100 shadow-md flex items-center justify-center border border-slate-200/70 dark:border-slate-700/70 hover:scale-105 active:scale-95 transition-all shrink-0 cursor-pointer group"
+              title="Explore Menu & Languages"
+              aria-label="Explore Menu"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                  <ChefHat className="w-5 h-5 sm:w-6 sm:h-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white font-display">
-                      Kitchen Station
-                    </span>
-                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-500">
-                      KDS
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                    Order Queue &amp; Line • Staff PIN
-                  </p>
-                </div>
+              <div className="p-2.5 rounded-full bg-amber-500/10 group-hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 transition-colors">
+                <Utensils className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-
-              <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-amber-500 group-hover:translate-x-1 transition-all shrink-0" />
             </button>
 
-            {/* Management Icon Button */}
+            {/* Right Action Button (Start with black circle badge and >>> chevrons) */}
             <button
               type="button"
-              onClick={onOpenManagementLogin}
-              className="p-3.5 sm:p-4 rounded-2xl bg-slate-100 dark:bg-slate-900/90 hover:bg-slate-200 dark:hover:bg-slate-850 border border-slate-200/90 dark:border-slate-800 hover:border-indigo-500/60 shadow-md flex items-center justify-between gap-3 transition-all duration-200 active:scale-[0.98] cursor-pointer text-left group"
+              onClick={onStart}
+              className="flex-1 h-13 sm:h-15 px-3 sm:px-4 pr-6 sm:pr-8 rounded-full bg-white dark:bg-slate-850 border border-slate-200/80 dark:border-slate-700/80 shadow-md flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-[0.98] transition-all cursor-pointer group"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-indigo-500/15 text-indigo-500 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                  <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white font-display">
-                      Management
-                    </span>
-                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded bg-indigo-500/15 text-indigo-400">
-                      POS
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                    Analytics &amp; Admin • Staff PIN
-                  </p>
-                </div>
+              {/* Black Circular Icon on the Left */}
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-slate-950 dark:bg-amber-500 text-white dark:text-slate-950 flex items-center justify-center shadow-md shrink-0 group-hover:scale-105 transition-transform">
+                <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
 
-              <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all shrink-0" />
+              {/* Start Label */}
+              <span className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white tracking-wider group-hover:text-amber-500 transition-colors">
+                Start Ordering
+              </span>
+
+              {/* Triple Chevrons >>> */}
+              <div className="flex items-center text-slate-400 dark:text-slate-500 group-hover:text-amber-500 group-hover:translate-x-1.5 transition-all">
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 -mr-2 sm:-mr-2.5" />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 -mr-2 sm:-mr-2.5" />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+              </div>
             </button>
 
           </div>
 
-          {/* Micro Information Note */}
-          <p className="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-3 tracking-wide">
-            Diners tap <strong className="text-amber-500">Customer Dining</strong> to directly choose language. Staff choose Kitchen or Management to enter PIN.
+          {/* Gentle interactive instruction hint below the pill */}
+          <p className="text-[11px] sm:text-xs text-slate-400 dark:text-slate-500 font-medium mt-3 tracking-wide">
+            Tap <span className="text-amber-500 font-semibold">Start Ordering</span> to browse our digital menu
           </p>
         </div>
 

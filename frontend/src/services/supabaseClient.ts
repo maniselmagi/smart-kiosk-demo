@@ -220,3 +220,68 @@ export function subscribeToCloudOrders(onOrderUpdate: (payload: any) => void) {
     return () => {};
   }
 }
+
+/**
+ * Push Created User Credential to Supabase Cloud PostgreSQL
+ */
+export async function pushUserToCloud(user: {
+  username: string;
+  name: string;
+  password: string;
+  role: 'management' | 'kitchen';
+  title?: string;
+  pin?: string;
+  department?: string;
+  phone?: string;
+  email?: string;
+}): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from('users')
+      .upsert({
+        branch_id: DEFAULT_BRANCH_ID,
+        username: user.username.toLowerCase(),
+        full_name: user.name,
+        password_hash: user.password,
+        role: user.role === 'management' ? 'STORE_MANAGER' : 'HEAD_CHEF',
+        department: user.department || (user.role === 'management' ? 'MANAGEMENT' : 'KITCHEN'),
+        pin_code: user.pin || (user.role === 'management' ? '9901' : '1234'),
+        phone: user.phone || null,
+        email: user.email || `${user.username.toLowerCase()}@royalember.com`,
+        is_active: true,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'username' });
+
+    if (error) {
+      console.warn('[Cloud DB] User sync error:', error.message);
+      return false;
+    }
+    console.log(`[Cloud DB] User @${user.username} synced to PostgreSQL!`);
+    return true;
+  } catch (err) {
+    console.warn('[Cloud DB] User cloud sync bypassed, saved locally:', err);
+    return false;
+  }
+}
+
+/**
+ * Fetch Users from Supabase Cloud PostgreSQL
+ */
+export async function fetchUsersFromCloud(): Promise<any[] | null> {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('is_active', true);
+
+    if (error) {
+      console.warn('[Cloud DB] Fetch users error:', error.message);
+      return null;
+    }
+    return data;
+  } catch (err) {
+    console.warn('[Cloud DB] Fetch users bypassed:', err);
+    return null;
+  }
+}
+

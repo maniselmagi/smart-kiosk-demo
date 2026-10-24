@@ -1,3 +1,5 @@
+import { pushUserToCloud, fetchUsersFromCloud } from './supabaseClient';
+
 export interface UserCredential {
   id: string;
   name: string;
@@ -159,6 +161,10 @@ export const authService = {
 
     users.push(newUser);
     this.saveUsers(users);
+
+    // Asynchronously push to Supabase Cloud PostgreSQL
+    pushUserToCloud(newUser).catch(err => console.warn('[Cloud Sync] User push bypassed, saved locally:', err));
+
     return { success: true, user: newUser };
   },
 
@@ -300,5 +306,43 @@ export const authService = {
     localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(DEFAULT_USERS));
     this.logout();
     window.dispatchEvent(new Event('auth_users_updated'));
+  },
+
+  async syncWithCloud(): Promise<void> {
+    try {
+      const cloudUsers = await fetchUsersFromCloud();
+      if (cloudUsers && cloudUsers.length > 0) {
+        const localUsers = this.getUsers();
+        let modified = false;
+
+        for (const cu of cloudUsers) {
+          const exists = localUsers.some(lu => lu.username.toLowerCase() === cu.username.toLowerCase());
+          if (!exists) {
+            localUsers.push({
+              id: cu.id || `usr-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+              name: cu.full_name || cu.username,
+              username: cu.username.toLowerCase(),
+              password: cu.password_hash || 'admin123',
+              role: cu.role === 'STORE_MANAGER' ? 'management' : 'kitchen',
+              title: cu.role === 'STORE_MANAGER' ? 'General Manager' : 'Kitchen Station Lead',
+              pin: cu.pin_code || (cu.role === 'STORE_MANAGER' ? '9901' : '1234'),
+              department: cu.department || (cu.role === 'STORE_MANAGER' ? 'Management' : 'Kitchen Brigade'),
+              phone: cu.phone,
+              email: cu.email,
+              createdAt: cu.created_at || new Date().toISOString(),
+              isDefault: cu.username.toLowerCase() === 'admin',
+            });
+            modified = true;
+          }
+        }
+
+        if (modified) {
+          this.saveUsers(localUsers);
+        }
+      }
+    } catch (err) {
+      console.warn('[Cloud Sync] Failed to sync users from PostgreSQL cloud:', err);
+    }
   }
 };
+

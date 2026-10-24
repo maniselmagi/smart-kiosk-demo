@@ -35,7 +35,14 @@ import {
   UserCheck,
   ArrowRight,
   SlidersHorizontal,
-  Table as TableIcon
+  LayoutGrid,
+  Columns3,
+  SplitSquareVertical,
+  CheckSquare,
+  Square,
+  Send,
+  Zap,
+  Timer
 } from 'lucide-react';
 import { getAssignedWaiter, WAITER_ZONES } from '../../utils/waiterAssignment';
 import { authService, UserCredential } from '../../services/authService';
@@ -52,7 +59,7 @@ function playKitchenChime() {
     const gain1 = ctx.createGain();
     osc1.type = 'sine';
     osc1.frequency.setValueAtTime(587.33, now);
-    gain1.gain.setValueAtTime(0.16, now);
+    gain1.gain.setValueAtTime(0.18, now);
     gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
     osc1.connect(gain1);
     gain1.connect(ctx.destination);
@@ -63,7 +70,7 @@ function playKitchenChime() {
     const gain2 = ctx.createGain();
     osc2.type = 'sine';
     osc2.frequency.setValueAtTime(880, now + 0.1);
-    gain2.gain.setValueAtTime(0.2, now + 0.1);
+    gain2.gain.setValueAtTime(0.22, now + 0.1);
     gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
     osc2.connect(gain2);
     gain2.connect(ctx.destination);
@@ -77,11 +84,11 @@ function playKitchenChime() {
 // Elapsed timer helper: consistent, clean, avoiding huge numbers
 function getOrderTiming(createdAt: string | undefined, targetMinutes: number = 15) {
   if (!createdAt) {
-    return { display: 'Just now', minutes: 1, percent: 10, isOverdue: false, overdueMins: 0 };
+    return { display: '1m', minutes: 1, percent: 10, isOverdue: false, overdueMins: 0 };
   }
   const t = new Date(createdAt).getTime();
   if (isNaN(t) || t <= 0) {
-    return { display: 'Just now', minutes: 1, percent: 10, isOverdue: false, overdueMins: 0 };
+    return { display: '1m', minutes: 1, percent: 10, isOverdue: false, overdueMins: 0 };
   }
   const diff = Date.now() - t;
   const rawMins = Math.max(0, Math.floor(diff / 60000));
@@ -89,8 +96,8 @@ function getOrderTiming(createdAt: string | undefined, targetMinutes: number = 1
 
   let display = '';
   if (effectiveMins === 0) display = 'Just now';
-  else if (effectiveMins < 60) display = `${effectiveMins}m ago`;
-  else display = `${Math.floor(effectiveMins / 60)}h ${effectiveMins % 60}m ago`;
+  else if (effectiveMins < 60) display = `${effectiveMins}m`;
+  else display = `${Math.floor(effectiveMins / 60)}h ${effectiveMins % 60}m`;
 
   const target = targetMinutes > 0 ? targetMinutes : 15;
   const isOverdue = effectiveMins > target;
@@ -99,6 +106,8 @@ function getOrderTiming(createdAt: string | undefined, targetMinutes: number = 1
 
   return { display, minutes: effectiveMins, percent, isOverdue, overdueMins };
 }
+
+type ViewMode = 'GRID' | 'EXPEDITER' | 'PIPELINE';
 
 export const KitchenDisplay: React.FC = () => {
   const { 
@@ -128,13 +137,21 @@ export const KitchenDisplay: React.FC = () => {
     return localStorage.getItem('kds_audio_enabled') !== 'false';
   });
 
+  // Display View Mode: Bento Grid (default), Expediter Split, or 4-Stage Pipeline
+  const [viewMode, setViewMode] = useState<ViewMode>('GRID');
+
   // Filter state
   const [selectedStation, setSelectedStation] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<'ALL' | OrderStatus>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [urgentOnly, setUrgentOnly] = useState(false);
 
-  // Selected Order for Full Ticket Drawer Inspection
-  const [inspectedOrder, setInspectedOrder] = useState<Order | null>(null);
+  // Item strike-through state (Item-level cooking checkbox for chefs)
+  // Map of `${orderId}-${itemIndex}` -> boolean
+  const [completedItems, setCompletedItems] = useState<Record<string, boolean>>({});
+
+  // Selected Order for Expediter view or Drawer
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
   // Modals
   const [isWaiterCallsOpen, setIsWaiterCallsOpen] = useState(false);
@@ -219,11 +236,34 @@ export const KitchenDisplay: React.FC = () => {
   const isDark = theme === 'dark';
   const displayOrders = liveOrders.length > 0 ? liveOrders : activeOrders;
 
+  // Set initial selected order for expediter mode
+  useEffect(() => {
+    if (!selectedOrderId && displayOrders.length > 0) {
+      setSelectedOrderId(displayOrders[0].id);
+    }
+  }, [displayOrders, selectedOrderId]);
+
+  // Toggle item strike-through
+  const toggleItemDone = (orderId: string, itemIdx: number) => {
+    const key = `${orderId}-${itemIdx}`;
+    setCompletedItems(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
   // Filtered orders
   const filteredOrders = useMemo(() => {
     return displayOrders.filter((order) => {
       if (statusFilter !== 'ALL' && order.status !== statusFilter) {
         return false;
+      }
+
+      if (urgentOnly) {
+        const timing = getOrderTiming(order.createdAt, 15);
+        if (!timing.isOverdue && order.status !== 'NEW') {
+          return false;
+        }
       }
 
       if (searchQuery.trim()) {
@@ -251,882 +291,838 @@ export const KitchenDisplay: React.FC = () => {
 
       return true;
     });
-  }, [displayOrders, statusFilter, searchQuery, selectedStation]);
+  }, [displayOrders, statusFilter, searchQuery, selectedStation, urgentOnly]);
 
   // Operational metrics
   const pendingAlerts = staffAlerts.filter((a) => a.status === 'PENDING');
   const soldOutItems = menuItems.filter((i) => !i.isAvailable);
 
   const metrics = useMemo(() => {
+    const newCount = displayOrders.filter(o => o.status === 'NEW').length;
+    const prepCount = displayOrders.filter(o => o.status === 'PREPARING').length;
+    const readyCount = displayOrders.filter(o => o.status === 'READY').length;
+    const servedCount = displayOrders.filter(o => o.status === 'COMPLETED').length;
+    const overdueCount = displayOrders.filter(o => {
+      if (o.status === 'COMPLETED') return false;
+      return getOrderTiming(o.createdAt, 15).isOverdue;
+    }).length;
+
     return {
-      newCount: displayOrders.filter(o => o.status === 'NEW').length,
-      prepCount: displayOrders.filter(o => o.status === 'PREPARING').length,
-      readyCount: displayOrders.filter(o => o.status === 'READY').length,
-      completedCount: displayOrders.filter(o => o.status === 'COMPLETED').length,
-      totalActive: displayOrders.filter(o => o.status !== 'COMPLETED').length,
+      total: displayOrders.length,
+      new: newCount,
+      preparing: prepCount,
+      ready: readyCount,
+      served: servedCount,
+      overdue: overdueCount
     };
   }, [displayOrders]);
 
-  const handleAdvance = (order: Order, next: OrderStatus) => {
-    updateOrderStatus(order.id, next);
-    if (isAudioEnabled) playKitchenChime();
-    showToast(`Order #${order.orderNumber} (Table ${order.tableNumber}) transitioned to ${next}`);
-    if (inspectedOrder && inspectedOrder.id === order.id) {
-      setInspectedOrder({ ...inspectedOrder, status: next });
+  // "All-Day Item Summary" (Aggregated items currently needing preparation across active orders)
+  const allDaySummary = useMemo(() => {
+    const itemMap = new Map<string, { name: string; count: number; isVeg: boolean }>();
+    displayOrders
+      .filter(o => o.status === 'NEW' || o.status === 'PREPARING')
+      .forEach(order => {
+        order.items.forEach(item => {
+          const isVeg = /veg|paneer|dosa|idli|coffee|vada|kesari|papad|poori/i.test(item.name);
+          const current = itemMap.get(item.name) || { name: item.name, count: 0, isVeg };
+          current.count += item.quantity;
+          itemMap.set(item.name, current);
+        });
+      });
+    return Array.from(itemMap.values()).sort((a, b) => b.count - a.count).slice(0, 8);
+  }, [displayOrders]);
+
+  // Advance Order Status
+  const handleAdvanceStatus = (orderId: string, currentStatus: OrderStatus, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const nextMap: Record<OrderStatus, OrderStatus> = {
+      NEW: 'PREPARING',
+      PREPARING: 'READY',
+      READY: 'COMPLETED',
+      COMPLETED: 'COMPLETED'
+    };
+    const next = nextMap[currentStatus];
+    if (next !== currentStatus) {
+      updateOrderStatus(orderId, next);
+      if (isAudioEnabled) playKitchenChime();
+      showToast(`Order #${orderId} moved to ${next}`);
     }
   };
 
+  // Currently inspected order for Expediter View
+  const activeExpediterOrder = useMemo(() => {
+    if (!selectedOrderId) return filteredOrders[0] || null;
+    return displayOrders.find(o => o.id === selectedOrderId) || filteredOrders[0] || null;
+  }, [selectedOrderId, displayOrders, filteredOrders]);
+
   return (
-    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-200 ${
-      isDark ? 'bg-slate-950 text-slate-100' : 'bg-[#F4F6F9] text-slate-800'
+    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-200 select-none ${
+      isDark ? 'bg-[#0B0F19] text-slate-100' : 'bg-slate-100/90 text-slate-900'
     }`}>
       
-      {/* =========================================================================
-          TOP RESTAURANT HEADER (RIDAY STYLE)
-      ========================================================================= */}
-      <header className={`border-b px-4 py-3 md:px-6 transition-colors shadow-2xs ${
-        isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/90'
+      {/* ========================================================= */}
+      {/* 1. TOP KITCHEN COMMAND BAR (Commercial POS Header)         */}
+      {/* ========================================================= */}
+      <header className={`sticky top-0 z-40 border-b backdrop-blur-md px-4 py-2.5 flex items-center justify-between gap-4 transition-colors ${
+        isDark 
+          ? 'bg-[#0F172A]/95 border-slate-800 text-white shadow-lg' 
+          : 'bg-white/95 border-slate-200/90 text-slate-800 shadow-xs'
       }`}>
-        <div className="max-w-[1920px] mx-auto flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-          
-          {/* Left Brand Emblem & Title */}
-          <div className="flex items-center flex-wrap gap-3">
-            {!isStandaloneRole && (
-              <button
-                onClick={() => setView('hub')}
-                className={`p-2 rounded-xl border transition-colors cursor-pointer ${
-                  isDark ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                }`}
-                title="Back to Landing Hub"
-              >
-                <ArrowLeft className="w-4 h-4" />
+        
+        {/* Left: Branding & Station Indicator */}
+        <div className="flex items-center gap-3">
+          {!isStandaloneRole && (
+            <button
+              onClick={() => setView('kiosk')}
+              className={`p-2 rounded-xl transition-all cursor-pointer ${
+                isDark ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+              }`}
+              title="Return to Kiosk"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+          )}
+
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-md shadow-orange-500/20">
+              <ChefHat className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold text-sm tracking-tight font-display">
+                  Royal Ember
+                </span>
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                  Kitchen Command Station
+                </span>
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-500">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  LIVE
+                </span>
+              </div>
+              <p className="text-[11px] opacity-60">
+                Active Prep Line • Indiranagar Flagship
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Center: Search & Rush Filter */}
+        <div className="hidden lg:flex items-center gap-2 max-w-md w-full">
+          <div className={`relative flex-1 rounded-xl border flex items-center px-3 py-1.5 ${
+            isDark ? 'bg-slate-900 border-slate-800 text-slate-200' : 'bg-slate-50 border-slate-200 text-slate-800'
+          }`}>
+            <Search className="w-3.5 h-3.5 opacity-40 mr-2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Filter by Ticket #, Table, or Dish..."
+              className="bg-transparent border-none outline-none text-xs w-full placeholder:opacity-50"
+            />
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} className="p-0.5 opacity-50 hover:opacity-100">
+                <X className="w-3 h-3" />
               </button>
             )}
-
-            <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-black shadow-md shadow-blue-500/20 shrink-0">
-                <ChefHat className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className={`text-lg font-black tracking-tight font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                    Kitchen Operations Board
-                  </h1>
-                  <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-[10px] font-black tracking-wider">
-                    TABLE VIEW
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                  <span>Royal Ember</span>
-                  <span>/</span>
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">Live Kitchen Order Management</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Search Input in Top Bar */}
-            <div className="relative w-72 hidden xl:block ml-4">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search orders, dishes, table..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full pl-9 pr-8 py-2 rounded-xl text-xs font-medium border transition-colors outline-hidden ${
-                  isDark
-                    ? 'bg-slate-800/80 border-slate-700 text-white placeholder-slate-400 focus:border-blue-500'
-                    : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-500'
-                }`}
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
           </div>
 
-          {/* Right Header Controls */}
-          <div className="flex items-center flex-wrap gap-2 justify-between lg:justify-end">
-            
-            {/* Waiter Calls Badge Button */}
-            <button
-              onClick={() => setIsWaiterCallsOpen(true)}
-              className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                pendingAlerts.length > 0
-                  ? 'bg-rose-50 text-rose-700 border-rose-300 dark:bg-rose-950/60 dark:text-rose-300'
-                  : isDark
-                    ? 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
-                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-              }`}
-              title="View Table Waiter Calls"
-            >
-              <Bell className="w-3.5 h-3.5" />
-              <span>Waiter Calls</span>
-              {pendingAlerts.length > 0 && (
-                <span className="px-1.5 py-0.2 rounded-full bg-rose-600 text-white text-[10px] font-black">
-                  {pendingAlerts.length}
-                </span>
-              )}
-            </button>
+          <button
+            onClick={() => setUrgentOnly(!urgentOnly)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              urgentOnly
+                ? 'bg-rose-500 text-white shadow-md shadow-rose-500/25 ring-2 ring-rose-500/30'
+                : isDark 
+                  ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' 
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+            }`}
+          >
+            <Zap className={`w-3.5 h-3.5 ${urgentOnly ? 'animate-bounce' : 'text-amber-500'}`} />
+            <span>Rush Only ({metrics.overdue})</span>
+          </button>
+        </div>
 
-            {/* Sold-Out Items Badge Button */}
-            <button
-              onClick={() => setIsSoldOutOpen(true)}
-              className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                soldOutItems.length > 0
-                  ? 'bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300'
-                  : isDark
-                    ? 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
-                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-              }`}
-              title="Manage Sold-Out Dishes"
-            >
-              <Flame className="w-3.5 h-3.5 text-amber-500" />
-              <span>Sold-Out ({soldOutItems.length})</span>
-            </button>
+        {/* Right: Operational Tools & User Badge */}
+        <div className="flex items-center gap-2">
+          
+          {/* Waiter Calls Badge */}
+          <button
+            onClick={() => setIsWaiterCallsOpen(true)}
+            className={`relative px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              pendingAlerts.length > 0 
+                ? 'bg-rose-500/10 text-rose-500 border border-rose-500/30 hover:bg-rose-500/20' 
+                : isDark ? 'bg-slate-800 text-slate-400 hover:text-white' : 'bg-slate-100 text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Bell className={`w-3.5 h-3.5 ${pendingAlerts.length > 0 ? 'animate-bounce text-rose-500' : ''}`} />
+            <span>Assistance</span>
+            {pendingAlerts.length > 0 && (
+              <span className="w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center">
+                {pendingAlerts.length}
+              </span>
+            )}
+          </button>
 
-            {/* Audio Alerts Toggle */}
-            <button
-              onClick={toggleAudio}
-              className={`p-2 rounded-xl border transition-colors cursor-pointer ${
-                isAudioEnabled
-                  ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800'
-                  : isDark ? 'bg-slate-800 text-slate-400 border-slate-700' : 'bg-slate-50 text-slate-400 border-slate-200'
-              }`}
-              title={isAudioEnabled ? 'Chime sound is active' : 'Chime sound is muted'}
-            >
-              {isAudioEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-            </button>
+          {/* 86'd / Sold-Out Menu Items Controller */}
+          <button
+            onClick={() => setIsSoldOutOpen(true)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+              soldOutItems.length > 0 
+                ? 'bg-amber-500/10 text-amber-500 border border-amber-500/30 hover:bg-amber-500/20' 
+                : isDark ? 'bg-slate-800 text-slate-400 hover:text-white' : 'bg-slate-100 text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Flame className="w-3.5 h-3.5 text-amber-500" />
+            <span>86'd ({soldOutItems.length})</span>
+          </button>
 
-            {/* Fullscreen Toggle */}
-            <button
-              onClick={toggleFullscreen}
-              className={`p-2 rounded-xl border transition-colors cursor-pointer ${
-                isDark ? 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-              }`}
-              title="Toggle Fullscreen"
-            >
-              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-            </button>
+          <div className="h-4 w-px bg-slate-300 dark:bg-slate-800 mx-1 hidden sm:block" />
 
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className={`p-2 rounded-xl border transition-colors cursor-pointer ${
-                isDark ? 'bg-slate-800 text-amber-400 border-slate-700 hover:bg-slate-700' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-              }`}
-              title="Toggle Light / Dark Mode"
-            >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
+          {/* Sound Mute/Unmute */}
+          <button
+            onClick={toggleAudio}
+            className={`p-2 rounded-xl transition-all cursor-pointer ${
+              isDark ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+            }`}
+            title={isAudioEnabled ? "Sound Alerts Active" : "Sound Alerts Muted"}
+          >
+            {isAudioEnabled ? <Volume2 className="w-4 h-4 text-emerald-500" /> : <VolumeX className="w-4 h-4 opacity-50" />}
+          </button>
 
-            {/* Active Chef Lead Profile Badge */}
-            <button
-              onClick={() => setIsChefSelectorOpen(true)}
-              className={`flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-                isDark ? 'bg-slate-800 text-white border-slate-700 hover:bg-slate-700' : 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100'
-              }`}
-              title="Active Station Lead"
-            >
-              <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-black">
-                {activeChef?.name.charAt(0) || 'C'}
-              </div>
-              <div className="text-left leading-tight hidden sm:block">
-                <span className="block font-black text-xs">{activeChef?.name || 'Chef Lead'}</span>
-                <span className="block text-[10px] text-slate-400 font-normal">@{activeChef?.username}</span>
-              </div>
-            </button>
+          {/* Fullscreen */}
+          <button
+            onClick={toggleFullscreen}
+            className={`p-2 rounded-xl transition-all cursor-pointer hidden md:flex ${
+              isDark ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+            }`}
+            title="Toggle Fullscreen"
+          >
+            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
 
-            {/* Real-time Clock */}
-            <div className={`px-3 py-1.5 rounded-xl border font-mono text-xs font-bold flex items-center gap-1.5 ${
-              isDark ? 'bg-slate-800 text-slate-300 border-slate-700' : 'bg-slate-50 text-slate-700 border-slate-200'
-            }`}>
-              <Clock className="w-3.5 h-3.5 text-blue-500" />
-              <span>{clockTime}</span>
-            </div>
+          {/* Theme Switcher */}
+          <button
+            onClick={toggleTheme}
+            className={`p-2 rounded-xl transition-all cursor-pointer ${
+              isDark ? 'bg-slate-800 hover:bg-slate-700 text-amber-400' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+            }`}
+            title="Switch Dark/Light Theme"
+          >
+            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
 
+          {/* Clock */}
+          <div className={`px-2.5 py-1 rounded-xl text-xs font-mono font-bold tracking-tight hidden sm:flex items-center gap-1.5 ${
+            isDark ? 'bg-slate-900 border border-slate-800 text-amber-400' : 'bg-slate-100 border border-slate-200 text-slate-700'
+          }`}>
+            <Clock className="w-3.5 h-3.5 opacity-60" />
+            <span>{clockTime}</span>
           </div>
 
+          {/* Chef Profile Badge */}
+          <button
+            onClick={() => setIsChefSelectorOpen(true)}
+            className={`flex items-center gap-2 pl-2 pr-3 py-1 rounded-xl border text-left cursor-pointer transition-colors ${
+              isDark ? 'bg-slate-900 border-slate-800 hover:border-slate-700' : 'bg-white border-slate-200 hover:border-slate-300'
+            }`}
+          >
+            <div className="w-6 h-6 rounded-lg bg-blue-600 text-white font-bold text-xs flex items-center justify-center">
+              {activeChef?.name?.charAt(0) || 'C'}
+            </div>
+            <div className="hidden xl:block">
+              <span className="text-xs font-bold block leading-tight truncate max-w-[110px]">
+                {activeChef?.name || 'Chef on Duty'}
+              </span>
+              <span className="text-[10px] opacity-60 block leading-none">
+                Station Lead
+              </span>
+            </div>
+          </button>
         </div>
       </header>
 
-      {/* =========================================================================
-          EXECUTIVE KPI METRIC CARDS (4 IN A ROW)
-      ========================================================================= */}
-      <section className="px-4 pt-4 md:px-6 max-w-[1920px] mx-auto w-full">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-          
-          {/* Card 1: New Tickets */}
-          <div 
-            onClick={() => setStatusFilter(statusFilter === 'NEW' ? 'ALL' : 'NEW')}
-            className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-              statusFilter === 'NEW'
-                ? 'ring-2 ring-amber-500/50 bg-amber-50/70 dark:bg-amber-950/40 border-amber-300'
-                : isDark ? 'bg-slate-900 border-slate-800 hover:border-slate-700' : 'bg-white border-slate-200/80 shadow-2xs hover:shadow-xs'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-                  New Tickets
-                </span>
-                <div className={`text-3xl font-black font-display mt-0.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                  {metrics.newCount}
-                </div>
-                <span className="text-[11px] text-amber-600 font-bold flex items-center gap-1 mt-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                  Awaiting Acceptance
-                </span>
-              </div>
-              <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 flex items-center justify-center text-amber-600 shrink-0">
-                <ShieldCheck className="w-6 h-6" />
-              </div>
-            </div>
-          </div>
-
-          {/* Card 2: Cooking Line */}
-          <div 
-            onClick={() => setStatusFilter(statusFilter === 'PREPARING' ? 'ALL' : 'PREPARING')}
-            className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-              statusFilter === 'PREPARING'
-                ? 'ring-2 ring-blue-500/50 bg-blue-50/70 dark:bg-blue-950/40 border-blue-300'
-                : isDark ? 'bg-slate-900 border-slate-800 hover:border-slate-700' : 'bg-white border-slate-200/80 shadow-2xs hover:shadow-xs'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-                  Cooking Line
-                </span>
-                <div className={`text-3xl font-black font-display mt-0.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                  {metrics.prepCount}
-                </div>
-                <span className="text-[11px] text-blue-600 font-bold flex items-center gap-1 mt-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                  Station In Progress
-                </span>
-              </div>
-              <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-blue-600 shrink-0">
-                <Flame className="w-6 h-6" />
-              </div>
-            </div>
-          </div>
-
-          {/* Card 3: Ready for Pickup */}
-          <div 
-            onClick={() => setStatusFilter(statusFilter === 'READY' ? 'ALL' : 'READY')}
-            className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-              statusFilter === 'READY'
-                ? 'ring-2 ring-emerald-500/50 bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-300'
-                : isDark ? 'bg-slate-900 border-slate-800 hover:border-slate-700' : 'bg-white border-slate-200/80 shadow-2xs hover:shadow-xs'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-                  Ready to Serve
-                </span>
-                <div className={`text-3xl font-black font-display mt-0.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                  {metrics.readyCount}
-                </div>
-                <span className="text-[11px] text-emerald-600 font-bold flex items-center gap-1 mt-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  Waiter Alerted
-                </span>
-              </div>
-              <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-emerald-600 shrink-0">
-                <CheckCircle2 className="w-6 h-6" />
-              </div>
-            </div>
-          </div>
-
-          {/* Card 4: Total Completed Today */}
-          <div 
-            onClick={() => setStatusFilter(statusFilter === 'COMPLETED' ? 'ALL' : 'COMPLETED')}
-            className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-              statusFilter === 'COMPLETED'
-                ? 'ring-2 ring-purple-500/50 bg-purple-50/70 dark:bg-purple-950/40 border-purple-300'
-                : isDark ? 'bg-slate-900 border-slate-800 hover:border-slate-700' : 'bg-white border-slate-200/80 shadow-2xs hover:shadow-xs'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-                  Served Today
-                </span>
-                <div className={`text-3xl font-black font-display mt-0.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                  {metrics.completedCount}
-                </div>
-                <span className="text-[11px] text-purple-600 font-bold flex items-center gap-1 mt-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
-                  Total Finished
-                </span>
-              </div>
-              <div className="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 flex items-center justify-center text-purple-600 shrink-0">
-                <UtensilsCrossed className="w-6 h-6" />
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* =========================================================================
-          CONTROL TOOLBAR: STATION SELECTOR & STATUS FILTERS
-      ========================================================================= */}
-      <section className="px-4 py-3 md:px-6 max-w-[1920px] mx-auto w-full">
-        <div className={`p-3 rounded-2xl border flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 ${
-          isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80 shadow-2xs'
+      {/* ========================================================= */}
+      {/* 2. ALL-DAY FIRE SUMMARY (Commercial Batch Cooking Board)   */}
+      {/* ========================================================= */}
+      {allDaySummary.length > 0 && (
+        <div className={`px-4 py-2 border-b flex items-center gap-3 overflow-x-auto text-xs ${
+          isDark ? 'bg-slate-900/60 border-slate-800/80 text-slate-300' : 'bg-amber-50/60 border-amber-200/50 text-slate-700'
         }`}>
-          
-          {/* Station Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            <span className="text-xs font-bold text-slate-400 mr-1 hidden sm:inline">Station:</span>
-            {[
-              { id: 'ALL', label: 'All Stations' },
-              { id: 'HOT', label: 'Hot Cooking' },
-              { id: 'TANDOOR', label: 'Tandoor & Breads' },
-              { id: 'STARTER', label: 'Starters & Tiffin' },
-              { id: 'BEVERAGE', label: 'Drinks & Sweets' },
-            ].map((st) => (
-              <button
-                key={st.id}
-                onClick={() => setSelectedStation(st.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                  selectedStation === st.id
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+          <div className="flex items-center gap-1.5 font-extrabold text-[11px] uppercase tracking-wider text-amber-500 whitespace-nowrap pl-1">
+            <Flame className="w-3.5 h-3.5 fill-amber-500 animate-pulse" />
+            <span>All-Day Prep Fire:</span>
+          </div>
+          <div className="flex items-center gap-2 overflow-x-auto py-0.5 custom-kds-scrollbar">
+            {allDaySummary.map((item, idx) => (
+              <div 
+                key={idx}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-medium text-xs whitespace-nowrap transition-transform hover:scale-105 ${
+                  isDark 
+                    ? 'bg-slate-800/90 border-slate-700/80 text-slate-200' 
+                    : 'bg-white border-amber-200 text-slate-800 shadow-xs'
                 }`}
               >
-                {st.label}
-              </button>
+                <span className="font-black text-amber-500 text-xs">
+                  {item.count}×
+                </span>
+                <span className="font-semibold">{item.name}</span>
+                <span className={`w-1.5 h-1.5 rounded-full ${item.isVeg ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+              </div>
             ))}
-          </div>
-
-          {/* Stage Filters & Waiter Legend */}
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
-            
-            {/* Status Stage Pills */}
-            {(['ALL', 'NEW', 'PREPARING', 'READY', 'COMPLETED'] as const).map((stage) => {
-              const label = 
-                stage === 'ALL' ? 'All Orders' :
-                stage === 'NEW' ? 'New' :
-                stage === 'PREPARING' ? 'Cooking' :
-                stage === 'READY' ? 'Ready' :
-                'Served';
-
-              const count = 
-                stage === 'ALL' ? displayOrders.length :
-                stage === 'NEW' ? metrics.newCount :
-                stage === 'PREPARING' ? metrics.prepCount :
-                stage === 'READY' ? metrics.readyCount :
-                metrics.completedCount;
-
-              const isSelected = statusFilter === stage;
-
-              return (
-                <button
-                  key={stage}
-                  onClick={() => setStatusFilter(stage)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer border ${
-                    isSelected
-                      ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-transparent shadow-xs'
-                      : isDark ? 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white' : 'bg-slate-100 text-slate-600 border-slate-200 hover:text-slate-900'
-                  }`}
-                >
-                  <span>{label}</span>
-                  <span className={`px-1.5 py-0.2 rounded-full font-mono text-[10px] ${
-                    isSelected ? 'bg-white/20 text-white dark:bg-black/20 dark:text-black font-black' : 'bg-black/5 text-slate-500'
-                  }`}>
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-
-          </div>
-
-        </div>
-      </section>
-
-      {/* =========================================================================
-          MASTER KITCHEN OPERATIONS TABLE
-          (Clean, executive tabular design matching the Recent Orders table in reference)
-      ========================================================================= */}
-      <main className="flex-1 px-4 pb-6 md:px-6 max-w-[1920px] mx-auto w-full">
-        
-        <div className={`rounded-2xl border shadow-xs overflow-hidden ${
-          isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200/80'
-        }`}>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead>
-                <tr className={`border-b text-[11px] font-black uppercase tracking-wider ${
-                  isDark ? 'bg-slate-800/80 border-slate-800 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'
-                }`}>
-                  <th className="py-3.5 px-4">Ticket &amp; Table</th>
-                  <th className="py-3.5 px-4">Server / Zone</th>
-                  <th className="py-3.5 px-4">Elapsed / Target</th>
-                  <th className="py-3.5 px-4 min-w-[320px]">Dishes &amp; Special Instructions</th>
-                  <th className="py-3.5 px-4 text-center">Stage Status</th>
-                  <th className="py-3.5 px-4 text-right">Quick Action</th>
-                </tr>
-              </thead>
-              <tbody className={`divide-y ${isDark ? 'divide-slate-800' : 'divide-slate-100'}`}>
-                {filteredOrders.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="py-20 text-center text-slate-400">
-                      <UtensilsCrossed className="w-10 h-10 mx-auto mb-2 opacity-40" />
-                      <p className="font-bold text-sm">No kitchen orders matching your filters.</p>
-                      <p className="text-xs opacity-70 mt-1">Incoming table orders will appear here in real time.</p>
-                    </td>
-                  </tr>
-                ) : (
-                  filteredOrders.map((order) => {
-                    const timing = getOrderTiming(order.createdAt, order.estimatedPrepTime);
-                    const waiter = getAssignedWaiter(order.tableNumber);
-                    const isOverdue = order.status !== 'COMPLETED' && timing.isOverdue;
-
-                    // Next Status
-                    const nextStatus: OrderStatus = 
-                      order.status === 'NEW' ? 'PREPARING' :
-                      order.status === 'PREPARING' ? 'READY' :
-                      'COMPLETED';
-
-                    // Action Button Styles
-                    const actionConfig = {
-                      NEW: {
-                        label: 'Start Cooking',
-                        icon: Flame,
-                        btnClass: 'bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-xs'
-                      },
-                      PREPARING: {
-                        label: 'Mark Ready',
-                        icon: CheckCircle2,
-                        btnClass: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs'
-                      },
-                      READY: {
-                        label: 'Serve Table',
-                        icon: Sparkles,
-                        btnClass: 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs'
-                      },
-                      COMPLETED: {
-                        label: 'Served ✓',
-                        icon: CheckCheck,
-                        btnClass: 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-default'
-                      }
-                    }[order.status];
-
-                    const ActionIcon = actionConfig.icon;
-
-                    // Status Badge Styling
-                    const statusBadgeClass = {
-                      NEW: 'bg-amber-50 text-amber-700 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800',
-                      PREPARING: 'bg-blue-50 text-blue-700 border-blue-300 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800',
-                      READY: 'bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800',
-                      COMPLETED: 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
-                    }[order.status];
-
-                    return (
-                      <tr 
-                        key={order.id}
-                        className={`transition-colors ${
-                          isOverdue 
-                            ? isDark ? 'bg-rose-950/20 hover:bg-rose-950/30' : 'bg-rose-50/40 hover:bg-rose-50/70' 
-                            : isDark ? 'hover:bg-slate-800/50' : 'hover:bg-slate-50/80'
-                        }`}
-                      >
-                        
-                        {/* 1. Ticket # & Table */}
-                        <td className="py-3.5 px-4 align-top">
-                          <div className="flex items-center gap-2">
-                            <span className="px-2.5 py-1 rounded-xl bg-slate-900 text-white dark:bg-slate-800 font-extrabold text-xs font-mono shadow-2xs">
-                              Table {order.tableNumber}
-                            </span>
-                            <span className="font-mono font-bold text-sm text-slate-700 dark:text-slate-300">
-                              #{order.orderNumber}
-                            </span>
-                          </div>
-                          <span className="text-[10px] text-slate-400 block mt-1">
-                            {order.items.length} {order.items.length === 1 ? 'item' : 'items'} • Dine-In
-                          </span>
-                        </td>
-
-                        {/* 2. Server / Zone */}
-                        <td className="py-3.5 px-4 align-top">
-                          <div className="flex items-center gap-1.5">
-                            <span className={`px-2 py-0.5 rounded-lg text-xs font-bold border flex items-center gap-1 ${waiter.color}`}>
-                              <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                              <span>{waiter.name}</span>
-                            </span>
-                          </div>
-                          <span className="text-[10px] text-slate-400 block mt-1 font-mono">
-                            Zone {waiter.zone}
-                          </span>
-                        </td>
-
-                        {/* 3. Elapsed / Target */}
-                        <td className="py-3.5 px-4 align-top">
-                          <div className="flex items-center gap-1 text-slate-700 dark:text-slate-300 font-bold font-mono">
-                            <Clock className={`w-3.5 h-3.5 ${isOverdue ? 'text-rose-500' : 'text-slate-400'}`} />
-                            <span>{timing.display}</span>
-                          </div>
-                          <div className="mt-1 flex items-center gap-1.5">
-                            <span className="text-[10px] text-slate-400">Target: {order.estimatedPrepTime || 15}m</span>
-                            {isOverdue && (
-                              <span className="px-1.5 py-0.2 rounded bg-rose-50 text-rose-700 border border-rose-200 text-[9px] font-black">
-                                +{timing.overdueMins}m
-                              </span>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* 4. Ordered Items Breakdown */}
-                        <td className="py-3.5 px-4 align-top">
-                          <div className="space-y-1.5">
-                            {order.items.map((item, idx) => {
-                              const isComp = item.price === 0 || item.name.includes('Complimentary') || item.name.includes('🎁');
-
-                              return (
-                                <div key={item.cartItemId || idx} className="flex items-start gap-2">
-                                  <span className="px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-mono font-bold text-xs shrink-0 mt-0.5">
-                                    {item.quantity}x
-                                  </span>
-
-                                  <div className="min-w-0">
-                                    <div className="flex items-center gap-1.5 flex-wrap">
-                                      <span className={`font-bold ${
-                                        isComp 
-                                          ? 'text-amber-600 dark:text-amber-400 font-extrabold' 
-                                          : isDark ? 'text-slate-100' : 'text-slate-900'
-                                      }`}>
-                                        {item.name}
-                                      </span>
-
-                                      <span className={`w-2.5 h-2.5 rounded-xs border flex items-center justify-center shrink-0 ${
-                                        item.isVeg ? 'border-emerald-600' : 'border-rose-600'
-                                      }`}>
-                                        <span className={`w-1 h-1 rounded-full ${item.isVeg ? 'bg-emerald-600' : 'bg-rose-600'}`} />
-                                      </span>
-
-                                      {item.spiceLevel && (
-                                        <span className="px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px]">
-                                          {item.spiceLevel}
-                                        </span>
-                                      )}
-
-                                      {item.customizations && item.customizations.map((c, cIdx) => (
-                                        <span key={cIdx} className="text-[10px] text-slate-400">
-                                          +{c}
-                                        </span>
-                                      ))}
-                                    </div>
-
-                                    {item.specialInstructions && (
-                                      <div className="mt-0.5 text-[11px] text-blue-700 dark:text-blue-300 italic flex items-center gap-1">
-                                        <Info className="w-3 h-3 shrink-0" />
-                                        <span>"{item.specialInstructions}"</span>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </td>
-
-                        {/* 5. Stage Status Pill */}
-                        <td className="py-3.5 px-4 text-center align-top">
-                          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${statusBadgeClass}`}>
-                            <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                            {order.status}
-                          </span>
-                        </td>
-
-                        {/* 6. Quick Action Buttons */}
-                        <td className="py-3.5 px-4 text-right align-top">
-                          <div className="flex items-center justify-end gap-2">
-                            
-                            {/* Inspect Drawer Button */}
-                            <button
-                              onClick={() => setInspectedOrder(order)}
-                              className={`p-2 rounded-xl border transition-colors cursor-pointer ${
-                                isDark 
-                                  ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700' 
-                                  : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                              }`}
-                              title="Inspect Full Ticket"
-                            >
-                              <Eye className="w-3.5 h-3.5" />
-                            </button>
-
-                            {/* Direct Advance Button */}
-                            {order.status !== 'COMPLETED' ? (
-                              <button
-                                onClick={() => handleAdvance(order, nextStatus)}
-                                className={`px-3.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 ${actionConfig.btnClass}`}
-                              >
-                                <ActionIcon className="w-3.5 h-3.5" />
-                                <span>{actionConfig.label}</span>
-                              </button>
-                            ) : (
-                              <span className="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 bg-slate-100 dark:bg-slate-800">
-                                ✓ Served
-                              </span>
-                            )}
-
-                          </div>
-                        </td>
-
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-
-        </div>
-
-      </main>
-
-      {/* =========================================================================
-          SLIDE-OVER DRAWER: FULL TICKET INSPECTOR
-      ========================================================================= */}
-      {inspectedOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className={`w-full max-w-md h-full shadow-2xl border-l flex flex-col justify-between ${
-            isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
-          }`}>
-            
-            {/* Drawer Top */}
-            <div className={`p-5 border-b flex items-center justify-between ${
-              isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
-            }`}>
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black">
-                  #{inspectedOrder.orderNumber}
-                </div>
-                <div>
-                  <h3 className="font-black text-base">Table {inspectedOrder.tableNumber} Ticket</h3>
-                  <span className="text-xs text-slate-400">Order ID: {inspectedOrder.id}</span>
-                </div>
-              </div>
-
-              <button onClick={() => setInspectedOrder(null)} className="p-2 text-slate-400 hover:text-slate-600">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Drawer Content */}
-            <div className="p-5 overflow-y-auto flex-1 space-y-4">
-              
-              {/* Meta Box */}
-              <div className={`p-4 rounded-2xl border space-y-2 ${
-                isDark ? 'bg-slate-800/40 border-slate-800' : 'bg-slate-50 border-slate-200'
-              }`}>
-                <div className="flex justify-between text-xs">
-                  <span className="text-slate-400">Status:</span>
-                  <span className="font-black uppercase">{inspectedOrder.status}</span>
-                </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-slate-400">Assigned Waiter:</span>
-                  <span className="font-bold">{getAssignedWaiter(inspectedOrder.tableNumber).fullName}</span>
-                </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-slate-400">Logged Time:</span>
-                  <span className="font-mono">{new Date(inspectedOrder.createdAt).toLocaleTimeString()}</span>
-                </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-slate-400">Est. Target:</span>
-                  <span className="font-mono font-bold">{inspectedOrder.estimatedPrepTime || 15} minutes</span>
-                </div>
-              </div>
-
-              {/* Items List */}
-              <div>
-                <h4 className="text-xs font-black uppercase text-slate-400 tracking-wider mb-2">
-                  Kitchen Items ({inspectedOrder.items.length})
-                </h4>
-                <div className="space-y-2">
-                  {inspectedOrder.items.map((item, idx) => (
-                    <div 
-                      key={item.cartItemId || idx}
-                      className={`p-3 rounded-2xl border ${
-                        isDark ? 'bg-slate-800/30 border-slate-800' : 'bg-white border-slate-200'
-                      }`}
-                    >
-                      <div className="flex justify-between items-start">
-                        <span className="font-bold text-sm">
-                          {item.quantity}x {item.name}
-                        </span>
-                        <span className={`w-3 h-3 rounded-xs border flex items-center justify-center shrink-0 mt-0.5 ${
-                          item.isVeg ? 'border-emerald-600' : 'border-rose-600'
-                        }`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${item.isVeg ? 'bg-emerald-600' : 'bg-rose-600'}`} />
-                        </span>
-                      </div>
-
-                      <div className="mt-1 text-xs text-slate-400 space-y-0.5">
-                        {item.spiceLevel && <div>Spice: {item.spiceLevel}</div>}
-                        {item.customizations && item.customizations.length > 0 && (
-                          <div>Options: {item.customizations.join(', ')}</div>
-                        )}
-                        {item.specialInstructions && (
-                          <div className="text-blue-600 dark:text-blue-400 italic">
-                            Note: "{item.specialInstructions}"
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-            </div>
-
-            {/* Drawer Bottom Actions */}
-            <div className={`p-5 border-t space-y-2 ${
-              isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
-            }`}>
-              {inspectedOrder.status === 'NEW' && (
-                <button
-                  onClick={() => handleAdvance(inspectedOrder, 'PREPARING')}
-                  className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <Flame className="w-4 h-4" />
-                  <span>Start Cooking (Advance to Preparing)</span>
-                </button>
-              )}
-
-              {inspectedOrder.status === 'PREPARING' && (
-                <button
-                  onClick={() => handleAdvance(inspectedOrder, 'READY')}
-                  className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Mark Ready to Serve</span>
-                </button>
-              )}
-
-              {inspectedOrder.status === 'READY' && (
-                <button
-                  onClick={() => handleAdvance(inspectedOrder, 'COMPLETED')}
-                  className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  <span>Mark as Served (Complete Ticket)</span>
-                </button>
-              )}
-
-              <button
-                onClick={() => setInspectedOrder(null)}
-                className="w-full py-2.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs"
-              >
-                Close Drawer
-              </button>
-            </div>
-
           </div>
         </div>
       )}
 
-      {/* Waiter Assistance Modal */}
-      {isWaiterCallsOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className={`w-full max-w-xl rounded-3xl border shadow-2xl overflow-hidden ${
-            isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
-          }`}>
-            <div className={`p-5 border-b flex items-center justify-between ${
-              isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
-            }`}>
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center">
-                  <Bell className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className={`font-black text-lg font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                    Table Assistance Requests
-                  </h3>
-                  <p className="text-xs text-slate-500">Live guest calls from table kiosks</p>
-                </div>
-              </div>
-              <button onClick={() => setIsWaiterCallsOpen(false)} className="p-2 text-slate-400 hover:text-slate-600">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      {/* ========================================================= */}
+      {/* 3. WORKSPACE CONTROLS & SEGMENTED STATUS NAV               */}
+      {/* ========================================================= */}
+      <div className={`px-4 py-2.5 border-b flex flex-col md:flex-row md:items-center justify-between gap-3 ${
+        isDark ? 'bg-slate-900/40 border-slate-800/60' : 'bg-white/80 border-slate-200/70'
+      }`}>
+        
+        {/* Left: Station Category Filters */}
+        <div className="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0 custom-kds-scrollbar">
+          {[
+            { id: 'ALL', label: 'All Stations' },
+            { id: 'HOT', label: 'Hot Cooking' },
+            { id: 'TANDOOR', label: 'Tandoor & Breads' },
+            { id: 'STARTER', label: 'Starters & Tiffin' },
+            { id: 'BEVERAGE', label: 'Drinks & Sweets' }
+          ].map(station => (
+            <button
+              key={station.id}
+              onClick={() => setSelectedStation(station.id)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+                selectedStation === station.id
+                  ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 font-black'
+                  : isDark 
+                    ? 'bg-slate-800/70 text-slate-400 hover:text-white hover:bg-slate-800' 
+                    : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+              }`}
+            >
+              {station.label}
+            </button>
+          ))}
+        </div>
 
-            <div className="p-5 max-h-[60vh] overflow-y-auto space-y-3">
-              {staffAlerts.length === 0 ? (
-                <div className="py-12 text-center text-slate-400 text-xs">
-                  <CheckCheck className="w-8 h-8 mx-auto mb-1.5 opacity-50" />
-                  <span>No active waiter calls right now.</span>
-                </div>
-              ) : (
-                staffAlerts.map((alert) => {
-                  const waiter = getAssignedWaiter(alert.tableNumber);
-                  const isPending = alert.status === 'PENDING';
+        {/* Center: Stage Status Pills with Counts */}
+        <div className="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0 custom-kds-scrollbar">
+          {[
+            { id: 'ALL', label: 'All Active', count: metrics.total, color: 'text-slate-400' },
+            { id: 'NEW', label: 'New Tickets', count: metrics.new, color: 'text-amber-500' },
+            { id: 'PREPARING', label: 'Cooking Line', count: metrics.preparing, color: 'text-blue-500' },
+            { id: 'READY', label: 'Ready to Serve', count: metrics.ready, color: 'text-emerald-500' },
+            { id: 'COMPLETED', label: 'Served', count: metrics.served, color: 'text-slate-400' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setStatusFilter(tab.id as 'ALL' | OrderStatus)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                statusFilter === tab.id
+                  ? isDark
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 font-black'
+                    : 'bg-slate-900 text-white shadow-md shadow-slate-900/20 font-black'
+                  : isDark 
+                    ? 'bg-slate-800/50 text-slate-400 hover:text-white hover:bg-slate-800' 
+                    : 'bg-slate-100/80 text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+              }`}
+            >
+              <span>{tab.label}</span>
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                statusFilter === tab.id 
+                  ? 'bg-white/20 text-white' 
+                  : isDark ? 'bg-slate-900 text-slate-300' : 'bg-white text-slate-700 border border-slate-200'
+              }`}>
+                {tab.count}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Right: Layout Switcher (Bento Tickets vs Expediter Split vs 4-Stage Pipeline) */}
+        <div className={`p-1 rounded-xl border flex items-center gap-1 ${
+          isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-100 border-slate-200'
+        }`}>
+          <button
+            onClick={() => setViewMode('GRID')}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              viewMode === 'GRID'
+                ? isDark ? 'bg-slate-800 text-white shadow-xs' : 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+            title="Bento Ticket Grid"
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Ticket Rail</span>
+          </button>
+
+          <button
+            onClick={() => setViewMode('EXPEDITER')}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              viewMode === 'EXPEDITER'
+                ? isDark ? 'bg-slate-800 text-white shadow-xs' : 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+            title="Split Expediter View"
+          >
+            <SplitSquareVertical className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Expediter</span>
+          </button>
+
+          <button
+            onClick={() => setViewMode('PIPELINE')}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              viewMode === 'PIPELINE'
+                ? isDark ? 'bg-slate-800 text-white shadow-xs' : 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+            title="Stage Pipeline Columns"
+          >
+            <Columns3 className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Pipeline</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ========================================================= */}
+      {/* 4. MAIN KITCHEN WORK AREA (According to Selected ViewMode) */}
+      {/* ========================================================= */}
+      <main className="flex-1 p-4 overflow-y-auto">
+        
+        {filteredOrders.length === 0 ? (
+          <div className="h-96 flex flex-col items-center justify-center text-center opacity-60">
+            <UtensilsCrossed className="w-12 h-12 mb-3 stroke-1 text-slate-400" />
+            <h3 className="text-lg font-bold">No Kitchen Orders Found</h3>
+            <p className="text-xs max-w-sm mt-1">
+              {searchQuery ? `No active tickets match "${searchQuery}".` : 'All stations are currently clear and prep is caught up.'}
+            </p>
+          </div>
+        ) : viewMode === 'GRID' ? (
+          
+          /* ------------------------------------------------------- */
+          /* VIEW 1: BENTO TICKET GRID (Commercial Responsive KDS)   */
+          /* ------------------------------------------------------- */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+            {filteredOrders.map(order => (
+              <KitchenBentoCard
+                key={order.id}
+                order={order}
+                isDark={isDark}
+                completedItems={completedItems}
+                onToggleItem={toggleItemDone}
+                onAdvance={handleAdvanceStatus}
+              />
+            ))}
+          </div>
+
+        ) : viewMode === 'EXPEDITER' ? (
+          
+          /* ------------------------------------------------------- */
+          /* VIEW 2: SPLIT EXPEDITER VIEW (Master Ticket Inspector)  */
+          /* ------------------------------------------------------- */
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-[calc(100vh-190px)] min-h-[500px]">
+            
+            {/* Left Column: Dense Ticket Queue (5 cols) */}
+            <div className={`lg:col-span-5 rounded-2xl border flex flex-col overflow-hidden ${
+              isDark ? 'bg-slate-900/70 border-slate-800' : 'bg-white border-slate-200 shadow-xs'
+            }`}>
+              <div className={`px-4 py-3 border-b flex items-center justify-between text-xs font-bold ${
+                isDark ? 'border-slate-800 bg-slate-900' : 'border-slate-100 bg-slate-50'
+              }`}>
+                <span>Active Queue ({filteredOrders.length} Tickets)</span>
+                <span className="text-[11px] opacity-60">Click ticket to inspect</span>
+              </div>
+              <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800 custom-kds-scrollbar">
+                {filteredOrders.map(order => {
+                  const timing = getOrderTiming(order.createdAt, 15);
+                  const isSelected = activeExpediterOrder?.id === order.id;
+                  const waiter = getAssignedWaiter(order.tableNumber);
 
                   return (
                     <div
-                      key={alert.id}
-                      className={`p-4 rounded-2xl border flex items-center justify-between gap-3 ${
-                        isPending
-                          ? 'bg-amber-50/50 border-amber-200 dark:bg-amber-950/40 dark:border-amber-800'
-                          : 'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 opacity-70'
+                      key={order.id}
+                      onClick={() => setSelectedOrderId(order.id)}
+                      className={`p-3.5 transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                        isSelected 
+                          ? isDark 
+                            ? 'bg-blue-600/15 border-l-4 border-l-blue-500' 
+                            : 'bg-blue-50/80 border-l-4 border-l-blue-600'
+                          : isDark ? 'hover:bg-slate-800/50' : 'hover:bg-slate-50'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl font-mono font-black text-xs flex items-center justify-center ${
-                          isPending ? 'bg-amber-500 text-slate-950' : 'bg-slate-700 text-white'
+                        <div className={`w-11 h-11 rounded-xl flex flex-col items-center justify-center font-black ${
+                          timing.isOverdue
+                            ? 'bg-rose-500/20 text-rose-500 border border-rose-500/30'
+                            : order.status === 'NEW'
+                              ? 'bg-amber-500/20 text-amber-500 border border-amber-500/30'
+                              : isDark ? 'bg-slate-800 text-slate-200' : 'bg-slate-100 text-slate-800'
                         }`}>
-                          T#{alert.tableNumber}
+                          <span className="text-[10px] uppercase font-bold leading-none">TBL</span>
+                          <span className="text-sm font-black leading-none">{order.tableNumber}</span>
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <h4 className={`font-black text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                              Table {alert.tableNumber}: {alert.type}
-                            </h4>
-                            <span className={`px-2 py-0.2 rounded text-[10px] font-bold border ${waiter.color}`}>
-                              Waiter {waiter.initial} ({waiter.name})
+                            <span className="font-mono font-bold text-xs">#{order.orderNumber}</span>
+                            <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md ${
+                              order.status === 'NEW' ? 'bg-amber-500/10 text-amber-500' :
+                              order.status === 'PREPARING' ? 'bg-blue-500/10 text-blue-500' :
+                              order.status === 'READY' ? 'bg-emerald-500/10 text-emerald-500' :
+                              'bg-slate-500/10 text-slate-400'
+                            }`}>
+                              {order.status}
                             </span>
                           </div>
-                          <span className="text-xs text-slate-400">
-                            Logged at {new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
+                          <p className="text-xs text-slate-400 truncate max-w-[200px] mt-0.5">
+                            {order.items.map(i => `${i.quantity}x ${i.name}`).join(', ')}
+                          </p>
                         </div>
                       </div>
 
-                      {isPending ? (
-                        <button
-                          onClick={() => {
-                            resolveStaffAlert(alert.id);
-                            showToast(`Table ${alert.tableNumber} call cleared`);
-                          }}
-                          className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors cursor-pointer"
-                        >
-                          Clear
-                        </button>
-                      ) : (
-                        <span className="text-xs font-bold text-slate-400">Resolved ✓</span>
-                      )}
+                      <div className="text-right">
+                        <span className={`text-xs font-mono font-bold block ${
+                          timing.isOverdue ? 'text-rose-500 animate-pulse' : 'text-slate-400'
+                        }`}>
+                          ⏱ {timing.display}
+                        </span>
+                        <span className="text-[10px] opacity-60 block mt-0.5">
+                          {waiter.name}
+                        </span>
+                      </div>
                     </div>
                   );
-                })
+                })}
+              </div>
+            </div>
+
+            {/* Right Column: High-Detail Ticket Plating Canvas (7 cols) */}
+            <div className={`lg:col-span-7 rounded-2xl border flex flex-col overflow-hidden ${
+              isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-sm'
+            }`}>
+              {activeExpediterOrder ? (
+                <div className="flex-1 flex flex-col overflow-hidden">
+                  
+                  {/* Master Header */}
+                  <div className={`p-4 border-b flex items-center justify-between ${
+                    isDark ? 'bg-slate-800/60 border-slate-800' : 'bg-slate-50 border-slate-200'
+                  }`}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-black flex flex-col items-center justify-center shadow-md">
+                        <span className="text-[9px] uppercase tracking-wider font-bold">TABLE</span>
+                        <span className="text-base leading-none">{activeExpediterOrder.tableNumber}</span>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-lg font-black font-display tracking-tight">
+                            Ticket #{activeExpediterOrder.orderNumber}
+                          </h2>
+                          <span className="text-xs font-mono opacity-50 font-normal">
+                            (ID: {activeExpediterOrder.id})
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-400">
+                          Server: <strong className="text-slate-200">{getAssignedWaiter(activeExpediterOrder.tableNumber).name}</strong> • Zone {getAssignedWaiter(activeExpediterOrder.tableNumber).zone} • Dine-In Order
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      {(() => {
+                        const timing = getOrderTiming(activeExpediterOrder.createdAt, 15);
+                        return (
+                          <div className={`px-3 py-1.5 rounded-xl border text-center ${
+                            timing.isOverdue 
+                              ? 'bg-rose-500/10 border-rose-500/30 text-rose-500' 
+                              : isDark ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-800'
+                          }`}>
+                            <span className="text-[10px] font-bold uppercase tracking-wider block">Prep Elapsed</span>
+                            <span className="text-sm font-black font-mono">{timing.display}</span>
+                            {timing.isOverdue && (
+                              <span className="text-[10px] font-bold block text-rose-500 leading-none mt-0.5">
+                                +{timing.overdueMins}m Overdue
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* Checklist of Dishes */}
+                  <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-kds-scrollbar">
+                    <div className="flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+                      <span>Plating Item Checklist (Tap item to check off)</span>
+                      <span>{activeExpediterOrder.items.length} Distinct Dishes</span>
+                    </div>
+
+                    {activeExpediterOrder.items.map((item, idx) => {
+                      const itemKey = `${activeExpediterOrder.id}-${idx}`;
+                      const isDone = completedItems[itemKey];
+                      const isVeg = /veg|paneer|dosa|idli|coffee|vada|kesari|papad|poori/i.test(item.name);
+
+                      return (
+                        <div
+                          key={idx}
+                          onClick={() => toggleItemDone(activeExpediterOrder.id, idx)}
+                          className={`p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                            isDone 
+                              ? isDark 
+                                ? 'bg-slate-800/40 border-slate-800 opacity-50' 
+                                : 'bg-slate-50 border-slate-200 opacity-60'
+                              : isDark 
+                                ? 'bg-slate-800/90 border-slate-700/80 hover:border-slate-600' 
+                                : 'bg-white border-slate-200 hover:border-blue-400 shadow-xs'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <button className="text-slate-400 hover:text-emerald-500 transition-colors">
+                              {isDone ? (
+                                <CheckSquare className="w-5 h-5 text-emerald-500" />
+                              ) : (
+                                <Square className="w-5 h-5" />
+                              )}
+                            </button>
+                            
+                            <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 font-black text-sm flex items-center justify-center">
+                              {item.quantity}×
+                            </div>
+
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className={`w-2.5 h-2.5 rounded-xs border flex items-center justify-center p-0.5 ${
+                                  isVeg ? 'border-emerald-500' : 'border-rose-500'
+                                }`}>
+                                  <span className={`w-full h-full rounded-full ${isVeg ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                                </span>
+                                <span className={`font-bold text-sm ${isDone ? 'line-through text-slate-400' : ''}`}>
+                                  {item.name}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-2 mt-1">
+                                {item.spiceLevel && (
+                                  <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-md bg-slate-700/40 text-slate-300">
+                                    Spice: {item.spiceLevel}
+                                  </span>
+                                )}
+                                {item.customizations && item.customizations.length > 0 && (
+                                  <span className="text-[10px] font-medium text-slate-400">
+                                    +{item.customizations.join(', ')}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="text-right">
+                            {isDone ? (
+                              <span className="text-[11px] font-bold text-emerald-500 flex items-center gap-1">
+                                <Check className="w-3.5 h-3.5" /> Plated
+                              </span>
+                            ) : (
+                              <span className="text-[11px] font-medium text-amber-500">
+                                In Cooking
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {/* Customer Instructions Alert */}
+                    {activeExpediterOrder.items.some(i => i.specialInstructions) && (
+                      <div className="p-3.5 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-400 text-xs flex items-start gap-2.5">
+                        <Info className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                        <div>
+                          <strong className="block font-bold uppercase text-[10px] tracking-wider text-amber-300">
+                            Customer Special Instruction:
+                          </strong>
+                          <span>"{activeExpediterOrder.items.find(i => i.specialInstructions)?.specialInstructions}"</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Expediter Stage Bump Bar */}
+                  <div className={`p-4 border-t flex items-center justify-between gap-3 ${
+                    isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          showToast(`Server ${getAssignedWaiter(activeExpediterOrder.tableNumber).name} paged to Table ${activeExpediterOrder.tableNumber}`);
+                        }}
+                        className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                          isDark ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' : 'bg-white border border-slate-200 hover:bg-slate-100 text-slate-700'
+                        }`}
+                      >
+                        <Send className="w-3.5 h-3.5 text-blue-500" />
+                        <span>Page Server</span>
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {activeExpediterOrder.status === 'NEW' && (
+                        <button
+                          onClick={(e) => handleAdvanceStatus(activeExpediterOrder.id, 'NEW', e)}
+                          className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 cursor-pointer transition-transform active:scale-95"
+                        >
+                          <Flame className="w-4 h-4 fill-slate-950" />
+                          <span>Fire to Cooking Line</span>
+                        </button>
+                      )}
+
+                      {activeExpediterOrder.status === 'PREPARING' && (
+                        <button
+                          onClick={(e) => handleAdvanceStatus(activeExpediterOrder.id, 'PREPARING', e)}
+                          className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center gap-2 shadow-lg shadow-emerald-600/20 cursor-pointer transition-transform active:scale-95"
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>Mark Plated &amp; Ready</span>
+                        </button>
+                      )}
+
+                      {activeExpediterOrder.status === 'READY' && (
+                        <button
+                          onClick={(e) => handleAdvanceStatus(activeExpediterOrder.id, 'READY', e)}
+                          className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs flex items-center gap-2 shadow-lg shadow-blue-600/20 cursor-pointer transition-transform active:scale-95"
+                        >
+                          <CheckCheck className="w-4 h-4" />
+                          <span>Bump / Served to Table</span>
+                        </button>
+                      )}
+
+                      {activeExpediterOrder.status === 'COMPLETED' && (
+                        <span className="px-4 py-2 rounded-xl bg-slate-800 text-slate-400 text-xs font-bold flex items-center gap-1.5">
+                          <Check className="w-3.5 h-3.5 text-emerald-500" />
+                          <span>Order Completed</span>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-full flex items-center justify-center text-slate-400 text-xs">
+                  Select an order ticket from the queue on the left
+                </div>
+              )}
+            </div>
+          </div>
+
+        ) : (
+          
+          /* ------------------------------------------------------- */
+          /* VIEW 3: PIPELINE COLUMNS (Refined Modern 4-Stage Lanes) */
+          /* ------------------------------------------------------- */
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 h-[calc(100vh-190px)]">
+            {(['NEW', 'PREPARING', 'READY', 'COMPLETED'] as const).map(colStatus => {
+              const colOrders = filteredOrders.filter(o => o.status === colStatus);
+              const headerMeta = {
+                NEW: { label: 'New Tickets', color: 'border-t-amber-500', countColor: 'text-amber-500 bg-amber-500/10' },
+                PREPARING: { label: 'Cooking Line', color: 'border-t-blue-500', countColor: 'text-blue-500 bg-blue-500/10' },
+                READY: { label: 'Ready to Expedite', color: 'border-t-emerald-500', countColor: 'text-emerald-500 bg-emerald-500/10' },
+                COMPLETED: { label: 'Served & Cleared', color: 'border-t-slate-500', countColor: 'text-slate-400 bg-slate-500/10' },
+              }[colStatus];
+
+              return (
+                <div 
+                  key={colStatus} 
+                  className={`rounded-2xl border border-t-4 ${headerMeta.color} flex flex-col overflow-hidden ${
+                    isDark ? 'bg-slate-900/50 border-slate-800' : 'bg-white border-slate-200 shadow-xs'
+                  }`}
+                >
+                  <div className={`px-4 py-3 border-b flex items-center justify-between ${
+                    isDark ? 'border-slate-800 bg-slate-900' : 'border-slate-100 bg-slate-50'
+                  }`}>
+                    <span className="font-extrabold text-xs uppercase tracking-wider">
+                      {headerMeta.label}
+                    </span>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-black ${headerMeta.countColor}`}>
+                      {colOrders.length}
+                    </span>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-kds-scrollbar">
+                    {colOrders.length === 0 ? (
+                      <div className="h-40 flex items-center justify-center text-center opacity-40 text-xs">
+                        No orders in this stage
+                      </div>
+                    ) : (
+                      colOrders.map(order => (
+                        <KitchenBentoCard
+                          key={order.id}
+                          order={order}
+                          isDark={isDark}
+                          completedItems={completedItems}
+                          onToggleItem={toggleItemDone}
+                          onAdvance={handleAdvanceStatus}
+                        />
+                      ))
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </main>
+
+      {/* ========================================================= */}
+      {/* 5. SLIDE-OVER / MODALS (Waiter Calls, 86'd, Chef Switch)   */}
+      {/* ========================================================= */}
+      
+      {/* Waiter Calls Modal */}
+      {isWaiterCallsOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in">
+          <div className={`max-w-md w-full rounded-2xl border p-5 shadow-2xl ${
+            isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+          }`}>
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <Bell className="w-5 h-5 text-rose-500 animate-bounce" />
+                <h3 className="font-black text-sm font-display">Staff / Table Alerts</h3>
+              </div>
+              <button onClick={() => setIsWaiterCallsOpen(false)} className="p-1 rounded-lg hover:bg-slate-800 opacity-60 hover:opacity-100">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="py-4 space-y-2 max-h-80 overflow-y-auto custom-kds-scrollbar">
+              {staffAlerts.length === 0 ? (
+                <p className="text-center text-xs opacity-60 py-6">No pending waiter calls at this moment.</p>
+              ) : (
+                staffAlerts.map(alert => (
+                  <div key={alert.id} className="p-3 rounded-xl border border-rose-500/30 bg-rose-500/10 flex items-center justify-between gap-3 text-xs">
+                    <div>
+                      <div className="font-bold flex items-center gap-2">
+                        <span>Table {alert.tableNumber}</span>
+                        <span className="text-[10px] px-1.5 py-0.2 rounded bg-rose-500 text-white font-bold uppercase">{alert.type}</span>
+                      </div>
+                      <p className="text-[11px] opacity-70 mt-0.5">Customer requested server assistance</p>
+                    </div>
+                    {alert.status === 'PENDING' ? (
+                      <button
+                        onClick={() => {
+                          resolveStaffAlert(alert.id);
+                          showToast(`Alert for Table ${alert.tableNumber} resolved`);
+                        }}
+                        className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs"
+                      >
+                        Resolve
+                      </button>
+                    ) : (
+                      <span className="text-[11px] text-emerald-500 font-bold">Resolved</span>
+                    )}
+                  </div>
+                ))
               )}
             </div>
 
-            <div className={`p-4 border-t flex justify-end ${
-              isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
-            }`}>
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end">
               <button
                 onClick={() => setIsWaiterCallsOpen(false)}
-                className="px-4 py-2 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-bold"
+                className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold"
               >
                 Close
               </button>
@@ -1135,152 +1131,53 @@ export const KitchenDisplay: React.FC = () => {
         </div>
       )}
 
-      {/* Sold Out Modal */}
+      {/* 86'd / Sold-Out Menu Modal */}
       {isSoldOutOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className={`w-full max-w-2xl rounded-3xl border shadow-2xl overflow-hidden ${
-            isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in">
+          <div className={`max-w-lg w-full rounded-2xl border p-5 shadow-2xl ${
+            isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
-            <div className={`p-5 border-b flex items-center justify-between ${
-              isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
-            }`}>
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center">
-                  <Flame className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className={`font-black text-lg font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                    Dish Availability &amp; 86'd List
-                  </h3>
-                  <p className="text-xs text-slate-500">Live syncs with table kiosks</p>
-                </div>
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <Flame className="w-5 h-5 text-amber-500" />
+                <h3 className="font-black text-sm font-display">86'd Station Ingredients &amp; Dishes</h3>
               </div>
-              <button onClick={() => setIsSoldOutOpen(false)} className="p-2 text-slate-400 hover:text-slate-600">
-                <X className="w-5 h-5" />
+              <button onClick={() => setIsSoldOutOpen(false)} className="p-1 rounded-lg hover:bg-slate-800 opacity-60 hover:opacity-100">
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-5 max-h-[60vh] overflow-y-auto space-y-2.5">
-              {menuItems.map((item) => (
-                <div
-                  key={item.id}
-                  className={`p-3 rounded-2xl border flex items-center justify-between gap-3 ${
-                    item.isAvailable
-                      ? isDark ? 'bg-slate-800/40 border-slate-800' : 'bg-slate-50 border-slate-200'
-                      : 'bg-rose-50 border-rose-200 dark:bg-rose-950/40 dark:border-rose-800'
-                  }`}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <img src={item.image} alt={item.name} className="w-11 h-11 rounded-xl object-cover shrink-0" />
-                    <div className="min-w-0">
-                      <h4 className={`font-bold text-xs truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                        {item.name}
-                      </h4>
-                      <p className="text-[11px] text-slate-400">₹{item.price} • {item.category}</p>
-                    </div>
+            <div className="py-4 space-y-2 max-h-96 overflow-y-auto custom-kds-scrollbar">
+              <p className="text-[11px] opacity-70 mb-3">
+                Toggle items marked out of stock. When toggled, table kiosks immediately disable ordering for this dish.
+              </p>
+              {menuItems.slice(0, 15).map(item => (
+                <div key={item.id} className="p-2.5 rounded-xl border border-slate-800 bg-slate-800/40 flex items-center justify-between gap-3 text-xs">
+                  <div>
+                    <span className="font-bold">{item.name}</span>
+                    <span className="text-[10px] opacity-60 block">₹{item.price} • {item.category}</span>
                   </div>
-
                   <button
                     onClick={() => {
                       toggleItemAvailability(item.id);
-                      showToast(`${item.name} set to ${item.isAvailable ? 'Sold Out' : 'Available'}`);
+                      showToast(`${item.name} marked as ${item.isAvailable ? '86-SOLD OUT' : 'AVAILABLE'}`);
                     }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                      item.isAvailable
-                        ? 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-rose-600 hover:text-white'
-                        : 'bg-rose-600 text-white'
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                      item.isAvailable 
+                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
+                        : 'bg-rose-500 text-white shadow-xs'
                     }`}
                   >
-                    {item.isAvailable ? 'Mark Sold Out' : 'Sold Out ✕ (Re-enable)'}
+                    {item.isAvailable ? 'Available' : "86'd Sold Out"}
                   </button>
                 </div>
               ))}
             </div>
 
-            <div className={`p-4 border-t flex justify-end ${
-              isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
-            }`}>
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end">
               <button
                 onClick={() => setIsSoldOutOpen(false)}
-                className="px-4 py-2 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-bold"
-              >
-                Done
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Chef Selector Modal */}
-      {isChefSelectorOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className={`w-full max-w-md rounded-3xl border shadow-2xl overflow-hidden ${
-            isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
-          }`}>
-            <div className={`p-5 border-b flex items-center justify-between ${
-              isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
-            }`}>
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-200 flex items-center justify-center">
-                  <UserCheck className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className={`font-black text-lg font-display ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                    Active Kitchen Lead
-                  </h3>
-                  <p className="text-xs text-slate-500">Switch current station operator</p>
-                </div>
-              </div>
-              <button onClick={() => setIsChefSelectorOpen(false)} className="p-2 text-slate-400 hover:text-slate-600">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-5 space-y-2.5">
-              {authService.getUsers().filter(u => u.role === 'kitchen' || u.role === 'management').map((user) => {
-                const isSelected = activeChef?.username === user.username;
-                return (
-                  <button
-                    key={user.id}
-                    onClick={() => {
-                      setActiveChef(user);
-                      authService.setCurrentUser(user);
-                      setIsChefSelectorOpen(false);
-                      showToast(`Station operator switched to ${user.name}`);
-                    }}
-                    className={`w-full p-3.5 rounded-2xl border text-left flex items-center justify-between transition-all cursor-pointer ${
-                      isSelected
-                        ? 'bg-blue-50 border-blue-300 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200'
-                        : isDark
-                          ? 'bg-slate-800/60 border-slate-700 text-slate-200 hover:bg-slate-800'
-                          : 'bg-slate-50 border-slate-200 text-slate-800 hover:bg-slate-100'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-sm">
-                        {user.name.charAt(0)}
-                      </div>
-                      <div>
-                        <span className="font-bold text-sm block">{user.name}</span>
-                        <span className="text-xs text-slate-400">@{user.username} • {user.title || user.department}</span>
-                      </div>
-                    </div>
-                    {isSelected && (
-                      <span className="px-2 py-0.5 rounded-md bg-blue-600 text-white text-[10px] font-black">
-                        ACTIVE
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className={`p-4 border-t flex justify-end ${
-              isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-200'
-            }`}>
-              <button
-                onClick={() => setIsChefSelectorOpen(false)}
-                className="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold"
+                className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold"
               >
                 Close
               </button>
@@ -1289,24 +1186,259 @@ export const KitchenDisplay: React.FC = () => {
         </div>
       )}
 
-      {/* FOOTER */}
-      <footer className={`border-t px-4 py-2.5 text-xs flex flex-col sm:flex-row items-center justify-between gap-2 ${
-        isDark ? 'bg-slate-900 border-slate-800 text-slate-500' : 'bg-white border-slate-200 text-slate-400'
-      }`}>
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-slate-700 dark:text-slate-300">Royal Ember Master KDS</span>
-          <span>•</span>
-          <span>Synchronized with Table Kiosks &amp; Supabase Cloud</span>
+      {/* Chef Profile Switcher Modal */}
+      {isChefSelectorOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in">
+          <div className={`max-w-md w-full rounded-2xl border p-5 shadow-2xl ${
+            isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+          }`}>
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <ChefHat className="w-5 h-5 text-amber-500" />
+                <h3 className="font-black text-sm font-display">Select Kitchen Station Lead</h3>
+              </div>
+              <button onClick={() => setIsChefSelectorOpen(false)} className="p-1 rounded-lg hover:bg-slate-800 opacity-60 hover:opacity-100">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="py-4 space-y-2 max-h-80 overflow-y-auto custom-kds-scrollbar">
+              {authService.getUsers().filter(u => u.role === 'kitchen').map(chef => (
+                <div
+                  key={chef.id}
+                  onClick={() => {
+                    setActiveChef(chef);
+                    setIsChefSelectorOpen(false);
+                    showToast(`Active Station Lead set to ${chef.name}`);
+                  }}
+                  className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
+                    activeChef?.id === chef.id 
+                      ? 'bg-blue-600/20 border-blue-500' 
+                      : 'bg-slate-800/40 border-slate-800 hover:bg-slate-800'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-blue-600 text-white font-bold flex items-center justify-center text-xs">
+                      {chef.name.charAt(0)}
+                    </div>
+                    <div>
+                      <span className="font-bold text-xs block">{chef.name}</span>
+                      <span className="text-[10px] opacity-60 block">{chef.title} • PIN: {chef.pin}</span>
+                    </div>
+                  </div>
+                  {activeChef?.id === chef.id && (
+                    <Check className="w-4 h-4 text-blue-400" />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end">
+              <button
+                onClick={() => setIsChefSelectorOpen(false)}
+                className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-3 text-[11px]">
-          <span>Lead: <strong>{activeChef?.name}</strong></span>
-          <span>•</span>
-          <span>Audio: <strong>{isAudioEnabled ? 'Active' : 'Muted'}</strong></span>
-        </div>
-      </footer>
+      )}
 
     </div>
   );
 };
 
-export default KitchenDisplay;
+/* ================================================================= */
+/* 6. MODULAR KITCHEN BENTO CARD COMPONENT (Authentic KDS Ticket)   */
+/* ================================================================= */
+interface BentoCardProps {
+  order: Order;
+  isDark: boolean;
+  completedItems: Record<string, boolean>;
+  onToggleItem: (orderId: string, idx: number) => void;
+  onAdvance: (orderId: string, current: OrderStatus, e?: React.MouseEvent) => void;
+}
+
+const KitchenBentoCard: React.FC<BentoCardProps> = ({
+  order,
+  isDark,
+  completedItems,
+  onToggleItem,
+  onAdvance
+}) => {
+  const timing = getOrderTiming(order.createdAt, 15);
+  const waiter = getAssignedWaiter(order.tableNumber);
+
+  // Status Styling & Action meta
+  const statusMeta = {
+    NEW: {
+      badge: 'bg-amber-500/10 text-amber-500 border border-amber-500/30',
+      actionLabel: 'Accept & Cook',
+      actionColor: 'bg-amber-500 hover:bg-amber-400 text-slate-950 font-black',
+      icon: Flame,
+      headerBar: 'border-t-amber-500'
+    },
+    PREPARING: {
+      badge: 'bg-blue-500/10 text-blue-500 border border-blue-500/30',
+      actionLabel: 'Mark Ready',
+      actionColor: 'bg-emerald-600 hover:bg-emerald-500 text-white font-black',
+      icon: CheckCircle2,
+      headerBar: 'border-t-blue-500'
+    },
+    READY: {
+      badge: 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/30',
+      actionLabel: 'Deliver to Table',
+      actionColor: 'bg-blue-600 hover:bg-blue-500 text-white font-black',
+      icon: CheckCheck,
+      headerBar: 'border-t-emerald-500'
+    },
+    COMPLETED: {
+      badge: 'bg-slate-500/10 text-slate-400 border border-slate-500/30',
+      actionLabel: 'Delivered',
+      actionColor: 'bg-slate-800 text-slate-400 cursor-default',
+      icon: Check,
+      headerBar: 'border-t-slate-700'
+    }
+  }[order.status];
+
+  return (
+    <div className={`rounded-2xl border border-t-4 ${statusMeta.headerBar} flex flex-col justify-between transition-all duration-150 overflow-hidden shadow-xs hover:shadow-md ${
+      isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-200'
+    }`}>
+      
+      {/* 1. Ticket Header Strip */}
+      <div className={`p-3.5 border-b flex items-start justify-between gap-2 ${
+        isDark ? 'bg-slate-800/40 border-slate-800' : 'bg-slate-50 border-slate-100'
+      }`}>
+        <div className="flex items-center gap-2.5">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 text-white flex flex-col items-center justify-center font-black shadow-xs">
+            <span className="text-[9px] uppercase font-bold tracking-wider text-amber-400 leading-none">TBL</span>
+            <span className="text-sm font-black leading-none mt-0.5">{order.tableNumber}</span>
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5">
+              <span className="font-mono font-extrabold text-xs">#{order.orderNumber}</span>
+              <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md ${statusMeta.badge}`}>
+                {order.status}
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1">
+              <UserCheck className="w-3 h-3 text-slate-400" />
+              <span>{waiter.name}</span>
+              <span className="text-[10px] opacity-60">({waiter.zone})</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Dynamic Timing Pill */}
+        <div className="text-right">
+          <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg font-mono text-xs font-bold border ${
+            timing.isOverdue 
+              ? 'bg-rose-500/15 border-rose-500/30 text-rose-500 animate-pulse' 
+              : isDark ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-700'
+          }`}>
+            <Clock className="w-3 h-3" />
+            <span>{timing.display}</span>
+          </div>
+          {timing.isOverdue && (
+            <span className="text-[9px] font-bold text-rose-500 block text-right mt-0.5">
+              +{timing.overdueMins}m RUSH
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* 2. Itemized Food Prep Checklist */}
+      <div className="p-3.5 flex-1 space-y-2.5 overflow-y-auto max-h-72 custom-kds-scrollbar">
+        {order.items.map((item, idx) => {
+          const itemKey = `${order.id}-${idx}`;
+          const isDone = completedItems[itemKey];
+          const isVeg = /veg|paneer|dosa|idli|coffee|vada|kesari|papad|poori/i.test(item.name);
+
+          return (
+            <div
+              key={idx}
+              onClick={() => onToggleItem(order.id, idx)}
+              className={`p-2 rounded-xl transition-all cursor-pointer flex items-start gap-2.5 border ${
+                isDone 
+                  ? isDark 
+                    ? 'bg-slate-800/30 border-slate-800 opacity-40' 
+                    : 'bg-slate-100/60 border-slate-200 opacity-50'
+                  : isDark 
+                    ? 'bg-slate-800/70 border-slate-700/60 hover:border-slate-600' 
+                    : 'bg-slate-50/80 border-slate-200 hover:border-blue-400'
+              }`}
+            >
+              <div className="pt-0.5 text-slate-400">
+                {isDone ? (
+                  <CheckSquare className="w-4 h-4 text-emerald-500" />
+                ) : (
+                  <Square className="w-4 h-4" />
+                )}
+              </div>
+
+              <div className="w-5 h-5 rounded-md bg-amber-500/10 text-amber-500 font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
+                {item.quantity}×
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className={`w-2 h-2 rounded-xs border flex items-center justify-center shrink-0 ${
+                    isVeg ? 'border-emerald-500' : 'border-rose-500'
+                  }`}>
+                    <span className={`w-1 h-1 rounded-full ${isVeg ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                  </span>
+                  <span className={`font-bold text-xs truncate ${isDone ? 'line-through text-slate-400' : ''}`}>
+                    {item.name}
+                  </span>
+                </div>
+
+                {item.spiceLevel && (
+                  <span className="text-[10px] text-slate-400 font-medium block mt-0.5">
+                    Spice: {item.spiceLevel}
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Customer Special Instruction Box */}
+        {order.items.some(i => i.specialInstructions) && (
+          <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[11px] flex items-start gap-1.5">
+            <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+            <span className="font-medium italic truncate">"{order.items.find(i => i.specialInstructions)?.specialInstructions}"</span>
+          </div>
+        )}
+      </div>
+
+      {/* 3. Urgency Progress Bar */}
+      <div className="w-full bg-slate-200 dark:bg-slate-800 h-1 overflow-hidden">
+        <div 
+          className={`h-full transition-all duration-300 ${
+            timing.isOverdue ? 'bg-rose-500' : order.status === 'READY' ? 'bg-emerald-500' : 'bg-amber-500'
+          }`}
+          style={{ width: `${Math.min(100, timing.percent)}%` }}
+        />
+      </div>
+
+      {/* 4. Action Button Footer */}
+      <div className={`p-3 border-t flex items-center gap-2 ${
+        isDark ? 'bg-slate-800/20 border-slate-800' : 'bg-slate-50 border-slate-100'
+      }`}>
+        <button
+          disabled={order.status === 'COMPLETED'}
+          onClick={(e) => onAdvance(order.id, order.status, e)}
+          className={`w-full py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-all active:scale-98 ${
+            statusMeta.actionColor
+          }`}
+        >
+          <statusMeta.icon className="w-4 h-4" />
+          <span>{statusMeta.actionLabel}</span>
+        </button>
+      </div>
+
+    </div>
+  );
+};

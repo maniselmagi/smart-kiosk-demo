@@ -18,9 +18,14 @@ import {
   Edit2,
   Check,
   AlertCircle,
-  Pencil
+  Pencil,
+  SlidersHorizontal,
+  RotateCcw,
+  UserCheck,
+  LayoutGrid
 } from 'lucide-react';
 import { authService, UserCredential } from '../../../services/authService';
+import { getWaiterZones, saveWaiterZones, WaiterZoneConfig, DEFAULT_WAITER_ZONES } from '../../../utils/waiterAssignment';
 
 export const StaffPage: React.FC = () => {
   const { showToast } = useKiosk();
@@ -65,6 +70,19 @@ export const StaffPage: React.FC = () => {
   });
   const [editFormError, setEditFormError] = useState<string | null>(null);
   const [showEditPassword, setShowEditPassword] = useState(false);
+
+  // Waiter-Table Allocation Management State
+  const [waiterZones, setWaiterZones] = useState<WaiterZoneConfig[]>(getWaiterZones);
+  const [editingZone, setEditingZone] = useState<WaiterZoneConfig | null>(null);
+  const [isZoneModalOpen, setIsZoneModalOpen] = useState(false);
+  const [zoneFormData, setZoneFormData] = useState({
+    id: '',
+    name: '',
+    initial: '',
+    minTable: 1,
+    maxTable: 5,
+    colorStyle: 'blue'
+  });
 
   // Load user credentials
   const refreshUsers = () => {
@@ -447,6 +465,361 @@ export const StaffPage: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {/* ========================================================= */}
+      {/* 2. WAITER TABLE ALLOCATION MANAGEMENT                     */}
+      {/* ========================================================= */}
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-xs space-y-5">
+        
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+          <div>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-bold text-sm">
+                <UserCheck className="w-4 h-4" />
+              </div>
+              <h3 className="text-lg font-black font-display text-slate-900 dark:text-white">
+                Waiter Table Allocation (Floor Service Coverage)
+              </h3>
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-bold">
+                {waiterZones.length} Active Waiter Sections
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 mt-1">
+              Admin control: configure how many tables each waiter is allowed to serve. Allocations sync in real time to the Kitchen Display.
+            </p>
+          </div>
+
+          {/* Quick Presets */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs font-bold text-slate-400">Presets:</span>
+            
+            {/* 4 Waiters x 5 Tables */}
+            <button
+              onClick={() => {
+                saveWaiterZones(DEFAULT_WAITER_ZONES);
+                setWaiterZones(DEFAULT_WAITER_ZONES);
+                showToast('Applied Preset: 4 Waiters • 5 Tables Each (Synced to Kitchen Display)');
+              }}
+              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
+            >
+              4 Waiters × 5 Tables
+            </button>
+
+            {/* 5 Waiters x 4 Tables */}
+            <button
+              onClick={() => {
+                const zones5x4: WaiterZoneConfig[] = [
+                  {
+                    id: 'z-1', rangeLabel: 'T(1-4)', minTable: 1, maxTable: 4, specificTables: [1,2,3,4],
+                    waiter: { code: 'V', name: 'Vikram', fullName: 'Vikram (V)', initial: 'V', zone: 'T(1-4)', role: 'Section Waiter • Tables 1-4', color: 'bg-blue-500/20 text-blue-400 border-blue-500/40', avatarBg: 'bg-blue-600 text-white' }
+                  },
+                  {
+                    id: 'z-2', rangeLabel: 'T(5-8)', minTable: 5, maxTable: 8, specificTables: [5,6,7,8],
+                    waiter: { code: 'B', name: 'Bala', fullName: 'Bala (B)', initial: 'B', zone: 'T(5-8)', role: 'Section Waiter • Tables 5-8', color: 'bg-amber-500/20 text-amber-400 border-amber-500/40', avatarBg: 'bg-amber-600 text-white' }
+                  },
+                  {
+                    id: 'z-3', rangeLabel: 'T(9-12)', minTable: 9, maxTable: 12, specificTables: [9,10,11,12],
+                    waiter: { code: 'S', name: 'Suresh', fullName: 'Suresh (S)', initial: 'S', zone: 'T(9-12)', role: 'Section Waiter • Tables 9-12', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40', avatarBg: 'bg-emerald-600 text-white' }
+                  },
+                  {
+                    id: 'z-4', rangeLabel: 'T(13-16)', minTable: 13, maxTable: 16, specificTables: [13,14,15,16],
+                    waiter: { code: 'R', name: 'Rajesh', fullName: 'Rajesh (R)', initial: 'R', zone: 'T(13-16)', role: 'Section Waiter • Tables 13-16', color: 'bg-purple-500/20 text-purple-400 border-purple-500/40', avatarBg: 'bg-purple-600 text-white' }
+                  },
+                  {
+                    id: 'z-5', rangeLabel: 'T(17-20)', minTable: 17, maxTable: 20, specificTables: [17,18,19,20],
+                    waiter: { code: 'A', name: 'Anand', fullName: 'Anand (A)', initial: 'A', zone: 'T(17-20)', role: 'Section Waiter • Tables 17-20', color: 'bg-rose-500/20 text-rose-400 border-rose-500/40', avatarBg: 'bg-rose-600 text-white' }
+                  }
+                ];
+                saveWaiterZones(zones5x4);
+                setWaiterZones(zones5x4);
+                showToast('Applied Preset: 5 Waiters • 4 Tables Each (Synced to Kitchen Display)');
+              }}
+              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
+            >
+              5 Waiters × 4 Tables
+            </button>
+
+            {/* 2 Waiters x 10 Tables */}
+            <button
+              onClick={() => {
+                const zones2x10: WaiterZoneConfig[] = [
+                  {
+                    id: 'z-1', rangeLabel: 'T(1-10)', minTable: 1, maxTable: 10,
+                    waiter: { code: 'S', name: 'Suresh', fullName: 'Suresh (S)', initial: 'S', zone: 'T(1-10)', role: 'Section Captain • Tables 1-10', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40', avatarBg: 'bg-emerald-600 text-white' }
+                  },
+                  {
+                    id: 'z-2', rangeLabel: 'T(11-20)', minTable: 11, maxTable: 20,
+                    waiter: { code: 'B', name: 'Bala', fullName: 'Bala (B)', initial: 'B', zone: 'T(11-20)', role: 'Section Captain • Tables 11-20', color: 'bg-amber-500/20 text-amber-400 border-amber-500/40', avatarBg: 'bg-amber-600 text-white' }
+                  }
+                ];
+                saveWaiterZones(zones2x10);
+                setWaiterZones(zones2x10);
+                showToast('Applied Preset: 2 Waiters • 10 Tables Each (Synced to Kitchen Display)');
+              }}
+              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
+            >
+              2 Waiters × 10 Tables
+            </button>
+          </div>
+        </div>
+
+        {/* Waiter Allocations Grid / Table */}
+        <div className="overflow-x-auto rounded-2xl border border-slate-200/80 dark:border-slate-800">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800 text-slate-400 font-extrabold uppercase tracking-wider text-[10px]">
+                <th className="py-3 px-4">Assigned Waiter</th>
+                <th className="py-3 px-4">Dining Tables Served</th>
+                <th className="py-3 px-4">Tables Count</th>
+                <th className="py-3 px-4">Zone Label</th>
+                <th className="py-3 px-4">Kitchen Badge Preview</th>
+                <th className="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {waiterZones.map((zone) => {
+                const count = zone.maxTable - zone.minTable + 1;
+
+                return (
+                  <tr key={zone.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
+                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
+                      <div className="flex items-center gap-2.5">
+                        <div className={`w-7 h-7 rounded-lg ${zone.waiter.avatarBg} font-black text-xs flex items-center justify-center`}>
+                          {zone.waiter.initial}
+                        </div>
+                        <div>
+                          <span>{zone.waiter.name}</span>
+                          <span className="text-[10px] text-slate-400 block font-normal">{zone.waiter.role}</span>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="py-3.5 px-4">
+                      <span className="font-mono font-extrabold text-xs text-blue-600 dark:text-blue-400">
+                        Table {zone.minTable} to Table {zone.maxTable}
+                      </span>
+                    </td>
+
+                    <td className="py-3.5 px-4">
+                      <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 font-bold text-xs text-slate-700 dark:text-slate-300">
+                        {count} Tables
+                      </span>
+                    </td>
+
+                    <td className="py-3.5 px-4 font-bold font-mono text-xs">
+                      {zone.rangeLabel}
+                    </td>
+
+                    <td className="py-3.5 px-4">
+                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border inline-flex items-center gap-1.5 ${zone.waiter.color}`}>
+                        <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                        <strong>{zone.rangeLabel}</strong>
+                        <span>{zone.waiter.initial} {zone.waiter.name}</span>
+                      </span>
+                    </td>
+
+                    <td className="py-3.5 px-4 text-right">
+                      <button
+                        onClick={() => {
+                          setEditingZone(zone);
+                          setZoneFormData({
+                            id: zone.id,
+                            name: zone.waiter.name,
+                            initial: zone.waiter.initial,
+                            minTable: zone.minTable,
+                            maxTable: zone.maxTable,
+                            colorStyle: zone.waiter.color.includes('emerald') ? 'emerald' : zone.waiter.color.includes('amber') ? 'amber' : zone.waiter.color.includes('purple') ? 'purple' : 'blue'
+                          });
+                          setIsZoneModalOpen(true);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 text-blue-600 dark:text-blue-400 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1.5 ml-auto"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                        <span>Edit Allocation</span>
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      {/* ========================================================= */}
+      {/* MODAL: EDIT WAITER TABLE ALLOCATION                       */}
+      {/* ========================================================= */}
+      {isZoneModalOpen && editingZone && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 p-6 text-slate-800 dark:text-slate-100 overflow-hidden">
+            
+            <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800 mb-4">
+              <div>
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 font-display">
+                  Table Coverage Config
+                </span>
+                <h3 className="font-extrabold text-base text-slate-900 dark:text-white font-display">
+                  Edit Waiter Table Allocation
+                </h3>
+              </div>
+              <button 
+                onClick={() => setIsZoneModalOpen(false)} 
+                className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const min = Number(zoneFormData.minTable);
+                const max = Number(zoneFormData.maxTable);
+                if (min < 1 || max < min) {
+                  showToast('Please enter valid table numbers (Min must be <= Max)');
+                  return;
+                }
+
+                const rangeLabel = `T(${min}-${max})`;
+                const colorMap = {
+                  blue: { color: 'bg-blue-500/20 text-blue-400 border-blue-500/40', avatarBg: 'bg-blue-600 text-white' },
+                  amber: { color: 'bg-amber-500/20 text-amber-400 border-amber-500/40', avatarBg: 'bg-amber-600 text-white' },
+                  emerald: { color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40', avatarBg: 'bg-emerald-600 text-white' },
+                  purple: { color: 'bg-purple-500/20 text-purple-400 border-purple-500/40', avatarBg: 'bg-purple-600 text-white' }
+                }[zoneFormData.colorStyle as 'blue' | 'amber' | 'emerald' | 'purple'] || { color: 'bg-blue-500/20 text-blue-400 border-blue-500/40', avatarBg: 'bg-blue-600 text-white' };
+
+                const updatedZones = waiterZones.map(z => {
+                  if (z.id === editingZone.id) {
+                    return {
+                      ...z,
+                      rangeLabel,
+                      minTable: min,
+                      maxTable: max,
+                      waiter: {
+                        ...z.waiter,
+                        name: zoneFormData.name.trim(),
+                        initial: zoneFormData.initial.trim() || zoneFormData.name.charAt(0).toUpperCase(),
+                        zone: rangeLabel,
+                        role: `Section Waiter • Tables ${min} to ${max}`,
+                        ...colorMap
+                      }
+                    };
+                  }
+                  return z;
+                });
+
+                saveWaiterZones(updatedZones);
+                setWaiterZones(updatedZones);
+                setIsZoneModalOpen(false);
+                showToast(`Waiter ${zoneFormData.name} table allocation updated to Tables ${min}-${max}! Real-time synced to Kitchen.`);
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  Waiter Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={zoneFormData.name}
+                  onChange={(e) => setZoneFormData({ ...zoneFormData, name: e.target.value, initial: e.target.value.charAt(0).toUpperCase() })}
+                  className="w-full px-3.5 py-2 text-xs rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    Start Table Number
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    required
+                    value={zoneFormData.minTable}
+                    onChange={(e) => setZoneFormData({ ...zoneFormData, minTable: parseInt(e.target.value) || 1 })}
+                    className="w-full px-3.5 py-2 text-xs rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 font-mono font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    End Table Number
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="100"
+                    required
+                    value={zoneFormData.maxTable}
+                    onChange={(e) => setZoneFormData({ ...zoneFormData, maxTable: parseInt(e.target.value) || 1 })}
+                    className="w-full px-3.5 py-2 text-xs rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 font-mono font-bold"
+                  />
+                </div>
+              </div>
+
+              {/* Real-time Calculation Summary */}
+              <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-xs">
+                <span className="font-bold text-blue-700 dark:text-blue-400 block">
+                  Coverage Summary:
+                </span>
+                <span className="text-slate-600 dark:text-slate-300">
+                  Waiter <strong>{zoneFormData.name || 'Server'}</strong> will serve <strong>{Math.max(0, zoneFormData.maxTable - zoneFormData.minTable + 1)} tables</strong> (Table {zoneFormData.minTable} to Table {zoneFormData.maxTable}).
+                </span>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Badge Color Style
+                </label>
+                <div className="grid grid-cols-4 gap-2">
+                  {[
+                    { id: 'blue', label: 'Blue', color: 'bg-blue-500' },
+                    { id: 'amber', label: 'Amber', color: 'bg-amber-500' },
+                    { id: 'emerald', label: 'Emerald', color: 'bg-emerald-500' },
+                    { id: 'purple', label: 'Purple', color: 'bg-purple-500' },
+                  ].map(c => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setZoneFormData({ ...zoneFormData, colorStyle: c.id })}
+                      className={`p-2 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer ${
+                        zoneFormData.colorStyle === c.id
+                          ? 'border-blue-500 ring-2 ring-blue-500/30 font-black'
+                          : 'border-slate-200 dark:border-slate-700 hover:border-slate-400'
+                      }`}
+                    >
+                      <span className={`w-2.5 h-2.5 rounded-full ${c.color}`} />
+                      <span>{c.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setIsZoneModalOpen(false)}
+                  className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-700 dark:hover:text-white cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 text-xs font-black rounded-xl bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-600/20 cursor-pointer"
+                >
+                  Save &amp; Sync to Kitchen
+                </button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      )}
 
       {/* ========================================================= */}
       {/* MODAL 1: CREATE USER CREDENTIAL                           */}

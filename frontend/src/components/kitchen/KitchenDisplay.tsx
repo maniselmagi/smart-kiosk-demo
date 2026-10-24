@@ -29,7 +29,7 @@ import {
   RefreshCw,
   Filter
 } from 'lucide-react';
-import { getAssignedWaiter } from '../../utils/waiterAssignment';
+import { getAssignedWaiter, getWaiterZones, WaiterZoneConfig } from '../../utils/waiterAssignment';
 import { authService } from '../../services/authService';
 
 // Audio chime for real-time kitchen orders
@@ -132,6 +132,16 @@ export const KitchenDisplay: React.FC = () => {
   const [isSoldOutOpen, setIsSoldOutOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // Waiter-Table Allocation State (Configured from Management Dashboard)
+  const [waiterZones, setWaiterZones] = useState<WaiterZoneConfig[]>(getWaiterZones);
+  const [selectedWaiterFilter, setSelectedWaiterFilter] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleUpdate = () => setWaiterZones(getWaiterZones());
+    window.addEventListener('waiter_zones_updated', handleUpdate);
+    return () => window.removeEventListener('waiter_zones_updated', handleUpdate);
+  }, []);
+
   // Real-time Clock
   const [clockTime, setClockTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
 
@@ -217,6 +227,13 @@ export const KitchenDisplay: React.FC = () => {
         const matchTable = `table ${order.tableNumber}`.includes(q) || order.tableNumber.toString() === q;
         const matchItem = order.items.some(i => i.name.toLowerCase().includes(q));
         if (!matchNum && !matchTable && !matchItem) return false;
+      }
+
+      if (selectedWaiterFilter) {
+        const waiter = getAssignedWaiter(order.tableNumber);
+        if (waiter.code !== selectedWaiterFilter && waiter.name !== selectedWaiterFilter) {
+          return false;
+        }
       }
 
       if (selectedStation !== 'ALL') {
@@ -305,6 +322,41 @@ export const KitchenDisplay: React.FC = () => {
               <p className="text-xs text-slate-400 mt-0.5">
                 Real-time kitchen order preparation and dining dispatch • Royal Ember Flagship
               </p>
+
+              {/* Waiter-Table Allocation Badges (Configured from Management Dashboard) */}
+              <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
+                <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1 mr-1">
+                  <span>Station 1 • Main Kitchen Line</span>
+                  <span className="opacity-40">|</span>
+                </span>
+
+                {waiterZones.map(zone => {
+                  const isSelected = selectedWaiterFilter === zone.waiter.code;
+                  return (
+                    <button
+                      key={zone.id}
+                      onClick={() => setSelectedWaiterFilter(isSelected ? null : zone.waiter.code)}
+                      className={`px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all cursor-pointer flex items-center gap-1.5 ${
+                        zone.waiter.color
+                      } ${isSelected ? 'ring-2 ring-white/60 scale-105 shadow-sm' : 'hover:scale-102'}`}
+                      title={`Click to filter orders for ${zone.waiter.name} (${zone.rangeLabel})`}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                      <strong className="font-extrabold">{zone.rangeLabel}</strong>
+                      <span>{zone.waiter.initial} {zone.waiter.name}</span>
+                    </button>
+                  );
+                })}
+
+                {selectedWaiterFilter && (
+                  <button
+                    onClick={() => setSelectedWaiterFilter(null)}
+                    className="text-[10px] text-slate-400 hover:text-white underline cursor-pointer ml-1"
+                  >
+                    Clear Filter
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 

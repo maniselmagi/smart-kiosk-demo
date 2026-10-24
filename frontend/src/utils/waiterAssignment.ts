@@ -9,12 +9,23 @@ export interface WaiterInfo {
   avatarBg: string;   // avatar styling classes
 }
 
-// 5 Tables per 1 Waiter Assignment Rule
-export const WAITER_ZONES: { rangeLabel: string; minTable: number; maxTable: number; waiter: WaiterInfo }[] = [
+export interface WaiterZoneConfig {
+  id: string;
+  rangeLabel: string;
+  minTable: number;
+  maxTable: number;
+  specificTables?: number[]; // optional specific tables list
+  waiter: WaiterInfo;
+}
+
+// Default 5 Tables per 1 Waiter Assignment Rule
+export const DEFAULT_WAITER_ZONES: WaiterZoneConfig[] = [
   {
+    id: 'zone-1',
     rangeLabel: 'T(1-5)',
     minTable: 1,
     maxTable: 5,
+    specificTables: [1, 2, 3, 4, 5],
     waiter: {
       code: 'V',
       name: 'Vikram',
@@ -27,9 +38,11 @@ export const WAITER_ZONES: { rangeLabel: string; minTable: number; maxTable: num
     }
   },
   {
+    id: 'zone-2',
     rangeLabel: 'T(6-10)',
     minTable: 6,
     maxTable: 10,
+    specificTables: [6, 7, 8, 9, 10],
     waiter: {
       code: 'B',
       name: 'Bala',
@@ -42,9 +55,11 @@ export const WAITER_ZONES: { rangeLabel: string; minTable: number; maxTable: num
     }
   },
   {
+    id: 'zone-3',
     rangeLabel: 'T(11-15)',
     minTable: 11,
     maxTable: 15,
+    specificTables: [11, 12, 13, 14, 15],
     waiter: {
       code: 'S',
       name: 'Suresh',
@@ -57,9 +72,11 @@ export const WAITER_ZONES: { rangeLabel: string; minTable: number; maxTable: num
     }
   },
   {
+    id: 'zone-4',
     rangeLabel: 'T(16-20)',
     minTable: 16,
     maxTable: 20,
+    specificTables: [16, 17, 18, 19, 20],
     waiter: {
       code: 'R',
       name: 'Rajesh',
@@ -73,11 +90,52 @@ export const WAITER_ZONES: { rangeLabel: string; minTable: number; maxTable: num
   }
 ];
 
+export const WAITER_ZONES = DEFAULT_WAITER_ZONES;
+
+const STORAGE_KEY = 'restaurant_waiter_table_zones';
+
+export const getWaiterZones = (): WaiterZoneConfig[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to parse stored waiter zones', e);
+  }
+  return DEFAULT_WAITER_ZONES;
+};
+
+export const saveWaiterZones = (zones: WaiterZoneConfig[]): void => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(zones));
+    window.dispatchEvent(new CustomEvent('waiter_zones_updated', { detail: zones }));
+  } catch (e) {
+    console.error('Failed to save waiter zones', e);
+  }
+};
+
 export const getAssignedWaiter = (tableNumber: number): WaiterInfo => {
-  const match = WAITER_ZONES.find(z => tableNumber >= z.minTable && tableNumber <= z.maxTable);
-  if (match) return match.waiter;
-  if (tableNumber <= 5) return WAITER_ZONES[0].waiter;
-  if (tableNumber <= 10) return WAITER_ZONES[1].waiter;
-  if (tableNumber <= 15) return WAITER_ZONES[2].waiter;
-  return WAITER_ZONES[3].waiter;
+  const currentZones = getWaiterZones();
+  
+  // 1. Check specific tables if specified
+  const specificMatch = currentZones.find(z => 
+    z.specificTables && z.specificTables.includes(tableNumber)
+  );
+  if (specificMatch) return specificMatch.waiter;
+
+  // 2. Check min-max range
+  const rangeMatch = currentZones.find(z => 
+    tableNumber >= z.minTable && tableNumber <= z.maxTable
+  );
+  if (rangeMatch) return rangeMatch.waiter;
+
+  // 3. Fallbacks
+  if (currentZones.length > 0) {
+    return currentZones[0].waiter;
+  }
+  return DEFAULT_WAITER_ZONES[0].waiter;
 };

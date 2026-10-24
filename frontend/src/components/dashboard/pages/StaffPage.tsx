@@ -218,38 +218,31 @@ export const StaffPage: React.FC = () => {
       {activeTab === 'credentials' && (
         <div className="space-y-6">
           
-          {/* Default Credentials Notice Callout */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-50/80 via-indigo-50/50 to-slate-50 dark:from-blue-950/30 dark:via-indigo-950/20 dark:to-slate-900 border border-blue-200/80 dark:border-blue-800/60 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+          {/* Security & Access Management Banner */}
+          <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
                 <h4 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-                  <span>Default System Credentials Configured</span>
-                  <span className="px-2 py-0.2 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">
-                    Active &amp; Ready
+                  <span>Role-Based Access Control</span>
+                  <span className="px-2 py-0.2 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold">
+                    Active
                   </span>
                 </h4>
                 <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                  You can sign in with default accounts, or create unlimited new credentials for Management and Kitchen staff.
+                  Manage authorized station credentials for Management and Kitchen staff. Passwords and PINs are securely stored and masked.
                 </p>
-                <div className="flex flex-wrap gap-3 mt-2 text-xs font-mono">
-                  <div className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200">
-                    👔 <b>Management:</b> <span className="text-blue-600 dark:text-blue-400 font-bold">admin</span> / <span className="text-slate-500">admin123</span>
-                  </div>
-                  <div className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200">
-                    👨‍🍳 <b>Kitchen KDS:</b> <span className="text-amber-600 dark:text-amber-400 font-bold">kitchen</span> / <span className="text-slate-500">kitchen123</span>
-                  </div>
-                </div>
               </div>
             </div>
 
             <button
               onClick={handleOpenCreateModal}
-              className="px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 border border-blue-300 dark:border-blue-700 text-blue-600 dark:text-blue-400 text-xs font-bold hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors shrink-0 shadow-xs"
+              className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-colors shrink-0 shadow-xs flex items-center gap-1.5"
             >
-              + Add New User
+              <Plus className="w-4 h-4" />
+              <span>Create User Credential</span>
             </button>
           </div>
 

@@ -103,7 +103,7 @@ export const StaffLoginModal: React.FC<StaffLoginModalProps> = ({
 
       triggerLoginSuccess(result.user);
     } else {
-      setErrorMessage(result.error || 'Invalid credentials. Default admin: admin / admin123');
+      setErrorMessage(result.error || 'Invalid username or password. Please verify and try again.');
     }
   };
 
@@ -120,7 +120,7 @@ export const StaffLoginModal: React.FC<StaffLoginModalProps> = ({
         if (result.success && result.user) {
           triggerLoginSuccess(result.user);
         } else {
-          setErrorMessage('Invalid 4-digit PIN. Try 9901 for Manager or 1234 for Kitchen.');
+          setErrorMessage('Invalid 4-digit PIN. Please verify and try again.');
           setTimeout(() => setPin(''), 600);
         }
       }
@@ -135,13 +135,6 @@ export const StaffLoginModal: React.FC<StaffLoginModalProps> = ({
     setTimeout(() => {
       onLoginSuccess(user.role, user);
     }, 700);
-  };
-
-  const fillQuickPreset = (u: string, p: string, role?: 'management' | 'kitchen') => {
-    setUsername(u);
-    setPassword(p);
-    if (role) setSelectedRole(role);
-    setErrorMessage(null);
   };
 
   if (!isOpen) return null;
@@ -335,7 +328,7 @@ export const StaffLoginModal: React.FC<StaffLoginModalProps> = ({
                         required
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        placeholder="e.g. admin or created user"
+                        placeholder="Enter username"
                         className="w-full pl-8 pr-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
                       />
                     </div>
@@ -439,53 +432,11 @@ export const StaffLoginModal: React.FC<StaffLoginModalProps> = ({
                 </div>
               )}
 
-              {/* QUICK DEFAULT CREDENTIALS (1-Tap Fill & Test) */}
-              <div className="w-full pt-3.5 border-t border-slate-800">
-                <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between">
-                  <span>Fast Demo Login Credentials:</span>
-                  <span className="text-amber-400">1-Tap to auto-fill</span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-left">
-                  {/* Default Admin (Management) */}
-                  <button
-                    type="button"
-                    onClick={() => fillQuickPreset('admin', 'admin123', 'management')}
-                    className="p-2.5 rounded-xl bg-blue-950/40 hover:bg-blue-900/50 border border-blue-500/40 transition-all group cursor-pointer"
-                  >
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-                      <span className="text-xs font-extrabold text-blue-300">Default Admin</span>
-                    </div>
-                    <div className="text-[10px] text-slate-300 font-mono">
-                      User: <b className="text-white">admin</b>
-                    </div>
-                    <div className="text-[10px] text-slate-300 font-mono">
-                      Pass: <b className="text-white">admin123</b>
-                    </div>
-                  </button>
-
-                  {/* Default Kitchen */}
-                  <button
-                    type="button"
-                    onClick={() => fillQuickPreset('kitchen', 'kitchen123', 'kitchen')}
-                    className="p-2.5 rounded-xl bg-amber-950/40 hover:bg-amber-900/50 border border-amber-500/40 transition-all group cursor-pointer"
-                  >
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <ChefHat className="w-3.5 h-3.5 text-amber-400" />
-                      <span className="text-xs font-extrabold text-amber-300">Default Kitchen</span>
-                    </div>
-                    <div className="text-[10px] text-slate-300 font-mono">
-                      User: <b className="text-white">kitchen</b>
-                    </div>
-                    <div className="text-[10px] text-slate-300 font-mono">
-                      Pass: <b className="text-white">kitchen123</b>
-                    </div>
-                  </button>
-                </div>
-
-                <p className="text-[10px] text-slate-500 text-center mt-2.5">
-                  💡 Once logged in as Admin, create more users under <b>Staff &amp; Roles</b>.
+              {/* Security Notice */}
+              <div className="w-full pt-3.5 border-t border-slate-800/80 text-center">
+                <p className="text-[11px] text-slate-500 flex items-center justify-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Authorized restaurant personnel only</span>
                 </p>
               </div>
 

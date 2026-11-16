@@ -42,6 +42,12 @@ interface KioskContextType {
   setCustomerName: (name: string) => void;
   customerPhone: string;
   setCustomerPhone: (phone: string) => void;
+  bookingTicket: string;
+  setBookingTicket: (ticket: string) => void;
+  selectedTimeSlot: string;
+  setSelectedTimeSlot: (slot: string) => void;
+  selectedBookingDate: string;
+  setSelectedBookingDate: (date: string) => void;
   language: Language;
   setLanguage: (lang: Language) => void;
   isLanguageModalOpen: boolean;
@@ -188,6 +194,48 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setCustomerPhoneState(phone);
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('royal_ember_customer_phone', phone);
+    }
+  }, []);
+
+  const [bookingTicket, setBookingTicketState] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('royal_ember_booking_ticket') || 'RE-TB-7241';
+    }
+    return 'RE-TB-7241';
+  });
+
+  const [selectedTimeSlot, setSelectedTimeSlotState] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('royal_ember_booking_timeslot') || '07:45 PM';
+    }
+    return '07:45 PM';
+  });
+
+  const [selectedBookingDate, setSelectedBookingDateState] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('royal_ember_booking_date') || new Date().toISOString().split('T')[0];
+    }
+    return new Date().toISOString().split('T')[0];
+  });
+
+  const setBookingTicket = useCallback((ticket: string) => {
+    setBookingTicketState(ticket);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('royal_ember_booking_ticket', ticket);
+    }
+  }, []);
+
+  const setSelectedTimeSlot = useCallback((slot: string) => {
+    setSelectedTimeSlotState(slot);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('royal_ember_booking_timeslot', slot);
+    }
+  }, []);
+
+  const setSelectedBookingDate = useCallback((date: string) => {
+    setSelectedBookingDateState(date);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('royal_ember_booking_date', date);
     }
   }, []);
   const [language, setLanguageState] = useState<Language>(() => {
@@ -660,6 +708,12 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setCustomerName,
         customerPhone,
         setCustomerPhone,
+        bookingTicket,
+        setBookingTicket,
+        selectedTimeSlot,
+        setSelectedTimeSlot,
+        selectedBookingDate,
+        setSelectedBookingDate,
         language,
         setLanguage,
         isLanguageModalOpen,

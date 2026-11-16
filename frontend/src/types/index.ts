@@ -66,6 +66,24 @@ export interface CartItem {
 
 export type OrderStatus = 'NEW' | 'PREPARING' | 'READY' | 'COMPLETED';
 
+export type BookingStatus = 'CONFIRMED' | 'SEATED' | 'COMPLETED' | 'CANCELLED';
+
+export interface TableBooking {
+  id: string;               // UUID
+  ticketNumber: string;     // e.g. "RE-TB-7241"
+  customerName: string;
+  customerPhone: string;
+  tableNumber: number;
+  guestCount: number;
+  bookingDate: string;      // YYYY-MM-DD
+  timeSlot: string;         // e.g. "07:30 PM"
+  mealType: 'lunch' | 'dinner' | 'tea';
+  assignedServer: string;   // e.g. "Suresh (S)"
+  sectionLabel: string;     // e.g. "Zone T(11-15) - Central Amber Pavilion"
+  status: BookingStatus;
+  createdAt: string;
+}
+
 export interface Order {
   id: string; // e.g. "ORD-1025"
   orderNumber: number; // e.g. 1025

@@ -242,6 +242,42 @@ export interface TranslationDictionary {
   doneNextGuestBtn: string;
   resettingInSeconds: string;
   bookAnotherTable: string;
+  tableBookingTitle: string;
+  tableBookingSubtitle: string;
+  bookingTicketNumber: string;
+  guestAndContactTitle: string;
+  customerNameLabel: string;
+  customerNamePlaceholder: string;
+  customerPhoneLabel: string;
+  customerPhonePlaceholder: string;
+  selectDiningTimeSlot: string;
+  diningTimeSlotDesc: string;
+  lunchSlots: string;
+  dinnerSlots: string;
+  teaSlots: string;
+  slotAvailable: string;
+  slotBooked: string;
+  slotFillingFast: string;
+  slotAlreadyBookedAlert: string;
+  nameRequiredError: string;
+  phoneRequiredError: string;
+  phoneLengthError: string;
+  allocatedDecisionLive: string;
+  assignedDiningTable: string;
+  capacitySeats: string;
+  dedicatedTableAttendant: string;
+  confirmBookingBtn: string;
+  tableFeatures: string;
+  tableBookedNotice: string;
+  changeLanguageBtn: string;
+  todayDateLabel: string;
+  tomorrowDateLabel: string;
+  guestsCountLabel: string;
+  coupleDuoSub: string;
+  standardFamilySub: string;
+  gatheringSub: string;
+  celebrationSub: string;
+  royalBanquetSub: string;
 }
 
 export const translations: Record<Language, TranslationDictionary> = {
@@ -462,6 +498,42 @@ export const translations: Record<Language, TranslationDictionary> = {
     doneNextGuestBtn: "Done / Next Guest",
     resettingInSeconds: "Screen resetting in",
     bookAnotherTable: "Book Another Table",
+    tableBookingTitle: "Guest Details & Smart Table Allocation",
+    tableBookingSubtitle: "Reserve your luxury dining table, select preferred showtime timing, and receive your instant booking ticket.",
+    bookingTicketNumber: "Booking Ticket",
+    guestAndContactTitle: "1. Primary Guest Details (Mandatory)",
+    customerNameLabel: "Your Full Name",
+    customerNamePlaceholder: "e.g. Anand Kumar",
+    customerPhoneLabel: "Mobile Number (For Digital Ticket & WhatsApp)",
+    customerPhonePlaceholder: "e.g. 98765 43210",
+    selectDiningTimeSlot: "2. Select Dining Timing Slot",
+    diningTimeSlotDesc: "Movie-ticket style live reservation. Booked slots are blocked in real-time.",
+    lunchSlots: "Lunch Service",
+    dinnerSlots: "Royal Dinner",
+    teaSlots: "Evening High Tea",
+    slotAvailable: "Available",
+    slotBooked: "Already Booked",
+    slotFillingFast: "Filling Fast",
+    slotAlreadyBookedAlert: "This timing slot is already booked for Table {table}. Please select another timing!",
+    nameRequiredError: "Please enter your full name to reserve a table.",
+    phoneRequiredError: "Mobile number is required for booking confirmation.",
+    phoneLengthError: "Please enter a valid 10-digit mobile number.",
+    allocatedDecisionLive: "ALLOCATED TABLE SUMMARY",
+    assignedDiningTable: "ASSIGNED DINING TABLE",
+    capacitySeats: "Seats",
+    dedicatedTableAttendant: "Dedicated Floor Attendant",
+    confirmBookingBtn: "Confirm Table Reservation",
+    tableFeatures: "Table Highlights & Ambience",
+    tableBookedNotice: "Slot Confirmed in Cloud Database",
+    changeLanguageBtn: "Change Language",
+    todayDateLabel: "Today",
+    tomorrowDateLabel: "Tomorrow",
+    guestsCountLabel: "Guests",
+    coupleDuoSub: "Couple / Solo",
+    standardFamilySub: "Standard Family",
+    gatheringSub: "Gathering",
+    celebrationSub: "Celebration",
+    royalBanquetSub: "Banquet Group",
   },
   ta: {
     welcomeTo: "வணக்கம்",
@@ -680,6 +752,42 @@ export const translations: Record<Language, TranslationDictionary> = {
     doneNextGuestBtn: "முடிந்தது / அடுத்த விருந்தினர்",
     resettingInSeconds: "திரை தானாக மீளமைக்கப்படும் நேரம்",
     bookAnotherTable: "மற்றொரு மேஜை முன்பதிவு",
+    tableBookingTitle: "விருந்தினர் விவரங்கள் & ஸ்மார்ட் மேஜை ஒதுக்கீடு",
+    tableBookingSubtitle: "உங்கள் ஆடம்பர விருந்து மேஜையை முன்பதிவு செய்து, விரும்பிய உணவு நேரத்தை தேர்வு செய்து உடனடி முன்பதிவு டிக்கெட்டைப் பெறுங்கள்.",
+    bookingTicketNumber: "முன்பதிவு டிக்கெட் எண்",
+    guestAndContactTitle: "1. முக்கிய விருந்தினர் விவரங்கள் (கட்டாயம்)",
+    customerNameLabel: "உங்கள் முழுப் பெயர்",
+    customerNamePlaceholder: "எ.கா. ஆனந்த் குமார்",
+    customerPhoneLabel: "கைபேசி எண் (டிஜிட்டல் டிக்கெட் பெற)",
+    customerPhonePlaceholder: "எ.கா. 98765 43210",
+    selectDiningTimeSlot: "2. உணவு அருந்தும் நேரத்தைத் தேர்ந்தெடுக்கவும்",
+    diningTimeSlotDesc: "சினிமா டிக்கெட் பாணியில் நேரலை முன்பதிவு. முன்பதிவு செய்யப்பட்ட நேரங்கள் உடனுக்குடன் பூட்டப்படும்.",
+    lunchSlots: "மதிய உணவு நேரம்",
+    dinnerSlots: "இரவு ராஜபோஜனம்",
+    teaSlots: "மாலை தேநீர் & சிற்றுண்டி",
+    slotAvailable: "கிடைக்கிறது",
+    slotBooked: "ஏற்கனவே முன்பதிவு செய்யப்பட்டது",
+    slotFillingFast: "விரைவில் நிறைகிறது",
+    slotAlreadyBookedAlert: "இந்த நேரம் ஏற்கனவே மேஜை {table}-க்கு முன்பதிவு செய்யப்பட்டுள்ளது. தயவுசெய்து வேறு நேரத்தைத் தேர்ந்தெடுக்கவும்!",
+    nameRequiredError: "மேஜை முன்பதிவு செய்ய உங்கள் பெயரை உள்ளிடவும்.",
+    phoneRequiredError: "முன்பதிவு உறுதிப்படுத்த கைபேசி எண் கட்டாயம்.",
+    phoneLengthError: "சரியான 10 இலக்க கைபேசி எண்ணை உள்ளிடவும்.",
+    allocatedDecisionLive: "ஒதுக்கப்பட்ட மேஜை சுருக்கம்",
+    assignedDiningTable: "ஒதுக்கப்பட்ட மேஜை",
+    capacitySeats: "இருக்கைகள்",
+    dedicatedTableAttendant: "உங்கள் தளப் பணியாளர்",
+    confirmBookingBtn: "மேஜை முன்பதிவை உறுதிசெய்க",
+    tableFeatures: "மேஜையின் சிறப்பம்சங்கள் & சூழல்",
+    tableBookedNotice: "கிளவுட் தரவுத்தளத்தில் உறுதிசெய்யப்பட்டது",
+    changeLanguageBtn: "மொழியை மாற்றுக",
+    todayDateLabel: "இன்று",
+    tomorrowDateLabel: "நாளை",
+    guestsCountLabel: "விருந்தினர்கள்",
+    coupleDuoSub: "ஜோடி / தனிநபர்",
+    standardFamilySub: "வழக்கமான குடும்பம்",
+    gatheringSub: "பெரிய குழு",
+    celebrationSub: "கொண்டாட்ட விருந்து",
+    royalBanquetSub: "ராயல் பாங்க்வெட் குழு",
   },
   hi: {
     welcomeTo: "स्वागत है",
@@ -898,6 +1006,42 @@ export const translations: Record<Language, TranslationDictionary> = {
     doneNextGuestBtn: "पूर्ण / अगला अतिथि",
     resettingInSeconds: "स्क्रीन स्वतः रीसेट होगी",
     bookAnotherTable: "अन्य टेबल बुक करें",
+    tableBookingTitle: "अतिथि विवरण एवं स्मार्ट टेबल आवंटन",
+    tableBookingSubtitle: "अपनी शाही डाइनिंग टेबल बुक करें, पसंदीदा समय चुनें और तत्काल बुकिंग टिकट प्राप्त करें।",
+    bookingTicketNumber: "बुकिंग टिकट संख्या",
+    guestAndContactTitle: "1. मुख्य अतिथि विवरण (अनिवार्य)",
+    customerNameLabel: "आपका पूरा नाम",
+    customerNamePlaceholder: "उदा. आनंद कुमार",
+    customerPhoneLabel: "मोबाइल नंबर (डिजिटल टिकट और एसएमएस हेतु)",
+    customerPhonePlaceholder: "उदा. 98765 43210",
+    selectDiningTimeSlot: "2. भोजन का समय स्लॉट चुनें",
+    diningTimeSlotDesc: "मूवी टिकट शैली में लाइव आरक्षण। पहले से बुक स्लॉट तुरंत लॉक हो जाते हैं।",
+    lunchSlots: "दोपहर का भोजन",
+    dinnerSlots: "शाही रात्रिभोज",
+    teaSlots: "शाम की चाय व नाश्ता",
+    slotAvailable: "उपलब्ध",
+    slotBooked: "पहले से बुक",
+    slotFillingFast: "जल्दी भर रहा है",
+    slotAlreadyBookedAlert: "यह समय स्लॉट टेबल {table} के लिए पहले से बुक है। कृपया कोई अन्य समय चुनें!",
+    nameRequiredError: "टेबल बुक करने के लिए कृपया अपना नाम दर्ज करें।",
+    phoneRequiredError: "बुकिंग पुष्टि के लिए मोबाइल नंबर अनिवार्य है।",
+    phoneLengthError: "कृपया 10 अंकों का वैध मोबाइल नंबर दर्ज करें।",
+    allocatedDecisionLive: "आवंटित टेबल सारांश",
+    assignedDiningTable: "आवंटित डाइनिंग टेबल",
+    capacitySeats: "सीटें",
+    dedicatedTableAttendant: "समर्पित फ्लोर सेवक",
+    confirmBookingBtn: "टेबल बुकिंग की पुष्टि करें",
+    tableFeatures: "टेबल की विशेषताएं एवं परिवेश",
+    tableBookedNotice: "क्लाउड डेटाबेस में सुरक्षित",
+    changeLanguageBtn: "भाषा बदलें",
+    todayDateLabel: "आज",
+    tomorrowDateLabel: "कल",
+    guestsCountLabel: "अतिथि",
+    coupleDuoSub: "युगल / एकल",
+    standardFamilySub: "सामान्य परिवार",
+    gatheringSub: "बड़ा समूह",
+    celebrationSub: "उत्सव दावत",
+    royalBanquetSub: "रॉयल बैंक्वेट समूह",
   },
   te: {
     welcomeTo: "స్వాగతం",
@@ -1116,6 +1260,42 @@ export const translations: Record<Language, TranslationDictionary> = {
     doneNextGuestBtn: "పూర్తయింది / తదుపరి అతిథి",
     resettingInSeconds: "స్క్రీన్ రీసెట్ అవుతుంది",
     bookAnotherTable: "మరొక టేబుల్ బుక్ చేయండి",
+    tableBookingTitle: "అతిథి వివరాలు & స్మార్ట్ టేబుల్ కేటాయింపు",
+    tableBookingSubtitle: "మీ లగ్జరీ డైనింగ్ టేబుల్‌ను రిజర్వ్ చేసుకోండి, కావలసిన సమయాన్ని ఎంచుకోండి మరియు తక్షణ బుకింగ్ టిక్కెట్‌ను పొందండి.",
+    bookingTicketNumber: "బుకింగ్ టికెట్ సంఖ్య",
+    guestAndContactTitle: "1. ప్రధాన అతిథి వివరాలు (తప్పనిసరి)",
+    customerNameLabel: "మీ పూర్తి పేరు",
+    customerNamePlaceholder: "ఉదా. ఆనంద్ కుమార్",
+    customerPhoneLabel: "మొబైల్ సంఖ్య (డిజిటల్ టికెట్ కొరకు)",
+    customerPhonePlaceholder: "ఉదా. 98765 43210",
+    selectDiningTimeSlot: "2. భోజన సమయ స్లాట్‌ను ఎంచుకోండి",
+    diningTimeSlotDesc: "సినిమా టికెట్ తరహా లైవ్ బుకింగ్. బుక్ చేసిన స్లాట్‌లు వెంటనే లాక్ చేయబడతాయి.",
+    lunchSlots: "మధ్యాహ్న భోజనం",
+    dinnerSlots: "రాయల్ డిన్నర్",
+    teaSlots: "సాయంత్రం టీ & స్నాక్స్",
+    slotAvailable: "అందుబాటులో ఉంది",
+    slotBooked: "ఇప్పటికే బుక్ చేయబడింది",
+    slotFillingFast: "వేగంగా నిండుతోంది",
+    slotAlreadyBookedAlert: "ఈ సమయం టేబుల్ {table} కొరకు ఇప్పటికే బుక్ అయింది. దయచేసి మరొక సమయాన్ని ఎంచుకోండి!",
+    nameRequiredError: "దయచేసి టేబుల్ బుక్ చేయడానికి మీ పేరు నమోదు చేయండి.",
+    phoneRequiredError: "బుకింగ్ ధృవీకరణకు మొబైల్ నంబర్ తప్పనిసరి.",
+    phoneLengthError: "దయచేసి సరైన 10 అంకెల మొబైల్ నంబర్‌ను నమోదు చేయండి.",
+    allocatedDecisionLive: "కేటాయించిన టేబుల్ సారాంశం",
+    assignedDiningTable: "కేటాయించిన డైనింగ్ టేబుల్",
+    capacitySeats: "సీట్లు",
+    dedicatedTableAttendant: "మీ ఫ్లోర్ అటెండెంట్",
+    confirmBookingBtn: "టేబుల్ బుకింగ్ ధృవీకరించండి",
+    tableFeatures: "టేబుల్ ముఖ్యాంశాలు & పరిసరాలు",
+    tableBookedNotice: "క్లౌడ్ డేటాబేస్‌లో భద్రపరచబడింది",
+    changeLanguageBtn: "భాషను మార్చండి",
+    todayDateLabel: "ఈరోజు",
+    tomorrowDateLabel: "రేపు",
+    guestsCountLabel: "అతిథులు",
+    coupleDuoSub: "జంట / ఒంటరి",
+    standardFamilySub: "సాధారణ కుటుంబం",
+    gatheringSub: "పెద్ద సమూహం",
+    celebrationSub: "వేడుక విందు",
+    royalBanquetSub: "రాయల్ బాంక్వెట్ గ్రూప్",
   },
   es: {
     welcomeTo: "Bienvenido a",
@@ -1334,6 +1514,42 @@ export const translations: Record<Language, TranslationDictionary> = {
     doneNextGuestBtn: "Listo / Siguiente Huésped",
     resettingInSeconds: "Restableciendo en",
     bookAnotherTable: "Reservar Otra Mesa",
+    tableBookingTitle: "Detalles del Huésped y Asignación de Mesa",
+    tableBookingSubtitle: "Reserve su mesa de lujo, seleccione el horario deseado y reciba su boleto de reserva instantáneo.",
+    bookingTicketNumber: "Boleto de Reserva",
+    guestAndContactTitle: "1. Datos del Huésped Principal (Obligatorio)",
+    customerNameLabel: "Nombre Completo",
+    customerNamePlaceholder: "ej. Juan Pérez",
+    customerPhoneLabel: "Teléfono Móvil (Para Boleto Digital y SMS)",
+    customerPhonePlaceholder: "ej. 98765 43210",
+    selectDiningTimeSlot: "2. Seleccione el Horario de Comida",
+    diningTimeSlotDesc: "Reserva en vivo estilo cine. Los horarios reservados se bloquean en tiempo real.",
+    lunchSlots: "Almuerzo",
+    dinnerSlots: "Cena Real",
+    teaSlots: "Merienda de la Tarde",
+    slotAvailable: "Disponible",
+    slotBooked: "Ya Reservado",
+    slotFillingFast: "Llenándose Rápido",
+    slotAlreadyBookedAlert: "¡Este horario ya está reservado para la Mesa {table}! Por favor seleccione otro horario.",
+    nameRequiredError: "Por favor ingrese su nombre completo.",
+    phoneRequiredError: "El teléfono móvil es obligatorio para confirmar la reserva.",
+    phoneLengthError: "Por favor ingrese un número de 10 dígitos válido.",
+    allocatedDecisionLive: "RESUMEN DE MESA ASIGNADA",
+    assignedDiningTable: "MESA ASIGNADA",
+    capacitySeats: "Asientos",
+    dedicatedTableAttendant: "Atendido por",
+    confirmBookingBtn: "Confirmar Reserva de Mesa",
+    tableFeatures: "Características y Ambiente de la Mesa",
+    tableBookedNotice: "Guardado en Base de Datos en la Nube",
+    changeLanguageBtn: "Cambiar Idioma",
+    todayDateLabel: "Hoy",
+    tomorrowDateLabel: "Mañana",
+    guestsCountLabel: "Invitados",
+    coupleDuoSub: "Pareja / Individual",
+    standardFamilySub: "Familia Estándar",
+    gatheringSub: "Reunión",
+    celebrationSub: "Celebración",
+    royalBanquetSub: "Banquete Real",
   },
   ar: {} as TranslationDictionary,
   fr: {} as TranslationDictionary,

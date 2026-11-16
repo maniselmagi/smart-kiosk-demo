@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useKiosk } from '../../context/KioskContext';
 import { HotelBrand } from '../common/HotelBrand';
-import { allocateTableForGuests } from '../../utils/tableAllocation';
+import { getLocalizedTableAllocation } from '../../utils/tableAllocation';
+import { tableBookingService, AVAILABLE_TIME_SLOTS, TimeSlotConfig } from '../../services/tableBookingService';
 import royalEmberLogo from '../../assets/royal_ember_logo.jpg';
 import { 
   Users, 
@@ -16,7 +17,15 @@ import {
   ShieldCheck,
   Plus,
   Minus,
-  Crown
+  Crown,
+  Clock,
+  Calendar,
+  Ticket,
+  AlertTriangle,
+  Lock,
+  Flame,
+  CheckCheck,
+  Database
 } from 'lucide-react';
 
 interface CustomerTableAllocationScreenProps {
@@ -36,7 +45,14 @@ export const CustomerTableAllocationScreen: React.FC<CustomerTableAllocationScre
     customerPhone, 
     setCustomerPhone,
     setTableNumber,
+    bookingTicket,
+    setBookingTicket,
+    selectedTimeSlot,
+    setSelectedTimeSlot,
+    selectedBookingDate,
+    setSelectedBookingDate,
     isAccessibilityMode,
+    language,
     showToast,
     t
   } = useKiosk();
@@ -45,45 +61,175 @@ export const CustomerTableAllocationScreen: React.FC<CustomerTableAllocationScre
   const [localCount, setLocalCount] = useState<number>(guestCount || 4);
   const [localName, setLocalName] = useState<string>(customerName || '');
   const [localPhone, setLocalPhone] = useState<string>(customerPhone || '');
-  const [isAllocatingAnimation, setIsAllocatingAnimation] = useState<boolean>(false);
+  const [localSlot, setLocalSlot] = useState<string>(selectedTimeSlot || '07:45 PM');
+  
+  // Date options: Today vs Tomorrow
+  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
+  const tomorrowStr = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split('T')[0];
+  }, []);
+  const [localDate, setLocalDate] = useState<string>(selectedBookingDate || todayStr);
 
-  // Compute table allocation based on local count
-  const allocation = allocateTableForGuests(localCount);
+  // Meal Category Filter for Slots: 'all' | 'lunch' | 'tea' | 'dinner'
+  const [activeMealFilter, setActiveMealFilter] = useState<'all' | 'lunch' | 'tea' | 'dinner'>('all');
 
-  // Quick preset options
+  // Form validation errors
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [collisionWarning, setCollisionWarning] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [ticketNumber, setTicketNumber] = useState<string>(bookingTicket || 'RE-TB-7241');
+
+  // Generate ticket number if needed
+  useEffect(() => {
+    if (!bookingTicket || bookingTicket === 'RE-TB-7241') {
+      const generated = tableBookingService.generateTicketNumber();
+      setTicketNumber(generated);
+      setBookingTicket(generated);
+    } else {
+      setTicketNumber(bookingTicket);
+    }
+  }, [bookingTicket, setBookingTicket]);
+
+  // Compute table allocation based on local count and active language
+  const allocation = getLocalizedTableAllocation(localCount, language);
+  const currentTableNum = allocation.tableNumber;
+
+  // Real-time table booking collision check (like cinema / movie ticket booking)
+  const slotCollisionStatus = useMemo(() => {
+    const statusMap: Record<string, { isBooked: boolean; customerName?: string }> = {};
+    AVAILABLE_TIME_SLOTS.forEach((slot) => {
+      const check = tableBookingService.isSlotBooked(currentTableNum, localDate, slot.time);
+      statusMap[slot.time] = {
+        isBooked: check.isBooked,
+        customerName: check.existingBooking?.customerName
+      };
+    });
+    return statusMap;
+  }, [currentTableNum, localDate]);
+
+  // Quick preset count options
   const countPresets = [
-    { count: 2, label: t.coupleDuo || '1-2 Duo', sub: 'Couple / Solo', icon: '👥' },
-    { count: 4, label: t.standardFamily || '3-4 Family', sub: 'Standard Family', icon: '👨‍👩‍👧‍👦' },
-    { count: 6, label: t.largeGroup || '5-6 Large', sub: 'Gathering', icon: '👨‍👩‍👧‍👦👨‍👧' },
-    { count: 8, label: t.celebrationFeast || '7-8 Feast', sub: 'Celebration', icon: '👑👨‍👩‍👦‍👦' },
-    { count: 10, label: t.royalBanquet || '10+ Royal', sub: 'Banquet Group', icon: '🎉👑' }
+    { count: 2, label: t.coupleDuo || '1-2 Duo', sub: t.coupleDuoSub || 'Couple / Solo', icon: '👥' },
+    { count: 4, label: t.standardFamily || '3-4 Family', sub: t.standardFamilySub || 'Standard Family', icon: '👨‍👩‍👧‍👦' },
+    { count: 6, label: t.largeGroup || '5-6 Large', sub: t.gatheringSub || 'Gathering', icon: '👨‍👩‍👧‍👦👨‍👧' },
+    { count: 8, label: t.celebrationFeast || '7-8 Feast', sub: t.celebrationSub || 'Celebration', icon: '👑👨‍👩‍👦‍👦' },
+    { count: 10, label: t.royalBanquet || '10+ Royal', sub: t.royalBanquetSub || 'Banquet Group', icon: '🎉👑' }
   ];
 
   const handleCountChange = (newCount: number) => {
     const clamped = Math.max(1, Math.min(16, newCount));
-    if (clamped !== localCount) {
-      setIsAllocatingAnimation(true);
-      setLocalCount(clamped);
-      setTimeout(() => setIsAllocatingAnimation(false), 200);
+    setLocalCount(clamped);
+    setCollisionWarning(null);
+  };
+
+  // Select a time slot with movie-ticket collision check
+  const handleSelectSlot = (slot: TimeSlotConfig) => {
+    const collision = slotCollisionStatus[slot.time];
+    if (collision?.isBooked) {
+      const alertMsg = (t.slotAlreadyBookedAlert || 'This timing slot is already booked for Table {table}. Please select another timing!')
+        .replace('{table}', `#${currentTableNum}`);
+      setCollisionWarning(`${slot.time} - ${alertMsg}`);
+      showToast(`⚠️ ${slot.time} is already booked for Table #${currentTableNum}!`);
+      return;
+    }
+
+    setCollisionWarning(null);
+    setLocalSlot(slot.time);
+  };
+
+  // Validate form fields
+  const validateForm = (): boolean => {
+    let isValid = true;
+    setNameError(null);
+    setPhoneError(null);
+    setCollisionWarning(null);
+
+    const trimmedName = localName.trim();
+    if (!trimmedName) {
+      setNameError(t.nameRequiredError || 'Please enter your full name to reserve a table.');
+      isValid = false;
+    }
+
+    const cleanPhone = localPhone.replace(/\D/g, '');
+    if (!cleanPhone) {
+      setPhoneError(t.phoneRequiredError || 'Mobile number is required for booking confirmation.');
+      isValid = false;
+    } else if (cleanPhone.length < 10) {
+      setPhoneError(t.phoneLengthError || 'Please enter a valid 10-digit mobile number.');
+      isValid = false;
+    }
+
+    // Check if currently chosen slot is booked
+    if (slotCollisionStatus[localSlot]?.isBooked) {
+      setCollisionWarning(`⚠️ ${localSlot} is already booked. Please choose an available timing!`);
+      isValid = false;
+    }
+
+    return isValid;
+  };
+
+  const handleProceed = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+
+    try {
+      // 1. Save to context
+      setGuestCount(localCount);
+      setCustomerName(localName.trim());
+      setCustomerPhone(localPhone.trim());
+      setTableNumber(currentTableNum);
+      setSelectedTimeSlot(localSlot);
+      setSelectedBookingDate(localDate);
+      setBookingTicket(ticketNumber);
+
+      // 2. Persist booking to Cloud PostgreSQL & LocalStorage via TableBookingService
+      const slotConfig = AVAILABLE_TIME_SLOTS.find((s) => s.time === localSlot);
+      const result = await tableBookingService.createBooking({
+        customerName: localName.trim(),
+        customerPhone: localPhone.trim(),
+        tableNumber: currentTableNum,
+        guestCount: localCount,
+        bookingDate: localDate,
+        timeSlot: localSlot,
+        mealType: slotConfig?.meal || 'dinner',
+        assignedServer: allocation.waiter.fullName || allocation.waiter.name,
+        sectionLabel: allocation.category,
+        ticketNumber: ticketNumber
+      });
+
+      if (!result.success) {
+        if (result.error === 'SLOT_ALREADY_BOOKED') {
+          setCollisionWarning(`⚠️ ${localSlot} was just booked by another customer! Please select another timing.`);
+          showToast(`This timing is already booked. Please choose another.`);
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      showToast(`🎉 Ticket #${ticketNumber} confirmed! Table #${currentTableNum} reserved for ${localSlot}.`);
+      onConfirmAllocation();
+    } catch (err) {
+      console.warn('Booking save error:', err);
+      onConfirmAllocation();
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleProceed = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    
-    // Save details to context
-    setGuestCount(localCount);
-    setCustomerName(localName.trim() || 'Valued Guest');
-    setCustomerPhone(localPhone.trim());
-    setTableNumber(allocation.tableNumber);
-
-    showToast(`Table ${allocation.tableNumber} allocated for your party of ${localCount}!`);
-    onConfirmAllocation();
-  };
+  // Filtered list of time slots
+  const filteredSlots = useMemo(() => {
+    if (activeMealFilter === 'all') return AVAILABLE_TIME_SLOTS;
+    return AVAILABLE_TIME_SLOTS.filter((s) => s.meal === activeMealFilter);
+  }, [activeMealFilter]);
 
   return (
     <div 
-      className={`min-h-[calc(100vh-45px)] flex flex-col justify-between p-4 sm:p-6 md:p-8 relative overflow-hidden transition-colors duration-300 ${
+      className={`min-h-[100dvh] w-full flex flex-col justify-between p-4 sm:p-6 md:p-8 relative overflow-hidden transition-colors duration-300 select-none ${
         isAccessibilityMode
           ? 'bg-slate-950 text-white'
           : 'bg-[#080B11] text-slate-100'
@@ -101,193 +247,378 @@ export const CustomerTableAllocationScreen: React.FC<CustomerTableAllocationScre
         }}
       />
 
-      {/* Subtle Luxury Dot Texture */}
-      <div 
-        className="absolute inset-0 pointer-events-none opacity-[0.035]"
-        style={{
-          backgroundImage: `radial-gradient(rgba(245, 158, 11, 0.8) 1px, transparent 0)`,
-          backgroundSize: '32px 32px'
-        }}
-      />
+      {/* Decorative ambient blurred orbs */}
+      <div className="absolute top-1/4 -left-20 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* 2. TOP BAR: Back button & Stepper */}
-      <div className="w-full max-w-5xl mx-auto flex items-center justify-between pb-4 border-b border-slate-800 z-10">
+      {/* 2. TOP VIP HEADER WITH STEP INDICATOR & LIVE TICKET NUMBER */}
+      <header className="relative z-10 w-full max-w-6xl mx-auto flex items-center justify-between pb-4 border-b border-white/10 gap-4">
+        {/* Back Button */}
         <button
+          type="button"
           onClick={onBackToLanguage}
-          className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/80 border border-slate-700/80 text-xs font-bold text-slate-300 hover:text-white hover:border-amber-400/60 active:scale-95 transition-all cursor-pointer shadow-xs"
+          className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60 text-xs sm:text-sm font-bold transition-all active:scale-95 cursor-pointer shadow-sm"
+          title={t.changeLanguageBtn || 'Change Language'}
         >
-          <ArrowLeft className="w-4 h-4 text-amber-400" />
-          <span>{t.changeLanguage || 'Change Language'}</span>
+          <ArrowLeft className="w-4 h-4 stroke-[2.5]" />
+          <span className="hidden sm:inline">{t.changeLanguageBtn || 'Change Language'}</span>
         </button>
 
-        {/* Small Centered Brand Emblem */}
+        {/* Center Brand Crest */}
+        <div className="flex items-center gap-3">
+          <HotelBrand size="sm" showDescriptor={false} />
+        </div>
+
+        {/* Right: Booking Ticket Badge */}
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl overflow-hidden border border-amber-400/60 shadow-sm bg-black">
-            <img src={royalEmberLogo} alt="Royal Ember" className="w-full h-full object-cover" />
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-gradient-to-r from-amber-500/20 to-amber-600/30 border border-amber-500/40 shadow-lg shadow-amber-500/10">
+            <Ticket className="w-4 h-4 text-amber-400" />
+            <div className="text-left">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block leading-none">
+                {t.bookingTicketNumber || 'Booking Ticket'}
+              </span>
+              <span className="text-xs sm:text-sm font-extrabold text-amber-300 font-mono tracking-wider">
+                #{ticketNumber}
+              </span>
+            </div>
           </div>
-          <span className="font-royal text-sm font-black tracking-widest uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-yellow-400">
-            Royal Ember
-          </span>
         </div>
+      </header>
 
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-400/30 text-amber-300 text-xs font-black shadow-[0_0_15px_rgba(245,158,11,0.15)]">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span>{t.stepTableAllocation || 'Step 2 of 2: Table Allocation'}</span>
-        </div>
-      </div>
-
-      {/* 3. CENTER CONTENT CONTAINER */}
-      <div className="w-full max-w-5xl mx-auto my-auto py-4 z-10">
+      {/* 3. MAIN INTERACTIVE CONTENT GRID */}
+      <main className="relative z-10 w-full max-w-6xl mx-auto my-auto py-5 flex flex-col gap-6">
         
-        {/* Header Title & Subtitle */}
-        <div className="text-center mb-6 space-y-1.5">
-          <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-black uppercase tracking-wider">
-            <Compass className="w-3.5 h-3.5 text-amber-400" />
-            <span>Intelligent Family Seating Concierge</span>
+        {/* Page Title & Subtitle */}
+        <div className="text-center max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>{t.stepTableAllocation || 'Step 2 of 2: Table & Timing Reservation'}</span>
           </div>
-          
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black font-display tracking-tight text-white">
-            {t.tableAllocationTitle || 'Guest Details & Smart Table Allocation'}
-          </h2>
-          
-          <p className="text-xs sm:text-sm text-slate-400 font-medium max-w-xl mx-auto">
-            {t.tableAllocationSubtitle || 'Tell us how many guests are dining so our concierge allocates the most suitable dining table and dedicated section attendant for your family.'}
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-tight">
+            {t.tableBookingTitle || 'Guest Details & Smart Table Allocation'}
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto mt-1 font-medium">
+            {t.tableBookingSubtitle || 'Reserve your luxury dining table, select preferred showtime timing, and receive your instant booking ticket.'}
           </p>
         </div>
 
-        {/* 2-COLUMN SHOWCASE: Left = Guest Inputs & Stepper | Right = Live Decision Card */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-          
-          {/* LEFT: CUSTOMER INFO & GUEST COUNT (7 Cols) */}
-          <div className="lg:col-span-7 bg-slate-900/80 backdrop-blur-2xl rounded-3xl p-5 sm:p-6 border-2 border-amber-500/30 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8),0_0_30px_rgba(245,158,11,0.08)] space-y-5 flex flex-col justify-between">
-            
-            {/* 1. Guest Information Inputs */}
-            <div className="space-y-3">
-              <span className="text-xs font-black uppercase tracking-wider text-amber-400 block flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5" />
-                <span>{t.guestInfoTitle || '1. Guest / Family Information (Optional)'}</span>
-              </span>
+        {/* Collision Warning Banner if booked slot is clicked */}
+        {collisionWarning && (
+          <div className="w-full bg-rose-500/20 border-2 border-rose-500/60 text-rose-200 px-4 py-3 rounded-2xl flex items-center justify-between gap-3 text-xs sm:text-sm animate-in shake duration-300">
+            <div className="flex items-center gap-2.5 font-bold">
+              <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
+              <span>{collisionWarning}</span>
+            </div>
+            <button
+              onClick={() => setCollisionWarning(null)}
+              className="text-rose-400 hover:text-white font-black text-xs uppercase px-2 py-1 rounded bg-rose-950/60"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {/* TWO-COLUMN LAYOUT: Left (Inputs & Timing) | Right (Assigned Table Ticket Card) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          {/* LEFT COLUMN (7 Cols): Guest Details, Party Size, Movie-style Timing */}
+          <div className="lg:col-span-7 flex flex-col gap-5">
+            
+            {/* 1. MANDATORY GUEST DETAILS FORM */}
+            <div className="bg-slate-900/80 backdrop-blur-md rounded-3xl border border-white/10 p-5 sm:p-6 shadow-xl">
+              <div className="flex items-center gap-2 mb-4">
+                <User className="w-4 h-4 text-amber-400" />
+                <h2 className="text-sm sm:text-base font-bold text-white uppercase tracking-wider">
+                  {t.guestAndContactTitle || '1. Primary Guest Details (Mandatory)'}
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Full Name Input */}
                 <div>
-                  <label className="text-[11px] font-bold text-slate-300 block mb-1">
-                    {t.yourNameLabel || 'Your Name / Family Name'}
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center gap-1">
+                    <span>{t.customerNameLabel || 'Your Full Name'}</span>
+                    <span className="text-amber-400">*</span>
                   </label>
                   <div className="relative">
-                    <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                     <input
                       type="text"
                       value={localName}
-                      onChange={(e) => setLocalName(e.target.value)}
-                      placeholder={t.yourNamePlaceholder || 'e.g. Mani S. / Rajesh Kumar'}
-                      className="w-full pl-9 pr-3 py-2.5 rounded-2xl bg-slate-800/80 border border-slate-700 text-xs font-bold text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
+                      onChange={(e) => {
+                        setLocalName(e.target.value);
+                        if (nameError) setNameError(null);
+                      }}
+                      placeholder={t.customerNamePlaceholder || 'e.g. Anand Kumar'}
+                      className={`w-full bg-slate-950/80 border rounded-2xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none transition-all ${
+                        nameError 
+                          ? 'border-rose-500 focus:ring-2 focus:ring-rose-500/30' 
+                          : 'border-white/15 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
+                      }`}
                     />
+                    <User className="w-4 h-4 text-slate-500 absolute right-3.5 top-3.5 pointer-events-none" />
                   </div>
+                  {nameError && (
+                    <p className="text-xs text-rose-400 mt-1 font-semibold flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" />
+                      <span>{nameError}</span>
+                    </p>
+                  )}
                 </div>
 
+                {/* Mobile Number Input */}
                 <div>
-                  <label className="text-[11px] font-bold text-slate-300 block mb-1">
-                    {t.phoneLabel || 'Mobile / WhatsApp (For Digital Bill)'}
+                  <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center gap-1">
+                    <span>{t.customerPhoneLabel || 'Mobile Number (For Digital Ticket)'}</span>
+                    <span className="text-amber-400">*</span>
                   </label>
                   <div className="relative">
-                    <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                     <input
                       type="tel"
                       value={localPhone}
-                      onChange={(e) => setLocalPhone(e.target.value)}
-                      placeholder={t.phonePlaceholder || 'e.g. 98765 43210'}
-                      className="w-full pl-9 pr-3 py-2.5 rounded-2xl bg-slate-800/80 border border-slate-700 text-xs font-bold text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400"
+                      maxLength={14}
+                      onChange={(e) => {
+                        setLocalPhone(e.target.value);
+                        if (phoneError) setPhoneError(null);
+                      }}
+                      placeholder={t.customerPhonePlaceholder || 'e.g. 98765 43210'}
+                      className={`w-full bg-slate-950/80 border rounded-2xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none transition-all font-mono ${
+                        phoneError 
+                          ? 'border-rose-500 focus:ring-2 focus:ring-rose-500/30' 
+                          : 'border-white/15 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20'
+                      }`}
                     />
+                    <Phone className="w-4 h-4 text-slate-500 absolute right-3.5 top-3.5 pointer-events-none" />
                   </div>
+                  {phoneError && (
+                    <p className="text-xs text-rose-400 mt-1 font-semibold flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3" />
+                      <span>{phoneError}</span>
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* 2. Interactive Person Count Selector */}
-            <div className="space-y-3 pt-3 border-t border-slate-800">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                  <Users className="w-3.5 h-3.5" />
-                  <span>{t.howManyGuestsTitle || '2. How Many Persons are Dining?'}</span>
-                </span>
-                <span className="text-xs font-bold text-amber-300 px-2 py-0.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                  {allocation.ambienceBadge}
-                </span>
-              </div>
-
-              {/* Main Stepper Control */}
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-600/10 to-slate-900 border-2 border-amber-500/30 flex items-center justify-between gap-3 shadow-inner">
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl select-none drop-shadow-sm">{allocation.familyIcon}</span>
+            {/* 2. MOVIE-TICKET STYLE SHOWTIME / DINING TIMING SELECTOR */}
+            <div className="bg-slate-900/80 backdrop-blur-md rounded-3xl border border-white/10 p-5 sm:p-6 shadow-xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-amber-400" />
                   <div>
-                    <span className="font-black text-xl text-white font-display block">
-                      {localCount} {localCount === 1 ? 'Person' : 'Guests / Persons'}
-                    </span>
-                    <span className="text-[11px] text-slate-300">
-                      {allocation.suitableFor}
-                    </span>
+                    <h2 className="text-sm sm:text-base font-bold text-white uppercase tracking-wider">
+                      {t.selectDiningTimeSlot || '2. Select Dining Timing Slot'}
+                    </h2>
+                    <p className="text-[11px] text-slate-400">
+                      {t.diningTimeSlotDesc || 'Movie-ticket style live reservation. Booked slots are blocked in real-time.'}
+                    </p>
                   </div>
                 </div>
 
-                {/* Plus / Minus Buttons */}
+                {/* Date Tabs (Today vs Tomorrow) */}
+                <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-2xl border border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLocalDate(todayStr);
+                      setCollisionWarning(null);
+                    }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      localDate === todayStr 
+                        ? 'bg-amber-500 text-slate-950 font-black shadow' 
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {t.todayDateLabel || 'Today'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLocalDate(tomorrowStr);
+                      setCollisionWarning(null);
+                    }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      localDate === tomorrowStr 
+                        ? 'bg-amber-500 text-slate-950 font-black shadow' 
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {t.tomorrowDateLabel || 'Tomorrow'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Meal Filter Category Pills */}
+              <div className="flex items-center gap-1.5 mb-4 overflow-x-auto pb-1 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setActiveMealFilter('all')}
+                  className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
+                    activeMealFilter === 'all'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                      : 'bg-slate-950 text-slate-400 hover:text-white border border-transparent'
+                  }`}
+                >
+                  All Slots
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveMealFilter('lunch')}
+                  className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
+                    activeMealFilter === 'lunch'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                      : 'bg-slate-950 text-slate-400 hover:text-white border border-transparent'
+                  }`}
+                >
+                  {t.lunchSlots || 'Lunch Service'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveMealFilter('tea')}
+                  className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
+                    activeMealFilter === 'tea'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                      : 'bg-slate-950 text-slate-400 hover:text-white border border-transparent'
+                  }`}
+                >
+                  {t.teaSlots || 'Evening Tea'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveMealFilter('dinner')}
+                  className={`px-3 py-1.5 rounded-xl font-bold transition-all cursor-pointer ${
+                    activeMealFilter === 'dinner'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                      : 'bg-slate-950 text-slate-400 hover:text-white border border-transparent'
+                  }`}
+                >
+                  {t.dinnerSlots || 'Royal Dinner'}
+                </button>
+              </div>
+
+              {/* SHOWTIME SLOTS GRID (Visual Movie Ticket Buttons) */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+                {filteredSlots.map((slot) => {
+                  const isCollision = slotCollisionStatus[slot.time]?.isBooked;
+                  const isSelected = localSlot === slot.time && !isCollision;
+
+                  return (
+                    <button
+                      key={slot.time}
+                      type="button"
+                      disabled={isCollision}
+                      onClick={() => handleSelectSlot(slot)}
+                      className={`relative p-3 rounded-2xl border transition-all text-left flex flex-col justify-between cursor-pointer ${
+                        isCollision
+                          ? 'bg-rose-950/40 border-rose-900/60 opacity-60 cursor-not-allowed hover:border-rose-700'
+                          : isSelected
+                            ? 'bg-gradient-to-br from-amber-500/30 via-slate-900 to-amber-600/20 border-amber-400 shadow-lg shadow-amber-500/20 scale-[1.02]'
+                            : 'bg-slate-950/70 border-white/10 hover:border-amber-400/50 hover:bg-slate-800/60'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className={`text-sm font-black font-mono ${
+                          isCollision 
+                            ? 'text-rose-400 line-through' 
+                            : isSelected 
+                              ? 'text-amber-300 font-extrabold' 
+                              : 'text-white'
+                        }`}>
+                          {slot.time}
+                        </span>
+
+                        {/* Status Icon */}
+                        {isCollision ? (
+                          <Lock className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                        ) : isSelected ? (
+                          <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0" />
+                        ) : (
+                          <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                        )}
+                      </div>
+
+                      {/* Period & Availability Badge */}
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="text-slate-400 truncate">
+                          {slot.periodLabel}
+                        </span>
+
+                        {isCollision ? (
+                          <span className="text-[9px] font-black uppercase text-rose-400 bg-rose-950 px-1.5 py-0.5 rounded border border-rose-800">
+                            {t.slotBooked || 'Booked'}
+                          </span>
+                        ) : slot.popularBadge ? (
+                          <span className="text-[9px] font-bold text-amber-300 bg-amber-500/20 px-1.5 py-0.5 rounded border border-amber-500/30">
+                            {slot.popularBadge}
+                          </span>
+                        ) : (
+                          <span className="text-[9px] font-bold text-emerald-300 bg-emerald-500/10 px-1 py-0.5 rounded">
+                            {t.slotAvailable || 'Available'}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 3. GUEST COUNT & FAMILY SIZE STEPPER */}
+            <div className="bg-slate-900/80 backdrop-blur-md rounded-3xl border border-white/10 p-5 sm:p-6 shadow-xl">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-amber-400" />
+                  <h2 className="text-sm sm:text-base font-bold text-white uppercase tracking-wider">
+                    {t.howManyGuestsTitle || '3. How many guests are dining today?'}
+                  </h2>
+                </div>
+
+                {/* Interactive Stepper */}
+                <div className="flex items-center gap-2 bg-slate-950/80 p-1 rounded-2xl border border-white/10">
                   <button
                     type="button"
                     onClick={() => handleCountChange(localCount - 1)}
                     disabled={localCount <= 1}
-                    className="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 text-white border border-slate-600 flex items-center justify-center font-bold text-lg active:scale-95 disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer shadow-xs"
-                    aria-label="Decrease guest count"
+                    className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-white flex items-center justify-center transition-all cursor-pointer"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
-
-                  <span className="w-10 text-center font-black text-2xl font-mono text-amber-400">
+                  <span className="w-10 text-center font-extrabold text-amber-300 text-base font-mono">
                     {localCount}
                   </span>
-
                   <button
                     type="button"
                     onClick={() => handleCountChange(localCount + 1)}
                     disabled={localCount >= 16}
-                    className="w-10 h-10 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-black text-lg hover:from-amber-300 hover:to-yellow-400 active:scale-95 disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer flex items-center justify-center shadow-md shadow-amber-500/30"
-                    aria-label="Increase guest count"
+                    className="w-8 h-8 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center justify-center transition-all font-bold cursor-pointer"
                   >
                     <Plus className="w-4 h-4 stroke-[3]" />
                   </button>
                 </div>
               </div>
 
-              {/* Quick Preset Buttons */}
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-1">
+              {/* Quick Preset Cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
                 {countPresets.map((preset) => {
-                  const isSelected = 
-                    (preset.count === 2 && localCount <= 2) ||
-                    (preset.count === 4 && localCount >= 3 && localCount <= 4) ||
-                    (preset.count === 6 && localCount >= 5 && localCount <= 6) ||
-                    (preset.count === 8 && localCount >= 7 && localCount <= 8) ||
-                    (preset.count === 10 && localCount >= 9);
+                  const isMatch = (localCount <= 2 && preset.count === 2) ||
+                                  (localCount > 2 && localCount <= 4 && preset.count === 4) ||
+                                  (localCount > 4 && localCount <= 6 && preset.count === 6) ||
+                                  (localCount > 6 && localCount <= 8 && preset.count === 8) ||
+                                  (localCount > 8 && preset.count === 10);
 
                   return (
                     <button
                       key={preset.count}
                       type="button"
                       onClick={() => handleCountChange(preset.count)}
-                      className={`p-2.5 rounded-2xl text-left border transition-all cursor-pointer flex flex-col justify-between ${
-                        isSelected
-                          ? 'bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 border-amber-300 shadow-lg shadow-amber-500/30 scale-102 font-black ring-2 ring-amber-400/50'
-                          : 'bg-slate-800/60 text-slate-300 border-slate-700/80 hover:bg-slate-800 hover:border-amber-400/40'
+                      className={`p-3 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center justify-between ${
+                        isMatch
+                          ? 'bg-amber-500/20 border-amber-400 text-white shadow-md shadow-amber-500/10'
+                          : 'bg-slate-950/60 border-white/10 text-slate-400 hover:border-white/30 hover:text-white'
                       }`}
                     >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-base">{preset.icon}</span>
-                        {isSelected && <Check className="w-3.5 h-3.5 stroke-[3.5]" />}
-                      </div>
-                      <span className="text-xs font-black leading-tight block">
-                        {preset.label}
-                      </span>
-                      <span className={`text-[10px] block ${isSelected ? 'text-slate-900 font-bold' : 'text-slate-400'}`}>
-                        {preset.sub}
-                      </span>
+                      <span className="text-xl mb-1">{preset.icon}</span>
+                      <span className="text-xs font-black text-amber-300 block">{preset.label}</span>
+                      <span className="text-[10px] text-slate-400 block truncate w-full">{preset.sub}</span>
                     </button>
                   );
                 })}
@@ -296,102 +627,121 @@ export const CustomerTableAllocationScreen: React.FC<CustomerTableAllocationScre
 
           </div>
 
-          {/* RIGHT: SMART TABLE ALLOCATION DECISION CARD (5 Cols) */}
-          <div className="lg:col-span-5 bg-gradient-to-br from-slate-900 via-slate-900 to-amber-950/80 text-white rounded-3xl p-5 sm:p-6 border-2 border-amber-400/50 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.9),0_0_35px_rgba(245,158,11,0.2)] flex flex-col justify-between relative overflow-hidden">
+          {/* RIGHT COLUMN (5 Cols): HIGH-END VIP TABLE TICKET CARD */}
+          <div className="lg:col-span-5 flex flex-col gap-4">
             
-            {/* Top Pill: Live Allocation Decision */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-400">
-                  Allocated Decision Live
+            <div className="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 rounded-3xl border-2 border-amber-500/40 p-6 shadow-2xl shadow-amber-500/15 relative overflow-hidden">
+              
+              {/* Gold Ambient Shimmer in Card */}
+              <div className="absolute top-0 right-0 w-48 h-48 bg-amber-500/15 rounded-full blur-2xl pointer-events-none" />
+
+              {/* Top Card Badge */}
+              <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                <span className="text-[10px] uppercase font-black tracking-widest text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded-full border border-amber-400/30 flex items-center gap-1.5">
+                  <Crown className="w-3 h-3 text-amber-400" />
+                  <span>{t.allocatedDecisionLive || 'ALLOCATED TABLE SUMMARY'}</span>
+                </span>
+                <span className="text-xs font-bold text-slate-400">
+                  {allocation.capacity} {t.capacitySeats || 'Seats'}
                 </span>
               </div>
-              <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-amber-300 text-[10px] font-bold border border-amber-400/20">
-                Capacity: {allocation.capacity} Seats
-              </span>
-            </div>
 
-            {/* Main Table Allocation Highlight */}
-            <div className={`py-4 space-y-3 transition-transform duration-200 ${isAllocatingAnimation ? 'scale-98 opacity-75' : 'scale-100 opacity-100'}`}>
-              <div className="flex items-center justify-between">
+              {/* TABLE NUMBER HERO */}
+              <div className="py-5 flex items-center gap-4">
+                <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-700 flex flex-col items-center justify-center text-slate-950 shadow-xl shadow-amber-500/30 shrink-0 font-black">
+                  <span className="text-[10px] font-extrabold tracking-widest uppercase text-slate-900/80">TABLE</span>
+                  <span className="text-3xl sm:text-4xl leading-none">#{currentTableNum}</span>
+                </div>
                 <div>
-                  <span className="text-[11px] font-bold text-amber-400/90 uppercase tracking-widest block">
-                    Assigned Dining Table
-                  </span>
-                  <div className="flex items-baseline gap-2">
-                    <h3 className="text-4xl sm:text-5xl font-black font-display text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-400 tracking-tight drop-shadow-[0_2px_15px_rgba(245,158,11,0.4)]">
-                      TABLE {allocation.tableNumber}
-                    </h3>
+                  <h3 className="text-base sm:text-lg font-black text-white leading-tight">
+                    {allocation.category}
+                  </h3>
+                  <div className="inline-block mt-1 px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 text-xs font-bold border border-amber-500/30">
+                    {allocation.ambienceBadge}
                   </div>
-                </div>
-
-                <div className="w-16 h-16 rounded-2xl bg-amber-500/20 border-2 border-amber-400/50 flex flex-col items-center justify-center text-center shadow-inner">
-                  <span className="text-2xl">{allocation.familyIcon}</span>
-                  <span className="text-[10px] font-black text-amber-300 uppercase mt-0.5">{localCount} Guests</span>
+                  <p className="text-xs text-slate-400 mt-1.5 flex items-center gap-1">
+                    <Compass className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span>{allocation.zoneDescription}</span>
+                  </p>
                 </div>
               </div>
 
-              {/* Table Category & Location */}
-              <div className="p-3 rounded-2xl bg-slate-800/90 border border-slate-700/80 space-y-1">
-                <span className="font-extrabold text-xs text-white block">
-                  {allocation.category}
-                </span>
-                <p className="text-[11px] text-slate-300 flex items-center gap-1.5">
-                  <Compass className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                  <span>{allocation.zoneDescription}</span>
-                </p>
-              </div>
-
-              {/* Assigned Section Waiter Card */}
-              <div className="p-3 rounded-2xl bg-amber-500/15 border border-amber-400/40 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shadow-md ${allocation.waiter.avatarBg}`}>
-                    {allocation.waiter.initial}
-                  </div>
+              {/* ASSIGNED FLOOR SERVER */}
+              <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-white/10 flex items-center justify-between gap-3 mb-4">
+                <div className="flex items-center gap-3">
+                  {allocation.waiter.avatarUrl ? (
+                    <img 
+                      src={allocation.waiter.avatarUrl} 
+                      alt={allocation.waiter.name} 
+                      className="w-10 h-10 rounded-full object-cover border border-amber-400/40"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-amber-500/20 text-amber-400 font-bold text-sm flex items-center justify-center border border-amber-400/40">
+                      {allocation.waiter.initial}
+                    </div>
+                  )}
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-amber-400 block">
-                      Dedicated Table Attendant
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                      {t.dedicatedTableAttendant || 'Dedicated Floor Attendant'}
                     </span>
-                    <span className="font-black text-xs text-white">
-                      {allocation.waiter.fullName}
-                    </span>
-                    <span className="text-[10px] text-slate-400 block">
-                      {allocation.waiter.zone} • {allocation.waiter.role}
+                    <span className="text-sm font-bold text-white">
+                      {allocation.waiter.fullName || allocation.waiter.name}
                     </span>
                   </div>
                 </div>
 
-                <div className="px-2 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-[10px] font-black border border-emerald-500/30 flex items-center gap-1">
-                  <ShieldCheck className="w-3 h-3" />
-                  <span>Ready</span>
+                <div className="flex items-center gap-1 text-emerald-400 text-xs font-bold bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/20">
+                  <CheckCheck className="w-3.5 h-3.5" />
+                  <span>On Duty</span>
                 </div>
               </div>
 
-              {/* Features List */}
-              <div className="grid grid-cols-2 gap-1.5 pt-1">
-                {allocation.features.map((feat, idx) => (
-                  <div key={idx} className="flex items-center gap-1.5 text-[11px] text-slate-300 font-medium">
+              {/* TICKET DETAILS PREVIEW */}
+              <div className="bg-slate-950/60 rounded-2xl p-4 border border-white/10 text-xs space-y-2 mb-5 font-medium">
+                <div className="flex justify-between pb-2 border-b border-white/5">
+                  <span className="text-slate-400">{t.bookingTicketNumber || 'Ticket #'}</span>
+                  <span className="font-mono font-bold text-amber-300">#{ticketNumber}</span>
+                </div>
+                <div className="flex justify-between pb-2 border-b border-white/5">
+                  <span className="text-slate-400">Date & Slot</span>
+                  <span className="font-bold text-white">{localDate === todayStr ? 'Today' : 'Tomorrow'} • {localSlot}</span>
+                </div>
+                <div className="flex justify-between pb-2 border-b border-white/5">
+                  <span className="text-slate-400">Party Size</span>
+                  <span className="font-bold text-amber-300">{localCount} {t.guestsCountLabel || 'Guests'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Cloud Sync</span>
+                  <span className="text-emerald-400 flex items-center gap-1">
+                    <Database className="w-3 h-3" />
+                    <span>PostgreSQL Cloud Ready</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* TABLE HIGHLIGHTS CHECKLIST */}
+              <div className="space-y-1.5 mb-6 text-xs text-slate-300">
+                {allocation.features.map((feat, i) => (
+                  <div key={i} className="flex items-center gap-2">
                     <CheckCircle2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                    <span className="truncate">{feat}</span>
+                    <span>{feat}</span>
                   </div>
                 ))}
               </div>
-            </div>
 
-            {/* Confirm Table & Start Ordering CTA */}
-            <div className="pt-3 border-t border-slate-800 space-y-2">
+              {/* PROCEED ACTION BUTTON */}
               <button
                 type="button"
                 onClick={handleProceed}
-                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black text-sm shadow-[0_10px_35px_rgba(245,158,11,0.4)] hover:shadow-[0_15px_45px_rgba(245,158,11,0.6)] hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2.5 cursor-pointer group"
+                disabled={isSubmitting}
+                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-black text-base flex items-center justify-center gap-2.5 shadow-xl shadow-amber-500/30 transition-all active:scale-95 cursor-pointer disabled:opacity-60"
               >
-                <span>{t.proceedToMenuBtn || 'Proceed to Digital Menu'} (Table {allocation.tableNumber})</span>
-                <ArrowRight className="w-5 h-5 stroke-[2.5] group-hover:translate-x-1 transition-transform" />
+                <span>{t.proceedToMenuBtn || 'Confirm Table & Get Ticket'}</span>
+                <ArrowRight className="w-5 h-5 stroke-[2.5]" />
               </button>
 
-              <p className="text-[10px] text-center text-slate-400">
-                Proceed directly to the gourmet menu at Table {allocation.tableNumber}.
+              <p className="text-[11px] text-center text-slate-400 mt-2 font-medium">
+                {t.tableBookedNotice || 'Instant cloud reservation synced across all terminals.'}
               </p>
             </div>
 
@@ -399,15 +749,8 @@ export const CustomerTableAllocationScreen: React.FC<CustomerTableAllocationScre
 
         </div>
 
-      </div>
+      </main>
 
-      {/* 4. FOOTER */}
-      <div className="w-full max-w-5xl mx-auto flex items-center justify-between text-xs text-slate-500 pt-3 border-t border-slate-800/80 z-10">
-        <span>Royal Ember Smart Table-Side Self-Ordering Kiosk</span>
-        <span>Table Allocation Concierge v2.4</span>
-      </div>
     </div>
   );
 };
-
-export default CustomerTableAllocationScreen;

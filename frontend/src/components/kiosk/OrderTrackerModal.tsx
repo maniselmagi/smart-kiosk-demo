@@ -25,6 +25,9 @@ import {
 import { getAssignedWaiter } from '../../utils/waiterAssignment';
 import { CustomerFeedbackModal } from './CustomerFeedbackModal';
 
+// Feature toggle: Set to true whenever the management wishes to enable the complimentary delay treat feature
+const ENABLE_COMPLIMENTARY_FOOD = false;
+
 export const COMPLIMENTARY_SNACKS = [
   {
     id: 'comp-papad',
@@ -435,15 +438,6 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                       <span className="text-[10px] text-amber-400/90 font-black uppercase tracking-wider mt-1">
                         Est. Time
                       </span>
-                      <button
-                        type="button"
-                        onClick={() => setSecondsLeft(0)}
-                        title="Simulate delay countdown"
-                        className="mt-1 text-[9px] text-amber-400/70 hover:text-amber-300 flex items-center gap-0.5 underline font-medium cursor-pointer"
-                      >
-                        <Zap className="w-2.5 h-2.5" />
-                        <span>Simulate Delay</span>
-                      </button>
                     </>
                   )}
                 </div>
@@ -489,8 +483,8 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
 
             </div>
 
-            {/* CHEF DELAY & COMPLIMENTARY FOOD (₹0 FREE ON THE HOUSE) */}
-            {isDelayed && (
+            {/* CHEF DELAY & COMPLIMENTARY FOOD (₹0 FREE ON THE HOUSE - CURRENTLY HIDDEN UNTIL EXPLICITLY REQUESTED) */}
+            {ENABLE_COMPLIMENTARY_FOOD && isDelayed && (
               <div className="mt-4 pt-4 border-t border-amber-500/30 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                 <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-slate-900/90 via-slate-850 to-amber-950/30 border border-amber-500/30 shadow-xl">
                   

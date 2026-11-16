@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { KioskProvider, useKiosk } from './context/KioskContext';
 import { DemoNavigation } from './components/common/DemoNavigation';
 import { Header } from './components/common/Header';
@@ -18,6 +19,7 @@ import { ManagementDashboard } from './components/dashboard/ManagementDashboard'
 import { LanguageSelectionModal } from './components/kiosk/LanguageSelectionModal';
 import { LanguageEntryScreen } from './components/kiosk/LanguageEntryScreen';
 import { CustomerTableAllocationScreen } from './components/kiosk/CustomerTableAllocationScreen';
+import { BookingThankYouScreen } from './components/kiosk/BookingThankYouScreen';
 import CallWaiterModal from './components/common/CallWaiterModal';
 import { AIChatModal } from './components/kiosk/AIChatModal';
 import { StaffLoginModal, StaffUser } from './components/auth/StaffLoginModal';
@@ -39,8 +41,20 @@ const MainAppContent: React.FC = () => {
     setIsLanguageModalOpen
   } = useKiosk();
 
-  // Kiosk inner sub-screen state: Step 1 (welcome) -> Step 2 (language) -> Step 3 (allocation) -> Step 4 (menu)
-  const [kioskSubScreen, setKioskSubScreen] = useState<'welcome' | 'language' | 'allocation' | 'menu'>('welcome');
+  // Kiosk inner sub-screen state: Step 1 (welcome) -> Step 2 (language) -> Step 3 (allocation) -> Step 4 (thankyou / menu)
+  const [kioskSubScreen, setKioskSubScreen] = useState<'welcome' | 'language' | 'allocation' | 'menu' | 'thankyou'>('welcome');
+
+  // Check if running in dedicated 4-screen Table Booking Kiosk mode (APK or ?mode=booking)
+  const isBookingKioskApp = React.useMemo(() => {
+    if (Capacitor.isNativePlatform()) return true;
+    if (import.meta.env.VITE_APP_MODE === 'booking') return true;
+    if (typeof window !== 'undefined') {
+      const search = window.location.search.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      if (search.includes('mode=booking') || hash.includes('booking')) return true;
+    }
+    return false;
+  }, []);
 
   // Unified Staff Login state (Kitchen & Management)
   const [isStaffLoginOpen, setIsStaffLoginOpen] = useState(false);
@@ -101,6 +115,50 @@ const MainAppContent: React.FC = () => {
     setIsCheckoutOpen(false);
     setIsReceiptOpen(true);
   };
+
+  // DEDICATED TABLE BOOKING KIOSK APP FLOW (Only 4 Screens: Welcome -> Language -> Table Booking -> Thank You)
+  if (isBookingKioskApp) {
+    return (
+      <div className="min-h-screen flex flex-col bg-[#080B11] text-white">
+        {kioskSubScreen === 'welcome' && (
+          <WelcomeScreen
+            onStart={() => setKioskSubScreen('language')}
+            onOpenLanguage={() => setKioskSubScreen('language')}
+          />
+        )}
+
+        {kioskSubScreen === 'language' && (
+          <LanguageEntryScreen 
+            onBack={() => setKioskSubScreen('welcome')}
+            onContinue={() => setKioskSubScreen('allocation')} 
+          />
+        )}
+
+        {kioskSubScreen === 'allocation' && (
+          <CustomerTableAllocationScreen
+            onBackToLanguage={() => setKioskSubScreen('language')}
+            onConfirmAllocation={() => setKioskSubScreen('thankyou')}
+          />
+        )}
+
+        {kioskSubScreen === 'thankyou' && (
+          <BookingThankYouScreen
+            onDone={() => setKioskSubScreen('welcome')}
+          />
+        )}
+
+        {/* Floating Toast Notification */}
+        {toastMessage && (
+          <div className="fixed top-6 right-6 z-50 animate-in slide-in-from-top-2 fade-in duration-200">
+            <div className="bg-slate-900/95 backdrop-blur-md text-white text-xs font-bold py-2.5 px-4 rounded-2xl shadow-xl border border-amber-500/30 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              <span>{toastMessage}</span>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">

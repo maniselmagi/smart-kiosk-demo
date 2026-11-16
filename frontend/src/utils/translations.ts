@@ -230,6 +230,18 @@ export interface TranslationDictionary {
   unit: string;
   kcalPerServing: string;
   allergens: string;
+  thankYouBookingTitle: string;
+  thankYouBookingSubtitle: string;
+  confirmedTableReservation: string;
+  assignedTableBadge: string;
+  partyGuestsLabel: string;
+  primaryGuestLabel: string;
+  contactNumberLabel: string;
+  assignedFloorServerLabel: string;
+  proceedToTablePrompt: string;
+  doneNextGuestBtn: string;
+  resettingInSeconds: string;
+  bookAnotherTable: string;
 }
 
 export const translations: Record<Language, TranslationDictionary> = {
@@ -438,6 +450,18 @@ export const translations: Record<Language, TranslationDictionary> = {
     unit: "Unit",
     kcalPerServing: "kcal per serving",
     allergens: "Allergens",
+    thankYouBookingTitle: "Thank You for Your Booking!",
+    thankYouBookingSubtitle: "Your table reservation is confirmed. We are excited to serve you a royal dining experience.",
+    confirmedTableReservation: "Confirmed Reservation",
+    assignedTableBadge: "Table Assigned",
+    partyGuestsLabel: "Party Size",
+    primaryGuestLabel: "Primary Guest",
+    contactNumberLabel: "Contact Mobile",
+    assignedFloorServerLabel: "Assigned Floor Attendant",
+    proceedToTablePrompt: "Please proceed to your allocated table. Your attendant will welcome you immediately.",
+    doneNextGuestBtn: "Done / Next Guest",
+    resettingInSeconds: "Screen resetting in",
+    bookAnotherTable: "Book Another Table",
   },
   ta: {
     welcomeTo: "வணக்கம்",
@@ -644,6 +668,18 @@ export const translations: Record<Language, TranslationDictionary> = {
     unit: "உணவு",
     kcalPerServing: "கலோரி / ஒருவருக்கு",
     allergens: "ஒவ்வாமை பொருட்கள்",
+    thankYouBookingTitle: "நன்றி! உங்கள் மேஜை முன்பதிவு செய்யப்பட்டது!",
+    thankYouBookingSubtitle: "உங்கள் மேஜை வெற்றிகரமாக ஒதுக்கப்பட்டுள்ளது. உங்களுக்கு மிகச் சிறந்த விருந்து உபசரிப்பை வழங்க காத்திருக்கிறோம்.",
+    confirmedTableReservation: "உறுதிசெய்யப்பட்ட முன்பதிவு",
+    assignedTableBadge: "ஒதுக்கப்பட்ட மேஜை",
+    partyGuestsLabel: "விருந்தினர்கள் எண்ணிக்கை",
+    primaryGuestLabel: "முக்கிய விருந்தினர் பெயர்",
+    contactNumberLabel: "கைபேசி எண்",
+    assignedFloorServerLabel: "உங்கள் தளப் பணியாளர்",
+    proceedToTablePrompt: "தயவுசெய்து உங்கள் மேஜைக்குச் செல்லவும். எங்கள் பணியாளர் உங்களை அன்புடன் வரவேற்பார்.",
+    doneNextGuestBtn: "முடிந்தது / அடுத்த விருந்தினர்",
+    resettingInSeconds: "திரை தானாக மீளமைக்கப்படும் நேரம்",
+    bookAnotherTable: "மற்றொரு மேஜை முன்பதிவு",
   },
   hi: {
     welcomeTo: "स्वागत है",
@@ -850,6 +886,18 @@ export const translations: Record<Language, TranslationDictionary> = {
     unit: "इकाई",
     kcalPerServing: "किलो कैलोरी / सर्विंग",
     allergens: "एलर्जी कारक",
+    thankYouBookingTitle: "धन्यवाद! आपकी टेबल सफलतापूर्वक बुक हो गई!",
+    thankYouBookingSubtitle: "आपकी टेबल की पुष्टि हो चुकी है। हम आपको एक शाही भोजन अनुभव प्रदान करने के लिए तत्पर हैं।",
+    confirmedTableReservation: "पुष्टित टेबल बुकिंग",
+    assignedTableBadge: "आवंटित टेबल",
+    partyGuestsLabel: "अतिथियों की संख्या",
+    primaryGuestLabel: "मुख्य अतिथि का नाम",
+    contactNumberLabel: "संपर्क मोबाइल नंबर",
+    assignedFloorServerLabel: "समर्पित फ्लोर सेवक",
+    proceedToTablePrompt: "कृपया अपनी आवंटित टेबल पर पधारें। हमारे सहयोगी तुरंत आपका स्वागत करेंगे।",
+    doneNextGuestBtn: "पूर्ण / अगला अतिथि",
+    resettingInSeconds: "स्क्रीन स्वतः रीसेट होगी",
+    bookAnotherTable: "अन्य टेबल बुक करें",
   },
   te: {
     welcomeTo: "స్వాగతం",
@@ -1056,6 +1104,18 @@ export const translations: Record<Language, TranslationDictionary> = {
     unit: "యూనిట్",
     kcalPerServing: "కిలో కేలరీలు / ప్లేట్",
     allergens: "అలెర్జీ కారకాలు",
+    thankYouBookingTitle: "ధన్యవాదాలు! మీ టేబుల్ విజయవంతంగా బుక్ అయింది!",
+    thankYouBookingSubtitle: "మీ టేబుల్ రిజర్వేషన్ ధృవీకరించబడింది. మీకు రాయల్ భోజన అనుభవాన్ని అందించడానికి స్వాగతం.",
+    confirmedTableReservation: "ధృవీకరించబడిన బుకింగ్",
+    assignedTableBadge: "కేటాయించిన టేబుల్",
+    partyGuestsLabel: "అతిథుల సంఖ్య",
+    primaryGuestLabel: "ప్రధాన అతిథి పేరు",
+    contactNumberLabel: "మొబైల్ నంబర్",
+    assignedFloorServerLabel: "ఫ్లోర్ అటెండెంట్",
+    proceedToTablePrompt: "దయచేసి మీ కేటాయించిన టేబుల్ వద్దకు వెళ్లండి. మా అటెండెంట్ మిమ్మల్ని స్వాగతిస్తారు.",
+    doneNextGuestBtn: "పూర్తయింది / తదుపరి అతిథి",
+    resettingInSeconds: "స్క్రీన్ రీసెట్ అవుతుంది",
+    bookAnotherTable: "మరొక టేబుల్ బుక్ చేయండి",
   },
   es: {
     welcomeTo: "Bienvenido a",
@@ -1262,6 +1322,18 @@ export const translations: Record<Language, TranslationDictionary> = {
     unit: "Plato",
     kcalPerServing: "kcal por porción",
     allergens: "Alérgenos",
+    thankYouBookingTitle: "¡Gracias por su Reserva!",
+    thankYouBookingSubtitle: "Su mesa está confirmada. Nos complace brindarle una experiencia gastronómica de primer nivel.",
+    confirmedTableReservation: "Reserva Confirmada",
+    assignedTableBadge: "Mesa Asignada",
+    partyGuestsLabel: "Número de Invitados",
+    primaryGuestLabel: "Huésped Principal",
+    contactNumberLabel: "Teléfono de Contacto",
+    assignedFloorServerLabel: "Atendido por",
+    proceedToTablePrompt: "Por favor diríjase a su mesa asignada. Nuestro anfitrión le atenderá enseguida.",
+    doneNextGuestBtn: "Listo / Siguiente Huésped",
+    resettingInSeconds: "Restableciendo en",
+    bookAnotherTable: "Reservar Otra Mesa",
   },
   ar: {} as TranslationDictionary,
   fr: {} as TranslationDictionary,

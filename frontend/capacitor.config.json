@@ -1,0 +1,8 @@
+{
+  "appId": "com.royalember.tablebooking",
+  "appName": "Royal Ember Kiosk",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}

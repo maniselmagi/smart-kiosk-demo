@@ -300,7 +300,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                 onClick={() => setSearchQuery('')}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full"
               >
-                Clear
+                {t.clear || 'Clear'}
               </button>
             )}
           </div>
@@ -397,10 +397,10 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
           <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 p-8 shadow-xs">
             <AlertCircle className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
             <h4 className="font-display text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">
-              No dishes found
+              {t.noDishesFound || 'No dishes found'}
             </h4>
             <p className="text-xs text-slate-400 dark:text-slate-500 mb-4 max-w-sm mx-auto">
-              Try adjusting your search query, dietary filter, or choose another category.
+              {t.noDishesFoundDesc || 'Try adjusting your search query, dietary filter, or choose another category.'}
             </p>
             <button
               type="button"
@@ -413,7 +413,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
               }}
               className="px-5 py-2.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black transition-colors cursor-pointer shadow-md"
             >
-              Reset All Filters
+              {t.resetFilters || 'Reset All Filters'}
             </button>
           </div>
         ) : (
@@ -470,7 +470,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                       {item.isSpicy && (
                         <span className="flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-bold shadow-xs">
                           <Flame className="w-3 h-3" />
-                          <span>Spicy</span>
+                          <span>{t.spicyLabel || 'Spicy'}</span>
                         </span>
                       )}
                     </div>
@@ -600,7 +600,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                         )
                       ) : (
                         <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500">
-                          Unavailable
+                          {t.unavailable || 'Unavailable'}
                         </span>
                       )}
 
@@ -643,7 +643,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
               <span className="font-black text-white text-xs tracking-wide">Kio</span>
               <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-black/40 text-[9px] font-black uppercase tracking-wider text-amber-300 border border-amber-300/40">
                 <MessageSquare className="w-2.5 h-2.5" />
-                <span>AI Chat</span>
+                <span>{t.aiChatLabel || 'AI Chat'}</span>
               </span>
             </div>
           </button>

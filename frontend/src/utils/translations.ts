@@ -174,6 +174,13 @@ export interface TranslationDictionary {
   dinnerService: string;
   exploreCombos: string;
   saveDiscountLabel: string;
+  spicyLabel: string;
+  aiChatLabel: string;
+  clear: string;
+  unavailable: string;
+  resetFilters: string;
+  noDishesFound: string;
+  noDishesFoundDesc: string;
 }
 
 export const translations: Record<Language, TranslationDictionary> = {
@@ -327,6 +334,13 @@ export const translations: Record<Language, TranslationDictionary> = {
     dinnerService: "Royal Evening Dinner Service",
     exploreCombos: "Explore Combos",
     saveDiscountLabel: "Save",
+    spicyLabel: "Spicy",
+    aiChatLabel: "AI Chat",
+    clear: "Clear",
+    unavailable: "Unavailable",
+    resetFilters: "Reset All Filters",
+    noDishesFound: "No dishes found",
+    noDishesFoundDesc: "Try adjusting your search query, dietary filter, or choose another category.",
   },
   ta: {
     welcomeTo: "வணக்கம்",
@@ -478,6 +492,13 @@ export const translations: Record<Language, TranslationDictionary> = {
     dinnerService: "இரவு உணவு ராஜ சேவை",
     exploreCombos: "காம்போக்களைப் பார்க்க",
     saveDiscountLabel: "சேமிப்பு",
+    spicyLabel: "காரமானது",
+    aiChatLabel: "AI சாட்",
+    clear: "அழிக்க",
+    unavailable: "கிடைக்கவில்லை",
+    resetFilters: "வடிப்பான்களை மீட்டமைக்க",
+    noDishesFound: "உணவுகள் எதுவும் கிடைக்கவில்லை",
+    noDishesFoundDesc: "உங்கள் தேடல், உணவு வகை அல்லது வேறு பிரிவைத் தேர்ந்தெடுத்து முயற்சிக்கவும்.",
   },
   hi: {
     welcomeTo: "स्वागत है",
@@ -629,6 +650,13 @@ export const translations: Record<Language, TranslationDictionary> = {
     dinnerService: "शाही रात्रिभोज सेवा",
     exploreCombos: "कॉम्बो देखें",
     saveDiscountLabel: "बचत",
+    spicyLabel: "तीखा",
+    aiChatLabel: "AI चैट",
+    clear: "हटाएं",
+    unavailable: "अनुपलब्ध",
+    resetFilters: "फ़िल्टर रीसेट करें",
+    noDishesFound: "कोई व्यंजन नहीं मिला",
+    noDishesFoundDesc: "अपनी खोज, आहार फ़िल्टर समायोजित करें या कोई अन्य श्रेणी चुनें।",
   },
   te: {
     welcomeTo: "స్వాగతం",
@@ -780,6 +808,13 @@ export const translations: Record<Language, TranslationDictionary> = {
     dinnerService: "రాయల్ డిన్నర్ సేవ",
     exploreCombos: "కాంబోలను చూడండి",
     saveDiscountLabel: "ఆదా",
+    spicyLabel: "కారమైనది",
+    aiChatLabel: "AI చాట్",
+    clear: "తొలగించు",
+    unavailable: "అందుబాటులో లేదు",
+    resetFilters: "ఫిల్టర్‌లను రీసెట్ చేయండి",
+    noDishesFound: "ఏ వంటకాలు కనుగొనబడలేదు",
+    noDishesFoundDesc: "మీ శోధనను లేదా వర్గాన్ని సర్దుబాటు చేసి మళ్లీ ప్రయత్నించండి.",
   },
   es: {
     welcomeTo: "Bienvenido a",
@@ -931,6 +966,13 @@ export const translations: Record<Language, TranslationDictionary> = {
     dinnerService: "Cena Real Nocturna",
     exploreCombos: "Explorar Combos",
     saveDiscountLabel: "Ahorra",
+    spicyLabel: "Picante",
+    aiChatLabel: "Chat IA",
+    clear: "Borrar",
+    unavailable: "No disponible",
+    resetFilters: "Restablecer filtros",
+    noDishesFound: "No se encontraron platos",
+    noDishesFoundDesc: "Intente ajustar su búsqueda, filtro dietético o elija otra categoría.",
   },
   ar: {} as TranslationDictionary,
   fr: {} as TranslationDictionary,

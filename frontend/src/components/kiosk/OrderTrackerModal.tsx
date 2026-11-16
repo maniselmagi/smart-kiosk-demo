@@ -102,28 +102,29 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
   const [selectedCompSnack, setSelectedCompSnack] = useState<typeof COMPLIMENTARY_SNACKS[0] | null>(null);
   const [isCompClaimed, setIsCompClaimed] = useState<boolean>(false);
 
+  const calculatePrepSecondsLeft = (ord: Order | null | undefined): number => {
+    if (!ord) return 12 * 60;
+    if (ord.status === 'COMPLETED') return 0;
+    const prepMins = ord.estimatedPrepTime || 12;
+    const createdMs = ord.createdAt ? new Date(ord.createdAt).getTime() : Date.now();
+    const targetMs = createdMs + (prepMins * 60 * 1000);
+    const diffSecs = Math.floor((targetMs - Date.now()) / 1000);
+    return Math.max(0, isNaN(diffSecs) ? prepMins * 60 : diffSecs);
+  };
+
   // Active delivery countdown timer running in real-time
-  const [secondsLeft, setSecondsLeft] = useState<number>(() => {
-    if (!activeOrder) return 0;
-    const target = new Date(activeOrder.createdAt).getTime() + (activeOrder.estimatedPrepTime * 60 * 1000);
-    return Math.max(0, Math.floor((target - Date.now()) / 1000));
-  });
+  const [secondsLeft, setSecondsLeft] = useState<number>(() => calculatePrepSecondsLeft(activeOrder));
 
   useEffect(() => {
-    if (!activeOrder) return;
-    const calculateSeconds = () => {
-      if (activeOrder.status === 'COMPLETED') return 0;
-      const target = new Date(activeOrder.createdAt).getTime() + (activeOrder.estimatedPrepTime * 60 * 1000);
-      return Math.max(0, Math.floor((target - Date.now()) / 1000));
-    };
+    if (!isOpen || !activeOrder) return;
+    setSecondsLeft(calculatePrepSecondsLeft(activeOrder));
 
-    setSecondsLeft(calculateSeconds());
     const interval = setInterval(() => {
-      setSecondsLeft(calculateSeconds());
+      setSecondsLeft(calculatePrepSecondsLeft(activeOrder));
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [activeOrder?.createdAt, activeOrder?.estimatedPrepTime, activeOrder?.status, activeOrder?.id]);
+  }, [isOpen, activeOrder?.createdAt, activeOrder?.estimatedPrepTime, activeOrder?.status, activeOrder?.id]);
 
   // Kitchen supervisor extra delay clock (5 minutes default set by kitchen)
   const [delaySecondsLeft, setDelaySecondsLeft] = useState<number>(300);
@@ -139,7 +140,28 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
     }
   }, [secondsLeft, activeOrder?.status]);
 
-  if (!isOpen || !activeOrder) return null;
+  if (!isOpen) return null;
+
+  if (!activeOrder) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-300">
+        <div className="w-full max-w-md bg-slate-900/95 text-slate-100 rounded-3xl p-6 shadow-2xl border border-white/10 text-center space-y-4">
+          <div className="w-16 h-16 rounded-full bg-amber-500/20 text-amber-400 mx-auto flex items-center justify-center animate-pulse border border-amber-500/30">
+            <Clock className="w-8 h-8" />
+          </div>
+          <h3 className="text-xl font-black text-white font-display">Live Kitchen Tracker</h3>
+          <p className="text-xs text-slate-400">Order successfully placed! Synchronizing with the Kitchen Display System...</p>
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-all cursor-pointer"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const delayMins = Math.floor(delaySecondsLeft / 60);
   const delaySecs = delaySecondsLeft % 60;
@@ -308,7 +330,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
             <div className="flex items-center gap-2">
               {allOrders.map((ord) => {
                 const isSelected = ord.id === activeOrder.id;
-                const itemCount = ord.items.reduce((s, i) => s + i.quantity, 0);
+                const itemCount = (ord.items || []).reduce((s, i) => s + (i.quantity || 1), 0);
                 return (
                   <button
                     key={ord.id}
@@ -763,7 +785,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                         {item.quantity}× {item.name}
                       </span>
                       <p className="text-[11px] text-slate-400">
-                        {item.spiceLevel} spice {item.customizations.length > 0 && `• ${item.customizations.join(', ')}`}
+                        {item.spiceLevel} spice {item.customizations && item.customizations.length > 0 && `• ${item.customizations.join(', ')}`}
                       </p>
                       {item.price === 0 && (
                         <span className="text-[10px] font-extrabold text-emerald-400 bg-emerald-500/20 px-1.5 py-0.2 rounded mt-0.5 inline-block">
@@ -786,7 +808,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
               <div className="flex items-center justify-between text-xs font-black text-slate-300">
                 <span>Total For All Placed Orders (Table {activeOrder.tableNumber})</span>
                 <span className="text-amber-400 font-display text-sm">
-                  ₹{allOrders.reduce((sum, o) => sum + o.total, 0)}
+                  ₹{allOrders.reduce((sum, o) => sum + (o?.total || 0), 0)}
                 </span>
               </div>
               <p className="text-[11px] text-slate-400">

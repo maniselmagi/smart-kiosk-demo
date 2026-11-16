@@ -199,7 +199,14 @@ const MainAppContent: React.FC = () => {
         order={liveTrackedOrder}
         isOpen={isReceiptOpen}
         onClose={() => setIsReceiptOpen(false)}
-        onTrackOrder={() => setIsTrackerOpen(true)}
+        onTrackOrder={() => {
+          if (liveTrackedOrder) {
+            setActiveCompletedOrder(liveTrackedOrder);
+            setCurrentTrackedOrder(liveTrackedOrder);
+          }
+          setIsReceiptOpen(false);
+          setIsTrackerOpen(true);
+        }}
         onOpenFeedback={() => setIsFinishMealOpen(true)}
       />
 

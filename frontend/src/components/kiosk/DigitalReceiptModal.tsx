@@ -115,14 +115,14 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
 
             {/* Itemized Culinary Dishes */}
             <div className="space-y-2.5 text-xs">
-              {order.items.map((item) => (
+              {(order.items || []).map((item) => (
                 <div key={item.cartItemId} className="flex justify-between items-start">
                   <div>
                     <div className="font-bold text-slate-200">
                       {item.quantity}× {item.name}
                     </div>
                     <div className="text-[11px] text-slate-400">
-                      Spice: {item.spiceLevel} {item.customizations.length > 0 && `• ${item.customizations.join(', ')}`}
+                      Spice: {item.spiceLevel} {item.customizations && item.customizations.length > 0 && `• ${item.customizations.join(', ')}`}
                     </div>
                   </div>
                   <span className="font-mono font-bold text-amber-400">

@@ -154,6 +154,26 @@ export interface TranslationDictionary {
   largeGroup: string;
   celebrationFeast: string;
   royalBanquet: string;
+  categoriesTitle: string;
+  viewAllMenu: string;
+  chefCombos: string;
+  royalSignature: string;
+  searchPlaceholderFull: string;
+  topRatedFilter: string;
+  fastPrepFilter: string;
+  popularDishesTitle: string;
+  popularDishesSubtitle: string;
+  dishesCountLabel: string;
+  diningAndBanquet: string;
+  serverLabel: string;
+  royalSignatureBadge: string;
+  chefComboDealBadge: string;
+  gamesAndNews: string;
+  morningService: string;
+  lunchService: string;
+  dinnerService: string;
+  exploreCombos: string;
+  saveDiscountLabel: string;
 }
 
 export const translations: Record<Language, TranslationDictionary> = {
@@ -287,6 +307,26 @@ export const translations: Record<Language, TranslationDictionary> = {
     largeGroup: "5-6 Large",
     celebrationFeast: "7-8 Feast",
     royalBanquet: "10+ Royal",
+    categoriesTitle: "Categories",
+    viewAllMenu: "View All Menu",
+    chefCombos: "Chef Combos",
+    royalSignature: "Signature",
+    searchPlaceholderFull: "Search for delicious dishes, curries, tandoors, biryanis...",
+    topRatedFilter: "Over 4.5 ⭐",
+    fastPrepFilter: "Fast Prep (<15m)",
+    popularDishesTitle: "Popular Dishes",
+    popularDishesSubtitle: "Freshly prepared artisanal meals served straight to Table",
+    dishesCountLabel: "Dishes",
+    diningAndBanquet: "Dining & Banquet",
+    serverLabel: "Server",
+    royalSignatureBadge: "★ Royal Signature",
+    chefComboDealBadge: "🍱 Chef Combo Deal",
+    gamesAndNews: "Games & News",
+    morningService: "Sunrise Breakfast Service",
+    lunchService: "Grand Afternoon Lunch Service",
+    dinnerService: "Royal Evening Dinner Service",
+    exploreCombos: "Explore Combos",
+    saveDiscountLabel: "Save",
   },
   ta: {
     welcomeTo: "வணக்கம்",
@@ -418,6 +458,26 @@ export const translations: Record<Language, TranslationDictionary> = {
     largeGroup: "5-6 பெரிய குழு",
     celebrationFeast: "7-8 விருந்து",
     royalBanquet: "10+ ராயல் குழு",
+    categoriesTitle: "உணவு வகைகள்",
+    viewAllMenu: "முழு மெனு காண்க",
+    chefCombos: "காம்போ ஆஃபர்",
+    royalSignature: "சிறப்பு உணவுகள்",
+    searchPlaceholderFull: "சுவையான உணவுகள், பிரியாணி, தோசைகளைத் தேடுங்கள்...",
+    topRatedFilter: "சிறந்த மதிப்பீடு (4.5+) ⭐",
+    fastPrepFilter: "விரைவு உணவு (<15 நிமி)",
+    popularDishesTitle: "பிரபலமான உணவுகள்",
+    popularDishesSubtitle: "உங்கள் மேஜைக்கு சுடச்சுட பரிமாறப்படும் பிரத்யேக உணவுகள் - மேஜை",
+    dishesCountLabel: "உணவுகள்",
+    diningAndBanquet: "டைனிங் & பாங்க்வெட்",
+    serverLabel: "பணியாளர்",
+    royalSignatureBadge: "★ ராயல் சிக்னேச்சர்",
+    chefComboDealBadge: "🍱 செஃப் காம்போ ஆஃபர்",
+    gamesAndNews: "விளையாட்டு & செய்திகள்",
+    morningService: "காலை உணவு பிரத்யேக சேவை",
+    lunchService: "மதிய உணவு ராஜ விருந்து சேவை",
+    dinnerService: "இரவு உணவு ராஜ சேவை",
+    exploreCombos: "காம்போக்களைப் பார்க்க",
+    saveDiscountLabel: "சேமிப்பு",
   },
   hi: {
     welcomeTo: "स्वागत है",
@@ -549,6 +609,26 @@ export const translations: Record<Language, TranslationDictionary> = {
     largeGroup: "5-6 बड़ा समूह",
     celebrationFeast: "7-8 दावत",
     royalBanquet: "10+ शाही समूह",
+    categoriesTitle: "व्यंजन श्रेणियाँ",
+    viewAllMenu: "पूरा मेन्यू देखें",
+    chefCombos: "शेफ कॉम्बो",
+    royalSignature: "शाही विशेषताएं",
+    searchPlaceholderFull: "स्वादिष्ट व्यंजन, करी, तंदूर, बिरयानी खोजें...",
+    topRatedFilter: "टॉप रेटेड (4.5+) ⭐",
+    fastPrepFilter: "त्वरित तैयारी (<15 मिनट)",
+    popularDishesTitle: "लोकप्रिय व्यंजन",
+    popularDishesSubtitle: "सीधे आपकी टेबल पर ताज़ा परोसे जाने वाले स्वादिष्ट व्यंजन - टेबल",
+    dishesCountLabel: "व्यंजन",
+    diningAndBanquet: "डाइनिंग और बैंक्वेट",
+    serverLabel: "अटेंडेंट",
+    royalSignatureBadge: "★ शाही विशेषता",
+    chefComboDealBadge: "🍱 शेफ कॉम्बो डील",
+    gamesAndNews: "खेल और समाचार",
+    morningService: "सुबह का ताज़ा नाश्ता सेवा",
+    lunchService: "शाही दोपहर का भोजन सेवा",
+    dinnerService: "शाही रात्रिभोज सेवा",
+    exploreCombos: "कॉम्बो देखें",
+    saveDiscountLabel: "बचत",
   },
   te: {
     welcomeTo: "స్వాగతం",
@@ -680,6 +760,26 @@ export const translations: Record<Language, TranslationDictionary> = {
     largeGroup: "5-6 బృందం",
     celebrationFeast: "7-8 విందు",
     royalBanquet: "10+ రాయల్ గ్రూప్",
+    categoriesTitle: "వంటకాల వర్గాలు",
+    viewAllMenu: "మొత్తం మెనూ చూడండి",
+    chefCombos: "చెఫ్ కాంబోలు",
+    royalSignature: "రాయల్ సిగ్నేచర్",
+    searchPlaceholderFull: "రుచికరమైన వంటకాలు, బిర్యానీలు, దోశలను శోధించండి...",
+    topRatedFilter: "టాప్ రేటెడ్ (4.5+) ⭐",
+    fastPrepFilter: "త్వరిత తయారీ (<15 నిమి)",
+    popularDishesTitle: "ప్రసిద్ధ వంటకాలు",
+    popularDishesSubtitle: "మీ టేబుల్ వద్దకు వేడిగా అందించే రుచికరమైన వంటకాలు - టేబుల్",
+    dishesCountLabel: "వంటకాలు",
+    diningAndBanquet: "డైనింగ్ & బాంక్వెట్",
+    serverLabel: "సర్వర్",
+    royalSignatureBadge: "★ రాయల్ సిగ్నేచర్",
+    chefComboDealBadge: "🍱 చెఫ్ కాంబో డీల్",
+    gamesAndNews: "ఆటలు & వార్తలు",
+    morningService: "ఉదయపు అల్పాహార సేవ",
+    lunchService: "మధ్యాహ్న భోజన విందు సేవ",
+    dinnerService: "రాయల్ డిన్నర్ సేవ",
+    exploreCombos: "కాంబోలను చూడండి",
+    saveDiscountLabel: "ఆదా",
   },
   es: {
     welcomeTo: "Bienvenido a",
@@ -811,6 +911,26 @@ export const translations: Record<Language, TranslationDictionary> = {
     largeGroup: "5-6 Grupo Grande",
     celebrationFeast: "7-8 Banquete",
     royalBanquet: "10+ Real",
+    categoriesTitle: "Categorías",
+    viewAllMenu: "Ver Todo el Menú",
+    chefCombos: "Combos del Chef",
+    royalSignature: "Especialidades",
+    searchPlaceholderFull: "Buscar platos deliciosos, curris, biryanis...",
+    topRatedFilter: "Más de 4.5 ⭐",
+    fastPrepFilter: "Preparación Rápida (<15m)",
+    popularDishesTitle: "Platos Populares",
+    popularDishesSubtitle: "Comidas artesanales recién preparadas servidas en la Mesa",
+    dishesCountLabel: "Platos",
+    diningAndBanquet: "Comedor y Banquetes",
+    serverLabel: "Mesero",
+    royalSignatureBadge: "★ Especialidad Real",
+    chefComboDealBadge: "🍱 Oferta Combo Chef",
+    gamesAndNews: "Juegos y Noticias",
+    morningService: "Servicio de Desayuno Matutino",
+    lunchService: "Gran Almuerzo Festivo",
+    dinnerService: "Cena Real Nocturna",
+    exploreCombos: "Explorar Combos",
+    saveDiscountLabel: "Ahorra",
   },
   ar: {} as TranslationDictionary,
   fr: {} as TranslationDictionary,

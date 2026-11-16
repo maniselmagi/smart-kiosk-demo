@@ -9,10 +9,12 @@ import {
   ConciergeBell,
   Sparkles,
   Bot,
-  MessageSquare
+  MessageSquare,
+  Globe
 } from 'lucide-react';
 import royalEmberLogo from '../../assets/royal_ember_logo.jpg';
 import { getAssignedWaiter } from '../../utils/waiterAssignment';
+import { AVAILABLE_LANGUAGES } from '../../utils/translations';
 
 interface HeaderProps {
   onBackToWelcome?: () => void;
@@ -36,8 +38,12 @@ export const Header: React.FC<HeaderProps> = ({
     toggleTheme, 
     cartTotalQuantity, 
     cartGrandTotal, 
-    t 
+    t,
+    language,
+    setIsLanguageModalOpen
   } = useKiosk();
+
+  const currentLanguageOption = AVAILABLE_LANGUAGES.find(l => l.code === language) || AVAILABLE_LANGUAGES[0];
 
   const [currentTime, setCurrentTime] = useState<string>('');
 
@@ -96,21 +102,21 @@ export const Header: React.FC<HeaderProps> = ({
                 Royal Ember
               </h1>
               <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.24em] text-amber-400/80 font-bold mt-0.5 whitespace-nowrap">
-                Dining &amp; Banquet
+                {t.diningAndBanquet || 'Dining & Banquet'}
               </p>
             </div>
           </div>
 
           {/* TABLE NUMBER CAPSULE (Ultra-refined luxury glass badge) */}
           <div className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 border border-amber-500/30 text-amber-300 shadow-sm select-none">
-            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-amber-400/80">Table</span>
+            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-amber-400/80">{t.table}</span>
             <span className="text-xs sm:text-sm font-black text-amber-300 leading-none">{tableNumber}</span>
             <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)] animate-pulse" />
           </div>
 
         </div>
 
-        {/* RIGHT: Live Clock, Assigned Server, Cart & Theme Toggle */}
+        {/* RIGHT: Live Clock, Assigned Server, Language Switcher, Cart & Theme Toggle */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           
           {/* Live Dynamic Clock */}
@@ -122,9 +128,22 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Assigned Server Badge (Luxury Concierge Bell with Gold Name) */}
           <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/80 border border-white/10 text-slate-200 shadow-xs hover:border-amber-500/30 transition-colors">
             <ConciergeBell className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 hidden md:inline">Server:</span>
+            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 hidden md:inline">{t.serverLabel || 'Server'}:</span>
             <span className="text-xs font-black text-amber-300">{assignedWaiter.fullName}</span>
           </div>
+
+          {/* Customer Language Switcher Button (Directly on Food Order Page) */}
+          <button
+            type="button"
+            onClick={() => setIsLanguageModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-amber-500/40 hover:border-amber-400 text-slate-100 shadow-sm transition-all cursor-pointer active:scale-95 shrink-0"
+            title={t.changeLanguage || "Change Language / மொழியை மாற்றுக"}
+            aria-label="Change Language"
+          >
+            <Globe className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <span className="text-sm leading-none">{currentLanguageOption.flag}</span>
+            <span className="text-xs font-black text-amber-300 hidden sm:inline">{currentLanguageOption.nativeLabel}</span>
+          </button>
 
           {/* Cart Trigger Button (Vibrant Culinary Amber Pill with Always-Visible Label) */}
           {onOpenCart && (

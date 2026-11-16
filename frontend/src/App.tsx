@@ -263,7 +263,7 @@ const MainAppContent: React.FC = () => {
       />
 
       <LanguageSelectionModal
-        isOpen={isLanguageModalOpen && view === 'kiosk' && kioskSubScreen === 'menu'}
+        isOpen={isLanguageModalOpen}
         onClose={() => setIsLanguageModalOpen(false)}
         onConfirm={() => setIsLanguageModalOpen(false)}
       />

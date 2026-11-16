@@ -82,17 +82,17 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
   const [ratingFilter, setRatingFilter] = useState<boolean>(false);
   const [fastPrepFilter, setFastPrepFilter] = useState<boolean>(false);
 
-  // Clean, professional categories inspired by the reference mockup
-  const categoriesList: { key: Category; label: string; icon: string }[] = [
-    { key: 'All', label: 'All Items', icon: '🍽️' },
-    { key: 'Starters', label: 'Starters', icon: '🍗' },
-    { key: 'Main Course', label: 'Main Course', icon: '🍛' },
-    { key: 'Breads & Rice', label: 'Breads & Rice', icon: '🍚' },
-    { key: 'Beverages', label: 'Beverages', icon: '🍹' },
-    { key: 'Desserts', label: 'Desserts', icon: '🍰' },
-    { key: 'Combo', label: 'Chef Combos', icon: '🍱' },
-    { key: 'Signature', label: 'Signature', icon: '👑' },
-  ];
+  // Clean, professional categories localized by selected language
+  const categoriesList = useMemo<{ key: Category; label: string; icon: string }[]>(() => [
+    { key: 'All', label: t.allCategories || 'All Items', icon: '🍽️' },
+    { key: 'Starters', label: t.starters || 'Starters', icon: '🍗' },
+    { key: 'Main Course', label: t.mainCourse || 'Main Course', icon: '🍛' },
+    { key: 'Breads & Rice', label: t.breadsRice || 'Breads & Rice', icon: '🍚' },
+    { key: 'Beverages', label: t.beverages || 'Beverages', icon: '🍹' },
+    { key: 'Desserts', label: t.desserts || 'Desserts', icon: '🍰' },
+    { key: 'Combo', label: t.chefCombos || 'Chef Combos', icon: '🍱' },
+    { key: 'Signature', label: t.royalSignature || 'Signature', icon: '👑' },
+  ], [t]);
 
   const toggleFavorite = (itemId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -195,7 +195,11 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
           <div className="flex items-center gap-2.5">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
             <span className="font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
-              {mealTime === 'morning' ? 'Sunrise Breakfast Service' : mealTime === 'lunch' ? 'Grand Afternoon Lunch Service' : 'Royal Evening Dinner Service'}
+              {mealTime === 'morning' 
+                ? (t.morningService || 'Sunrise Breakfast Service') 
+                : mealTime === 'lunch' 
+                ? (t.lunchService || 'Grand Afternoon Lunch Service') 
+                : (t.dinnerService || 'Royal Evening Dinner Service')}
             </span>
             <span className="hidden sm:inline text-slate-400 dark:text-slate-600">•</span>
             <span className="hidden sm:inline font-medium text-slate-600 dark:text-slate-400">
@@ -218,7 +222,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             <div className="flex items-center gap-2">
               <span className="text-amber-500 text-base">🌿</span>
               <h3 className="font-sans font-bold text-lg sm:text-xl text-slate-900 dark:text-white tracking-tight">
-                Categories
+                {t.categoriesTitle || 'Categories'}
               </h3>
             </div>
             <button
@@ -226,7 +230,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
               onClick={() => setSelectedCategory('All')}
               className="text-xs font-bold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1"
             >
-              <span>View All Menu</span>
+              <span>{t.viewAllMenu || 'View All Menu'}</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -285,7 +289,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
             <input
               type="text"
-              placeholder="Search for delicious dishes, curries, tandoors, biryanis..."
+              placeholder={t.searchPlaceholderFull || "Search for delicious dishes, curries, tandoors, biryanis..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-11 pr-20 py-2.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-sm font-medium text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/25 focus:border-amber-500 shadow-xs transition-all"
@@ -312,7 +316,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                   : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:border-slate-300'
               }`}
             >
-              All Items
+              {t.allCategories || 'All Items'}
             </button>
 
             <button
@@ -351,7 +355,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
               }`}
             >
               <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
-              <span>Over 4.5 ⭐</span>
+              <span>{t.topRatedFilter || 'Over 4.5 ⭐'}</span>
             </button>
 
             <button
@@ -364,7 +368,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
               }`}
             >
               <Zap className="w-3.5 h-3.5 text-cyan-500" />
-              <span>Fast Prep (&lt;15m)</span>
+              <span>{t.fastPrepFilter || 'Fast Prep (<15m)'}</span>
             </button>
           </div>
         </section>
@@ -374,17 +378,17 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <h2 className="font-sans font-extrabold text-2xl sm:text-3xl text-slate-900 dark:text-white tracking-tight">
-                Popular Dishes
+                {t.popularDishesTitle || 'Popular Dishes'}
               </h2>
               <span className="text-amber-500 font-bold text-lg">~</span>
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-              Freshly prepared artisanal meals served straight to Table {tableNumber}
+              {t.popularDishesSubtitle ? `${t.popularDishesSubtitle} ${tableNumber}` : `Freshly prepared artisanal meals served straight to Table ${tableNumber}`}
             </p>
           </div>
 
           <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700 shadow-xs">
-            {filteredItems.length} Dishes
+            {filteredItems.length} {t.dishesCountLabel || 'Dishes'}
           </span>
         </div>
 
@@ -497,14 +501,14 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                     {item.isSignature && (
                       <div className="absolute bottom-2 left-2 px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-slate-950 text-[10px] font-black uppercase tracking-wider shadow-md shadow-amber-500/40 flex items-center gap-1.5 border border-amber-300">
                         <Crown className="w-3.5 h-3.5 text-slate-950 fill-slate-950" />
-                        <span>★ Royal Signature</span>
+                        <span>{t.royalSignatureBadge || '★ Royal Signature'}</span>
                       </div>
                     )}
 
                     {item.isCombo && (
                       <div className="absolute bottom-2 left-2 px-3 py-1 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[10px] font-black uppercase tracking-wider shadow-md shadow-emerald-500/40 flex items-center gap-1.5 border border-emerald-300/60">
                         <Tag className="w-3.5 h-3.5 text-white" />
-                        <span>🍱 Chef Combo Deal</span>
+                        <span>{t.chefComboDealBadge || '🍱 Chef Combo Deal'}</span>
                       </div>
                     )}
 
@@ -658,7 +662,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             title={activeTableOrder ? `Track Order #${activeTableOrder.orderNumber}` : 'Track Kitchen Order'}
           >
             <Activity className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="font-extrabold">Track Order</span>
+            <span className="font-extrabold">{t.orderProgress || 'Track Order'}</span>
             {activeTableOrder && (
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
             )}
@@ -674,7 +678,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             title="Play Games & Read E-Papers"
           >
             <Gamepad2 className="w-3.5 h-3.5 text-amber-400" />
-            <span className="font-extrabold">Games &amp; News</span>
+            <span className="font-extrabold">{t.gamesAndNews || 'Games & News'}</span>
           </button>
         )}
 
@@ -690,7 +694,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
           title={`Call waiter (${assignedWaiter.fullName}) to Table ${tableNumber}`}
         >
           <Bell className="w-3.5 h-3.5 text-rose-400" />
-          <span className="font-extrabold">Call Waiter</span>
+          <span className="font-extrabold">{t.callWaiter}</span>
         </button>
 
       </aside>

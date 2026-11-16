@@ -407,39 +407,20 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                   />
                 </svg>
 
-                {/* Radar Center Content */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                {/* Radar Center Content - Shows ONLY timer */}
+                <div className="absolute inset-0 flex items-center justify-center text-center">
                   {activeOrder.status === 'COMPLETED' ? (
-                    <>
-                      <Sparkles className="w-7 h-7 text-emerald-400 animate-bounce" />
-                      <span className="text-[11px] font-black text-emerald-300 uppercase tracking-wider mt-0.5">Ready!</span>
-                    </>
+                    <Sparkles className="w-8 h-8 text-emerald-400 animate-bounce" />
                   ) : activeOrder.status === 'READY' ? (
-                    <>
-                      <UtensilsCrossed className="w-7 h-7 text-emerald-400 animate-pulse" />
-                      <span className="text-[11px] font-black text-emerald-300 uppercase tracking-wider mt-0.5">{t.statusServed || 'Dispatched!'}</span>
-                    </>
+                    <UtensilsCrossed className="w-8 h-8 text-emerald-400 animate-pulse" />
                   ) : isDelayed ? (
-                    <>
-                      <span className="text-2xl font-black text-amber-400 font-mono tracking-tight leading-none animate-pulse">
-                        {formattedDelayClock}
-                      </span>
-                      <span className="text-[10px] text-amber-300 font-bold uppercase tracking-wider mt-1">
-                        {t.finishingTouches || 'Chef Finishing'}
-                      </span>
-                      <span className="text-[9px] text-slate-400 font-medium">
-                        +5m {t.cookingForTable || 'by Kitchen'}
-                      </span>
-                    </>
+                    <span className="text-3xl font-black text-amber-400 font-mono tracking-tight leading-none animate-pulse drop-shadow-sm">
+                      {formattedDelayClock}
+                    </span>
                   ) : (
-                    <>
-                      <span className="text-2xl font-black text-white font-mono tracking-tight leading-none">
-                        {formattedCountdown}
-                      </span>
-                      <span className="text-[10px] text-amber-400/90 font-black uppercase tracking-wider mt-1">
-                        {t.estimatedWait || 'Est. Time'}
-                      </span>
-                    </>
+                    <span className="text-3xl font-black text-white font-mono tracking-tight leading-none drop-shadow-sm">
+                      {formattedCountdown}
+                    </span>
                   )}
                 </div>
               </div>

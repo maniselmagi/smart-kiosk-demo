@@ -12,7 +12,9 @@ import {
   Moon,
   ChevronUp,
   ChevronDown,
-  Layers
+  Layers,
+  Download,
+  Smartphone
 } from 'lucide-react';
 
 export const DemoNavigation: React.FC = () => {
@@ -128,6 +130,17 @@ export const DemoNavigation: React.FC = () => {
             <BarChart3 className="w-3.5 h-3.5" />
             <span>Management</span>
           </button>
+
+          {/* Direct APK Download Button */}
+          <a
+            href="./RoyalEmber-TableBooking-Kiosk.apk"
+            download="RoyalEmber-TableBooking-Kiosk.apk"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black transition-all cursor-pointer shadow-md shadow-amber-500/20 active:scale-95"
+            title="Download Android APK directly to device"
+          >
+            <Download className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>Download APK</span>
+          </a>
 
         </div>
 

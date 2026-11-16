@@ -51,7 +51,8 @@ const MainAppContent: React.FC = () => {
     if (typeof window !== 'undefined') {
       const search = window.location.search.toLowerCase();
       const hash = window.location.hash.toLowerCase();
-      if (search.includes('mode=booking') || hash.includes('booking')) return true;
+      const pathname = window.location.pathname.toLowerCase();
+      if (search.includes('booking') || hash.includes('booking') || pathname.includes('booking')) return true;
     }
     return false;
   }, []);
@@ -119,7 +120,35 @@ const MainAppContent: React.FC = () => {
   // DEDICATED TABLE BOOKING KIOSK APP FLOW (Only 4 Screens: Welcome -> Language -> Table Booking -> Thank You)
   if (isBookingKioskApp) {
     return (
-      <div className="min-h-screen flex flex-col bg-[#080B11] text-white">
+      <div className="min-h-screen flex flex-col bg-[#080B11] text-white relative">
+        {/* Helper bar when previewing in browser */}
+        {!Capacitor.isNativePlatform() && (
+          <div className="bg-slate-950/95 border-b border-amber-500/20 px-4 py-2 flex items-center justify-between text-xs z-50">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="font-bold text-amber-300">Royal Ember Table Booking Kiosk (4-Screen Flow Mode)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <a
+                href="./RoyalEmber-TableBooking-Kiosk.apk"
+                download="RoyalEmber-TableBooking-Kiosk.apk"
+                className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black shadow transition-all cursor-pointer"
+              >
+                <span>Download APK (6.0 MB)</span>
+              </a>
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.href = window.location.pathname;
+                }}
+                className="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white transition-all cursor-pointer"
+              >
+                Exit to Web Hub
+              </button>
+            </div>
+          </div>
+        )}
+
         {kioskSubScreen === 'welcome' && (
           <WelcomeScreen
             onStart={() => setKioskSubScreen('language')}

@@ -113,7 +113,7 @@ const parseRouteFromLocation = (): { view: ViewType; isStandalone: boolean; tabl
   let view: ViewType = 'hub';
   let isStandalone = false;
 
-  if (path.includes('/kiosk') || hash.includes('kiosk') || roleParam === 'kiosk' || roleParam === 'customer') {
+  if (path.includes('booking') || hash.includes('booking') || roleParam === 'booking' || path.includes('/kiosk') || hash.includes('kiosk') || roleParam === 'kiosk' || roleParam === 'customer') {
     view = 'kiosk';
     isStandalone = !demoParam;
   } else if (path.includes('/kitchen') || path.includes('/kds') || hash.includes('kitchen') || hash.includes('kds') || roleParam === 'kitchen' || roleParam === 'kds') {

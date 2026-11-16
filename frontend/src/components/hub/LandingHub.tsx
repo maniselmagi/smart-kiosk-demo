@@ -15,7 +15,8 @@ import {
   ShieldCheck,
   Smartphone,
   Sun,
-  Moon
+  Moon,
+  Download
 } from 'lucide-react';
 
 interface LandingHubProps {
@@ -91,6 +92,51 @@ export const LandingHub: React.FC<LandingHubProps> = ({
           <p className="text-base sm:text-lg md:text-xl text-slate-300 font-normal leading-relaxed max-w-2xl mx-auto">
             A connected ordering, kitchen, and analytics experience for modern dine-in restaurants.
           </p>
+        </div>
+
+        {/* PROMINENT DIRECT ANDROID APK DOWNLOAD BANNER */}
+        <div className="w-full max-w-4xl bg-gradient-to-r from-amber-500/20 via-slate-800/90 to-emerald-500/20 border-2 border-amber-500/50 rounded-3xl p-6 sm:p-7 mb-8 shadow-2xl shadow-amber-500/10 flex flex-col md:flex-row items-center justify-between gap-6 backdrop-blur-xl">
+          <div className="flex items-center gap-4 sm:gap-5 text-left">
+            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-950 shadow-xl shadow-amber-500/30 shrink-0">
+              <Smartphone className="w-8 h-8 sm:w-9 sm:h-9 stroke-[2.2]" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] font-black uppercase tracking-wider">
+                  Android APK v1.0 Ready
+                </span>
+                <span className="text-xs text-amber-300/80 font-bold">• 6.0 MB Direct Download</span>
+              </div>
+              <h2 className="text-lg sm:text-xl md:text-2xl font-black text-white">
+                Table Booking Kiosk App (.apk)
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-xl mt-0.5">
+                Dedicated 4-screen kiosk: <strong>Welcome ➜ Language Selection ➜ Table Booking ➜ Thank You</strong>. Download and install directly onto your Android device or tablet.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full md:w-auto shrink-0">
+            <a
+              href="./RoyalEmber-TableBooking-Kiosk.apk"
+              download="RoyalEmber-TableBooking-Kiosk.apk"
+              className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-black text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-xl shadow-amber-500/30 transition-all active:scale-95 cursor-pointer"
+            >
+              <Download className="w-5 h-5 stroke-[2.5]" />
+              <span>Download APK</span>
+            </a>
+
+            <button
+              onClick={() => {
+                window.location.search = '?mode=booking';
+              }}
+              className="w-full sm:w-auto px-4 py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-white border border-amber-500/30 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+              title="Preview the 4-screen booking kiosk in web browser"
+            >
+              <span>Web Preview</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Dedicated URL Role Routing Notice */}

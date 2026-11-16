@@ -1,4 +1,5 @@
-import type { MenuItem, ComboRecommendation } from '../types';
+import type { MenuItem, ComboRecommendation, Category } from '../types';
+import { INITIAL_MENU_ITEMS } from '../data/initialData';
 
 export type Language = 'en' | 'ta' | 'hi' | 'te' | 'es' | 'ar' | 'fr' | 'de' | 'ko' | 'kn' | 'ml';
 
@@ -181,6 +182,54 @@ export interface TranslationDictionary {
   resetFilters: string;
   noDishesFound: string;
   noDishesFoundDesc: string;
+  yourDiningTray: string;
+  servingSequence: string;
+  servingSequenceSub: string;
+  servingSequenceDesc: string;
+  tapArrowsToReorder: string;
+  arrange: string;
+  done: string;
+  addDishes: string;
+  reviewOrderAndPay: string;
+  selectedDishes: string;
+  cookingForTable: string;
+  scanUpiPrompt: string;
+  upiScanHelp: string;
+  instantAutoVerification: string;
+  authorizingPayment: string;
+  paymentConfirmed: string;
+  kdsRoutedMsg: string;
+  paid: string;
+  totalSettled: string;
+  receiveDigitalCopy: string;
+  enterMobileOrEmail: string;
+  onFloor: string;
+  liveKitchenProgress: string;
+  ticket: string;
+  tickets: string;
+  activeTickets: string;
+  kitchenSyncActive: string;
+  dishesServedMsg: string;
+  cookingFresh: string;
+  finishingTouches: string;
+  kitchenCompletion: string;
+  boredWaiting: string;
+  playGamesLounge: string;
+  assignedAttendant: string;
+  dedicatedToTable: string;
+  orderTimeline: string;
+  activeStep: string;
+  completed: string;
+  dishesInOrder: string;
+  closeTracker: string;
+  standardPrice: string;
+  addOns: string;
+  standard: string;
+  free: string;
+  unitPrice: string;
+  unit: string;
+  kcalPerServing: string;
+  allergens: string;
 }
 
 export const translations: Record<Language, TranslationDictionary> = {
@@ -341,6 +390,54 @@ export const translations: Record<Language, TranslationDictionary> = {
     resetFilters: "Reset All Filters",
     noDishesFound: "No dishes found",
     noDishesFoundDesc: "Try adjusting your search query, dietary filter, or choose another category.",
+    yourDiningTray: "Your Dining Tray",
+    servingSequence: "Serving Sequence",
+    servingSequenceSub: "1st, 2nd, 3rd...",
+    servingSequenceDesc: "Decide which course arrives first to your table.",
+    tapArrowsToReorder: "Tap arrows to re-order course priority!",
+    arrange: "Arrange",
+    done: "Done",
+    addDishes: "+ Add Dishes",
+    reviewOrderAndPay: "Review Order & Pay",
+    selectedDishes: "Selected Artisanal Dishes",
+    cookingForTable: "Cooking for Table",
+    scanUpiPrompt: "Scan with PhonePe, GPay, Paytm or CRED",
+    upiScanHelp: "Amount & Table is pre-encoded. Point your camera or UPI scanner to complete settlement.",
+    instantAutoVerification: "Instant Auto-Verification",
+    authorizingPayment: "Authorizing Payment...",
+    paymentConfirmed: "Payment Confirmed",
+    kdsRoutedMsg: "Order routed to Kitchen Display System (KDS). Fresh preparation begins shortly!",
+    paid: "Paid",
+    totalSettled: "Total Settled",
+    receiveDigitalCopy: "Receive Digital Copy (SMS / WhatsApp / Email)",
+    enterMobileOrEmail: "Enter mobile number or email...",
+    onFloor: "On Floor",
+    liveKitchenProgress: "Live Kitchen Progress →",
+    ticket: "Ticket",
+    tickets: "Tickets",
+    activeTickets: "Active Tickets",
+    kitchenSyncActive: "Real-Time Kitchen Sync Active",
+    dishesServedMsg: "Dishes Served at Your Table!",
+    cookingFresh: "Artisanal Dishes Being Cooked Fresh",
+    finishingTouches: "Finishing Touches on the Fire Line",
+    kitchenCompletion: "Kitchen Completion",
+    boredWaiting: "Bored waiting? Play Ludo, Sudoku or Read Live News!",
+    playGamesLounge: "Play Games Lounge",
+    assignedAttendant: "Assigned Floor Attendant",
+    dedicatedToTable: "Dedicated to Table",
+    orderTimeline: "Order Preparation Timeline",
+    activeStep: "Active Step",
+    completed: "Completed ✓",
+    dishesInOrder: "Dishes in Order",
+    closeTracker: "Close Tracker",
+    standardPrice: "Standard Price",
+    addOns: "add-ons",
+    standard: "Standard",
+    free: "Free",
+    unitPrice: "Unit Price",
+    unit: "Unit",
+    kcalPerServing: "kcal per serving",
+    allergens: "Allergens",
   },
   ta: {
     welcomeTo: "வணக்கம்",
@@ -499,6 +596,54 @@ export const translations: Record<Language, TranslationDictionary> = {
     resetFilters: "வடிப்பான்களை மீட்டமைக்க",
     noDishesFound: "உணவுகள் எதுவும் கிடைக்கவில்லை",
     noDishesFoundDesc: "உங்கள் தேடல், உணவு வகை அல்லது வேறு பிரிவைத் தேர்ந்தெடுத்து முயற்சிக்கவும்.",
+    yourDiningTray: "உங்கள் உணவுப் பட்டியல்",
+    servingSequence: "பரிமாறும் வரிசை",
+    servingSequenceSub: "1வது, 2வது, 3வது...",
+    servingSequenceDesc: "உங்கள் மேஜைக்கு எந்த உணவு முதலில் வர வேண்டும் என்பதை வரிசைப்படுத்தவும்.",
+    tapArrowsToReorder: "வரிசையை மாற்ற அம்புக்குறிகளைத் தட்டவும்!",
+    arrange: "வரிசைப்படுத்து",
+    done: "முடிந்தது",
+    addDishes: "+ மேலும் சேர்க்க",
+    reviewOrderAndPay: "ஆர்டரை சரிபார்த்து செலுத்த",
+    selectedDishes: "தேர்ந்தெடுக்கப்பட்ட உணவுகள்",
+    cookingForTable: "சமைக்கப்படும் மேஜை",
+    scanUpiPrompt: "PhonePe, GPay, Paytm அல்லது CRED மூலம் ஸ்கேன் செய்க",
+    upiScanHelp: "தொகை மற்றும் மேஜை எண் இணைக்கப்பட்டுள்ளது. கேமரா அல்லது யுபிஐ மூலம் ஸ்கேன் செய்து செலுத்தவும்.",
+    instantAutoVerification: "உடனடி தானியங்கி சரிபார்ப்பு",
+    authorizingPayment: "பணம் சரிபார்க்கப்படுகிறது...",
+    paymentConfirmed: "பணம் உறுதிசெய்யப்பட்டது",
+    kdsRoutedMsg: "ஆர்டர் சமையலறைக்கு (KDS) அனுப்பப்பட்டது. தயாரிப்பு விரைவில் தொடங்குகிறது!",
+    paid: "செலுத்தப்பட்டது",
+    totalSettled: "செலுத்தப்பட்ட மொத்த தொகை",
+    receiveDigitalCopy: "டிஜிட்டல் ரசீது பெற (SMS / WhatsApp / மின்னஞ்சல்)",
+    enterMobileOrEmail: "கைபேசி எண் அல்லது மின்னஞ்சலை உள்ளிடவும்...",
+    onFloor: "சேவையில்",
+    liveKitchenProgress: "சமையலறை நேரலை முன்னேற்றம் →",
+    ticket: "டிக்கெட்",
+    tickets: "டிக்கெட்டுகள்",
+    activeTickets: "செயலில் உள்ள டிக்கெட்டுகள்",
+    kitchenSyncActive: "சமையலறை நேரலை இணைப்பு செயலில் உள்ளது",
+    dishesServedMsg: "உணவுகள் உங்கள் மேஜைக்கு பரிமாறப்பட்டது!",
+    cookingFresh: "உணவுகள் சுடச்சுட சமைக்கப்படுகின்றன",
+    finishingTouches: "சமையலறையில் இறுதி அலங்கரிப்பு நடக்கிறது",
+    kitchenCompletion: "சமையலறை தயாரிப்பு நிறைவு",
+    boredWaiting: "காத்திருக்கும் நேரத்தில் லுடோ, சுடோகு விளையாடலாம் அல்லது செய்திகளை வாசிக்கலாம்!",
+    playGamesLounge: "விளையாட்டு லவுஞ்ச்",
+    assignedAttendant: "நியமிக்கப்பட்ட உணவுப் பணியாளர்",
+    dedicatedToTable: "மேஜை சேவைக்கு - மேஜை",
+    orderTimeline: "தயாரிப்பு நேரலை காலவரிசை",
+    activeStep: "நடப்பு நிலை",
+    completed: "முடிந்தது ✓",
+    dishesInOrder: "இந்த ஆர்டரில் உள்ள உணவுகள்",
+    closeTracker: "டிராக்கரை மூடுக",
+    standardPrice: "வழக்கமான விலை",
+    addOns: "கூடுதல் விருப்பங்கள்",
+    standard: "வழக்கமானது",
+    free: "இலவசம்",
+    unitPrice: "ஒரு உணவின் விலை",
+    unit: "உணவு",
+    kcalPerServing: "கலோரி / ஒருவருக்கு",
+    allergens: "ஒவ்வாமை பொருட்கள்",
   },
   hi: {
     welcomeTo: "स्वागत है",
@@ -657,6 +802,54 @@ export const translations: Record<Language, TranslationDictionary> = {
     resetFilters: "फ़िल्टर रीसेट करें",
     noDishesFound: "कोई व्यंजन नहीं मिला",
     noDishesFoundDesc: "अपनी खोज, आहार फ़िल्टर समायोजित करें या कोई अन्य श्रेणी चुनें।",
+    yourDiningTray: "आपकी भोजन ट्रे",
+    servingSequence: "परोसने का क्रम",
+    servingSequenceSub: "पहला, दूसरा, तीसरा...",
+    servingSequenceDesc: "तय करें कि आपकी टेबल पर कौन सा व्यंजन पहले आए।",
+    tapArrowsToReorder: "क्रम बदलने के लिए तीरों पर टैप करें!",
+    arrange: "व्यवस्थित करें",
+    done: "पूर्ण",
+    addDishes: "+ व्यंजन जोड़ें",
+    reviewOrderAndPay: "ऑर्डर समीक्षा और भुगतान",
+    selectedDishes: "चयनित स्वादिष्ट व्यंजन",
+    cookingForTable: "टेबल के लिए तैयार हो रहा है",
+    scanUpiPrompt: "PhonePe, GPay, Paytm या CRED से स्कैन करें",
+    upiScanHelp: "राशि और टेबल नंबर पहले से दर्ज है। भुगतान पूरा करने के लिए स्कैन करें।",
+    instantAutoVerification: "त्वरित स्वचालित सत्यापन",
+    authorizingPayment: "भुगतान प्रमाणित हो रहा है...",
+    paymentConfirmed: "भुगतान की पुष्टि हुई",
+    kdsRoutedMsg: "ऑर्डर किचन डिस्प्ले सिस्टम (KDS) को भेजा गया। तैयारी जल्द शुरू होगी!",
+    paid: "भुगतान किया गया",
+    totalSettled: "कुल भुगतान",
+    receiveDigitalCopy: "डिजिटल रसीद प्राप्त करें (SMS / WhatsApp / ईमेल)",
+    enterMobileOrEmail: "मोबाइल नंबर या ईमेल दर्ज करें...",
+    onFloor: "ड्यूटी पर",
+    liveKitchenProgress: "किचन लाइव प्रगति →",
+    ticket: "टिकट",
+    tickets: "टिकटें",
+    activeTickets: "सक्रिय टिकट",
+    kitchenSyncActive: "रीयल-टाइम किचन सिंक सक्रिय",
+    dishesServedMsg: "व्यंजन आपकी टेबल पर परोसे गए!",
+    cookingFresh: "व्यंजन ताज़ा बनाए जा रहे हैं",
+    finishingTouches: "किचन में अंतिम फिनिशिंग जारी है",
+    kitchenCompletion: "किचन तैयारी प्रगति",
+    boredWaiting: "इंतजार में बोर हो रहे हैं? लूडो, सुडोकू खेलें या लाइव समाचार पढ़ें!",
+    playGamesLounge: "गेम्स लाउंज",
+    assignedAttendant: "नियुक्त फ्लोर अटेंडेंट",
+    dedicatedToTable: "समर्पित टेबल - टेबल",
+    orderTimeline: "ऑर्डर तैयारी समयरेखा",
+    activeStep: "सक्रिय चरण",
+    completed: "पूर्ण ✓",
+    dishesInOrder: "ऑर्डर में व्यंजन",
+    closeTracker: "ट्रैकर बंद करें",
+    standardPrice: "मानक मूल्य",
+    addOns: "ऐड-ऑन",
+    standard: "मानक",
+    free: "निःशुल्क",
+    unitPrice: "प्रति इकाई मूल्य",
+    unit: "इकाई",
+    kcalPerServing: "किलो कैलोरी / सर्विंग",
+    allergens: "एलर्जी कारक",
   },
   te: {
     welcomeTo: "స్వాగతం",
@@ -815,6 +1008,54 @@ export const translations: Record<Language, TranslationDictionary> = {
     resetFilters: "ఫిల్టర్‌లను రీసెట్ చేయండి",
     noDishesFound: "ఏ వంటకాలు కనుగొనబడలేదు",
     noDishesFoundDesc: "మీ శోధనను లేదా వర్గాన్ని సర్దుబాటు చేసి మళ్లీ ప్రయత్నించండి.",
+    yourDiningTray: "మీ భోజన ట్రే",
+    servingSequence: "వడ్డించే క్రమం",
+    servingSequenceSub: "1వ, 2వ, 3వ...",
+    servingSequenceDesc: "మీ టేబుల్‌కి ఏ వంటకం మొదట రావాలో నిర్ణయించండి.",
+    tapArrowsToReorder: "క్రమాన్ని మార్చడానికి బాణాలను నొక్కండి!",
+    arrange: "క్రమబద్ధీకరించు",
+    done: "పూర్తయింది",
+    addDishes: "+ వంటకాలను జోడించండి",
+    reviewOrderAndPay: "ఆర్డర్‌ను సమీక్షించి చెల్లించండి",
+    selectedDishes: "ఎంచుకున్న ప్రత్యేక వంటకాలు",
+    cookingForTable: "టేబుల్ కోసం వంట",
+    scanUpiPrompt: "PhonePe, GPay, Paytm లేదా CREDతో స్కాన్ చేయండి",
+    upiScanHelp: "మొత్తం మరియు టేబుల్ ముందే నమోదు చేయబడ్డాయి. చెల్లించడానికి స్కాన్ చేయండి.",
+    instantAutoVerification: "తక్షణ స్వయంచాలక ధృవీకరణ",
+    authorizingPayment: "చెల్లింపు ధృవీకరించబడుతోంది...",
+    paymentConfirmed: "చెల్లింపు నిర్ధారించబడింది",
+    kdsRoutedMsg: "ఆర్డర్ కిచెన్ డిస్‌ప్లే సిస్టమ్ (KDS)కి పంపబడింది. తయారీ త్వరలో ప్రారంభమవుతుంది!",
+    paid: "చెల్లించబడింది",
+    totalSettled: "మొత్తం పరిష్కరించబడింది",
+    receiveDigitalCopy: "డిజితల్ రసీదు పొందండి (SMS / WhatsApp / ఇమెయిల్)",
+    enterMobileOrEmail: "మొబైల్ నంబర్ లేదా ఇమెయిల్‌ను నమోదు చేయండి...",
+    onFloor: "విధిలో",
+    liveKitchenProgress: "లైవ్ కిచెన్ పురోగతి →",
+    ticket: "టికెట్",
+    tickets: "టికెట్లు",
+    activeTickets: "క్రియాశీల టిక్కెట్లు",
+    kitchenSyncActive: "రియల్-టైమ్ కిచెన్ సమకాలీకరణ సక్రియంగా ఉంది",
+    dishesServedMsg: "మీ టేబుల్‌కి వంటకాలు వడ్డించబడ్డాయి!",
+    cookingFresh: "వంటకాలు తాజాగా వండబడుతున్నాయి",
+    finishingTouches: "కిచెన్‌లో తుది మెరుగులు దిద్దుతున్నారు",
+    kitchenCompletion: "కిచెన్ పూర్తయిన శాతం",
+    boredWaiting: "వేచి చూస్తూ బోర్ కొడుతుందా? లూడో, సుడోకు ఆడండి లేదా వార్తలు చదవండి!",
+    playGamesLounge: "గేమ్స్ లాంజ్",
+    assignedAttendant: "కేటాయించిన ఫ్లోర్ అటెండెంట్",
+    dedicatedToTable: "ప్రత్యేక టేబుల్ - టేబుల్",
+    orderTimeline: "ఆర్డర్ తయారీ కాలక్రమం",
+    activeStep: "ప్రస్తుత దశ",
+    completed: "పూర్తయింది ✓",
+    dishesInOrder: "ఆర్డర్‌లోని వంటకాలు",
+    closeTracker: "ట్రాకర్‌ను మూసివేయి",
+    standardPrice: "సాధారణ ధర",
+    addOns: "యాడ్-ఆన్లు",
+    standard: "సాధారణం",
+    free: "ఉచితం",
+    unitPrice: "ఒక్కో యూనిట్ ధర",
+    unit: "యూనిట్",
+    kcalPerServing: "కిలో కేలరీలు / ప్లేట్",
+    allergens: "అలెర్జీ కారకాలు",
   },
   es: {
     welcomeTo: "Bienvenido a",
@@ -973,6 +1214,54 @@ export const translations: Record<Language, TranslationDictionary> = {
     resetFilters: "Restablecer filtros",
     noDishesFound: "No se encontraron platos",
     noDishesFoundDesc: "Intente ajustar su búsqueda, filtro dietético o elija otra categoría.",
+    yourDiningTray: "Su Bandeja de Comida",
+    servingSequence: "Secuencia de Servicio",
+    servingSequenceSub: "1º, 2º, 3º...",
+    servingSequenceDesc: "Decida qué plato llega primero a su mesa.",
+    tapArrowsToReorder: "¡Toque las flechas para reorganizar el orden!",
+    arrange: "Organizar",
+    done: "Listo",
+    addDishes: "+ Agregar Platos",
+    reviewOrderAndPay: "Revisar Pedido y Pagar",
+    selectedDishes: "Platos Seleccionados",
+    cookingForTable: "Cocinando para la Mesa",
+    scanUpiPrompt: "Escanee con PhonePe, GPay, Paytm o CRED",
+    upiScanHelp: "Monto y mesa preconfigurados. Apunte su cámara o escáner UPI para pagar.",
+    instantAutoVerification: "Verificación Automática Instantánea",
+    authorizingPayment: "Autorizando Pago...",
+    paymentConfirmed: "Pago Confirmado",
+    kdsRoutedMsg: "¡Pedido enviado a cocina (KDS). La preparación comenzará en breve!",
+    paid: "Pagado",
+    totalSettled: "Total Liquidado",
+    receiveDigitalCopy: "Recibir Copia Digital (SMS / WhatsApp / Correo)",
+    enterMobileOrEmail: "Ingrese número móvil o correo...",
+    onFloor: "En Servicio",
+    liveKitchenProgress: "Progreso en Vivo de Cocina →",
+    ticket: "Boleto",
+    tickets: "Boletos",
+    activeTickets: "Boletos Activos",
+    kitchenSyncActive: "Sincronización en Tiempo Real de Cocina",
+    dishesServedMsg: "¡Platos Servidos en su Mesa!",
+    cookingFresh: "Platos Artesanales Preparándose Frescos",
+    finishingTouches: "Últimos Toques en la Línea de Fuego",
+    kitchenCompletion: "Completado en Cocina",
+    boredWaiting: "¿Aburrido esperando? ¡Juegue Ludo, Sudoku o lea noticias!",
+    playGamesLounge: "Salón de Juegos",
+    assignedAttendant: "Mesero de Piso Asignado",
+    dedicatedToTable: "Dedicado a la Mesa",
+    orderTimeline: "Cronología de Preparación del Pedido",
+    activeStep: "Paso Activo",
+    completed: "Completado ✓",
+    dishesInOrder: "Platos en el Pedido",
+    closeTracker: "Cerrar Rastreador",
+    standardPrice: "Precio Estándar",
+    addOns: "adicionales",
+    standard: "Estándar",
+    free: "Gratis",
+    unitPrice: "Precio Unitario",
+    unit: "Plato",
+    kcalPerServing: "kcal por porción",
+    allergens: "Alérgenos",
   },
   ar: {} as TranslationDictionary,
   fr: {} as TranslationDictionary,
@@ -1161,4 +1450,167 @@ export function getLocalizedComboTitle(combo: ComboRecommendation, lang: Languag
   if (lang === 'ml' && (combo.titleTamil || combo.titleHindi)) return combo.titleTamil || combo.titleHindi || combo.title;
   if (lang === 'es' && combo.titleSpanish) return combo.titleSpanish;
   return combo.title;
+}
+
+export function getLocalizedCartItemName(
+  item: { name: string; nameTamil?: string; nameHindi?: string; nameTelugu?: string; nameSpanish?: string; menuItemId?: string },
+  lang: Language
+): string {
+  if (lang === 'ta' && item.nameTamil) return item.nameTamil;
+  if (lang === 'hi' && item.nameHindi) return item.nameHindi;
+  if (lang === 'te' && item.nameTelugu) return item.nameTelugu;
+  if (lang === 'es' && item.nameSpanish) return item.nameSpanish;
+
+  if (item.menuItemId || item.name) {
+    const found = INITIAL_MENU_ITEMS.find(
+      (m) => m.id === item.menuItemId || m.name.toLowerCase() === (item.name || '').toLowerCase()
+    );
+    if (found) {
+      if (lang === 'ta' && found.nameTamil) return found.nameTamil;
+      if (lang === 'hi' && found.nameHindi) return found.nameHindi;
+      if (lang === 'te' && found.nameTelugu) return found.nameTelugu;
+      if (lang === 'es' && found.nameSpanish) return found.nameSpanish;
+    }
+  }
+
+  return item.name;
+}
+
+export function getLocalizedSpiceLabel(spiceLevel: string, t: TranslationDictionary): string {
+  const normalized = (spiceLevel || '').toLowerCase();
+  if (normalized.includes('mild')) return t.mild;
+  if (normalized.includes('medium')) return t.medium;
+  if (normalized.includes('extra')) return t.extraHot;
+  if (normalized.includes('hot')) return t.hot;
+  return spiceLevel;
+}
+
+export function getLocalizedCategory(category: Category | string, t: TranslationDictionary): string {
+  switch (category) {
+    case 'Starters': return t.starters;
+    case 'Main Course': return t.mainCourse;
+    case 'Breads & Rice': return t.breadsRice;
+    case 'Beverages': return t.beverages;
+    case 'Desserts': return t.desserts;
+    case 'Combo': return t.chefCombos;
+    case 'Signature': return t.royalSignature;
+    case 'All': return t.allCategories;
+    default: return category;
+  }
+}
+
+export function getLocalizedCustomizationOption(option: string, lang: Language): string {
+  if (!option) return '';
+  if (lang === 'en') return option;
+
+  const clean = option.replace(/\s*\(\+?₹?\s*\d+\)/g, '').trim();
+
+  const tamilMap: Record<string, string> = {
+    'Extra Gunpowder': 'கூடுதல் பொடி',
+    'Double Vada': 'இரண்டு வடை',
+    'Less Ghee': 'குறைந்த நெய்',
+    'Extra Ghee': 'கூடுதல் நெய்',
+    'Extra Sambar Bowl': 'கூடுதல் சாம்பார் கிண்ணம்',
+    'Ghee Roast': 'நெய் ரோஸ்ட்',
+    'Gunpowder / Podi': 'பொடி / இட்லி பொடி',
+    'Less Potato': 'குறைந்த உருளைக்கிழங்கு',
+    'Extra Gravy': 'கூடுதல் கிரேவி',
+    'Boneless Only': 'எலும்பில்லாதது மட்டும்',
+    'Mild Cream': 'மிதமான கிரீம்',
+    'Butter Drizzle': 'வெண்ணெய் தூவல்',
+    'Extra Mint Chutney': 'கூடுதல் புதினா சட்னி',
+    'Extra Crispy Edges': 'மொறுமொறு விளிம்புகள்',
+    'Lemon Squeeze': 'எலுமிச்சை சாறு',
+    'Less Salt': 'குறைந்த உப்பு',
+    'Extra Mirchi Ka Salan': 'கூடுதல் மிர்ச்சி சால்னா',
+    'Double Raita': 'இரட்டை ராய்தா',
+    'Fried Onions Add-on': 'வறுத்த வெங்காயம்',
+    'Oat Milk Sub': 'ஓட்ஸ் பால்',
+    'Extra Shot Espresso': 'கூடுதல் எஸ்பிரெஸ்ஸோ',
+    'Less Sugar': 'குறைந்த சர்க்கரை',
+    'Ice Cream Scoop': 'ஐஸ்கிரீம் ஸ்கூப்',
+    'Extra Garlic': 'கூடுதல் பூண்டு',
+    'Crispy Toasted': 'மொறுமொறு டோஸ்ட்',
+    'No Butter': 'வெண்ணெய் வேண்டாம்',
+    'Extra Raita': 'கூடுதல் ராய்தா',
+    'Extra Chicken Piece': 'கூடுதல் கோழித் துண்டு',
+    'Spicy Salan': 'காரமான சால்னா',
+    'Extra Pepper Kick': 'கூடுதல் மிளகு',
+    'Schezwan Toss': 'செஸ்வான் டாஸ்',
+    'Dry / Semi Gravy': 'டிரை / செமி கிரேவி',
+    'No Nuts Garnish': 'நட்ஸ் வேண்டாம்',
+    'Low Sugar': 'குறைந்த சர்க்கரை',
+    'Cardamom Boost': 'ஏலக்காய் சுவை',
+    'Extra Warm Jamun': 'கூடுதல் சூடான ஜாமூன்',
+    'Double Ice Cream': 'இரட்டை ஐஸ்கிரீம்',
+    'Silver Leaf': 'வெள்ளி இலை',
+    'Free Delay Apology': 'இலவச தாமத அன்பளிப்பு',
+    'Chef Special Treat': 'செஃப் சிறப்பு உணவு'
+  };
+
+  const hindiMap: Record<string, string> = {
+    'Extra Gunpowder': 'अतिरिक्त पोड़ी',
+    'Double Vada': 'डबल वड़ा',
+    'Less Ghee': 'कम घी',
+    'Extra Ghee': 'अतिरिक्त घी',
+    'Extra Sambar Bowl': 'अतिरिक्त सांभर कटोरी',
+    'Ghee Roast': 'घी रोस्ट',
+    'Gunpowder / Podi': 'पोड़ी मसाला',
+    'Less Potato': 'कम आलू',
+    'Extra Gravy': 'अतिरिक्त ग्रेवी',
+    'Boneless Only': 'केवल बोनलेस',
+    'Mild Cream': 'हल्की मलाई',
+    'Butter Drizzle': 'मक्खन का तड़का',
+    'Extra Mint Chutney': 'अतिरिक्त पुदीना चटनी',
+    'Extra Crispy Edges': 'ज्यादा क्रिस्पी',
+    'Lemon Squeeze': 'नींबू का रस',
+    'Less Salt': 'कम नमक',
+    'Extra Mirchi Ka Salan': 'अतिरिक्त सालन',
+    'Double Raita': 'डबल रायता',
+    'Fried Onions Add-on': 'तले हुए प्याज',
+    'Oat Milk Sub': 'ओट मिल्क',
+    'Extra Shot Espresso': 'एक्स्ट्रा शॉट एस्प्रेसो',
+    'Less Sugar': 'कम चीनी',
+    'Ice Cream Scoop': 'आइसक्रीम स्कूप',
+    'Extra Garlic': 'अतिरिक्त लहसुन',
+    'Crispy Toasted': 'क्रिस्पी टोस्ट',
+    'No Butter': 'बिना मक्खन',
+    'Extra Raita': 'अतिरिक्त रायता',
+    'Extra Chicken Piece': 'अतिरिक्त चिकन पीस',
+    'Spicy Salan': 'तीखा सालन',
+    'Extra Pepper Kick': 'काली मिर्च',
+    'Schezwan Toss': 'शेजवान टॉस',
+    'Dry / Semi Gravy': 'ड्राई / सेमी ग्रेवी',
+    'No Nuts Garnish': 'बिना मेवे',
+    'Low Sugar': 'कम मीठा',
+    'Cardamom Boost': 'इलायची स्वाद',
+    'Extra Warm Jamun': 'गरमा-गरम जामुन',
+    'Double Ice Cream': 'डबल आइसक्रीम',
+    'Silver Leaf': 'चांदी का वर्क',
+    'Free Delay Apology': 'निःशुल्क देरी उपहार',
+    'Chef Special Treat': 'शेफ स्पेशल ट्रीट'
+  };
+
+  const teMap: Record<string, string> = {
+    'Extra Gunpowder': 'అదనపు కారప్పొడి',
+    'Double Vada': 'డబుల్ వడ',
+    'Less Ghee': 'తక్కువ నెయ్యి',
+    'Extra Ghee': 'అదనపు నెయ్యి',
+    'Extra Sambar Bowl': 'అదనపు సాంబార్',
+    'Ghee Roast': 'నెయ్యి రోస్ట్',
+    'Gunpowder / Podi': 'కారప్పొడి',
+    'Less Potato': 'తక్కువ బంగాళాదుంప',
+    'Extra Gravy': 'అదనపు గ్రేవీ',
+    'Boneless Only': 'బోన్‌లెస్ మాత్రమే',
+    'Double Raita': 'డబుల్ రైతా',
+    'Extra Raita': 'అదనపు రైతా',
+    'Less Sugar': 'తక్కువ పంచదార',
+    'No Butter': 'వెన్న లేకుండా'
+  };
+
+  if (lang === 'ta' && tamilMap[clean]) return tamilMap[clean];
+  if (lang === 'hi' && hindiMap[clean]) return hindiMap[clean];
+  if (lang === 'te' && teMap[clean]) return teMap[clean];
+
+  return clean;
 }

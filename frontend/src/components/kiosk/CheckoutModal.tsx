@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useKiosk } from '../../context/KioskContext';
 import { Order } from '../../types';
+import { getLocalizedCartItemName, getLocalizedSpiceLabel, getLocalizedCustomizationOption } from '../../utils/translations';
 import { 
   X, 
   CreditCard, 
@@ -33,6 +34,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
     cartGrandTotal, 
     tableNumber, 
     placeOrder, 
+    language,
     t 
   } = useKiosk();
 
@@ -66,19 +68,19 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-full bg-amber-400/15 text-amber-400 text-xs font-black uppercase tracking-wider border border-amber-400/30">
-                Table {tableNumber}
+                {t.table} {tableNumber}
               </span>
               <span className="text-xs text-slate-500">•</span>
               <span className="text-xs font-semibold text-slate-300">
-                {cart.reduce((a, b) => a + b.quantity, 0)} Items
+                {cart.reduce((a, b) => a + b.quantity, 0)} {t.dishesCountLabel || 'Items'}
               </span>
               <span className="text-xs text-slate-500">•</span>
               <span className="text-xs font-black text-amber-400 font-display">
-                Total ₹{cartGrandTotal}
+                {t.total} ₹{cartGrandTotal}
               </span>
             </div>
             <h3 className="font-black text-xl text-white font-display mt-1 tracking-tight flex items-center gap-2">
-              <span>Review Order &amp; Pay</span>
+              <span>{t.reviewOrderAndPay || 'Review Order & Pay'}</span>
             </h3>
           </div>
 
@@ -100,10 +102,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             <div className="flex items-center justify-between">
               <label className="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-2">
                 <UtensilsCrossed className="w-4 h-4 text-amber-400" />
-                <span>Selected Artisanal Dishes ({cart.length})</span>
+                <span>{t.selectedDishes || 'Selected Artisanal Dishes'} ({cart.length})</span>
               </label>
               <span className="text-xs font-bold text-slate-400">
-                Cooking for Table {tableNumber}
+                {t.cookingForTable || 'Cooking for Table'} {tableNumber}
               </span>
             </div>
 
@@ -114,10 +116,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     <img src={item.image} alt={item.name} className="w-11 h-11 rounded-xl object-cover border border-white/10 shrink-0" />
                     <div>
                       <span className="font-bold text-slate-100 block">
-                        {item.quantity}× {item.name}
+                        {item.quantity}× {getLocalizedCartItemName(item, language)}
                       </span>
                       <p className="text-[11px] text-slate-400">
-                        {item.spiceLevel} spice {item.customizations.length > 0 && `• ${item.customizations.join(', ')}`}
+                        {getLocalizedSpiceLabel(item.spiceLevel, t)} {item.customizations.length > 0 && `• ${item.customizations.map(c => getLocalizedCustomizationOption(c, language)).join(', ')}`}
                       </p>
                     </div>
                   </div>
@@ -131,15 +133,15 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             {/* Bill Breakdown Voucher Card */}
             <div className="p-4 rounded-2xl bg-slate-850/70 border border-white/[0.08] space-y-2 text-xs">
               <div className="flex justify-between text-slate-400">
-                <span>Kitchen Subtotal</span>
+                <span>{t.subtotal}</span>
                 <span className="font-semibold text-slate-200">₹{cartSubtotal}</span>
               </div>
               <div className="flex justify-between text-slate-400">
-                <span>Restaurant GST (5%)</span>
+                <span>{t.taxGst}</span>
                 <span className="font-semibold text-slate-200">₹{cartTax}</span>
               </div>
               <div className="flex justify-between items-baseline pt-2.5 border-t border-white/[0.08] text-sm font-black text-white">
-                <span>Table Grand Total</span>
+                <span>{t.total}</span>
                 <span className="text-2xl font-black text-amber-400 font-display">
                   ₹{cartGrandTotal}
                 </span>
@@ -150,7 +152,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           {/* Payment Method Selector */}
           <div className="space-y-3">
             <label className="block text-xs font-black uppercase tracking-wider text-slate-300">
-              Select Payment Method
+              {t.paymentMethod || 'Select Payment Method'}
             </label>
 
             <div className="grid grid-cols-3 gap-3">
@@ -173,7 +175,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 }`}>
                   <QrCode className="w-5 h-5" />
                 </div>
-                <span className="text-xs font-black text-slate-200">UPI QR Code</span>
+                <span className="text-xs font-black text-slate-200">{t.upi || 'UPI QR Code'}</span>
                 <span className="text-[10px] text-slate-400 font-normal">GPay / PhonePe</span>
               </button>
 
@@ -196,7 +198,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 }`}>
                   <CreditCard className="w-5 h-5" />
                 </div>
-                <span className="text-xs font-black text-slate-200">Credit / Debit</span>
+                <span className="text-xs font-black text-slate-200">{t.card || 'Credit / Debit'}</span>
                 <span className="text-[10px] text-slate-400 font-normal">Tap &amp; Pay POS</span>
               </button>
 
@@ -219,7 +221,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 }`}>
                   <Wallet className="w-5 h-5" />
                 </div>
-                <span className="text-xs font-black text-slate-200">Digital Wallet</span>
+                <span className="text-xs font-black text-slate-200">{t.wallet || 'Digital Wallet'}</span>
                 <span className="text-[10px] text-slate-400 font-normal">Paytm / Amazon</span>
               </button>
             </div>
@@ -245,7 +247,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 <div className="flex-1 text-center sm:text-left space-y-1.5">
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                     <span className="text-sm font-black text-white">
-                      Scan with PhonePe, GPay, Paytm or CRED
+                      {t.scanUpiPrompt || 'Scan with PhonePe, GPay, Paytm or CRED'}
                     </span>
                     <span className="text-xs font-black text-amber-950 bg-amber-400 px-2 py-0.5 rounded-full font-mono">
                       ₹{cartGrandTotal}
@@ -253,12 +255,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   </div>
 
                   <p className="text-xs text-slate-400 leading-snug">
-                    Amount &amp; Table {tableNumber} is pre-encoded. Point your camera or UPI scanner to complete settlement.
+                    {t.upiScanHelp || `Amount & Table ${tableNumber} is pre-encoded. Point your camera or UPI scanner to complete settlement.`}
                   </p>
 
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>Instant Auto-Verification • Table {tableNumber}</span>
+                    <span>{t.instantAutoVerification || 'Instant Auto-Verification'} • {t.table} {tableNumber}</span>
                   </div>
                 </div>
               </div>
@@ -271,16 +273,16 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         <div className="p-5 sm:p-6 bg-slate-900 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0">
           <div className="w-full sm:w-auto text-center sm:text-left">
             <div className="flex items-center justify-center sm:justify-start gap-2 text-xs text-slate-400">
-              <span>Subtotal ₹{cartSubtotal}</span>
+              <span>{t.subtotal} ₹{cartSubtotal}</span>
               <span>+</span>
-              <span>5% GST ₹{cartTax}</span>
+              <span>{t.taxGst} ₹{cartTax}</span>
               <span>=</span>
-              <span className="font-bold text-slate-200">Total ₹{cartGrandTotal}</span>
+              <span className="font-bold text-slate-200">{t.total} ₹{cartGrandTotal}</span>
             </div>
             
             <div className="flex items-baseline justify-center sm:justify-start gap-2 mt-0.5">
               <span className="text-xs uppercase font-extrabold text-slate-400">
-                FINAL TOTAL:
+                {t.total}:
               </span>
               <span className="text-2xl font-black text-amber-400 font-display">
                 ₹{cartGrandTotal}
@@ -296,7 +298,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
             {isProcessing ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin text-slate-950" />
-                <span>Authorizing Payment...</span>
+                <span>{t.authorizingPayment || 'Authorizing Payment...'}</span>
               </>
             ) : (
               <>

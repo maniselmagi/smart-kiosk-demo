@@ -18,6 +18,7 @@ import {
   Utensils
 } from 'lucide-react';
 import { getSpicePrice, getCustomizationCleanLabel, getCustomizationPrice } from '../../utils/pricingUtils';
+import { getLocalizedCartItemName, getLocalizedSpiceLabel, getLocalizedCustomizationOption } from '../../utils/translations';
 
 interface CartDrawerModalProps {
   isOpen: boolean;
@@ -40,6 +41,7 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
     cartTax, 
     cartGrandTotal, 
     t, 
+    language,
     tableNumber 
   } = useKiosk();
 
@@ -110,15 +112,15 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] uppercase font-black tracking-wider text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full border border-amber-400/30">
-                  Table {tableNumber}
+                  {t.table} {tableNumber}
                 </span>
                 <span className="text-xs text-slate-500">•</span>
                 <span className="text-xs text-slate-400 font-semibold">
-                  {cart.reduce((a, b) => a + b.quantity, 0)} Items
+                  {cart.reduce((a, b) => a + b.quantity, 0)} {t.dishesCountLabel || 'Items'}
                 </span>
               </div>
               <h3 className="font-black text-lg text-white font-display mt-0.5 tracking-tight">
-                Your Dining Tray
+                {t.yourDiningTray || 'Your Dining Tray'}
               </h3>
             </div>
           </div>
@@ -130,7 +132,7 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
                 className="text-xs font-bold text-slate-400 hover:text-rose-400 px-2 py-1 rounded-lg transition-colors cursor-pointer"
                 title="Clear all items"
               >
-                Clear
+                {t.clear || 'Clear'}
               </button>
             )}
             <button
@@ -153,19 +155,19 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="font-black text-xs text-amber-300 uppercase tracking-wider">
-                      Serving Sequence
+                      {t.servingSequence || 'Serving Sequence'}
                     </span>
                     <span className="text-[10px] font-black px-1.5 py-0.2 rounded-full bg-amber-400 text-slate-950">
-                      1st, 2nd, 3rd...
+                      {t.servingSequenceSub || '1st, 2nd, 3rd...'}
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-300 mt-0.5 leading-snug">
                     {isArrangeMode ? (
                       <span className="text-emerald-300 font-bold flex items-center gap-1">
-                        <Sparkles className="w-3 h-3" /> Tap arrows to re-order course priority!
+                        <Sparkles className="w-3 h-3" /> {t.tapArrowsToReorder || 'Tap arrows to re-order course priority!'}
                       </span>
                     ) : (
-                      'Decide which course arrives first to your table.'
+                      t.servingSequenceDesc || 'Decide which course arrives first to your table.'
                     )}
                   </p>
                 </div>
@@ -183,12 +185,12 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
                   {isArrangeMode ? (
                     <>
                       <Check className="w-3.5 h-3.5 stroke-[3]" />
-                      <span>Done</span>
+                      <span>{t.done || 'Done'}</span>
                     </>
                   ) : (
                     <>
                       <ArrowUpDown className="w-3.5 h-3.5" />
-                      <span>Arrange</span>
+                      <span>{t.arrange || 'Arrange'}</span>
                     </>
                   )}
                 </button>
@@ -274,7 +276,7 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline justify-between gap-1 mb-1">
                       <h4 className="font-black text-sm text-white truncate block">
-                        {item.name}
+                        {getLocalizedCartItemName(item, language)}
                       </h4>
                       <div className="text-right shrink-0">
                         <span className="font-black text-sm text-amber-400 font-display">
@@ -292,7 +294,7 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
                     <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-400 mb-2">
                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-400/10 text-amber-400 font-bold border border-amber-400/20">
                         <Flame className="w-2.5 h-2.5 text-amber-400" />
-                        <span>{item.spiceLevel}</span>
+                        <span>{getLocalizedSpiceLabel(item.spiceLevel, t)}</span>
                         {getSpicePrice(item.spiceLevel) > 0 && (
                           <span className="text-[10px] opacity-80">(+₹{getSpicePrice(item.spiceLevel)})</span>
                         )}
@@ -300,9 +302,10 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
                       {item.customizations.map((c) => {
                         const optPrice = getCustomizationPrice(c);
                         const optLabel = getCustomizationCleanLabel(c);
+                        const localizedOptLabel = getLocalizedCustomizationOption(optLabel, language);
                         return (
                           <span key={c} className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-medium flex items-center gap-1 border border-white/5">
-                            <span>{optLabel}</span>
+                            <span>{localizedOptLabel}</span>
                             {optPrice > 0 && (
                               <span className="text-[10px] text-amber-400 font-bold">+₹{optPrice}</span>
                             )}
@@ -390,7 +393,7 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
                 <span className="font-semibold text-slate-200 font-mono">₹{cartSubtotal}</span>
               </div>
               <div className="flex items-center justify-between text-slate-400">
-                <span>{t.taxGst} (5%)</span>
+                <span>{t.taxGst}</span>
                 <span className="font-semibold text-slate-200 font-mono">₹{cartTax}</span>
               </div>
               <div className="flex items-center justify-between text-base font-black text-white pt-2 border-t border-white/10">
@@ -404,7 +407,7 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
                 onClick={onClose}
                 className="py-3 px-3 rounded-2xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-xs font-bold text-slate-200 transition-colors cursor-pointer active:scale-95"
               >
-                + Add Dishes
+                {t.addDishes || '+ Add Dishes'}
               </button>
               <button
                 onClick={() => {

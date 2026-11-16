@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { getAssignedWaiter } from '../../utils/waiterAssignment';
 import { CustomerFeedbackModal } from './CustomerFeedbackModal';
+import { getLocalizedCartItemName, getLocalizedSpiceLabel } from '../../utils/translations';
 
 // Feature toggle: Set to true whenever the management wishes to enable the complimentary delay treat feature
 const ENABLE_COMPLIMENTARY_FOOD = false;
@@ -83,7 +84,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
   onOpenEntertainment,
   onOpenFeedback
 }) => {
-  const { t, callWaiter, updateOrder, showToast } = useKiosk();
+  const { t, language, callWaiter, updateOrder, showToast } = useKiosk();
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   // Consolidated multi-orders for this table
@@ -233,29 +234,29 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
       key: 'NEW',
       label: t.statusReceived,
       icon: <CheckCircle2 className="w-5 h-5" />,
-      desc: `Confirmed by Floor Supervisor & Waiter ${waiter.name}`,
-      tag: 'Step 1 • Ticket Queued',
+      desc: `${t.serverLabel || 'Supervisor & Waiter'} ${waiter.name}`,
+      tag: `${t.ticket || 'Ticket'} #${activeOrder.orderNumber}`,
     },
     {
       key: 'PREPARING',
       label: t.statusPreparing,
       icon: <ChefHat className="w-5 h-5" />,
-      desc: 'Chef cooking on fire line • Fresh ingredients simmering',
-      tag: 'Step 2 • On the Fire',
+      desc: t.cookingFresh || 'Chef cooking on fire line • Fresh ingredients simmering',
+      tag: t.statusPreparing,
     },
     {
       key: 'READY',
       label: t.statusReady,
       icon: <UtensilsCrossed className="w-5 h-5" />,
-      desc: `Plated hot with garnishes • Waiter ${waiter.name} bringing to Table ${activeOrder.tableNumber}`,
-      tag: 'Step 3 • Dispatched',
+      desc: `${t.serverLabel || 'Waiter'} ${waiter.name} • ${t.table} ${activeOrder.tableNumber}`,
+      tag: t.statusReady,
     },
     {
       key: 'COMPLETED',
       label: t.statusServed,
       icon: <Sparkles className="w-5 h-5" />,
-      desc: 'Dishes delivered directly to your table. Bon Appétit!',
-      tag: 'Step 4 • Meal Served',
+      desc: t.dishesServedMsg || `Dishes delivered to Table ${activeOrder.tableNumber}`,
+      tag: t.statusServed,
     },
   ];
 
@@ -289,27 +290,27 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
               </span>
               <div className="flex flex-col">
-                <span className="text-[9px] font-mono tracking-widest text-slate-400 uppercase font-bold leading-none">Ticket</span>
+                <span className="text-[9px] font-mono tracking-widest text-slate-400 uppercase font-bold leading-none">{t.ticket || 'Ticket'}</span>
                 <span className="text-sm font-black font-mono text-amber-400 leading-tight">#{activeOrder.orderNumber}</span>
               </div>
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-[11px] uppercase tracking-wider font-extrabold text-amber-300 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/25">
-                  Table {activeOrder.tableNumber}
+                  {t.table} {activeOrder.tableNumber}
                 </span>
                 <span className="text-xs text-slate-500">•</span>
                 <span className="text-xs font-semibold text-slate-300">
-                  {(activeOrder.items || []).reduce((a, b) => a + (b.quantity || 1), 0)} {(activeOrder.items || []).reduce((a, b) => a + (b.quantity || 1), 0) === 1 ? 'Dish' : 'Dishes'}
+                  {(activeOrder.items || []).reduce((a, b) => a + (b.quantity || 1), 0)} {t.dishesCountLabel || 'Dishes'}
                 </span>
                 {allOrders.length > 1 && (
                   <span className="text-[10px] font-bold bg-amber-500/15 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30">
-                    {allOrders.length} Tickets
+                    {allOrders.length} {t.tickets || 'Tickets'}
                   </span>
                 )}
               </div>
               <h3 className="text-lg font-black font-display text-white mt-0.5 tracking-tight flex items-center gap-2">
-                <span>Live Kitchen Tracker</span>
+                <span>{t.orderProgress || 'Live Kitchen Tracker'}</span>
               </h3>
             </div>
           </div>
@@ -328,7 +329,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
           <div className="px-5 sm:px-6 py-2.5 bg-slate-950/80 border-b border-white/[0.06] flex items-center gap-3 overflow-x-auto custom-scrollbar">
             <span className="text-[10px] uppercase font-black tracking-widest text-slate-400 shrink-0 flex items-center gap-1.5">
               <Receipt className="w-3.5 h-3.5 text-amber-400" />
-              Active Tickets ({allOrders.length}):
+              {t.activeTickets || 'Active Tickets'} ({allOrders.length}):
             </span>
             <div className="flex items-center gap-2">
               {allOrders.map((ord) => {
@@ -350,7 +351,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                   >
                     <span className="font-mono text-white">#{ord.orderNumber}</span>
                     <span className="text-slate-500">•</span>
-                    <span className="text-[11px] text-slate-300">{itemCount} {itemCount === 1 ? 'item' : 'items'}</span>
+                    <span className="text-[11px] text-slate-300">{itemCount} {t.dishesCountLabel || 'items'}</span>
                     <span className="text-slate-500">•</span>
                     <span className="font-mono text-amber-300 font-semibold">₹{ord.total}</span>
                     <span className={`text-[9px] uppercase px-1.5 py-0.2 rounded font-bold ${
@@ -416,7 +417,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                   ) : activeOrder.status === 'READY' ? (
                     <>
                       <UtensilsCrossed className="w-7 h-7 text-emerald-400 animate-pulse" />
-                      <span className="text-[11px] font-black text-emerald-300 uppercase tracking-wider mt-0.5">Dispatched!</span>
+                      <span className="text-[11px] font-black text-emerald-300 uppercase tracking-wider mt-0.5">{t.statusServed || 'Dispatched!'}</span>
                     </>
                   ) : isDelayed ? (
                     <>
@@ -424,10 +425,10 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                         {formattedDelayClock}
                       </span>
                       <span className="text-[10px] text-amber-300 font-bold uppercase tracking-wider mt-1">
-                        Chef Finishing
+                        {t.finishingTouches || 'Chef Finishing'}
                       </span>
                       <span className="text-[9px] text-slate-400 font-medium">
-                        +5m by Kitchen
+                        +5m {t.cookingForTable || 'by Kitchen'}
                       </span>
                     </>
                   ) : (
@@ -436,7 +437,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                         {formattedCountdown}
                       </span>
                       <span className="text-[10px] text-amber-400/90 font-black uppercase tracking-wider mt-1">
-                        Est. Time
+                        {t.estimatedWait || 'Est. Time'}
                       </span>
                     </>
                   )}
@@ -447,17 +448,17 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
               <div className="flex-1 text-center sm:text-left space-y-2">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-black">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>Real-Time Kitchen Sync Active</span>
+                  <span>{t.kitchenSyncActive || 'Real-Time Kitchen Sync Active'}</span>
                 </div>
 
                 <h4 className="text-lg font-black text-white font-display">
                   {activeOrder.status === 'COMPLETED'
-                    ? 'Dishes Served at Your Table!'
+                    ? (t.dishesServedMsg || 'Dishes Served at Your Table!')
                     : activeOrder.status === 'READY'
-                    ? `Waiter ${waiter.name} is Delivering to Table ${activeOrder.tableNumber}`
+                    ? `${t.serverLabel || 'Waiter'} ${waiter.name} • ${t.table} ${activeOrder.tableNumber}`
                     : isDelayed
-                    ? 'Finishing Touches on the Fire Line'
-                    : 'Artisanal Dishes Being Cooked Fresh'}
+                    ? (t.finishingTouches || 'Finishing Touches on the Fire Line')
+                    : (t.cookingFresh || 'Artisanal Dishes Being Cooked Fresh')}
                 </h4>
 
                 <p className="text-xs text-slate-400 leading-relaxed">
@@ -469,7 +470,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                 {/* Progress Mini Bar */}
                 <div className="pt-1 space-y-1">
                   <div className="flex justify-between text-[11px] font-bold text-slate-400">
-                    <span>Kitchen Completion</span>
+                    <span>{t.kitchenCompletion || 'Kitchen Completion'}</span>
                     <span className="text-amber-400 font-mono font-black">{progressPercent}%</span>
                   </div>
                   <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden p-0.5">
@@ -644,7 +645,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                     <Gamepad2 className="w-4 h-4 animate-pulse" />
                   </div>
                   <span className="text-xs font-bold text-slate-200">
-                    Bored waiting? Play <span className="text-amber-400 font-extrabold">Ludo, Sudoku</span> or Read Live News!
+                    {t.boredWaiting || 'Bored waiting? Play Ludo, Sudoku or Read Live News!'}
                   </span>
                 </div>
 
@@ -656,7 +657,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                   }}
                   className="w-full sm:w-auto py-2 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs shadow-md shadow-amber-500/25 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
                 >
-                  <span>Play Games Lounge</span>
+                  <span>{t.playGamesLounge || 'Play Games Lounge'}</span>
                   <ArrowRight className="w-3.5 h-3.5 text-slate-950" />
                 </button>
               </div>
@@ -671,13 +672,13 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
               </div>
               <div>
                 <span className="text-[10px] uppercase font-black text-amber-400/90 block tracking-wider">
-                  Assigned Floor Attendant
+                  {t.assignedAttendant || 'Assigned Floor Attendant'}
                 </span>
                 <span className="text-sm font-black text-white">
                   {waiter.fullName} <span className="font-normal text-xs text-slate-400">({waiter.zone})</span>
                 </span>
                 <p className="text-[11px] text-slate-400">
-                  Dedicated to Table {activeOrder.tableNumber} for prompt service
+                  {t.dedicatedToTable || 'Dedicated to Table'} {activeOrder.tableNumber}
                 </p>
               </div>
             </div>
@@ -688,7 +689,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
               className="px-3 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-xs font-bold text-slate-200 hover:text-white flex items-center gap-1.5 transition-all cursor-pointer active:scale-95 shrink-0"
             >
               <Bell className="w-3.5 h-3.5 text-amber-400" />
-              <span>Call Waiter</span>
+              <span>{t.callWaiter}</span>
             </button>
           </div>
 
@@ -696,7 +697,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
           <div className="space-y-4">
             <h4 className="text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
               <Flame className="w-3.5 h-3.5 text-amber-400" />
-              <span>Order Preparation Timeline</span>
+              <span>{t.orderTimeline || 'Order Preparation Timeline'}</span>
             </h4>
 
             <div className="relative pl-6 space-y-6 before:absolute before:left-[1.85rem] before:top-3 before:bottom-3 before:w-0.5 before:bg-gradient-to-b before:from-amber-400 before:via-emerald-400 before:to-slate-800">
@@ -734,12 +735,12 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                         
                         {isCurrent && (
                           <span className="text-[10px] font-black uppercase tracking-wider text-amber-950 bg-amber-400 px-2 py-0.5 rounded-full shadow-xs">
-                            Active Step
+                            {t.activeStep || 'Active Step'}
                           </span>
                         )}
                         {isPast && (
                           <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                            Completed ✓
+                            {t.completed || 'Completed ✓'}
                           </span>
                         )}
                       </div>
@@ -762,10 +763,10 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-black uppercase tracking-wider text-slate-400">
-                Dishes in Order #{activeOrder.orderNumber} ({(activeOrder.items || []).length})
+                {t.dishesInOrder || 'Dishes in Order'} #{activeOrder.orderNumber} ({(activeOrder.items || []).length})
               </span>
               <span className="text-xs font-bold text-amber-400 font-display">
-                Total ₹{activeOrder.total}
+                {t.total} ₹{activeOrder.total}
               </span>
             </div>
 
@@ -776,10 +777,10 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                     <img src={item.image} alt={item.name} className="w-11 h-11 rounded-xl object-cover border border-white/10" />
                     <div>
                       <span className="font-bold text-slate-200 block">
-                        {item.quantity}× {item.name}
+                        {item.quantity}× {getLocalizedCartItemName(item, language)}
                       </span>
                       <p className="text-[11px] text-slate-400">
-                        {item.spiceLevel} spice {item.customizations && item.customizations.length > 0 && `• ${item.customizations.join(', ')}`}
+                        {getLocalizedSpiceLabel(item.spiceLevel, t)} {item.customizations && item.customizations.length > 0 && `• ${item.customizations.join(', ')}`}
                       </p>
                       {item.price === 0 && (
                         <span className="text-[10px] font-extrabold text-emerald-400 bg-emerald-500/20 px-1.5 py-0.2 rounded mt-0.5 inline-block">
@@ -789,7 +790,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                     </div>
                   </div>
                   <span className="font-black text-amber-400 font-display text-sm">
-                    {item.price === 0 ? 'FREE' : `₹${item.price * item.quantity}`}
+                    {item.price === 0 ? (t.free || 'FREE') : `₹${item.price * item.quantity}`}
                   </span>
                 </div>
               ))}
@@ -800,7 +801,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
           {allOrders.length > 1 && (
             <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-2">
               <div className="flex items-center justify-between text-xs font-black text-slate-300">
-                <span>Total For All Placed Orders (Table {activeOrder.tableNumber})</span>
+                <span>Total For All Placed Orders ({t.table} {activeOrder.tableNumber})</span>
                 <span className="text-amber-400 font-display text-sm">
                   ₹{allOrders.reduce((sum, o) => sum + (o?.total || 0), 0)}
                 </span>
@@ -820,7 +821,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
             onClick={onClose}
             className="px-4 py-3 rounded-2xl bg-white/[0.06] hover:bg-white/[0.12] text-slate-300 hover:text-white text-xs font-bold transition-all cursor-pointer border border-white/10 active:scale-95"
           >
-            Close Tracker
+            {t.closeTracker || 'Close Tracker'}
           </button>
 
           {/* Feedback Button once Food is Ready */}
@@ -834,7 +835,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
               className="flex-1 py-3 px-4 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <Star className="w-4 h-4 fill-slate-950" />
-              <span>Feedback & Ratings</span>
+              <span>{t.feedbackTitle || 'Feedback & Ratings'}</span>
             </button>
           )}
 
@@ -851,7 +852,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
             }`}
           >
             <Receipt className="w-4 h-4" />
-            <span>View Receipt</span>
+            <span>{t.viewReceipt || 'View Receipt'}</span>
           </button>
         </div>
 

@@ -48,6 +48,10 @@ export interface CartItem {
   cartItemId: string; // unique per cart row
   menuItemId: string;
   name: string;
+  nameTamil?: string;
+  nameHindi?: string;
+  nameTelugu?: string;
+  nameSpanish?: string;
   price: number;
   basePrice?: number;
   customizationTotal?: number;

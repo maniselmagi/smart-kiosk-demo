@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
 import { useKiosk } from '../../context/KioskContext';
 import { MenuItem, SpiceLevel } from '../../types';
-import { getLocalizedItemName, getLocalizedItemDescription } from '../../utils/translations';
+import { 
+  getLocalizedItemName, 
+  getLocalizedItemDescription, 
+  getLocalizedCategory, 
+  getLocalizedCustomizationOption 
+} from '../../utils/translations';
 import { 
   getSpicePrice, 
   getSpicePriceLabel, 
@@ -110,14 +115,14 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
                   <span className={`w-2 h-2 rounded-full ${item.isVeg ? 'bg-emerald-600' : 'bg-rose-600'}`} />
                 </span>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded bg-black/50 backdrop-blur-xs">
-                  {item.category}
+                  {getLocalizedCategory(item.category, t)}
                 </span>
                 <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-500/80 backdrop-blur-xs flex items-center gap-1">
                   <Clock className="w-3 h-3" /> {item.prepTimeMinutes} {t.min}
                 </span>
                 {item.isSignature && (
                   <span className="text-xs font-black px-2 py-0.5 rounded bg-cyan-400 text-slate-950 flex items-center gap-1 shadow-xs">
-                    <Sparkles className="w-3 h-3" /> Signature
+                    <Sparkles className="w-3 h-3" /> {t.royalSignature || 'Signature'}
                   </span>
                 )}
               </div>
@@ -146,11 +151,11 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
                 )}
                 {extraCost > 0 ? (
                   <div className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-300 bg-black/60 px-2 py-0.5 rounded-full border border-amber-400/30">
-                    <span>+₹{extraCost * quantity} add-ons</span>
+                    <span>+₹{extraCost * quantity} {t.addOns || 'add-ons'}</span>
                   </div>
                 ) : quantity === 1 ? (
                   <span className="text-[11px] text-white/70 block">
-                    Standard Price
+                    {t.standardPrice || 'Standard Price'}
                   </span>
                 ) : null}
               </div>
@@ -167,9 +172,9 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
               {localizedDesc}
             </p>
             <div className="flex items-center gap-4 mt-2 text-xs text-slate-500 dark:text-slate-400 font-medium">
-              <span>{item.calories} kcal per serving</span>
+              <span>{item.calories} {t.kcalPerServing || 'kcal per serving'}</span>
               <span>•</span>
-              <span>Allergens: {item.allergens.join(', ')}</span>
+              <span>{t.allergens || 'Allergens'}: {item.allergens.join(', ')}</span>
             </div>
           </div>
 
@@ -226,7 +231,7 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
                         ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300' 
                         : 'text-slate-400 dark:text-slate-500'
                     }`}>
-                      {badge}
+                      {badge === 'Standard' ? (t.standard || 'Standard') : badge === 'Free' ? (t.free || 'Free') : badge}
                     </span>
                   </button>
                 );
@@ -243,7 +248,7 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
                 </label>
                 {customizationCost > 0 && (
                   <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-                    +₹{customizationCost} add-ons
+                    +₹{customizationCost} {t.addOns || 'add-ons'}
                   </span>
                 )}
               </div>
@@ -266,7 +271,7 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
                     >
                       <div className="flex-1 pr-2 min-w-0">
                         <span className="block truncate font-bold text-slate-800 dark:text-slate-100">
-                          {cleanLabel}
+                          {getLocalizedCustomizationOption(cleanLabel, language)}
                         </span>
                         <span className={`text-[11px] font-extrabold inline-block mt-0.5 ${
                           price > 0 
@@ -275,7 +280,7 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
                               : 'text-amber-700 dark:text-amber-400' 
                             : 'text-slate-400 dark:text-slate-500 font-medium'
                         }`}>
-                          {price > 0 ? `+₹${price}` : 'Free'}
+                          {price > 0 ? `+₹${price}` : (t.free || 'Free')}
                         </span>
                       </div>
                       <div className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors shrink-0 ${
@@ -318,6 +323,7 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                 disabled={quantity <= 1}
                 className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-30 disabled:hover:bg-transparent transition-colors active:scale-95 cursor-pointer"
+                aria-label="Decrease Quantity"
               >
                 <Minus className="w-4 h-4" />
               </button>
@@ -327,6 +333,7 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
               <button
                 onClick={() => setQuantity((q) => q + 1)}
                 className="w-10 h-10 rounded-xl flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors active:scale-95 cursor-pointer"
+                aria-label="Increase Quantity"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -334,7 +341,7 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
 
             <div className="hidden sm:block text-left">
               <div className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                {quantity > 1 ? `Unit (×${quantity})` : 'Unit Price'}
+                {quantity > 1 ? `${t.unit || 'Unit'} (×${quantity})` : (t.unitPrice || 'Unit Price')}
               </div>
               <div className="text-sm font-black text-slate-800 dark:text-slate-100 font-display">
                 ₹{unitPrice}
@@ -349,7 +356,7 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
           >
             <span>{t.addToCart}</span>
             <div className="flex items-baseline gap-1.5 font-display">
-              <span className="text-xs font-normal opacity-80">Total:</span>
+              <span className="text-xs font-normal opacity-80">{t.total}:</span>
               <span className="font-black text-lg md:text-xl">
                 ₹{totalPrice}
               </span>

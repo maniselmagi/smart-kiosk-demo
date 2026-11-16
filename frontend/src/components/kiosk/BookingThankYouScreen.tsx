@@ -239,15 +239,9 @@ export const BookingThankYouScreen: React.FC<BookingThankYouScreenProps> = ({ on
           </div>
 
           {/* Notice to Customer */}
-          <div className="mt-4 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200/90 flex items-center justify-between gap-2.5">
-            <div className="flex items-center gap-2">
-              <UtensilsCrossed className="w-4 h-4 text-amber-400 shrink-0" />
-              <span>{t.proceedToTablePrompt || 'Please proceed to your allocated table. Your attendant will welcome you immediately.'}</span>
-            </div>
-            <div className="hidden sm:flex items-center gap-1 text-[11px] text-emerald-400 font-bold shrink-0">
-              <Database className="w-3 h-3" />
-              <span>Cloud Synced</span>
-            </div>
+          <div className="mt-4 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200/90 flex items-center justify-center gap-2.5 text-center">
+            <UtensilsCrossed className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>{t.proceedToTablePrompt || 'Please proceed to your allocated table. Your attendant will welcome you immediately.'}</span>
           </div>
         </div>
       </main>

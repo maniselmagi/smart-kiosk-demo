@@ -706,16 +706,9 @@ export const CustomerTableAllocationScreen: React.FC<CustomerTableAllocationScre
                   <span className="text-slate-400">Date & Slot</span>
                   <span className="font-bold text-white">{localDate === todayStr ? 'Today' : 'Tomorrow'} • {localSlot}</span>
                 </div>
-                <div className="flex justify-between pb-2 border-b border-white/5">
+                <div className="flex justify-between">
                   <span className="text-slate-400">Party Size</span>
                   <span className="font-bold text-amber-300">{localCount} {t.guestsCountLabel || 'Guests'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Cloud Sync</span>
-                  <span className="text-emerald-400 flex items-center gap-1">
-                    <Database className="w-3 h-3" />
-                    <span>PostgreSQL Cloud Ready</span>
-                  </span>
                 </div>
               </div>
 
@@ -741,7 +734,7 @@ export const CustomerTableAllocationScreen: React.FC<CustomerTableAllocationScre
               </button>
 
               <p className="text-[11px] text-center text-slate-400 mt-2 font-medium">
-                {t.tableBookedNotice || 'Instant cloud reservation synced across all terminals.'}
+                {t.proceedToTablePrompt || 'Your reserved table will be prepared for prompt service.'}
               </p>
             </div>
 

@@ -15,14 +15,15 @@ import {
   Plus, 
   Check, 
   Bot, 
-  ArrowRight,
-  HelpCircle,
-  Flame,
-  Volume2,
-  VolumeX,
-  Mic,
-  MicOff,
-  Radio
+  ArrowRight, 
+  HelpCircle, 
+  Flame, 
+  Volume2, 
+  VolumeX, 
+  Mic, 
+  MicOff, 
+  Radio,
+  AudioLines
 } from 'lucide-react';
 import { 
   processCustomerQuery, 
@@ -37,6 +38,7 @@ import {
   createSpeechRecognition,
   speakWithVoice,
   stopSpeech,
+  requestMicPermission,
   isSpeechRecognitionSupported,
   IBrowserSpeechRecognition
 } from '../../services/voiceChatService';
@@ -76,6 +78,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
   const [addedItemIds, setAddedItemIds] = useState<Record<string, boolean>>({});
 
   // Voice Chat State
+  const [isVoiceOverlayOpen, setIsVoiceOverlayOpen] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [interimSpeechText, setInterimSpeechText] = useState('');
   const [autoVoiceReply, setAutoVoiceReply] = useState(true);
@@ -150,16 +153,20 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
     if (isOpen) {
       scrollToBottom();
     }
-  }, [messages, isTyping, isOpen, interimSpeechText]);
+  }, [messages, isTyping, isOpen]);
 
-  // Voice Chat: Start Speech Recognition
-  const startListening = () => {
+  // Voice Chat: Start Speech Recognition with explicit mic permission check
+  const startListening = async () => {
+    stopSpeech();
+
+    // 1. Explicitly request microphone permission
+    await requestMicPermission();
+
+    // 2. Setup recognition
     if (!isSpeechRecognitionSupported()) {
-      showToast(voiceConfig.unsupportedText);
+      setIsVoiceOverlayOpen(true);
       return;
     }
-
-    stopSpeech();
 
     try {
       if (recognitionRef.current) {
@@ -172,7 +179,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
 
       const rec = createSpeechRecognition(language);
       if (!rec) {
-        showToast(voiceConfig.unsupportedText);
+        setIsVoiceOverlayOpen(true);
         return;
       }
 
@@ -201,23 +208,25 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
         }
 
         if (finalTranscript.trim()) {
+          const spoken = finalTranscript.trim();
           setIsListening(false);
+          setIsVoiceOverlayOpen(false);
           setInterimSpeechText('');
           try {
             rec.stop();
           } catch {
             // ignore
           }
-          handleSendMessage(finalTranscript.trim(), true);
+          handleSendMessage(spoken, true);
         }
       };
 
       rec.onerror = (err: any) => {
-        console.warn('Speech recognition warning:', err);
-        setIsListening(false);
+        console.warn('Speech recognition status:', err);
         if (err?.error === 'not-allowed' || err?.error === 'service-not-allowed') {
           showToast(voiceConfig.micDeniedText);
         }
+        setIsListening(false);
       };
 
       rec.onend = () => {
@@ -226,9 +235,12 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
 
       recognitionRef.current = rec;
       rec.start();
+      setIsListening(true);
+      setIsVoiceOverlayOpen(true);
     } catch (err) {
-      console.error('Speech recognition start failed:', err);
+      console.warn('Speech recognition start note:', err);
       setIsListening(false);
+      setIsVoiceOverlayOpen(true);
     }
   };
 
@@ -242,18 +254,22 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
       }
     }
     setIsListening(false);
-    if (interimSpeechText.trim()) {
-      handleSendMessage(interimSpeechText.trim(), true);
-    }
-    setInterimSpeechText('');
   };
 
-  const handleToggleVoice = () => {
-    if (isListening) {
-      stopListening();
-    } else {
-      startListening();
+  const handleSendVoiceQuery = () => {
+    stopListening();
+    setIsVoiceOverlayOpen(false);
+    if (interimSpeechText.trim()) {
+      handleSendMessage(interimSpeechText.trim(), true);
+      setInterimSpeechText('');
     }
+  };
+
+  const handleSelectVoicePrompt = (prompt: string) => {
+    stopListening();
+    setIsVoiceOverlayOpen(false);
+    setInterimSpeechText('');
+    handleSendMessage(prompt, true);
   };
 
   if (!isOpen) return null;
@@ -674,32 +690,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
           <div ref={messagesEndRef} />
         </div>
 
-        {/* 4. LIVE SPEECH LISTENING BANNER */}
-        {isListening && (
-          <div className="px-4 py-2.5 bg-gradient-to-r from-red-950/80 via-slate-900 to-amber-950/80 border-t border-red-500/30 flex items-center justify-between text-xs text-amber-300 animate-in slide-in-from-bottom-2 shrink-0">
-            <div className="flex items-center gap-2.5 truncate">
-              <span className="relative flex h-3 w-3 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
-              </span>
-              <span className="font-black text-[11px] text-amber-400 uppercase tracking-wide shrink-0">
-                {voiceConfig.flag} {voiceConfig.nativeName} ({voiceConfig.code}):
-              </span>
-              <span className="truncate text-slate-200 font-semibold italic">
-                {interimSpeechText ? `"${interimSpeechText}"` : voiceConfig.speakingPrompt}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={stopListening}
-              className="text-[10px] font-black px-2.5 py-1 rounded-lg bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30 transition-colors shrink-0 cursor-pointer ml-2 active:scale-95"
-            >
-              {voiceConfig.tapToStop}
-            </button>
-          </div>
-        )}
-
-        {/* 5. CHAT INPUT BAR WITH MICROPHONE BUTTON */}
+        {/* 4. CHAT INPUT BAR WITH PROMINENT MICROPHONE BUTTON */}
         <form 
           onSubmit={(e) => {
             e.preventDefault();
@@ -710,22 +701,12 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
           {/* Dedicated Voice Chat Button */}
           <button
             type="button"
-            onClick={handleToggleVoice}
-            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all cursor-pointer shrink-0 active:scale-95 border ${
-              isListening
-                ? 'bg-red-500/20 text-red-400 border-red-500 shadow-lg shadow-red-500/30 animate-pulse'
-                : 'bg-slate-900 hover:bg-slate-800 text-amber-400 border-amber-400/40 hover:border-amber-400 shadow-md'
-            }`}
-            title={isListening ? voiceConfig.tapToStop : voiceConfig.speakToKio}
+            onClick={startListening}
+            className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all cursor-pointer shrink-0 active:scale-95 bg-gradient-to-tr from-amber-500 to-yellow-400 text-slate-950 font-black shadow-lg shadow-amber-500/25 border border-amber-300 hover:brightness-110"
+            title={voiceConfig.speakToKio}
             aria-label="Voice Chat"
           >
-            {isListening ? (
-              <span className="relative flex items-center justify-center">
-                <MicOff className="w-5 h-5 text-red-400" />
-              </span>
-            ) : (
-              <Mic className="w-5 h-5" />
-            )}
+            <Mic className="w-5 h-5 stroke-[2.5]" />
           </button>
 
           {/* Text Input */}
@@ -733,7 +714,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
             type="text"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            placeholder={isListening ? voiceConfig.listeningText : (t.aiChatPlaceholder || "Ask Kio (e.g. Signature foods, top ratings, opening hours)...")}
+            placeholder={t.aiChatPlaceholder || "Ask Kio (e.g. Signature foods, top ratings, opening hours)..."}
             className="flex-1 bg-slate-900 border border-white/10 focus:border-amber-400/60 rounded-2xl px-4 py-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-hidden focus:ring-1 focus:ring-amber-400/40 transition-all"
           />
 
@@ -751,6 +732,127 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
             <Send className="w-4 h-4 stroke-[2.5]" />
           </button>
         </form>
+
+        {/* 5. FULL VOICE ASSISTANT MODAL OVERLAY (SIRI / GOOGLE ASSISTANT STYLE) */}
+        {isVoiceOverlayOpen && (
+          <div className="absolute inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex flex-col justify-between p-5 animate-in fade-in zoom-in-95 duration-200">
+            {/* Top Bar */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                <span className="text-xs font-bold text-amber-300 uppercase tracking-widest flex items-center gap-1.5">
+                  <AudioLines className="w-4 h-4 text-amber-400" />
+                  {voiceConfig.flag} {voiceConfig.nativeName} ({voiceConfig.code})
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  stopListening();
+                  setIsVoiceOverlayOpen(false);
+                }}
+                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white cursor-pointer transition-colors"
+                title="Close Voice Assistant"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Center: Pulsating Microphone & Soundwaves */}
+            <div className="flex flex-col items-center justify-center text-center space-y-6 my-auto">
+              {/* Pulsing Mic Ring */}
+              <div className="relative flex items-center justify-center">
+                <div className={`absolute -inset-6 rounded-full bg-gradient-to-r from-amber-500/30 via-yellow-400/20 to-amber-600/30 blur-xl ${isListening ? 'animate-pulse' : ''}`} />
+                <div className={`absolute -inset-3 rounded-full border-2 border-amber-400/40 ${isListening ? 'animate-ping duration-1000' : ''}`} />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isListening) {
+                      stopListening();
+                    } else {
+                      startListening();
+                    }
+                  }}
+                  className={`relative w-24 h-24 rounded-full flex items-center justify-center shadow-2xl transition-all cursor-pointer active:scale-95 border-2 ${
+                    isListening
+                      ? 'bg-gradient-to-tr from-amber-500 via-amber-400 to-yellow-300 text-slate-950 border-amber-200 shadow-amber-500/50 scale-105'
+                      : 'bg-slate-800 text-amber-400 border-white/10 hover:border-amber-400'
+                  }`}
+                >
+                  <Mic className={`w-10 h-10 ${isListening ? 'stroke-[2.5]' : ''}`} />
+                </button>
+              </div>
+
+              {/* Status Header */}
+              <div className="space-y-1.5 max-w-md">
+                <h3 className="font-display font-black text-lg sm:text-xl text-white">
+                  {isListening ? voiceConfig.listeningText : voiceConfig.speakingPrompt}
+                </h3>
+                <p className="text-xs text-slate-400">
+                  {voiceConfig.speakingPrompt}
+                </p>
+              </div>
+
+              {/* Live Speech Recognition Transcript Box */}
+              <div className="w-full max-w-lg min-h-16 p-4 rounded-2xl bg-slate-900/90 border border-amber-400/30 text-center shadow-inner flex items-center justify-center">
+                {interimSpeechText ? (
+                  <p className="text-base sm:text-lg font-bold text-amber-300 animate-in fade-in">
+                    "{interimSpeechText}"
+                  </p>
+                ) : (
+                  <p className="text-xs text-slate-500 italic">
+                    🎙️ {voiceConfig.listeningText}
+                  </p>
+                )}
+              </div>
+
+              {/* Quick Spoken Question Prompts in Active Language */}
+              <div className="w-full max-w-lg space-y-2">
+                <span className="text-[11px] font-bold text-amber-400/80 uppercase tracking-wider block">
+                  💡 {t.recommendedForYou || 'Tap to ask instantly in'} {voiceConfig.nativeName}:
+                </span>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {voiceConfig.voiceSamplePrompts.map((sample, sIdx) => (
+                    <button
+                      key={sIdx}
+                      type="button"
+                      onClick={() => handleSelectVoicePrompt(sample)}
+                      className="px-3 py-1.5 rounded-full bg-slate-900 hover:bg-amber-500 hover:text-slate-950 text-slate-200 border border-white/10 hover:border-amber-400 text-xs font-semibold transition-all cursor-pointer active:scale-95 shadow-md flex items-center gap-1.5"
+                    >
+                      <span>🗣️</span>
+                      <span>"{sample}"</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Actions */}
+            <div className="flex items-center justify-center gap-3 pt-3 border-t border-white/10">
+              {interimSpeechText ? (
+                <button
+                  type="button"
+                  onClick={handleSendVoiceQuery}
+                  className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-black text-sm shadow-xl shadow-amber-500/30 hover:brightness-110 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                >
+                  <Send className="w-4 h-4 stroke-[2.5]" />
+                  <span>{voiceConfig.tapToStop}</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    stopListening();
+                    setIsVoiceOverlayOpen(false);
+                  }}
+                  className="px-5 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition-all cursor-pointer"
+                >
+                  {t.cancel || 'Cancel'}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

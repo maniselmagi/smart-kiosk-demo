@@ -46,6 +46,42 @@ const LANGUAGE_DETAILS: Record<string, LanguageMeta> = {
     greeting: '¡Hola y Bienvenidos!',
     sub: 'Español (Spanish)',
     description: 'Disfrute de nuestro menú gourmet en español'
+  },
+  ar: {
+    code: 'ar',
+    greeting: 'أهلاً وسهلاً!',
+    sub: 'العربية (Arabic)',
+    description: 'استكشف قائمتنا الفاخرة واطلب باللغة العربية'
+  },
+  fr: {
+    code: 'fr',
+    greeting: 'Bienvenue !',
+    sub: 'Français (French)',
+    description: 'Découvrez notre menu gastronomique en français'
+  },
+  de: {
+    code: 'de',
+    greeting: 'Herzlich Willkommen!',
+    sub: 'Deutsch (German)',
+    description: 'Entdecken Sie unsere Speisekarte auf Deutsch'
+  },
+  ko: {
+    code: 'ko',
+    greeting: '환영합니다!',
+    sub: '한국어 (Korean)',
+    description: '한국어로 고급 다이닝 메뉴를 확인하고 주문하세요'
+  },
+  kn: {
+    code: 'kn',
+    greeting: 'ಸುಸ್ವಾಗತ!',
+    sub: 'ಕನ್ನಡ (Kannada)',
+    description: 'ರುಚಿಕರವಾದ ತಿನಿಸುಗಳನ್ನು ಕನ್ನಡದಲ್ಲಿ ನೋಡಿ ಆರ್ಡರ್ ಮಾಡಿ'
+  },
+  ml: {
+    code: 'ml',
+    greeting: 'സ്വാഗതം!',
+    sub: 'മലയാളം (Malayalam)',
+    description: 'രുചികരമായ വിഭവങ്ങൾ മലയാളത്തിൽ കണ്ട് ഓർഡർ ചെയ്യൂ'
   }
 };
 

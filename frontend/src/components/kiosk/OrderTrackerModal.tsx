@@ -444,7 +444,47 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
 
                 <p className="text-xs text-slate-400 leading-relaxed">
                   {isDelayed
-                    ? 'Our chef is ensuring precision seasoning and heat before dispatching.'
+                    ? language === 'ta'
+                      ? 'எங்கள் செஃப் சுவை மற்றும் பக்குவத்தை சரிபார்த்து பரிமாறத் தயார் செய்கிறார்.'
+                      : language === 'hi'
+                      ? 'हमारे शेफ परोसने से पहले स्वाद और तापमान की जांच कर रहे हैं।'
+                      : language === 'te'
+                      ? 'మా చెఫ్ రుచిని సరిచూసి వడ్డించడానికి సిద్ధం చేస్తున్నారు.'
+                      : language === 'es'
+                      ? 'Nuestro chef está asegurando la sazón y temperatura ideales antes de servir.'
+                      : language === 'ar'
+                      ? 'يقوم الشيف بضبط النكهات والتوابل بدقة قبل تقديمها لكم.'
+                      : language === 'fr'
+                      ? 'Notre chef peaufine l\'assaisonnement et la cuisson avant le service.'
+                      : language === 'de'
+                      ? 'Unser Küchenchef verfeinert das Gericht vor dem Servieren.'
+                      : language === 'ko'
+                      ? '셰프가 서빙 전 정성껏 조리와 간을 맞추고 있습니다.'
+                      : language === 'kn'
+                      ? 'ನಮ್ಮ ಬಾಣಸಿಗರು ಬಡಿಸುವ ಮುನ್ನ ರುಚಿಯನ್ನು ಪರಿಶೀಲಿಸುತ್ತಿದ್ದಾರೆ.'
+                      : language === 'ml'
+                      ? 'ഞങ്ങളുടെ ഷെഫ് വിളമ്പുന്നതിന് മുമ്പ് വിഭവങ്ങൾ പരിശോധിക്കുന്നു.'
+                      : 'Our chef is ensuring precision seasoning and heat before dispatching.'
+                    : language === 'ta'
+                    ? `மொத்த சமையலறை தயாரிப்பு நேரம்: ${activeOrder.estimatedPrepTime || 12} நிமிடங்கள். உடனுக்குடன் சுடச்சுட சமைக்கப்படுகிறது.`
+                    : language === 'hi'
+                    ? `कुल रसोई तैयारी समय: ${activeOrder.estimatedPrepTime || 12} मिनट। गरमा-गरम ताज़ा पकाया गया।`
+                    : language === 'te'
+                    ? `మొత్తం వంట సమయం: ${activeOrder.estimatedPrepTime || 12} నిమిషాలు. తాజాగా వండబడుతోంది.`
+                    : language === 'es'
+                    ? `Tiempo total de preparación: ${activeOrder.estimatedPrepTime || 12} minutos. Preparado al momento.`
+                    : language === 'ar'
+                    ? `مدة التحضير في المطبخ: ${activeOrder.estimatedPrepTime || 12} دقيقة. يُطهى طازجاً عند الطلب.`
+                    : language === 'fr'
+                    ? `Temps de préparation: ${activeOrder.estimatedPrepTime || 12} minutes. Cuisiné frais sur commande.`
+                    : language === 'de'
+                    ? `Gesamte Zubereitungszeit: ${activeOrder.estimatedPrepTime || 12} Minuten. Frisch auf Bestellung zubereitet.`
+                    : language === 'ko'
+                    ? `총 주방 조리 시간: 약 ${activeOrder.estimatedPrepTime || 12}분. 주문 즉시 신선하게 조리됩니다.`
+                    : language === 'kn'
+                    ? `ಒಟ್ಟು ಸಿದ್ಧತೆ ಸಮಯ: ${activeOrder.estimatedPrepTime || 12} ನಿಮಿಷಗಳು. ತಾಜಾವಾಗಿ ಬೇಯಿಸಲಾಗುತ್ತಿದೆ.`
+                    : language === 'ml'
+                    ? `ആകെ തയ്യാറാക്കൽ സമയം: ${activeOrder.estimatedPrepTime || 12} മിനിറ്റ്. ഓർഡർ അനുസരിച്ച് പുതുതായി പാകം ചെയ്യുന്നു.`
                     : `Total kitchen prep window: ${activeOrder.estimatedPrepTime || 12} minutes. Cooked fresh to order.`}
                 </p>
 

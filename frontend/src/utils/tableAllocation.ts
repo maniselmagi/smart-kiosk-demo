@@ -241,5 +241,245 @@ export const getLocalizedTableAllocation = (personCount: number, lang: string = 
     }
   }
 
+  if (lang === 'ar') {
+    if (count <= 2) {
+      return {
+        ...base,
+        category: 'طاولة نافذة ثنائية هادئة (إطلالة على الحديقة)',
+        ambienceBadge: 'طاولة زوجية مريحة',
+        zoneDescription: 'الطابق الأرضي • زاوية الحديقة الهادئة',
+        suitableFor: 'مثالية لتناول الطعام الفردي أو للأزواج',
+        features: ['إطلالة خلابة على الحديقة', 'إضاءة دافئة مريحة', 'ترتيب ثنائي أنيق', 'خدمة سريعة']
+      };
+    } else if (count <= 4) {
+      return {
+        ...base,
+        category: 'كابينة عائلية مريحة بـ 4 مقاعد',
+        ambienceBadge: 'كابينة عائلية متميزة',
+        zoneDescription: 'جناح القاعة • كابينة بمسند ظهر مرتفع',
+        suitableFor: 'مثالية للعائلات المكونة من 3 إلى 4 أفراد مع أطفال',
+        features: ['وسائد مخملية فاخرة', 'كرسي أطفال متوفر', 'طاولة واسعة للأطباق', 'خصوصية شبه تامة']
+      };
+    } else if (count <= 6) {
+      return {
+        ...base,
+        category: 'طاولة مأدبة عائلية بـ 6 مقاعد',
+        ambienceBadge: 'مأدبة عائلية مركزية',
+        zoneDescription: 'بهو الطعام الرئيسي • جناح العنبر الملكي',
+        suitableFor: 'مساحة فسيحة للعائلات الكبيرة ولقاءات الأصدقاء',
+        features: ['طاولة من خشب الساج الصلب', 'صينية دوارة جاهزة', 'نادل سريع مخصص', 'مقاعد مريحة عريضة']
+      };
+    } else {
+      return {
+        ...base,
+        category: 'مأدبة إمبراطورية ملكية فاخرة لأكثر من 10 ضيوف',
+        ambienceBadge: 'مأدبة ملكية كبرى',
+        zoneDescription: 'الطابق الأول • جناح المهراجا الملكي',
+        suitableFor: 'طاولة مخصصة للاحتفالات الكبرى والعائلات الكبيرة',
+        features: ['صينية دوارة 360 درجة', 'خدمة كابتن الجناح المخصصة', 'أجواء كبار الشخصيات VIP', 'مساحة لأطباق متعددة']
+      };
+    }
+  }
+
+  if (lang === 'fr') {
+    if (count <= 2) {
+      return {
+        ...base,
+        category: 'Table Intime 2 Places Près de la Fenêtre',
+        ambienceBadge: 'Table Duo Paisible',
+        zoneDescription: 'Rez-de-chaussée • Coin Jardin Calme',
+        suitableFor: 'Idéale pour les personnes seules ou les couples',
+        features: ['Vue sur le jardin', 'Éclairage tamisé chaleureux', 'Disposition duo intime', 'Service rapide']
+      };
+    } else if (count <= 4) {
+      return {
+        ...base,
+        category: 'Banquette Familiale Coussinée 4 Places',
+        ambienceBadge: 'Banquette Familiale Confortable',
+        zoneDescription: 'Aile Pavillon • Banquette Haute Confortable',
+        suitableFor: 'Parfait pour les familles avec enfants (3 à 4 personnes)',
+        features: ['Coussins velours grand confort', 'Chaise haute pour enfant', 'Grande surface de table', 'Intimité préservée']
+      };
+    } else if (count <= 6) {
+      return {
+        ...base,
+        category: 'Table de Banquet Familial 6 Places',
+        ambienceBadge: 'Banquet Familial Central',
+        zoneDescription: 'Atrium Principal • Pavillon Ambre Central',
+        suitableFor: 'Spacieux pour les grandes familles et les réunions d\'amis',
+        features: ['Table en teck massif', 'Plateau tournant central', 'Serveur dédié rapide', 'Fauteuils confortables']
+      };
+    } else {
+      return {
+        ...base,
+        category: 'Grand Banquet Royal Impérial 10+ Places',
+        ambienceBadge: 'Banquet Royal d\'Honneur',
+        zoneDescription: 'Mezzanine 1er Étage • Pavillon Maharaja',
+        suitableFor: 'Table de gala pour grandes célébrations familiales',
+        features: ['Plateau tournant Lazy Susan 360°', 'Maître d\'hôtel dédié', 'Ambiance VIP royale', 'Service multi-plats']
+      };
+    }
+  }
+
+  if (lang === 'de') {
+    if (count <= 2) {
+      return {
+        ...base,
+        category: 'Gemütlicher 2-Sitzer-Fenstertisch (Gartenblick)',
+        ambienceBadge: 'Ruhiger Paartisch',
+        zoneDescription: 'Erdgeschoss • Ruhige Gartenecke',
+        suitableFor: 'Perfekt für Alleinreisende oder Paare',
+        features: ['Schöner Gartenblick', 'Warmes Wohlfühllicht', 'Kompakte Duo-Ausstattung', 'Zügige Bedienung']
+      };
+    } else if (count <= 4) {
+      return {
+        ...base,
+        category: 'Gepolsterte 4-Sitzer-Familiennische',
+        ambienceBadge: 'Komfortable Familiennische',
+        zoneDescription: 'Pavillon-Flügel • Komfortable Nische mit hoher Lehne',
+        suitableFor: 'Ideal für Familien mit Kindern (3 bis 4 Personen)',
+        features: ['Weiche Samtpolster', 'Kinderstuhl-freundlich', 'Großzügige Tischfläche', 'Halbprivate Nische']
+      };
+    } else if (count <= 6) {
+      return {
+        ...base,
+        category: '6-Sitzer-Familienbanketttisch',
+        ambienceBadge: 'Zentrales Familienbankett',
+        zoneDescription: 'Hauptspeisesaal • Zentraler Bernsteinpavillon',
+        suitableFor: 'Viel Platz für größere Familien und Freundesgruppen',
+        features: ['Massiver Teakholztisch', 'Drehteller vorhanden', 'Eigener schneller Kellner', 'Breite Armlehnstühle']
+      };
+    } else {
+      return {
+        ...base,
+        category: 'Königliches Kaiserbankett für 10+ Personen',
+        ambienceBadge: 'Großes Königsbankett',
+        zoneDescription: '1. Obergeschoss • Maharaja-Pavillon',
+        suitableFor: 'Festtafel für große Familien- und Jubiläumsfeiern',
+        features: ['360° Drehteller Lazy Susan', 'Eigener Service-Kapitän', 'Exklusives VIP-Ambiente', 'Mehrgängige Servierfläche']
+      };
+    }
+  }
+
+  if (lang === 'ko') {
+    if (count <= 2) {
+      return {
+        ...base,
+        category: '창가 2인 아늑한 테이블 (정원 전망)',
+        ambienceBadge: '조용한 커플석',
+        zoneDescription: '1층 • 고요한 정원 창가 코너',
+        suitableFor: '혼밥 또는 오붓한 커플 식사에 최적',
+        features: ['아름다운 정원 전망', '은은하고 따뜻한 조명', '컴팩트한 2인 세팅', '신속한 코스 서빙']
+      };
+    } else if (count <= 4) {
+      return {
+        ...base,
+        category: '쿠션형 4인 패밀리 부스석',
+        ambienceBadge: '안락한 패밀리 부스',
+        zoneDescription: '파빌리온 윙 • 높은 등받이의 편안한 부스',
+        suitableFor: '자녀를 동반한 3~4인 가족 식사에 최적',
+        features: ['고급 벨벳 쿠션', '유아용 의자 제공', '넓은 식탁 공간', '아늑한 반독립형 좌석']
+      };
+    } else if (count <= 6) {
+      return {
+        ...base,
+        category: '6인 패밀리 뱅킷 연회 테이블',
+        ambienceBadge: '중앙 패밀리 뱅킷',
+        zoneDescription: '메인 다이닝 홀 • 센트럴 앰버 파빌리온',
+        suitableFor: '대가족 및 단체 친구 모임에 넉넉한 공간',
+        features: ['고급 티크 원목 식탁', '중앙 회전 턴테이블 완비', '전담 서빙 러너 배치', '넓은 팔걸이 의자']
+      };
+    } else {
+      return {
+        ...base,
+        category: '10인 이상 그랜드 로얄 임페리얼 뱅킷',
+        ambienceBadge: '그랜드 로얄 대연회석',
+        zoneDescription: '2층 메자닌 • 로얄 마하라자 파빌리온',
+        suitableFor: '대규모 가족 축하연 및 단체 연회에 최적',
+        features: ['360도 회전 레이지 수잔', '구역 전담 캡틴 서비스', 'VIP 프라이빗 연회 분위기', '다채로운 코스 요리 배치']
+      };
+    }
+  }
+
+  if (lang === 'kn') {
+    if (count <= 2) {
+      return {
+        ...base,
+        category: '2 ಆಸನಗಳ ಕಿಟಕಿ ಬದಿಯ ಶಾಂತ ಟೇಬಲ್ (ಉದ್ಯಾನವನ ನೋಟ)',
+        ambienceBadge: 'ಆರಾಮದಾಯಕ ಜೋಡಿ ಟೇಬಲ್',
+        zoneDescription: 'ನೆಲ ಮಹಡಿ • ಉದ್ಯಾನವನದ ಕಿಟಕಿ ಮೂಲೆ',
+        suitableFor: 'ಏಕವ್ಯಕ್ತಿ ಅಥವಾ ಜೋಡಿ ಊಟಕ್ಕೆ ಅತ್ಯುತ್ತಮ ಆಯ್ಕೆ',
+        features: ['ಸುಂದರ ಉದ್ಯಾನವನ ನೋಟ', 'ಮೃದುವಾದ ಬೆಳಕು', 'ಕಾಂಪ್ಯಾಕ್ಟ್ ಸೆಟಪ್', 'ತ್ವರಿತ ಸೇವೆ']
+      };
+    } else if (count <= 4) {
+      return {
+        ...base,
+        category: '4 ಆಸನಗಳ ಆರಾಮದಾಯಕ ಕುಟುಂಬ ಬೂತ್',
+        ambienceBadge: 'ಕುಟುಂಬದ ಬೂತ್',
+        zoneDescription: 'ಪೆವಿಲಿಯನ್ ವಿಭಾಗ • ಹೈ-ಬ್ಯಾಕ್ ಬೂತ್',
+        suitableFor: 'ಮಕ್ಕಳಿರುವ 3-4 ಜನರ ಕುಟುಂಬಕ್ಕೆ ಸೂಕ್ತ',
+        features: ['ವೆಲ್ವೆಟ್ ಕುಶನ್‌ಗಳು', 'ಮಕ್ಕಳ ಕುರ್ಚಿ ಲಭ್ಯ', 'ವಿಶಾಲವಾದ ಮೇಜು', 'ಅರೆ-ಖಾಸಗಿ ಸ್ಥಳ']
+      };
+    } else if (count <= 6) {
+      return {
+        ...base,
+        category: '6 ಆಸನಗಳ ಕುಟುಂಬ ಬ್ಯಾಂಕ್ವೆಟ್ ಟೇಬಲ್',
+        ambienceBadge: 'ಕೇಂದ್ರ ಕುಟುಂಬ ಬ್ಯಾಂಕ್ವೆಟ್',
+        zoneDescription: 'ಮುಖ್ಯ ಊಟದ ಸಭಾಂಗಣ • ಆಂಬರ್ ಪೆವಿಲಿಯನ್',
+        suitableFor: 'ದೊಡ್ಡ ಕುಟುಂಬಗಳು ಮತ್ತು ಸ್ನೇಹಿತರ ಸಭೆಗಳಿಗೆ ಸೂಕ್ತ',
+        features: ['ತೇಗದ ಮರದ ಟೇಬಲ್', 'ತಿರುಗುವ ತಟ್ಟೆ ಸೌಲಭ್ಯ', 'ಮೀಸಲಾದ ವೇಗದ ಪರಿಚಾರಕ', 'ವಿಶಾಲ ಕುರ್ಚಿಗಳು']
+      };
+    } else {
+      return {
+        ...base,
+        category: '10+ ಆಸನಗಳ ಗ್ರ್ಯಾಂಡ್ ರಾಯಲ್ ಬ್ಯಾಂಕ್ವೆಟ್',
+        ambienceBadge: 'ಭವ್ಯ ರಾಯಲ್ ಬ್ಯಾಂಕ್ವೆಟ್',
+        zoneDescription: 'ಮೊದಲ ಮಹಡಿ • ಮಹಾರಾಜ ಪೆವಿಲಿಯನ್',
+        suitableFor: 'ದೊಡ್ಡ ಆಚರಣೆಗಳು ಮತ್ತು ಸಮಾರಂಭಗಳಿಗೆ ಸೂಕ್ತ',
+        features: ['360° ತಿರುಗುವ ಮೇಜು', 'ವಿಭಾಗದ ಕ್ಯಾಪ್ಟನ್ ಸೇವೆ', 'ವಿಐಪಿ ವಾತಾವರಣ', 'ಬಹು-ಪದಾರ್ಥಗಳ ವ್ಯವಸ್ಥೆ']
+      };
+    }
+  }
+
+  if (lang === 'ml') {
+    if (count <= 2) {
+      return {
+        ...base,
+        category: '2 സീറ്റർ ജനൽക്കര ടേബിൾ (പൂന്തോട്ട കാഴ്ച)',
+        ambienceBadge: 'ശാന്തമായ കപ്പിൾ ടേബിൾ',
+        zoneDescription: 'താഴത്തെ നില • പൂന്തോട്ട ജനൽക്കര',
+        suitableFor: 'ഏകാംഗ അല്ലെങ്കിൽ ജോഡി ഭക്ഷണത്തിന് ഏറ്റവും അനുയോജ്യം',
+        features: ['മനോഹരമായ പൂന്തോട്ട കാഴ്ച', 'സുഖകരമായ ലൈറ്റിംഗ്', 'കോംപാക്റ്റ് സെറ്റപ്പ്', 'വേഗത്തിലുള്ള സേവനം']
+      };
+    } else if (count <= 4) {
+      return {
+        ...base,
+        category: '4 സീറ്റർ കുഷ്യൻ ഫാമിലി ബൂത്ത്',
+        ambienceBadge: 'സൗകര്യപ്രദമായ ഫാമിലി ബൂത്ത്',
+        zoneDescription: 'പവലിയൻ വിംഗ് • ഹൈ-ബാക്ക് ബൂത്ത്',
+        suitableFor: '3-4 പേരുള്ള കുടുംബങ്ങൾക്ക് ഏറ്റവും ഉചിതം',
+        features: ['വെൽവെറ്റ് കുഷ്യനുകൾ', 'കുട്ടികളുടെ കസേര സൗകര്യം', 'വിശാലമായ ടേബിൾടോപ്പ്', 'സെമി-പ്രൈവറ്റ് ഇടം']
+      };
+    } else if (count <= 6) {
+      return {
+        ...base,
+        category: '6 സീറ്റർ ഫാമിലി ബാങ്ക്വെറ്റ് ടേബിൾ',
+        ambienceBadge: 'സെൻട്രൽ ഫാമിലി ബാങ്ക്വെറ്റ്',
+        zoneDescription: 'പ്രധാന ഡൈനിംഗ് ഹാൾ • ആംബർ പവലിയൻ',
+        suitableFor: 'വലിയ കുടുംബങ്ങൾക്കും സുഹൃദ് കൂട്ടായ്മകൾക്കും അനുയോജ്യം',
+        features: ['തേക്ക് തടി ബാങ്ക്വെറ്റ് ടേബിൾ', 'ടേൺടേബിൾ റെഡി', 'പ്രത്യേക കിച്ചൻ റണ്ണർ', 'വിശാലമായ കസേരകൾ']
+      };
+    } else {
+      return {
+        ...base,
+        category: '10+ സീറ്റർ ഗ്രാൻഡ് റോയൽ ഇംപീരിയൽ ബാങ്ക്വെറ്റ്',
+        ambienceBadge: 'ഗ്രാൻഡ് റോയൽ ബാങ്ക്വെറ്റ്',
+        zoneDescription: 'ഒന്നാം നില • മഹാരാജ പവലിയൻ',
+        suitableFor: 'വലിയ കുടുംബ ആഘോഷങ്ങൾക്കും സദ്യകൾക്കും ഉചിതം',
+        features: ['360° കറങ്ങുന്ന ലേസി സൂസൻ', 'പ്രത്യേക സെക്ഷൻ ക്യാപ്റ്റൻ സർവീസ്', 'വിഐപി ബാങ്ക്വെറ്റ് അന്തരീക്ഷം', 'മൾട്ടി-കോഴ്സ് പ്ലേറ്റർ']
+      };
+    }
+  }
+
   return base;
 };

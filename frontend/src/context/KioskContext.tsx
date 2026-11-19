@@ -240,7 +240,8 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, []);
   const [language, setLanguageState] = useState<Language>(() => {
     const saved = storageService.getLanguage();
-    if (saved === 'ta' || saved === 'hi' || saved === 'te' || saved === 'es' || saved === 'en') {
+    const VALID_LANGS: Language[] = ['en', 'ta', 'hi', 'te', 'es', 'ar', 'fr', 'de', 'ko', 'kn', 'ml'];
+    if (saved && VALID_LANGS.includes(saved as Language)) {
       return saved as Language;
     }
     return 'en';

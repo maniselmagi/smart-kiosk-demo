@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useKiosk } from '../../context/KioskContext';
 import { MenuItem, Order } from '../../types';
 import { 
@@ -26,6 +26,7 @@ import {
   AVAILABLE_QUESTION_PROMPTS 
 } from '../../services/aiConciergeService';
 import { getAssignedWaiter } from '../../utils/waiterAssignment';
+import { getLocalizedItemName, getLocalizedItemDescription } from '../../utils/translations';
 
 interface AIChatModalProps {
   isOpen: boolean;
@@ -49,7 +50,9 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
     showToast, 
     activeOrders, 
     currentTrackedOrder,
-    callWaiter
+    callWaiter,
+    language,
+    t
   } = useKiosk();
 
   const assignedWaiter = getAssignedWaiter(tableNumber);
@@ -59,25 +62,44 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
   const [isTyping, setIsTyping] = useState(false);
   const [addedItemIds, setAddedItemIds] = useState<Record<string, boolean>>({});
 
-  // Initial welcome message
-  const initialMessages: AIResponse[] = [
-    {
+  // Localized welcome greeting factory
+  const initialGreeting = useMemo<AIResponse>(() => {
+    const rawGreeting = t.aiChatGreeting || "Namaste & Welcome to Table {table}! I am Kio, your dedicated AI dining concierge at Royal Ember. You can ask me about our Signature dishes, top ratings, opening hours, spice customizations, or call your waiter. How may I assist you today?";
+    const text = rawGreeting.replace('{table}', tableNumber.toString());
+
+    return {
       id: 'welcome-1',
       sender: 'ai',
-      text: `👑 **Namaste & Welcome to Table ${tableNumber}!**\n\nI am **Kio**, your dedicated AI dining assistant at Royal Ember.\n\nYou can ask me about our **Signature creations**, **Top-rated dishes (4.8★+)**, **Shop opening & closing hours**, dietary customizations, or table assistance. How may I assist you today?`,
+      text,
       suggestedQuestions: [
-        '👑 Which foods are your Signatures?',
-        '⭐ Which foods have excellent rating?',
-        '🕒 What is the shop opening and closing time?',
-        '🌿 Show Pure Vegetarian specialties',
-        '🔔 Call my assigned waiter'
+        `👑 ${t.aiChatQuickSignatures || 'Signature Foods'}`,
+        `⭐ ${t.aiChatQuickTopRated || 'Top Rated (4.8★+)'}`,
+        `🕒 ${t.aiChatQuickTimings || 'Shop Timings'}`,
+        `🌿 ${t.aiChatQuickVeg || 'Pure Veg'}`,
+        `🔔 ${t.aiChatQuickCallWaiter || 'Call Waiter'}`
       ],
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }
-  ];
+    };
+  }, [language, tableNumber, t]);
 
-  const [messages, setMessages] = useState<AIResponse[]>(initialMessages);
+  const [messages, setMessages] = useState<AIResponse[]>([initialGreeting]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const prevLangRef = useRef(language);
+
+  // Update initial message and reset chat when language changes
+  useEffect(() => {
+    if (prevLangRef.current !== language) {
+      prevLangRef.current = language;
+      setMessages([initialGreeting]);
+    } else {
+      setMessages(prev => {
+        if (prev.length <= 1) {
+          return [initialGreeting];
+        }
+        return prev;
+      });
+    }
+  }, [language, initialGreeting]);
 
   // Auto-scroll to bottom of conversation
   const scrollToBottom = () => {
@@ -115,7 +137,8 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
         menuItems,
         tableNumber,
         assignedWaiter.fullName,
-        activeOrder
+        activeOrder,
+        language
       );
       setMessages(prev => [...prev, response]);
       setIsTyping(false);
@@ -127,7 +150,8 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
     e.stopPropagation();
     addToCart(item, 'Mild', [], 'Ordered via Kio AI', 1);
     setAddedItemIds(prev => ({ ...prev, [item.id]: true }));
-    showToast(`✨ Added 1× ${item.name} (₹${item.price}) to cart!`);
+    const localizedName = getLocalizedItemName(item, language);
+    showToast(`✨ ${localizedName} (₹${item.price}) ${t.added}`);
 
     setTimeout(() => {
       setAddedItemIds(prev => ({ ...prev, [item.id]: false }));
@@ -141,7 +165,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
       if (onCallWaiterModal) {
         onCallWaiterModal();
       } else {
-        showToast(`🔔 Waiter ${assignedWaiter.fullName} alerted for Table ${tableNumber}!`);
+        showToast(`🔔 ${assignedWaiter.fullName} - ${t.staffNotified || 'Staff Notified'}!`);
       }
     } else if (action.type === 'track_order') {
       if (onOpenOrderTracker) {
@@ -155,8 +179,8 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
 
   // Reset conversation to fresh start
   const handleResetChat = () => {
-    setMessages(initialMessages);
-    showToast('🔄 Kio conversation cleared.');
+    setMessages([initialGreeting]);
+    showToast('🔄 Kio conversation reset.');
   };
 
   return (
@@ -185,19 +209,19 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                 <h3 className="font-display font-black text-base sm:text-lg text-white tracking-tight flex items-center gap-2">
                   <span>Kio</span>
                   <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-gradient-to-r from-violet-500/20 to-amber-500/20 text-amber-300 border border-amber-400/40">
-                    AI Chatbox
+                    {t.aiChatLabel || 'AI Chatbox'}
                   </span>
                 </h3>
               </div>
               <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
                 <span className="flex items-center gap-1 text-emerald-400 font-semibold text-[11px]">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Live Table Assistant
+                  {t.aiChatLiveAssistant || 'Live Table Assistant'}
                 </span>
                 <span>•</span>
-                <span className="text-amber-300/90 font-medium text-[11px]">Table {tableNumber}</span>
+                <span className="text-amber-300/90 font-medium text-[11px]">{t.table} {tableNumber}</span>
                 <span>•</span>
-                <span className="text-slate-400 text-[11px]">Server: {assignedWaiter.name}</span>
+                <span className="text-slate-400 text-[11px]">{t.serverLabel || 'Server'}: {assignedWaiter.name}</span>
               </div>
             </div>
           </div>
@@ -230,45 +254,45 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
           </span>
           <button
             type="button"
-            onClick={() => handleSendMessage('Which foods are signature?')}
+            onClick={() => handleSendMessage(t.aiChatQuickSignatures || 'Signature Foods')}
             className="px-2.5 py-1 rounded-full bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[11px] font-bold shrink-0 transition-all active:scale-95 cursor-pointer flex items-center gap-1"
           >
-            <Crown className="w-3 h-3" /> Signature Foods
+            <Crown className="w-3 h-3" /> {t.aiChatQuickSignatures || 'Signature Foods'}
           </button>
           <button
             type="button"
-            onClick={() => handleSendMessage('Which foods have excellent rating?')}
+            onClick={() => handleSendMessage(t.aiChatQuickTopRated || 'Top Rated (4.8★+)')}
             className="px-2.5 py-1 rounded-full bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-300 border border-yellow-400/30 text-[11px] font-bold shrink-0 transition-all active:scale-95 cursor-pointer flex items-center gap-1"
           >
-            <Star className="w-3 h-3" /> Top Rated (4.8★+)
+            <Star className="w-3 h-3" /> {t.aiChatQuickTopRated || 'Top Rated (4.8★+)'}
           </button>
           <button
             type="button"
-            onClick={() => handleSendMessage('What is the shop opening and closing time?')}
+            onClick={() => handleSendMessage(t.aiChatQuickTimings || 'Shop Timings')}
             className="px-2.5 py-1 rounded-full bg-emerald-400/10 hover:bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 text-[11px] font-bold shrink-0 transition-all active:scale-95 cursor-pointer flex items-center gap-1"
           >
-            <Clock className="w-3 h-3" /> Shop Timings
+            <Clock className="w-3 h-3" /> {t.aiChatQuickTimings || 'Shop Timings'}
           </button>
           <button
             type="button"
-            onClick={() => handleSendMessage('Show Pure Vegetarian specialties')}
+            onClick={() => handleSendMessage(t.aiChatQuickVeg || 'Pure Veg')}
             className="px-2.5 py-1 rounded-full bg-teal-400/10 hover:bg-teal-400/20 text-teal-300 border border-teal-400/30 text-[11px] font-bold shrink-0 transition-all active:scale-95 cursor-pointer flex items-center gap-1"
           >
-            🌿 Pure Veg
+            🌿 {t.aiChatQuickVeg || 'Pure Veg'}
           </button>
           <button
             type="button"
-            onClick={() => handleSendMessage('Recommend mild / non-spicy dishes for kids')}
+            onClick={() => handleSendMessage(t.aiChatQuickMild || 'Mild for Kids')}
             className="px-2.5 py-1 rounded-full bg-sky-400/10 hover:bg-sky-400/20 text-sky-300 border border-sky-400/30 text-[11px] font-bold shrink-0 transition-all active:scale-95 cursor-pointer flex items-center gap-1"
           >
-            🌶️ Mild for Kids
+            🌶️ {t.aiChatQuickMild || 'Mild for Kids'}
           </button>
           <button
             type="button"
-            onClick={() => handleSendMessage('How do I call my waiter?')}
+            onClick={() => handleSendMessage(t.aiChatQuickCallWaiter || 'Call Waiter')}
             className="px-2.5 py-1 rounded-full bg-rose-400/10 hover:bg-rose-400/20 text-rose-300 border border-rose-400/30 text-[11px] font-bold shrink-0 transition-all active:scale-95 cursor-pointer flex items-center gap-1"
           >
-            <Bell className="w-3 h-3" /> Call Waiter
+            <Bell className="w-3 h-3" /> {t.aiChatQuickCallWaiter || 'Call Waiter'}
           </button>
         </div>
 
@@ -299,8 +323,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                   >
                     <div className="whitespace-pre-line prose prose-invert prose-xs max-w-none">
                       {msg.text.split('\n').map((line, idx) => {
-                        // Custom minimal markdown parser for bold, lists, and emojis
-                        if (line.startsWith('👑 ') || line.startsWith('⭐ ') || line.startsWith('🕒 ') || line.startsWith('🌿 ') || line.startsWith('🌶️ ') || line.startsWith('🔔 ') || line.startsWith('💳 ') || line.startsWith('🍳 ') || line.startsWith('📋 ') || line.startsWith('🌧️ ') || line.startsWith('🎉 ') || line.startsWith('💪 ') || line.startsWith('📶 ') || line.startsWith('📍 ')) {
+                        if (line.startsWith('👑 ') || line.startsWith('⭐ ') || line.startsWith('🕒 ') || line.startsWith('🌿 ') || line.startsWith('🌶️ ') || line.startsWith('🔔 ') || line.startsWith('💳 ') || line.startsWith('🍳 ') || line.startsWith('📋 ') || line.startsWith('🌧️ ') || line.startsWith('🎉 ') || line.startsWith('💪 ') || line.startsWith('📶 ') || line.startsWith('📍 ') || line.startsWith('🤖 ')) {
                           return (
                             <h4 key={idx} className="font-display font-black text-amber-300 text-sm mb-1 mt-0.5">
                               {line.replace(/\*\*/g, '')}
@@ -328,11 +351,14 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                     </div>
                   </div>
 
-                  {/* INTERACTIVE MENU ITEM CARDS (If response has dish recommendations) */}
+                  {/* INTERACTIVE MENU ITEM CARDS */}
                   {msg.highlightItems && msg.highlightItems.length > 0 && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 w-full">
                       {msg.highlightItems.map((item) => {
                         const isAdded = addedItemIds[item.id];
+                        const localizedName = getLocalizedItemName(item, language);
+                        const localizedDesc = getLocalizedItemDescription(item, language);
+
                         return (
                           <div 
                             key={item.id}
@@ -341,14 +367,14 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                           >
                             <img 
                               src={item.image} 
-                              alt={item.name} 
+                              alt={localizedName} 
                               className="w-16 h-16 rounded-xl object-cover border border-white/10 shrink-0 group-hover:scale-105 transition-transform" 
                             />
                             <div className="flex-1 min-w-0 flex flex-col justify-between">
                               <div>
                                 <div className="flex items-center justify-between gap-1">
                                   <h5 className="font-bold text-xs text-white truncate group-hover:text-amber-400 transition-colors">
-                                    {item.name}
+                                    {localizedName}
                                   </h5>
                                   <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-amber-400/15 text-amber-300 text-[10px] font-black shrink-0">
                                     <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
@@ -356,7 +382,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                                   </div>
                                 </div>
                                 <p className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">
-                                  {item.description}
+                                  {localizedDesc}
                                 </p>
                               </div>
 
@@ -378,12 +404,12 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                                   {isAdded ? (
                                     <>
                                       <Check className="w-3 h-3 stroke-[3]" />
-                                      <span>Added</span>
+                                      <span>{t.aiChatQuickAdded || 'Added'}</span>
                                     </>
                                   ) : (
                                     <>
                                       <Plus className="w-3 h-3 stroke-[3]" />
-                                      <span>Add ₹{item.price}</span>
+                                      <span>{t.aiChatQuickAdd || 'Add'} ₹{item.price}</span>
                                     </>
                                   )}
                                 </button>
@@ -412,7 +438,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                     <div className="space-y-1.5 pt-1 w-full">
                       {msg.isFallback && (
                         <span className="text-[10px] uppercase font-bold tracking-wider text-amber-400/90 block">
-                          Suggested Available Questions:
+                          {t.recommendedForYou || 'Suggested Topics'}:
                         </span>
                       )}
                       <div className="flex flex-wrap gap-1.5">
@@ -444,7 +470,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                 <span className="w-2 h-2 rounded-full bg-amber-400 animate-bounce" style={{ animationDelay: '0ms' }} />
                 <span className="w-2 h-2 rounded-full bg-amber-400 animate-bounce" style={{ animationDelay: '150ms' }} />
                 <span className="w-2 h-2 rounded-full bg-amber-400 animate-bounce" style={{ animationDelay: '300ms' }} />
-                <span className="text-[11px] text-slate-400 ml-1 font-medium">Kio is thinking...</span>
+                <span className="text-[11px] text-slate-400 ml-1 font-medium">{t.aiChatThinking || 'Kio is thinking...'}</span>
               </div>
             </div>
           )}
@@ -464,7 +490,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
             type="text"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            placeholder="Ask Kio (e.g. Signature foods, top ratings, opening hours)..."
+            placeholder={t.aiChatPlaceholder || "Ask Kio (e.g. Signature foods, top ratings, opening hours)..."}
             className="flex-1 bg-slate-900 border border-white/10 focus:border-amber-400/60 rounded-2xl px-4 py-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-hidden focus:ring-1 focus:ring-amber-400/40 transition-all"
           />
 

@@ -38,7 +38,8 @@ const MainAppContent: React.FC = () => {
     tableNumber,
     completeAllTableOrders,
     isLanguageModalOpen,
-    setIsLanguageModalOpen
+    setIsLanguageModalOpen,
+    t
   } = useKiosk();
 
   // Kiosk inner sub-screen state: Step 1 (welcome) -> Step 2 (language) -> Step 3 (allocation) -> Step 4 (thankyou / menu)
@@ -126,7 +127,7 @@ const MainAppContent: React.FC = () => {
           <div className="bg-slate-950/95 border-b border-amber-500/20 px-4 py-2 flex items-center justify-between text-xs z-50">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="font-bold text-amber-300">Royal Ember Table Booking Kiosk (4-Screen Flow Mode)</span>
+              <span className="font-bold text-amber-300">Royal Ember • {t.tableBookingTitle || 'Table Booking Kiosk'}</span>
             </div>
             <div className="flex items-center gap-2">
               <a

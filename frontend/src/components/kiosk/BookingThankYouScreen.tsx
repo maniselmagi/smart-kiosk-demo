@@ -139,17 +139,17 @@ export const BookingThankYouScreen: React.FC<BookingThankYouScreenProps> = ({ on
             <div className="flex items-center gap-3">
               <div className="text-right">
                 <span className="text-[10px] uppercase font-bold text-slate-400 block leading-none">
-                  Reserved Dining Slot
+                  {t.reservedDiningSlot || 'Reserved Dining Slot'}
                 </span>
                 <span className="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5 mt-0.5">
                   <Clock className="w-3.5 h-3.5 text-amber-400" />
-                  <span>{selectedBookingDate || 'Today'} • {selectedTimeSlot || '07:45 PM'}</span>
+                  <span>{selectedBookingDate || (t.todayDateLabel || 'Today')} • {selectedTimeSlot || '07:45 PM'}</span>
                 </span>
               </div>
 
               <div className="px-2.5 py-1 rounded-xl bg-emerald-500/20 text-emerald-300 text-[11px] font-black border border-emerald-500/30 flex items-center gap-1">
                 <CheckCheck className="w-3.5 h-3.5" />
-                <span>CONFIRMED</span>
+                <span>{t.confirmedBadge || 'CONFIRMED'}</span>
               </div>
             </div>
           </div>
@@ -158,7 +158,7 @@ export const BookingThankYouScreen: React.FC<BookingThankYouScreenProps> = ({ on
             {/* Table Number with Royal Glow */}
             <div className="flex items-center gap-4 text-left">
               <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-700 flex flex-col items-center justify-center text-slate-950 shadow-xl shadow-amber-500/30 font-black shrink-0">
-                <span className="text-[9px] tracking-widest uppercase font-extrabold text-slate-900/80">TABLE</span>
+                <span className="text-[9px] tracking-widest uppercase font-extrabold text-slate-900/80">{t.table}</span>
                 <span className="text-2xl sm:text-3xl leading-none">#{assignedTable}</span>
               </div>
               <div>

@@ -519,7 +519,7 @@ export const PromoAdBanner: React.FC<PromoAdBannerProps> = ({ onSelectCategory }
               />
             ))}
             <span className="text-[10px] font-bold text-slate-400 ml-1.5">
-              Offer {currentSlide + 1} of {slides.length}
+              {language === 'ta' ? `ஆஃபர் ${currentSlide + 1} / ${slides.length}` : language === 'hi' ? `ऑफर ${currentSlide + 1} / ${slides.length}` : `Offer ${currentSlide + 1} of ${slides.length}`}
             </span>
           </div>
 

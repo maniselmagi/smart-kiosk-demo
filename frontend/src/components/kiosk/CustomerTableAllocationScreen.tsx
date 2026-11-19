@@ -458,7 +458,7 @@ export const CustomerTableAllocationScreen: React.FC<CustomerTableAllocationScre
                       : 'bg-slate-950 text-slate-400 hover:text-white border border-transparent'
                   }`}
                 >
-                  All Slots
+                  {t.allCategories || 'All Slots'}
                 </button>
                 <button
                   type="button"
@@ -539,7 +539,7 @@ export const CustomerTableAllocationScreen: React.FC<CustomerTableAllocationScre
                       {/* Period & Availability Badge */}
                       <div className="flex items-center justify-between text-[10px]">
                         <span className="text-slate-400 truncate">
-                          {slot.periodLabel}
+                          {slot.meal === 'lunch' ? (t.lunchSlots || slot.periodLabel) : slot.meal === 'tea' ? (t.teaSlots || slot.periodLabel) : (t.dinnerSlots || slot.periodLabel)}
                         </span>
 
                         {isCollision ? (
@@ -548,7 +548,7 @@ export const CustomerTableAllocationScreen: React.FC<CustomerTableAllocationScre
                           </span>
                         ) : slot.popularBadge ? (
                           <span className="text-[9px] font-bold text-amber-300 bg-amber-500/20 px-1.5 py-0.5 rounded border border-amber-500/30">
-                            {slot.popularBadge}
+                            {t.slotFillingFast || 'Filling Fast'}
                           </span>
                         ) : (
                           <span className="text-[9px] font-bold text-emerald-300 bg-emerald-500/10 px-1 py-0.5 rounded">
@@ -649,7 +649,7 @@ export const CustomerTableAllocationScreen: React.FC<CustomerTableAllocationScre
               {/* TABLE NUMBER HERO */}
               <div className="py-5 flex items-center gap-4">
                 <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-700 flex flex-col items-center justify-center text-slate-950 shadow-xl shadow-amber-500/30 shrink-0 font-black">
-                  <span className="text-[10px] font-extrabold tracking-widest uppercase text-slate-900/80">TABLE</span>
+                  <span className="text-[10px] font-extrabold tracking-widest uppercase text-slate-900/80">{t.table}</span>
                   <span className="text-3xl sm:text-4xl leading-none">#{currentTableNum}</span>
                 </div>
                 <div>
@@ -692,7 +692,7 @@ export const CustomerTableAllocationScreen: React.FC<CustomerTableAllocationScre
 
                 <div className="flex items-center gap-1 text-emerald-400 text-xs font-bold bg-emerald-500/10 px-2 py-1 rounded-full border border-emerald-500/20">
                   <CheckCheck className="w-3.5 h-3.5" />
-                  <span>On Duty</span>
+                  <span>{t.onDuty || 'On Duty'}</span>
                 </div>
               </div>
 
@@ -703,11 +703,11 @@ export const CustomerTableAllocationScreen: React.FC<CustomerTableAllocationScre
                   <span className="font-mono font-bold text-amber-300">#{ticketNumber}</span>
                 </div>
                 <div className="flex justify-between pb-2 border-b border-white/5">
-                  <span className="text-slate-400">Date & Slot</span>
-                  <span className="font-bold text-white">{localDate === todayStr ? 'Today' : 'Tomorrow'} • {localSlot}</span>
+                  <span className="text-slate-400">{t.dateAndSlot || 'Date & Slot'}</span>
+                  <span className="font-bold text-white">{localDate === todayStr ? (t.todayDateLabel || 'Today') : (t.tomorrowDateLabel || 'Tomorrow')} • {localSlot}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Party Size</span>
+                  <span className="text-slate-400">{t.partySize || 'Party Size'}</span>
                   <span className="font-bold text-amber-300">{localCount} {t.guestsCountLabel || 'Guests'}</span>
                 </div>
               </div>

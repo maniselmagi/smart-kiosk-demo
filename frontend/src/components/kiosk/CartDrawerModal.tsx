@@ -261,7 +261,7 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
                       {index + 1}
                     </div>
                     <span className="text-[9px] font-black uppercase text-slate-400 mt-0.5 tracking-tighter">
-                      {isFirst ? '1st' : isSecond ? '2nd' : isThird ? '3rd' : `${index + 1}th`}
+                      {language === 'ta' ? `${index + 1}-வது` : isFirst ? '1st' : isSecond ? '2nd' : isThird ? '3rd' : `${index + 1}th`}
                     </span>
                   </div>
 

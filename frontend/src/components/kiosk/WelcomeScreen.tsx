@@ -208,7 +208,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           <div className="inline-flex items-center justify-center gap-2 mb-1 sm:mb-1.5">
             <span className="h-[1px] w-6 sm:w-10 bg-amber-400/80" />
             <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.35em] text-amber-300 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-              Welcome To
+              {t.welcomeTo || 'Welcome To'}
             </span>
             <span className="h-[1px] w-6 sm:w-10 bg-amber-400/80" />
           </div>
@@ -222,7 +222,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           <div className="flex items-center justify-center gap-2.5 mt-1 sm:mt-1.5">
             <span className="h-[1px] w-6 sm:w-12 bg-amber-400/50" />
             <p className="text-[10px] sm:text-xs md:text-sm font-black uppercase tracking-[0.25em] text-amber-200/90 drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">
-              Restaurant &amp; Grand Banquet
+              {t.diningAndBanquet || 'Restaurant & Grand Banquet'}
             </p>
             <span className="h-[1px] w-6 sm:w-12 bg-amber-400/50" />
           </div>

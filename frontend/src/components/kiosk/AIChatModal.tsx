@@ -18,7 +18,11 @@ import {
   ArrowRight,
   HelpCircle,
   Flame,
-  Volume2
+  Volume2,
+  VolumeX,
+  Mic,
+  MicOff,
+  Radio
 } from 'lucide-react';
 import { 
   processCustomerQuery, 
@@ -28,6 +32,14 @@ import {
 import { getAssignedWaiter, getLocalizedWaiterName } from '../../utils/waiterAssignment';
 import { getLocalizedItemName, getLocalizedItemDescription } from '../../utils/translations';
 import { getEntertainmentText } from '../../utils/entertainmentTranslations';
+import {
+  getVoiceConfig,
+  createSpeechRecognition,
+  speakWithVoice,
+  stopSpeech,
+  isSpeechRecognitionSupported,
+  IBrowserSpeechRecognition
+} from '../../services/voiceChatService';
 
 interface AIChatModalProps {
   isOpen: boolean;
@@ -52,7 +64,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
     activeOrders, 
     currentTrackedOrder,
     callWaiter,
-    language,
+    language = 'en',
     t
   } = useKiosk();
 
@@ -62,6 +74,14 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [addedItemIds, setAddedItemIds] = useState<Record<string, boolean>>({});
+
+  // Voice Chat State
+  const [isListening, setIsListening] = useState(false);
+  const [interimSpeechText, setInterimSpeechText] = useState('');
+  const [autoVoiceReply, setAutoVoiceReply] = useState(true);
+  const recognitionRef = useRef<IBrowserSpeechRecognition | null>(null);
+
+  const voiceConfig = useMemo(() => getVoiceConfig(language), [language]);
 
   // Localized welcome greeting factory
   const initialGreeting = useMemo<AIResponse>(() => {
@@ -92,6 +112,11 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
     if (prevLangRef.current !== language) {
       prevLangRef.current = language;
       setMessages([initialGreeting]);
+      stopSpeech();
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+        setIsListening(false);
+      }
     } else {
       setMessages(prev => {
         if (prev.length <= 1) {
@@ -102,6 +127,20 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
     }
   }, [language, initialGreeting]);
 
+  // Cleanup voice on unmount or close
+  useEffect(() => {
+    return () => {
+      stopSpeech();
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch {
+          // ignore
+        }
+      }
+    };
+  }, []);
+
   // Auto-scroll to bottom of conversation
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -111,12 +150,116 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
     if (isOpen) {
       scrollToBottom();
     }
-  }, [messages, isTyping, isOpen]);
+  }, [messages, isTyping, isOpen, interimSpeechText]);
+
+  // Voice Chat: Start Speech Recognition
+  const startListening = () => {
+    if (!isSpeechRecognitionSupported()) {
+      showToast(voiceConfig.unsupportedText);
+      return;
+    }
+
+    stopSpeech();
+
+    try {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch {
+          // ignore
+        }
+      }
+
+      const rec = createSpeechRecognition(language);
+      if (!rec) {
+        showToast(voiceConfig.unsupportedText);
+        return;
+      }
+
+      rec.onstart = () => {
+        setIsListening(true);
+        setInterimSpeechText('');
+      };
+
+      rec.onresult = (event: any) => {
+        let finalTranscript = '';
+        let interimTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const item = event.results[i];
+          const transcriptPart = item[0]?.transcript || '';
+          if (item.isFinal) {
+            finalTranscript += transcriptPart;
+          } else {
+            interimTranscript += transcriptPart;
+          }
+        }
+
+        const currentText = (finalTranscript || interimTranscript).trim();
+        if (currentText) {
+          setInterimSpeechText(currentText);
+        }
+
+        if (finalTranscript.trim()) {
+          setIsListening(false);
+          setInterimSpeechText('');
+          try {
+            rec.stop();
+          } catch {
+            // ignore
+          }
+          handleSendMessage(finalTranscript.trim(), true);
+        }
+      };
+
+      rec.onerror = (err: any) => {
+        console.warn('Speech recognition warning:', err);
+        setIsListening(false);
+        if (err?.error === 'not-allowed' || err?.error === 'service-not-allowed') {
+          showToast(voiceConfig.micDeniedText);
+        }
+      };
+
+      rec.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = rec;
+      rec.start();
+    } catch (err) {
+      console.error('Speech recognition start failed:', err);
+      setIsListening(false);
+    }
+  };
+
+  // Voice Chat: Stop Speech Recognition
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch {
+        // ignore
+      }
+    }
+    setIsListening(false);
+    if (interimSpeechText.trim()) {
+      handleSendMessage(interimSpeechText.trim(), true);
+    }
+    setInterimSpeechText('');
+  };
+
+  const handleToggleVoice = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  };
 
   if (!isOpen) return null;
 
   // Handle sending a message
-  const handleSendMessage = (textToSend?: string) => {
+  const handleSendMessage = (textToSend?: string, wasVoiceInput: boolean = false) => {
     const query = (textToSend || inputMessage).trim();
     if (!query) return;
 
@@ -143,6 +286,11 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
       );
       setMessages(prev => [...prev, response]);
       setIsTyping(false);
+
+      // Auto Speak Response if Voice Reply is enabled or user spoke query
+      if (autoVoiceReply || wasVoiceInput) {
+        speakWithVoice(response.text, language);
+      }
     }, 450);
   };
 
@@ -170,16 +318,19 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
       }
     } else if (action.type === 'track_order') {
       if (onOpenOrderTracker) {
+        stopSpeech();
         onClose();
         onOpenOrderTracker();
       }
     } else if (action.type === 'open_cart') {
+      stopSpeech();
       onClose();
     }
   };
 
   // Reset conversation to fresh start
   const handleResetChat = () => {
+    stopSpeech();
     setMessages([initialGreeting]);
     showToast('🔄 Kio conversation reset.');
   };
@@ -213,6 +364,12 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                     {t.aiChatLabel || 'AI Chatbox'}
                   </span>
                 </h3>
+
+                {/* Active Speech Language Pill */}
+                <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-[10px] font-bold">
+                  <Mic className="w-2.5 h-2.5 text-purple-400" />
+                  <span>{voiceConfig.flag} {voiceConfig.nativeName} ({voiceConfig.code})</span>
+                </span>
               </div>
               <div className="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
                 <span className="flex items-center gap-1 text-emerald-400 font-semibold text-[11px]">
@@ -227,7 +384,28 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Auto Voice Reply Toggle */}
+            <button
+              type="button"
+              onClick={() => {
+                const next = !autoVoiceReply;
+                setAutoVoiceReply(next);
+                if (!next) stopSpeech();
+                showToast(next ? `🔊 Voice Reply Enabled (${voiceConfig.nativeName})` : '🔇 Voice Reply Muted');
+              }}
+              className={`w-9 h-9 rounded-2xl transition-all flex items-center justify-center cursor-pointer border active:scale-95 ${
+                autoVoiceReply
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-400/40 shadow-sm'
+                  : 'bg-white/[0.05] hover:bg-white/[0.12] text-slate-400 border-white/5'
+              }`}
+              title={autoVoiceReply ? 'Mute AI Voice Reply' : 'Enable AI Voice Reply'}
+              aria-label="Toggle AI Voice Reply"
+            >
+              {autoVoiceReply ? <Volume2 className="w-4 h-4 text-amber-400" /> : <VolumeX className="w-4 h-4 text-slate-400" />}
+            </button>
+
+            {/* Reset Chat */}
             <button
               type="button"
               onClick={handleResetChat}
@@ -237,9 +415,21 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
             >
               <RotateCcw className="w-4 h-4" />
             </button>
+
+            {/* Close */}
             <button
               type="button"
-              onClick={onClose}
+              onClick={() => {
+                stopSpeech();
+                if (recognitionRef.current) {
+                  try {
+                    recognitionRef.current.abort();
+                  } catch {
+                    // ignore
+                  }
+                }
+                onClose();
+              }}
               className="w-9 h-9 rounded-2xl bg-white/[0.05] hover:bg-white/[0.12] text-slate-400 hover:text-white transition-all flex items-center justify-center cursor-pointer border border-white/5 active:scale-95"
               aria-label="Close Chatbox"
             >
@@ -331,31 +521,31 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                             </h4>
                           );
                         }
-                        if (line.startsWith('• ')) {
-                          return (
-                            <div key={idx} className="flex items-start gap-1.5 my-0.5 text-xs">
-                              <span className="text-amber-400 font-bold">•</span>
-                              <span>{line.substring(2).replace(/\*\*(.*?)\*\*/g, '$1')}</span>
-                            </div>
-                          );
-                        }
-                        return (
-                          <p key={idx} className="my-1">
-                            {line.replace(/\*\*(.*?)\*\*/g, '$1')}
-                          </p>
-                        );
+                        return <p key={idx} className="my-0.5">{line}</p>;
                       })}
                     </div>
 
-                    <div className={`text-[10px] mt-1.5 flex items-center justify-end ${isUser ? 'text-slate-900/70 font-bold' : 'text-slate-400'}`}>
-                      {msg.timestamp}
+                    {/* Timestamp & Listen Button */}
+                    <div className="flex items-center justify-between text-[10px] text-slate-500 mt-2 pt-1.5 border-t border-white/5">
+                      <span>{msg.timestamp}</span>
+                      {!isUser && (
+                        <button
+                          type="button"
+                          onClick={() => speakWithVoice(msg.text, language)}
+                          className="flex items-center gap-1 text-slate-400 hover:text-amber-300 transition-colors cursor-pointer px-1.5 py-0.5 rounded-md hover:bg-white/5 font-semibold"
+                          title="Listen to this message"
+                        >
+                          <Volume2 className="w-3 h-3 text-amber-400" />
+                          <span>Listen ({voiceConfig.name})</span>
+                        </button>
+                      )}
                     </div>
                   </div>
 
-                  {/* INTERACTIVE MENU ITEM CARDS */}
+                  {/* RECOMMENDED FOOD CARDS */}
                   {msg.highlightItems && msg.highlightItems.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 w-full">
-                      {msg.highlightItems.map((item) => {
+                    <div className="grid grid-cols-1 gap-2 pt-1 w-full">
+                      {msg.highlightItems.map((item: MenuItem) => {
                         const isAdded = addedItemIds[item.id];
                         const localizedName = getLocalizedItemName(item, language);
                         const localizedDesc = getLocalizedItemDescription(item, language);
@@ -364,57 +554,62 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                           <div 
                             key={item.id}
                             onClick={() => onOpenItemDetail && onOpenItemDetail(item)}
-                            className="p-2.5 rounded-2xl bg-slate-850/80 hover:bg-slate-800 border border-white/[0.08] hover:border-amber-500/40 transition-all flex gap-3 group cursor-pointer shadow-sm relative overflow-hidden"
+                            className="p-2.5 rounded-2xl bg-slate-800/80 hover:bg-slate-750 border border-white/10 hover:border-amber-400/40 transition-all flex items-center justify-between gap-3 group cursor-pointer shadow-md"
                           >
-                            <img 
-                              src={item.image} 
-                              alt={localizedName} 
-                              className="w-16 h-16 rounded-xl object-cover border border-white/10 shrink-0 group-hover:scale-105 transition-transform" 
-                            />
-                            <div className="flex-1 min-w-0 flex flex-col justify-between">
-                              <div>
-                                <div className="flex items-center justify-between gap-1">
-                                  <h5 className="font-bold text-xs text-white truncate group-hover:text-amber-400 transition-colors">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-white/10 shadow-xs">
+                                <img 
+                                  src={item.image} 
+                                  alt={localizedName}
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                />
+                                {item.isSignature && (
+                                  <span className="absolute top-0.5 left-0.5 p-0.5 rounded-md bg-amber-500 text-slate-950 shadow-xs">
+                                    <Crown className="w-2.5 h-2.5" />
+                                  </span>
+                                )}
+                              </div>
+
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-1.5">
+                                  <span className={`w-2 h-2 rounded-full shrink-0 ${item.isVeg ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                                  <h5 className="font-bold text-xs text-white truncate group-hover:text-amber-300 transition-colors">
                                     {localizedName}
                                   </h5>
-                                  <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-amber-400/15 text-amber-300 text-[10px] font-black shrink-0">
-                                    <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
-                                    <span>{item.rating}</span>
-                                  </div>
                                 </div>
                                 <p className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">
                                   {localizedDesc}
                                 </p>
                               </div>
+                            </div>
 
-                              <div className="flex items-center justify-between mt-1.5">
-                                <span className="font-mono font-bold text-xs text-amber-400">
-                                  ₹{item.price}
-                                </span>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="font-mono font-black text-amber-400 text-xs">
+                                ₹{item.price}
+                              </span>
 
-                                <button
-                                  type="button"
-                                  onClick={(e) => handleQuickAdd(item, e)}
-                                  className={`px-2 py-1 rounded-xl text-[10px] font-bold flex items-center gap-1 transition-all active:scale-95 cursor-pointer ${
-                                    isAdded 
-                                      ? 'bg-emerald-500 text-slate-950 font-black' 
-                                      : 'bg-amber-400 hover:bg-amber-300 text-slate-950 font-black shadow-xs'
-                                  }`}
-                                  title="Add to order"
-                                >
-                                  {isAdded ? (
-                                    <>
-                                      <Check className="w-3 h-3 stroke-[3]" />
-                                      <span>{t.aiChatQuickAdded || 'Added'}</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Plus className="w-3 h-3 stroke-[3]" />
-                                      <span>{t.aiChatQuickAdd || 'Add'} ₹{item.price}</span>
-                                    </>
-                                  )}
-                                </button>
-                              </div>
+                              <button
+                                type="button"
+                                onClick={(e) => handleQuickAdd(item, e)}
+                                className={`px-2.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all active:scale-90 cursor-pointer ${
+                                  isAdded 
+                                    ? 'bg-emerald-500 text-slate-950 font-black' 
+                                    : 'bg-amber-400 hover:bg-amber-300 text-slate-950 font-black shadow-xs'
+                                }`}
+                                title="Add to order"
+                              >
+                                {isAdded ? (
+                                  <>
+                                    <Check className="w-3 h-3 stroke-[3]" />
+                                    <span>{t.aiChatQuickAdded || 'Added'}</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Plus className="w-3 h-3 stroke-[3]" />
+                                    <span>{t.aiChatQuickAdd || 'Add'} ₹{item.price}</span>
+                                  </>
+                                )}
+                              </button>
                             </div>
                           </div>
                         );
@@ -479,7 +674,32 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
           <div ref={messagesEndRef} />
         </div>
 
-        {/* 4. CHAT INPUT BAR */}
+        {/* 4. LIVE SPEECH LISTENING BANNER */}
+        {isListening && (
+          <div className="px-4 py-2.5 bg-gradient-to-r from-red-950/80 via-slate-900 to-amber-950/80 border-t border-red-500/30 flex items-center justify-between text-xs text-amber-300 animate-in slide-in-from-bottom-2 shrink-0">
+            <div className="flex items-center gap-2.5 truncate">
+              <span className="relative flex h-3 w-3 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
+              </span>
+              <span className="font-black text-[11px] text-amber-400 uppercase tracking-wide shrink-0">
+                {voiceConfig.flag} {voiceConfig.nativeName} ({voiceConfig.code}):
+              </span>
+              <span className="truncate text-slate-200 font-semibold italic">
+                {interimSpeechText ? `"${interimSpeechText}"` : voiceConfig.speakingPrompt}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={stopListening}
+              className="text-[10px] font-black px-2.5 py-1 rounded-lg bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30 transition-colors shrink-0 cursor-pointer ml-2 active:scale-95"
+            >
+              {voiceConfig.tapToStop}
+            </button>
+          </div>
+        )}
+
+        {/* 5. CHAT INPUT BAR WITH MICROPHONE BUTTON */}
         <form 
           onSubmit={(e) => {
             e.preventDefault();
@@ -487,14 +707,37 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
           }}
           className="p-3 sm:p-4 bg-slate-950/90 border-t border-white/[0.08] flex items-center gap-2.5 shrink-0"
         >
+          {/* Dedicated Voice Chat Button */}
+          <button
+            type="button"
+            onClick={handleToggleVoice}
+            className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all cursor-pointer shrink-0 active:scale-95 border ${
+              isListening
+                ? 'bg-red-500/20 text-red-400 border-red-500 shadow-lg shadow-red-500/30 animate-pulse'
+                : 'bg-slate-900 hover:bg-slate-800 text-amber-400 border-amber-400/40 hover:border-amber-400 shadow-md'
+            }`}
+            title={isListening ? voiceConfig.tapToStop : voiceConfig.speakToKio}
+            aria-label="Voice Chat"
+          >
+            {isListening ? (
+              <span className="relative flex items-center justify-center">
+                <MicOff className="w-5 h-5 text-red-400" />
+              </span>
+            ) : (
+              <Mic className="w-5 h-5" />
+            )}
+          </button>
+
+          {/* Text Input */}
           <input
             type="text"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            placeholder={t.aiChatPlaceholder || "Ask Kio (e.g. Signature foods, top ratings, opening hours)..."}
+            placeholder={isListening ? voiceConfig.listeningText : (t.aiChatPlaceholder || "Ask Kio (e.g. Signature foods, top ratings, opening hours)...")}
             className="flex-1 bg-slate-900 border border-white/10 focus:border-amber-400/60 rounded-2xl px-4 py-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-hidden focus:ring-1 focus:ring-amber-400/40 transition-all"
           />
 
+          {/* Send Button */}
           <button
             type="submit"
             disabled={!inputMessage.trim()}

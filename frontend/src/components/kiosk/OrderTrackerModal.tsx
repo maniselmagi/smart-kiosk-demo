@@ -22,7 +22,7 @@ import {
   AlertCircle,
   Layers
 } from 'lucide-react';
-import { getAssignedWaiter } from '../../utils/waiterAssignment';
+import { getAssignedWaiter, getLocalizedWaiterName } from '../../utils/waiterAssignment';
 import { CustomerFeedbackModal } from './CustomerFeedbackModal';
 import { getLocalizedCartItemName, getLocalizedSpiceLabel } from '../../utils/translations';
 
@@ -234,7 +234,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
       key: 'NEW',
       label: t.statusReceived,
       icon: <CheckCircle2 className="w-5 h-5" />,
-      desc: `${t.serverLabel || 'Supervisor & Waiter'} ${waiter.name}`,
+      desc: `${t.serverLabel || 'Supervisor & Waiter'} ${getLocalizedWaiterName(waiter.name, language, false)}`,
       tag: `${t.ticket || 'Ticket'} #${activeOrder.orderNumber}`,
     },
     {
@@ -248,7 +248,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
       key: 'READY',
       label: t.statusReady,
       icon: <UtensilsCrossed className="w-5 h-5" />,
-      desc: `${t.serverLabel || 'Waiter'} ${waiter.name} • ${t.table} ${activeOrder.tableNumber}`,
+      desc: `${t.serverLabel || 'Waiter'} ${getLocalizedWaiterName(waiter.name, language, false)} • ${t.table} ${activeOrder.tableNumber}`,
       tag: t.statusReady,
     },
     {
@@ -436,7 +436,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                   {activeOrder.status === 'COMPLETED'
                     ? (t.dishesServedMsg || 'Dishes Served at Your Table!')
                     : activeOrder.status === 'READY'
-                    ? `${t.serverLabel || 'Waiter'} ${waiter.name} • ${t.table} ${activeOrder.tableNumber}`
+                    ? `${t.serverLabel || 'Waiter'} ${getLocalizedWaiterName(waiter.name, language, false)} • ${t.table} ${activeOrder.tableNumber}`
                     : isDelayed
                     ? (t.finishingTouches || 'Finishing Touches on the Fire Line')
                     : (t.cookingFresh || 'Artisanal Dishes Being Cooked Fresh')}
@@ -638,7 +638,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                       Dishes Delivered • How Was Everything?
                     </span>
                     <p className="text-[11px] text-slate-300">
-                      Rate your meal and service by <strong className="text-amber-300 font-medium">Waiter {waiter.fullName}</strong>.
+                      Rate your meal and service by <strong className="text-amber-300 font-medium">{getLocalizedWaiterName(waiter.name, language)}</strong>.
                     </p>
                   </div>
                 </div>
@@ -696,7 +696,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                   {t.assignedAttendant || 'Assigned Floor Attendant'}
                 </span>
                 <span className="text-sm font-black text-white">
-                  {waiter.fullName} <span className="font-normal text-xs text-slate-400">({waiter.zone})</span>
+                  {getLocalizedWaiterName(waiter.name, language)} <span className="font-normal text-xs text-slate-400">({waiter.zone})</span>
                 </span>
                 <p className="text-[11px] text-slate-400">
                   {t.dedicatedToTable || 'Dedicated to Table'} {activeOrder.tableNumber}

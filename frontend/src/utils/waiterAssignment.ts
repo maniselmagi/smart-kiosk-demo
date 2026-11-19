@@ -144,3 +144,69 @@ export const getAssignedWaiter = (tableNumber: number): WaiterInfo => {
   }
   return DEFAULT_WAITER_ZONES[0].waiter;
 };
+
+export const WAITER_NAMES_LOCALIZED: Record<string, Record<string, { full: string; single: string }>> = {
+  'Suresh': {
+    en: { full: 'Suresh (S)', single: 'Suresh' },
+    ta: { full: 'சுரேஷ் (S)', single: 'சுரேஷ்' },
+    hi: { full: 'सुरेश (S)', single: 'सुरेश' },
+    te: { full: 'సురేష్ (S)', single: 'సురేష్' },
+    kn: { full: 'ಸುರೇಶ್ (S)', single: 'ಸುರೇಶ್' },
+    ml: { full: 'സുരേഷ് (S)', single: 'സുരേഷ്' },
+    ar: { full: 'سوريش (S)', single: 'سوريش' },
+    ko: { full: '수레시 (S)', single: '수레시' },
+    es: { full: 'Suresh (S)', single: 'Suresh' },
+    fr: { full: 'Suresh (S)', single: 'Suresh' },
+    de: { full: 'Suresh (S)', single: 'Suresh' }
+  },
+  'Vikram': {
+    en: { full: 'Vikram (V)', single: 'Vikram' },
+    ta: { full: 'விக்ரம் (V)', single: 'விக்ரம்' },
+    hi: { full: 'विक्रम (V)', single: 'विक्रम' },
+    te: { full: 'విక్రమ్ (V)', single: 'విక్రమ్' },
+    kn: { full: 'ವಿಕ್ರಮ್ (V)', single: 'ವಿಕ್ರಮ್' },
+    ml: { full: 'വിക്രം (V)', single: 'വിക്രം' },
+    ar: { full: 'فيكرام (V)', single: 'فيكرام' },
+    ko: { full: '비크람 (V)', single: '비크람' },
+    es: { full: 'Vikram (V)', single: 'Vikram' },
+    fr: { full: 'Vikram (V)', single: 'Vikram' },
+    de: { full: 'Vikram (V)', single: 'Vikram' }
+  },
+  'Bala': {
+    en: { full: 'Bala (B)', single: 'Bala' },
+    ta: { full: 'பாலா (B)', single: 'பாலா' },
+    hi: { full: 'बाला (B)', single: 'बाला' },
+    te: { full: 'బాలా (B)', single: 'బాలా' },
+    kn: { full: 'ಬಾಲಾ (B)', single: 'ಬಾಲಾ' },
+    ml: { full: 'ബാല (B)', single: 'ബാല' },
+    ar: { full: 'بالا (B)', single: 'بالا' },
+    ko: { full: '발라 (B)', single: '발라' },
+    es: { full: 'Bala (B)', single: 'Bala' },
+    fr: { full: 'Bala (B)', single: 'Bala' },
+    de: { full: 'Bala (B)', single: 'Bala' }
+  },
+  'Rajesh': {
+    en: { full: 'Rajesh (R)', single: 'Rajesh' },
+    ta: { full: 'ராஜேஷ் (R)', single: 'ராஜேஷ்' },
+    hi: { full: 'राजेश (R)', single: 'राजेश' },
+    te: { full: 'రాజేష్ (R)', single: 'రాజేష్' },
+    kn: { full: 'ರಾಜೇಶ್ (R)', single: 'ರಾಜೇಶ್' },
+    ml: { full: 'രാജേഷ് (R)', single: 'രാജേഷ്' },
+    ar: { full: 'راجيش (R)', single: 'راجيش' },
+    ko: { full: '라제시 (R)', single: '라제시' },
+    es: { full: 'Rajesh (R)', single: 'Rajesh' },
+    fr: { full: 'Rajesh (R)', single: 'Rajesh' },
+    de: { full: 'Rajesh (R)', single: 'Rajesh' }
+  }
+};
+
+export const getLocalizedWaiterName = (waiterNameOrCode: string, lang: string = 'en', includeInitial: boolean = true): string => {
+  if (!waiterNameOrCode) return '';
+  const baseName = waiterNameOrCode.replace(/\s*\([A-Z]\)/, '').trim();
+  const entry = WAITER_NAMES_LOCALIZED[baseName];
+  if (entry) {
+    const loc = entry[lang] || entry['en'];
+    return includeInitial ? loc.full : loc.single;
+  }
+  return waiterNameOrCode;
+};

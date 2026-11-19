@@ -25,7 +25,7 @@ import {
   AIResponse, 
   AVAILABLE_QUESTION_PROMPTS 
 } from '../../services/aiConciergeService';
-import { getAssignedWaiter } from '../../utils/waiterAssignment';
+import { getAssignedWaiter, getLocalizedWaiterName } from '../../utils/waiterAssignment';
 import { getLocalizedItemName, getLocalizedItemDescription } from '../../utils/translations';
 
 interface AIChatModalProps {
@@ -136,7 +136,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
         query,
         menuItems,
         tableNumber,
-        assignedWaiter.fullName,
+        getLocalizedWaiterName(assignedWaiter.name, language),
         activeOrder,
         language
       );
@@ -165,7 +165,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
       if (onCallWaiterModal) {
         onCallWaiterModal();
       } else {
-        showToast(`🔔 ${assignedWaiter.fullName} - ${t.staffNotified || 'Staff Notified'}!`);
+        showToast(`🔔 ${getLocalizedWaiterName(assignedWaiter.name, language)} - ${t.staffNotified || 'Staff Notified'}!`);
       }
     } else if (action.type === 'track_order') {
       if (onOpenOrderTracker) {
@@ -221,7 +221,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                 <span>•</span>
                 <span className="text-amber-300/90 font-medium text-[11px]">{t.table} {tableNumber}</span>
                 <span>•</span>
-                <span className="text-slate-400 text-[11px]">{t.serverLabel || 'Server'}: {assignedWaiter.name}</span>
+                <span className="text-slate-400 text-[11px]">{t.serverLabel || 'Server'}: {getLocalizedWaiterName(assignedWaiter.name, language, false)}</span>
               </div>
             </div>
           </div>

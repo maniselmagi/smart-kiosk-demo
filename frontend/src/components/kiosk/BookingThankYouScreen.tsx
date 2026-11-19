@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useKiosk } from '../../context/KioskContext';
 import { getLocalizedTableAllocation } from '../../utils/tableAllocation';
+import { getLocalizedWaiterName } from '../../utils/waiterAssignment';
 import { HotelBrand } from '../common/HotelBrand';
 import { 
   CheckCircle2, 
@@ -232,7 +233,7 @@ export const BookingThankYouScreen: React.FC<BookingThankYouScreenProps> = ({ on
                   </div>
                 )}
                 <span className="text-sm font-bold text-white truncate">
-                  {assignedWaiter.fullName || assignedWaiter.name}
+                  {getLocalizedWaiterName(assignedWaiter.name, language)}
                 </span>
               </div>
             </div>

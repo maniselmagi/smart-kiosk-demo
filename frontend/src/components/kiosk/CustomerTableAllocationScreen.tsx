@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useKiosk } from '../../context/KioskContext';
 import { HotelBrand } from '../common/HotelBrand';
 import { getLocalizedTableAllocation } from '../../utils/tableAllocation';
+import { getLocalizedWaiterName } from '../../utils/waiterAssignment';
 import { tableBookingService, AVAILABLE_TIME_SLOTS, TimeSlotConfig } from '../../services/tableBookingService';
 import royalEmberLogo from '../../assets/royal_ember_logo.jpg';
 import { 
@@ -197,7 +198,7 @@ export const CustomerTableAllocationScreen: React.FC<CustomerTableAllocationScre
         bookingDate: localDate,
         timeSlot: localSlot,
         mealType: slotConfig?.meal || 'dinner',
-        assignedServer: allocation.waiter.fullName || allocation.waiter.name,
+        assignedServer: getLocalizedWaiterName(allocation.waiter.name, language),
         sectionLabel: allocation.category,
         ticketNumber: ticketNumber
       });
@@ -685,7 +686,7 @@ export const CustomerTableAllocationScreen: React.FC<CustomerTableAllocationScre
                       {t.dedicatedTableAttendant || 'Dedicated Floor Attendant'}
                     </span>
                     <span className="text-sm font-bold text-white">
-                      {allocation.waiter.fullName || allocation.waiter.name}
+                      {getLocalizedWaiterName(allocation.waiter.name, language)}
                     </span>
                   </div>
                 </div>

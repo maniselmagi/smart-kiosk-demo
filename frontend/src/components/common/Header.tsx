@@ -13,7 +13,7 @@ import {
   Globe
 } from 'lucide-react';
 import royalEmberLogo from '../../assets/royal_ember_logo.jpg';
-import { getAssignedWaiter } from '../../utils/waiterAssignment';
+import { getAssignedWaiter, getLocalizedWaiterName } from '../../utils/waiterAssignment';
 import { AVAILABLE_LANGUAGES } from '../../utils/translations';
 
 interface HeaderProps {
@@ -129,7 +129,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/80 border border-white/10 text-slate-200 shadow-xs hover:border-amber-500/30 transition-colors">
             <ConciergeBell className="w-3.5 h-3.5 text-amber-400 shrink-0" />
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 hidden md:inline">{t.serverLabel || 'Server'}:</span>
-            <span className="text-xs font-black text-amber-300">{assignedWaiter.fullName}</span>
+            <span className="text-xs font-black text-amber-300">{getLocalizedWaiterName(assignedWaiter.name, language)}</span>
           </div>
 
           {/* Customer Language Switcher Button (Directly on Food Order Page) */}

@@ -32,7 +32,7 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
   onOpenReceipt,
   onReturnToMenu,
 }) => {
-  const { tableNumber, submitFeedback, updateOrderStatus, completeAllTableOrders, showToast } = useKiosk();
+  const { tableNumber, submitFeedback, updateOrderStatus, completeAllTableOrders, showToast, t } = useKiosk();
 
   const targetTable = order?.tableNumber || tableNumber || 12;
   const waiter = getAssignedWaiter(targetTable);
@@ -216,7 +216,7 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
               )}
             </div>
             <h3 className="text-base sm:text-lg font-black text-white tracking-tight mt-1 flex items-center gap-2">
-              <span>{isSubmitted ? 'Royal Ember Guest Appreciation' : 'How Was Your Dining Experience?'}</span>
+              <span>{isSubmitted ? `${t.brandName || 'Royal Ember'} Guest Appreciation` : (t.feedbackTitle || 'How Was Your Dining Experience?')}</span>
               <Sparkles className="w-4 h-4 text-amber-400" />
             </h3>
           </div>
@@ -322,7 +322,7 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({
             <div className="space-y-2.5 relative z-10 max-w-lg mx-auto">
               <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 text-xs font-black uppercase tracking-[0.2em] shadow-sm">
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>Royal Ember Dining Honors</span>
+                <span>{t.brandName || 'Royal Ember'} Dining Honors</span>
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
               </div>
 

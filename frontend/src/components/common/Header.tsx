@@ -99,7 +99,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Brand Typography */}
             <div className="flex flex-col leading-none">
               <h1 className="font-royal font-black text-sm sm:text-base md:text-lg tracking-[0.14em] uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-500 drop-shadow-sm whitespace-nowrap">
-                Royal Ember
+                {t.brandName || 'Royal Ember'}
               </h1>
               <p className="text-[8px] sm:text-[9px] uppercase tracking-[0.24em] text-amber-400/80 font-bold mt-0.5 whitespace-nowrap">
                 {t.diningAndBanquet || 'Dining & Banquet'}

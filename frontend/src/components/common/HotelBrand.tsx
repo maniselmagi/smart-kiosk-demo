@@ -1,5 +1,6 @@
 import React from 'react';
 import royalEmberLogo from '../../assets/royal_ember_logo.jpg';
+import { useKiosk } from '../../context/KioskContext';
 
 interface HotelBrandProps {
   size?: 'sm' | 'md' | 'lg' | 'hero';
@@ -17,6 +18,15 @@ export const HotelBrand: React.FC<HotelBrandProps> = ({
   className = ''
 }) => {
   const isCenter = align === 'center';
+  let brandName = 'Royal Ember';
+  let descriptor = 'Restaurant & Banquet';
+  try {
+    const kiosk = useKiosk();
+    if (kiosk?.t?.brandName) brandName = kiosk.t.brandName;
+    if (kiosk?.t?.diningAndBanquet) descriptor = kiosk.t.diningAndBanquet;
+  } catch {
+    // Fallback if rendered outside KioskProvider
+  }
 
   return (
     <div className={`flex ${isCenter ? 'flex-col items-center text-center' : 'items-center gap-3.5 text-left'} ${className}`}>
@@ -56,7 +66,7 @@ export const HotelBrand: React.FC<HotelBrandProps> = ({
             }`}
           >
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 dark:from-amber-400 dark:via-yellow-300 dark:to-amber-500">
-              Royal Ember
+              {brandName}
             </span>
           </h1>
         </div>
@@ -67,7 +77,7 @@ export const HotelBrand: React.FC<HotelBrandProps> = ({
               size === 'hero' ? 'text-xs sm:text-sm tracking-[0.25em]' : size === 'lg' ? 'text-[11px] sm:text-xs tracking-[0.2em]' : 'text-[10px] tracking-[0.15em]'
             }`}
           >
-            Restaurant &amp; Banquet
+            {descriptor}
           </p>
         )}
 

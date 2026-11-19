@@ -97,7 +97,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     toggleTheme, 
     activeOrders, 
     staffAlerts,
-    showToast 
+    showToast,
+    t
   } = useKiosk();
 
   const [currentUser, setCurrentUser] = useState<UserCredential | null>(() => authService.getCurrentUser());
@@ -206,7 +207,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 <div className="overflow-hidden">
                   <div className="flex items-center gap-1.5">
                     <h1 className="font-extrabold text-base tracking-tight font-display text-slate-900 dark:text-white truncate">
-                      Royal Ember
+                      {t.brandName || 'Royal Ember'}
                     </h1>
                     <span className="px-1.5 py-0.2 rounded-md bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-wider border border-amber-200/50 dark:border-amber-800/50">
                       Official

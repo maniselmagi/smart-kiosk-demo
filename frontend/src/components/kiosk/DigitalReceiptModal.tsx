@@ -104,7 +104,7 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
             {/* Restaurant Meta */}
             <div className="text-center pb-3 border-b border-dashed border-white/15">
               <h4 className="font-black text-base text-white font-display tracking-wide">
-                Royal Ember Kiosk Bistro
+                {t.brandName || 'Royal Ember'} Kiosk Bistro
               </h4>
               <p className="text-xs text-slate-400 mt-0.5">
                 {t.table} {order.tableNumber} • {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {t.paymentMethod || 'Mode'}: {order.paymentMethod}

@@ -129,7 +129,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             </div>
 
             <p className="font-royal text-xs font-black uppercase tracking-[0.3em] text-amber-400 mt-3 drop-shadow-md">
-              Royal Ember
+              {t.brandName || 'Royal Ember'}
             </p>
           </div>
         </div>
@@ -143,7 +143,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/55 backdrop-blur-md border border-amber-500/30 text-amber-300 shadow-lg pointer-events-auto">
           <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
           <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase font-display">
-            Royal Ember Dining
+            {t.brandName || 'Royal Ember'}
           </span>
         </div>
 
@@ -215,7 +215,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
 
           {/* Grand Prominent Highlighted Restaurant Title with Shimmer Glow */}
           <h1 className="font-royal text-3xl sm:text-5xl md:text-6xl font-black tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-400 drop-shadow-[0_4px_25px_rgba(0,0,0,0.95)] leading-tight animate-gold-shimmer">
-            ROYAL EMBER
+            {(t.brandName || 'Royal Ember').toUpperCase()}
           </h1>
           
           {/* Elegant Sub-Brand Slogan */}

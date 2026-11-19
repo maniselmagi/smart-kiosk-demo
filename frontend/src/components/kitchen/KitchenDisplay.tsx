@@ -151,7 +151,8 @@ export const KitchenDisplay: React.FC = () => {
     isStandaloneRole,
     showToast,
     theme,
-    toggleTheme
+    toggleTheme,
+    t
   } = useKiosk();
 
   // Storage heartbeat
@@ -515,7 +516,7 @@ export const KitchenDisplay: React.FC = () => {
                 className="w-10 h-10 rounded-xl object-cover ring-2 ring-amber-500/40 shadow-xs shrink-0" 
               />
               <div className="leading-tight">
-                <span className="font-extrabold text-sm tracking-tight block text-slate-900 dark:text-white">Royal Ember</span>
+                <span className="font-extrabold text-sm tracking-tight block text-slate-900 dark:text-white">{t.brandName || 'Royal Ember'}</span>
                 <span className="text-[10px] text-amber-500 font-bold uppercase tracking-wider block">Kitchen Display (KDS)</span>
               </div>
             </div>

@@ -26,6 +26,7 @@ export const AVAILABLE_LANGUAGES: LanguageOption[] = [
 ];
 
 export interface TranslationDictionary {
+  brandName: string;
   welcomeTo: string;
   smartKiosk: string;
   table: string;
@@ -299,6 +300,7 @@ export interface TranslationDictionary {
 
 export const translations: Record<Language, TranslationDictionary> = {
   en: {
+    brandName: "Royal Ember",
     welcomeTo: "Welcome to",
     smartKiosk: "Smart Table-Side Kiosk",
     table: "Table",
@@ -570,6 +572,7 @@ export const translations: Record<Language, TranslationDictionary> = {
     confirmedBadge: "CONFIRMED",
   },
   ta: {
+    brandName: "ராயல் எம்பர்",
     welcomeTo: "வணக்கம்",
     smartKiosk: "ஸ்மார்ட் டேபிள் கியோஸ்க்",
     table: "மேஜை",
@@ -841,6 +844,7 @@ export const translations: Record<Language, TranslationDictionary> = {
     confirmedBadge: "உறுதிசெய்யப்பட்டது",
   },
   hi: {
+    brandName: "रॉयल एम्बर",
     welcomeTo: "स्वागत है",
     smartKiosk: "स्मार्ट टेबल-साइड कियोस्क",
     table: "टेबल",
@@ -1112,6 +1116,7 @@ export const translations: Record<Language, TranslationDictionary> = {
     confirmedBadge: "पुष्टि की गई",
   },
   te: {
+    brandName: "రాయల్ ఎంబర్",
     welcomeTo: "స్వాగతం",
     smartKiosk: "స్మార్ట్ టేబుల్-సైడ్ కియోస్క్",
     table: "టేబుల్",
@@ -1383,6 +1388,7 @@ export const translations: Record<Language, TranslationDictionary> = {
     confirmedBadge: "ధృవీకరించబడింది",
   },
   es: {
+    brandName: "Royal Ember",
     welcomeTo: "Bienvenido a",
     smartKiosk: "Quiosco Inteligente de Mesa",
     table: "Mesa",
@@ -1662,6 +1668,7 @@ export const translations: Record<Language, TranslationDictionary> = {
 };
 
 translations.ar = {
+  brandName: "رويال إمبر",
   welcomeTo: "مرحبا بكم في",
   smartKiosk: "كشك الطلب الذكي بجانب الطاولة",
   table: "طاولة",
@@ -1934,6 +1941,7 @@ translations.ar = {
 };
 
 translations.kn = {
+  brandName: "ರಾಯಲ್ ಎಂಬರ್",
   welcomeTo: "ಸ್ವಾಗತ",
   smartKiosk: "ಸ್ಮಾರ್ಟ್ ಟೇಬಲ್ ಕಿಯೋಸ್ಕ್",
   table: "ಮೇಜು",
@@ -2206,6 +2214,7 @@ translations.kn = {
 };
 
 translations.ml = {
+  brandName: "റോയൽ എംബർ",
   welcomeTo: "സ്വാഗതം",
   smartKiosk: "സ്മാർട്ട് ടേബിൾ കിയോസ്ക്",
   table: "മേശ",
@@ -2478,6 +2487,7 @@ translations.ml = {
 };
 
 translations.fr = {
+  brandName: "Royal Ember",
   welcomeTo: "Bienvenue à",
   smartKiosk: "Borne de Commande Intelligente",
   table: "Table",
@@ -2750,6 +2760,7 @@ translations.fr = {
 };
 
 translations.de = {
+  brandName: "Royal Ember",
   welcomeTo: "Willkommen bei",
   smartKiosk: "Intelligenter Tisch-Kiosk",
   table: "Tisch",
@@ -3022,6 +3033,7 @@ translations.de = {
 };
 
 translations.ko = {
+  brandName: "로얄 엠버",
   welcomeTo: "환영합니다",
   smartKiosk: "스마트 테이블 키오스크",
   table: "테이블",
@@ -3409,8 +3421,6 @@ export function getLocalizedComboTitle(combo: ComboRecommendation, lang: Languag
   if (lang === 'ta' && combo.titleTamil) return combo.titleTamil;
   if (lang === 'hi' && combo.titleHindi) return combo.titleHindi;
   if (lang === 'te' && combo.titleTelugu) return combo.titleTelugu;
-  if (lang === 'kn' && (combo.titleTelugu || combo.titleHindi)) return combo.titleTelugu || combo.titleHindi || combo.title;
-  if (lang === 'ml' && (combo.titleTamil || combo.titleHindi)) return combo.titleTamil || combo.titleHindi || combo.title;
   if (lang === 'es' && combo.titleSpanish) return combo.titleSpanish;
   return combo.title;
 }

@@ -24,7 +24,7 @@ export const FinishMealModal: React.FC<FinishMealModalProps> = ({
   onClose,
   onFinishDiningSuccess,
 }) => {
-  const { tableNumber, submitFeedback, updateOrderStatus, completeAllTableOrders, showToast } = useKiosk();
+  const { tableNumber, submitFeedback, updateOrderStatus, completeAllTableOrders, showToast, t } = useKiosk();
 
   // Waiter for this table
   const targetTable = order?.tableNumber || tableNumber || 12;
@@ -139,7 +139,7 @@ export const FinishMealModal: React.FC<FinishMealModalProps> = ({
             </div>
 
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 text-xs font-bold border border-amber-500/30">
-              <Sparkles className="w-3.5 h-3.5" /> Royal Ember looks forward to welcoming you back!
+              <Sparkles className="w-3.5 h-3.5" /> {t.brandName || 'Royal Ember'} looks forward to welcoming you back!
             </div>
           </div>
         ) : (

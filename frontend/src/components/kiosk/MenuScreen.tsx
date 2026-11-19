@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { PromoAdBanner } from './PromoAdBanner';
 import { getAssignedWaiter } from '../../utils/waiterAssignment';
+import { getEntertainmentText } from '../../utils/entertainmentTranslations';
 import CallWaiterModal from '../common/CallWaiterModal';
 
 interface MenuScreenProps {
@@ -641,7 +642,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             {/* Unmistakable AI Chatbox Label */}
             <div className="relative flex items-center gap-1.5 leading-none">
               <span className="font-black text-white text-xs tracking-wide">
-                {language === 'ar' ? 'كيو' : language === 'ko' ? '키오' : language === 'ta' ? 'கியோ' : language === 'hi' ? 'कियो' : language === 'te' ? 'కియో' : language === 'kn' ? 'ಕಿಯೋ' : language === 'ml' ? 'കിയോ' : 'Kio'}
+                {getEntertainmentText(language).kioAiLabel}
               </span>
               <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-black/40 text-[9px] font-black uppercase tracking-wider text-amber-300 border border-amber-300/40">
                 <MessageSquare className="w-2.5 h-2.5" />

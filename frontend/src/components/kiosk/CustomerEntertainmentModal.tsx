@@ -2319,12 +2319,25 @@ const MULTILINGUAL_NEWS_DATA: Record<NewsLanguage, LanguagePaperConfig> = {
 };
 
 const MultilingualTodayNewspaper: React.FC = () => {
-  const [selectedLang, setSelectedLang] = useState<NewsLanguage>('en');
+  const { language = 'en' } = useKiosk();
+  const initialLang: NewsLanguage = (['en', 'ta', 'hi', 'te', 'kn', 'ml', 'mr'].includes(language) ? language : 'en') as NewsLanguage;
+  const [selectedLang, setSelectedLang] = useState<NewsLanguage>(initialLang);
   const [selectedPaperIdx, setSelectedPaperIdx] = useState(0);
   const [activeShortIdx, setActiveShortIdx] = useState(0);
   const [viewFormat, setViewFormat] = useState<'shorts' | 'epaper'>('shorts');
 
-  const currentConfig = MULTILINGUAL_NEWS_DATA[selectedLang];
+  const tEnt = getEntertainmentText(language);
+
+  // Sync newspaper language whenever kiosk language changes
+  useEffect(() => {
+    if (['en', 'ta', 'hi', 'te', 'kn', 'ml', 'mr'].includes(language)) {
+      setSelectedLang(language as NewsLanguage);
+      setSelectedPaperIdx(0);
+      setActiveShortIdx(0);
+    }
+  }, [language]);
+
+  const currentConfig = MULTILINGUAL_NEWS_DATA[selectedLang] || MULTILINGUAL_NEWS_DATA['en'];
   const activePaper = currentConfig.papers[selectedPaperIdx] || currentConfig.papers[0];
   const newsList = activePaper.news;
   const currentShort = newsList[activeShortIdx] || newsList[0];
@@ -2349,10 +2362,10 @@ const MultilingualTodayNewspaper: React.FC = () => {
             </div>
             <div>
               <span className="text-xs font-black text-white uppercase tracking-wider block">
-                Choose Newspaper Language
+                {tEnt.chooseNewspaperLang}
               </span>
               <span className="text-[10px] text-slate-400">
-                Select your preferred language to switch live news &amp; editorial editions
+                {tEnt.newspaperSubtext}
               </span>
             </div>
           </div>
@@ -2385,7 +2398,7 @@ const MultilingualTodayNewspaper: React.FC = () => {
         {/* Quick Language Switcher Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-2 border-t border-white/5">
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider shrink-0 mr-1">
-            Quick Switch:
+            {tEnt.quickSwitch}
           </span>
           {(['en', 'ta', 'hi', 'te', 'kn', 'ml', 'mr'] as NewsLanguage[]).map((langKey) => {
             const config = MULTILINGUAL_NEWS_DATA[langKey];
@@ -2424,7 +2437,7 @@ const MultilingualTodayNewspaper: React.FC = () => {
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-sans font-black flex items-center gap-1 animate-pulse">
               <span className="w-1.5 h-1.5 rounded-full bg-white" />
-              LIVE BREAKING NEWS
+              {tEnt.liveBreakingNews}
             </span>
             <div className="flex items-center gap-1 text-[11px] text-slate-600 dark:text-slate-400 font-sans font-semibold">
               <CloudSun className="w-3.5 h-3.5 text-amber-500" />
@@ -2449,7 +2462,7 @@ const MultilingualTodayNewspaper: React.FC = () => {
         {/* Publication Selector Tabs in this Language */}
         <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
           <div className="text-[10px] font-sans font-bold text-slate-500 uppercase tracking-wider text-center mb-1.5">
-            Select Newspaper Edition:
+            {tEnt.selectEdition}
           </div>
           <div className="flex items-center justify-center gap-2 overflow-x-auto no-scrollbar font-sans py-1">
             {currentConfig.papers.map((paper, pIdx) => {
@@ -2494,7 +2507,7 @@ const MultilingualTodayNewspaper: React.FC = () => {
             }`}
           >
             <BookOpen className="w-3 h-3" />
-            <span>Shorts Cards</span>
+            <span>{tEnt.shortsCards}</span>
           </button>
           <button
             onClick={() => setViewFormat('epaper')}
@@ -2503,7 +2516,7 @@ const MultilingualTodayNewspaper: React.FC = () => {
             }`}
           >
             <Layers className="w-3 h-3" />
-            <span>Full e-Paper</span>
+            <span>{tEnt.fullEpaper}</span>
           </button>
         </div>
       </div>
@@ -2836,7 +2849,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
             >
               <Clock className="w-3.5 h-3.5 animate-pulse text-amber-400" />
               <span>
-                {isTimeUp ? 'Ready to Serve!' : `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`}
+                {isTimeUp ? tEnt.readyToServeBadge : `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`}
               </span>
             </div>
 
@@ -2856,7 +2869,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
             <div className="flex items-center gap-2">
               <span className="text-base animate-bounce">🔔</span>
               <span className="font-extrabold text-xs">
-                Your Feast is Fresh &amp; Ready! Waiter {waiter.fullName} is serving {tEnt.table} {order?.tableNumber || 12}.
+                {tEnt.feastReadyMsg(getLocalizedWaiterName(waiter.name, language), order?.tableNumber || 12)}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -2867,7 +2880,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
                 }}
                 className="px-2.5 py-1 rounded-lg bg-white/20 hover:bg-white/30 text-white text-[10px] font-black transition-colors cursor-pointer whitespace-nowrap"
               >
-                Track Order →
+                {tEnt.trackOrderBtn}
               </button>
               <button
                 onClick={() => setDismissTimeUp(true)}

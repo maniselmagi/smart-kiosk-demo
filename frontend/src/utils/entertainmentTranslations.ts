@@ -28,6 +28,18 @@ export interface EntertainmentTranslations {
   rollDice: string;
   footerText: string;
   minimizeKeepPlaying: string;
+  loginBtn: string;
+  kioAiLabel: string;
+  readyToServeBadge: string;
+  feastReadyMsg: (waiter: string, table: number) => string;
+  trackOrderBtn: string;
+  chooseNewspaperLang: string;
+  newspaperSubtext: string;
+  quickSwitch: string;
+  selectEdition: string;
+  liveBreakingNews: string;
+  shortsCards: string;
+  fullEpaper: string;
 }
 
 export const ENTERTAINMENT_TRANSLATIONS: Record<string, EntertainmentTranslations> = {
@@ -58,7 +70,19 @@ export const ENTERTAINMENT_TRANSLATIONS: Record<string, EntertainmentTranslation
     chefBotsTurn: "Chef Bot's Turn...",
     rollDice: 'ROLL DICE',
     footerText: 'Real-time games & multilingual live news active',
-    minimizeKeepPlaying: 'Minimize & Keep Playing'
+    minimizeKeepPlaying: 'Minimize & Keep Playing',
+    loginBtn: 'Login',
+    kioAiLabel: 'Kio AI',
+    readyToServeBadge: 'Ready to Serve!',
+    feastReadyMsg: (waiter, table) => `Your Feast is Fresh & Ready! Waiter ${waiter} is serving Table ${table}.`,
+    trackOrderBtn: 'Track Order →',
+    chooseNewspaperLang: 'Choose Newspaper Language',
+    newspaperSubtext: 'Select your preferred language to switch live news & editorial editions',
+    quickSwitch: 'Quick Switch:',
+    selectEdition: 'Select Newspaper Edition:',
+    liveBreakingNews: 'LIVE BREAKING NEWS',
+    shortsCards: 'Shorts Cards',
+    fullEpaper: 'Full e-Paper'
   },
   ta: {
     loungeTitle: 'மேஜை பொழுதுபோக்கு அரங்கம்',
@@ -87,7 +111,19 @@ export const ENTERTAINMENT_TRANSLATIONS: Record<string, EntertainmentTranslation
     chefBotsTurn: 'செஃப் பாட் முறை...',
     rollDice: 'தாயக்கட்டையை உருட்டவும்',
     footerText: 'நிகழ்நேர விளையாட்டுகள் & பலமொழி செய்திகள் செயலில் உள்ளன',
-    minimizeKeepPlaying: 'சிறிதாக்கி விளையாடவும்'
+    minimizeKeepPlaying: 'சிறிதாக்கி விளையாடவும்',
+    loginBtn: 'உள்நுழைவு',
+    kioAiLabel: 'கியோ AI',
+    readyToServeBadge: 'பரிமாறத் தயார்!',
+    feastReadyMsg: (waiter, table) => `உங்கள் உணவு தயார்! பணியாளர் ${waiter} மேஜை ${table}-ல் பரிமாறுகிறார்.`,
+    trackOrderBtn: 'ஆர்டரைக் கண்காணிக்க →',
+    chooseNewspaperLang: 'செய்தித்தாள் மொழியைத் தேர்ந்தெடுக்கவும்',
+    newspaperSubtext: 'நேரலை செய்திகள் மற்றும் இதழ்களைப் படிக்க மொழியைத் தேர்ந்தெடுக்கவும்',
+    quickSwitch: 'விரைவு மாற்றம்:',
+    selectEdition: 'செய்தித்தாள் பதிப்பைத் தேர்ந்தெடுக்கவும்:',
+    liveBreakingNews: 'நேரலை முக்கியச் செய்திகள்',
+    shortsCards: 'சுருக்கச் செய்திகள்',
+    fullEpaper: 'முழு மின்-இதழ்'
   },
   hi: {
     loungeTitle: 'टेबल-साइड मनोरंजन लाउंज',
@@ -116,7 +152,19 @@ export const ENTERTAINMENT_TRANSLATIONS: Record<string, EntertainmentTranslation
     chefBotsTurn: 'शेफ बॉट की बारी...',
     rollDice: 'पासा फेंकें',
     footerText: 'रीयल-टाइम गेम्स और बहुभाषी समाचार सक्रिय हैं',
-    minimizeKeepPlaying: 'छोटा करें और खेलते रहें'
+    minimizeKeepPlaying: 'छोटा करें और खेलते रहें',
+    loginBtn: 'लॉगिन',
+    kioAiLabel: 'कियो AI',
+    readyToServeBadge: 'परोसने के लिए तैयार!',
+    feastReadyMsg: (waiter, table) => `आपका भोजन तैयार है! परिचारक ${waiter} टेबल ${table} पर परोस रहे हैं।`,
+    trackOrderBtn: 'ऑर्डर ट्रैक करें →',
+    chooseNewspaperLang: 'अखबार की भाषा चुनें',
+    newspaperSubtext: 'लाइव समाचार और संपादकीय संस्करणों के लिए अपनी भाषा चुनें',
+    quickSwitch: 'त्वरित स्विच:',
+    selectEdition: 'समाचार पत्र संस्करण चुनें:',
+    liveBreakingNews: 'लाइव ब्रेकिंग न्यूज़',
+    shortsCards: 'शॉर्ट्स कार्ड',
+    fullEpaper: 'पूरा ई-पेपर'
   },
   te: {
     loungeTitle: 'టేబుల్-సైడ్ ఎంటర్‌టైన్‌మెంట్ లాంజ్',
@@ -145,7 +193,19 @@ export const ENTERTAINMENT_TRANSLATIONS: Record<string, EntertainmentTranslation
     chefBotsTurn: 'చెఫ్ బాట్ వంతు...',
     rollDice: 'పాచికలు వేయండి',
     footerText: 'రియల్-టైమ్ గేమ్‌లు & వార్తలు చురుకుగా ఉన్నాయి',
-    minimizeKeepPlaying: 'మినిమైజ్ చేసి ఆడుకోండి'
+    minimizeKeepPlaying: 'మినిమైజ్ చేసి ఆడుకోండి',
+    loginBtn: 'లాగిన్',
+    kioAiLabel: 'కియో AI',
+    readyToServeBadge: 'వడ్డించడానికి సిద్ధం!',
+    feastReadyMsg: (waiter, table) => `మీ భోజనం సిద్ధంగా ఉంది! సహాయకుడు ${waiter} టేబుల్ ${table} వద్ద వడ్డిస్తున్నారు.`,
+    trackOrderBtn: 'ఆర్డర్ ట్రాక్ చేయండి →',
+    chooseNewspaperLang: 'దినపత్రిక భాషను ఎంచుకోండి',
+    newspaperSubtext: 'ప్రత్యక్ష వార్తా పత్రికలను చదవడానికి భాషను ఎంచుకోండి',
+    quickSwitch: 'త్వరిత మార్పు:',
+    selectEdition: 'పత్రిక ఎడిషన్‌ను ఎంచుకోండి:',
+    liveBreakingNews: 'ప్రత్యక్ష తాజా వార్తలు',
+    shortsCards: 'షార్ట్స్ కార్డులు',
+    fullEpaper: 'పూర్తి ఇ-పేపర్'
   },
   kn: {
     loungeTitle: 'ಟೇಬಲ್-ಸೈಡ್ ಮನರಂಜನಾ ಲೌಂಜ್',
@@ -174,7 +234,19 @@ export const ENTERTAINMENT_TRANSLATIONS: Record<string, EntertainmentTranslation
     chefBotsTurn: 'ಶೆಫ್ ಬಾಟ್ ಸರದಿ...',
     rollDice: 'ದಾಳ ಉರುಳಿಸಿ',
     footerText: 'ಲೈವ್ ಗೇಮ್‌ಗಳು & ಸುದ್ದಿಗಳು ಸಕ್ರಿಯವಾಗಿವೆ',
-    minimizeKeepPlaying: 'ಮಿನಿಮೈಸ್ ಮಾಡಿ ಆಟ ಮುಂದುವರಿಸಿ'
+    minimizeKeepPlaying: 'ಮಿನಿಮೈಸ್ ಮಾಡಿ ಆಟ ಮುಂದುವರಿಸಿ',
+    loginBtn: 'ಲಾಗಿನ್',
+    kioAiLabel: 'ಕಿಯೋ AI',
+    readyToServeBadge: 'ಬಡಿಸಲು ಸಿದ್ಧ!',
+    feastReadyMsg: (waiter, table) => `ನಿಮ್ಮ ಊಟ ಸಿದ್ಧವಾಗಿದೆ! ಸಹಾಯಕ ${waiter} ಟೇಬಲ್ ${table} ಗೆ ಬಡಿಸುತ್ತಿದ್ದಾರೆ.`,
+    trackOrderBtn: 'ಆರ್ಡರ್ ಟ್ರ್ಯಾಕ್ ಮಾಡಿ →',
+    chooseNewspaperLang: 'ದಿನಪತ್ರಿಕೆಯ ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ',
+    newspaperSubtext: 'ನೇರ ಸುದ್ದಿ ಮತ್ತು ಆವೃತ್ತಿಗಳನ್ನು ಓದಲು ಭಾಷೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ',
+    quickSwitch: 'ತ್ವರಿತ ಬದಲಾವಣೆ:',
+    selectEdition: 'ಪತ್ರಿಕೆಯ ಆವೃತ್ತಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ:',
+    liveBreakingNews: 'ಲೈವ್ ಬ್ರೇಕಿಂಗ್ ನ್ಯೂಸ್',
+    shortsCards: 'ಶಾರ್ಟ್ಸ್ ಕಾರ್ಡ್‌ಗಳು',
+    fullEpaper: 'ಪೂರ್ಣ ಇ-ಪೇಪರ್'
   },
   ml: {
     loungeTitle: 'ടേബിൾ-സൈഡ് വിനോദ ലോഞ്ച്',
@@ -203,7 +275,19 @@ export const ENTERTAINMENT_TRANSLATIONS: Record<string, EntertainmentTranslation
     chefBotsTurn: 'ഷെഫ് ബോട്ടിന്റെ ഊഴം...',
     rollDice: 'ഡൈസ് ഉരുട്ടുക',
     footerText: 'തത്സമയ ഗെയിമുകളും വാർത്തകളും ലഭ്യമാണ്',
-    minimizeKeepPlaying: 'ചെറുതാക്കി കളി തുടരുക'
+    minimizeKeepPlaying: 'ചെറുതാക്കി കളി തുടരുക',
+    loginBtn: 'ലോഗിൻ',
+    kioAiLabel: 'കിയോ AI',
+    readyToServeBadge: 'വിളമ്പാൻ തയ്യാർ!',
+    feastReadyMsg: (waiter, table) => `ഭക്ഷണം തയ്യാറായിരിക്കുന്നു! അറ്റൻഡന്റ് ${waiter} ടേബിൾ ${table}-ൽ വിളമ്പുന്നു.`,
+    trackOrderBtn: 'ഓർഡർ ട്രാക്ക് ചെയ്യുക →',
+    chooseNewspaperLang: 'പത്രത്തിന്റെ ഭാഷ തിരഞ്ഞെടുക്കുക',
+    newspaperSubtext: 'തത്സമയ വാർത്തകളും എഡിറ്റോറിയലുകളും വായിക്കാൻ ഭാഷ മാറ്റുക',
+    quickSwitch: 'പെട്ടെന്ന് മാറ്റുക:',
+    selectEdition: 'പത്രത്തിന്റെ പതിപ്പ് തിരഞ്ഞെടുക്കുക:',
+    liveBreakingNews: 'തത്സമയ ബ്രേക്കിംഗ് ന്യൂസ്',
+    shortsCards: 'ഷോർട്ട്സ് കാർഡുകൾ',
+    fullEpaper: 'പൂർണ്ണ ഇ-പേപ്പർ'
   },
   ar: {
     loungeTitle: 'صالة الترفيه بجانب الطاولة',
@@ -232,7 +316,19 @@ export const ENTERTAINMENT_TRANSLATIONS: Record<string, EntertainmentTranslation
     chefBotsTurn: 'دور الشيف الآلي...',
     rollDice: 'رمي النرد',
     footerText: 'الألعاب المباشرة والأخبار متعددة اللغات نشطة',
-    minimizeKeepPlaying: 'تصغير ومتابعة اللعب'
+    minimizeKeepPlaying: 'تصغير ومتابعة اللعب',
+    loginBtn: 'تسجيل الدخول',
+    kioAiLabel: 'كيو AI',
+    readyToServeBadge: 'جاهز للتقديم!',
+    feastReadyMsg: (waiter, table) => `وجبتكم الشهية جاهزة الآن! المضيف ${waiter} يقدمها لطاولة ${table}.`,
+    trackOrderBtn: 'تتبع الطلب ←',
+    chooseNewspaperLang: 'اختر لغة الصحيفة',
+    newspaperSubtext: 'حدد لغتك المفضلة لتصفح الأخبار المباشرة والافتتاحيات',
+    quickSwitch: 'تبديل سريع:',
+    selectEdition: 'اختر إصدار الصحيفة:',
+    liveBreakingNews: 'أخبار عاجلة مباشرة',
+    shortsCards: 'بطاقات موجزة',
+    fullEpaper: 'الصحيفة الإلكترونية'
   },
   ko: {
     loungeTitle: '테이블 엔터테인먼트 라운지',
@@ -261,7 +357,19 @@ export const ENTERTAINMENT_TRANSLATIONS: Record<string, EntertainmentTranslation
     chefBotsTurn: '셰프 봇 차례...',
     rollDice: '주사위 굴리기',
     footerText: '실시간 게임 & 다국어 뉴스 서비스 활성화됨',
-    minimizeKeepPlaying: '최소화하고 게임 계속하기'
+    minimizeKeepPlaying: '최소화하고 게임 계속하기',
+    loginBtn: '로그인',
+    kioAiLabel: '키오 AI',
+    readyToServeBadge: '서빙 준비 완료!',
+    feastReadyMsg: (waiter, table) => `주문하신 요리가 완성되었습니다! 담당 직원 ${waiter}이(가) 테이블 ${table}로 서빙합니다.`,
+    trackOrderBtn: '주문 현황 보기 →',
+    chooseNewspaperLang: '신문 언어 선택',
+    newspaperSubtext: '원하시는 언어를 선택하여 실시간 뉴스와 사설을 확인하세요',
+    quickSwitch: '빠른 전환:',
+    selectEdition: '신문사 및 판본 선택:',
+    liveBreakingNews: '실시간 속보',
+    shortsCards: '쇼츠 카드',
+    fullEpaper: '전체 전자신문'
   },
   es: {
     loungeTitle: 'Sala de Entretenimiento en Mesa',
@@ -290,7 +398,19 @@ export const ENTERTAINMENT_TRANSLATIONS: Record<string, EntertainmentTranslation
     chefBotsTurn: 'Turno del Chef Bot...',
     rollDice: 'LANZAR DADOS',
     footerText: 'Juegos en tiempo real y noticias multilingües activos',
-    minimizeKeepPlaying: 'Minimizar y Seguir Jugando'
+    minimizeKeepPlaying: 'Minimizar y Seguir Jugando',
+    loginBtn: 'Iniciar Sesión',
+    kioAiLabel: 'Kio AI',
+    readyToServeBadge: '¡Listo para Servir!',
+    feastReadyMsg: (waiter, table) => `¡Su comida está lista! El camarero ${waiter} la está sirviendo en la Mesa ${table}.`,
+    trackOrderBtn: 'Seguir Pedido →',
+    chooseNewspaperLang: 'Elegir Idioma del Periódico',
+    newspaperSubtext: 'Seleccione su idioma para ver noticias en vivo y editoriales',
+    quickSwitch: 'Cambio Rápido:',
+    selectEdition: 'Seleccionar Edición:',
+    liveBreakingNews: 'NOTICIAS DE ÚLTIMA HORA',
+    shortsCards: 'Tarjetas Resumen',
+    fullEpaper: 'Edición Digital Completa'
   },
   fr: {
     loungeTitle: 'Espace Divertissement à Table',
@@ -319,7 +439,19 @@ export const ENTERTAINMENT_TRANSLATIONS: Record<string, EntertainmentTranslation
     chefBotsTurn: 'Au tour du Chef Bot...',
     rollDice: 'LANCER LE DÉ',
     footerText: 'Jeux en temps réel et actualités multilingues actifs',
-    minimizeKeepPlaying: 'Réduire & Continuer'
+    minimizeKeepPlaying: 'Réduire & Continuer',
+    loginBtn: 'Connexion',
+    kioAiLabel: 'Kio AI',
+    readyToServeBadge: 'Prêt à Servir !',
+    feastReadyMsg: (waiter, table) => `Votre repas est prêt ! Le serveur ${waiter} sert la Table ${table}.`,
+    trackOrderBtn: 'Suivre la Commande →',
+    chooseNewspaperLang: 'Choisir la Langue du Journal',
+    newspaperSubtext: 'Sélectionnez votre langue pour lire les actualités en direct',
+    quickSwitch: 'Changement Rapide :',
+    selectEdition: 'Choisir l\'Édition :',
+    liveBreakingNews: 'DERNIÈRE MINUTE',
+    shortsCards: 'Cartes Résumé',
+    fullEpaper: 'Journal Numérique Complet'
   },
   de: {
     loungeTitle: 'Unterhaltungs-Lounge am Tisch',
@@ -348,11 +480,22 @@ export const ENTERTAINMENT_TRANSLATIONS: Record<string, EntertainmentTranslation
     chefBotsTurn: 'Chef Bot ist am Zug...',
     rollDice: 'WÜRFELN',
     footerText: 'Echtzeit-Spiele und mehrsprachige Nachrichten aktiv',
-    minimizeKeepPlaying: 'Minimieren & Weiter Spielen'
+    minimizeKeepPlaying: 'Minimieren & Weiter Spielen',
+    loginBtn: 'Anmelden',
+    kioAiLabel: 'Kio AI',
+    readyToServeBadge: 'Bereit zum Servieren!',
+    feastReadyMsg: (waiter, table) => `Ihre Speisen sind frisch zubereitet! Kellner ${waiter} serviert an Tisch ${table}.`,
+    trackOrderBtn: 'Bestellung Verfolgen →',
+    chooseNewspaperLang: 'Zeitungs-Sprache Wählen',
+    newspaperSubtext: 'Wählen Sie Ihre Sprache für Live-Nachrichten',
+    quickSwitch: 'Schnellwechsel:',
+    selectEdition: 'Zeitungsausgabe Wählen:',
+    liveBreakingNews: 'EILMELDUNG',
+    shortsCards: 'Kompaktkarten',
+    fullEpaper: 'Komplette E-Paper-Ausgabe'
   }
 };
 
 export const getEntertainmentText = (lang: string): EntertainmentTranslations => {
   return ENTERTAINMENT_TRANSLATIONS[lang] || ENTERTAINMENT_TRANSLATIONS['en'];
 };
-

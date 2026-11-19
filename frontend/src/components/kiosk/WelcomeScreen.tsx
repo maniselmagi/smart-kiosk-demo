@@ -3,6 +3,7 @@ import { useKiosk } from '../../context/KioskContext';
 import restaurantFoodImg from '../../assets/restaurant_food_welcome.jpg';
 import { LanguageFlagBadge } from '../common/LanguageFlagBadge';
 import { AVAILABLE_LANGUAGES, Language } from '../../utils/translations';
+import { getEntertainmentText } from '../../utils/entertainmentTranslations';
 import { 
   Crown,
   Sparkles, 
@@ -159,7 +160,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           >
             <ShieldCheck className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" />
             <span className="font-display tracking-wider text-[11px] uppercase">
-              Login
+              {getEntertainmentText(language).loginBtn}
             </span>
           </button>
 

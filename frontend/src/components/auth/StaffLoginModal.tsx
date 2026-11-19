@@ -175,7 +175,7 @@ export const StaffLoginModal: React.FC<StaffLoginModalProps> = ({
             </button>
             <div>
               <span className="text-[10px] font-black uppercase tracking-widest text-amber-400 font-display flex items-center gap-1">
-                <Crown className="w-3 h-3" /> Royal Ember Staff Portal
+                <Crown className="w-3 h-3" /> {tStaff.portalBadge}
               </span>
               <h2 className="text-lg font-black tracking-tight font-display text-white">
                 {tStaff.title}

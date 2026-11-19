@@ -27,6 +27,7 @@ import {
 } from '../../services/aiConciergeService';
 import { getAssignedWaiter, getLocalizedWaiterName } from '../../utils/waiterAssignment';
 import { getLocalizedItemName, getLocalizedItemDescription } from '../../utils/translations';
+import { getEntertainmentText } from '../../utils/entertainmentTranslations';
 
 interface AIChatModalProps {
   isOpen: boolean;
@@ -207,7 +208,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
               <div className="flex items-center gap-2">
                 {/* Official Chatbox Name */}
                 <h3 className="font-display font-black text-base sm:text-lg text-white tracking-tight flex items-center gap-2">
-                  <span>Kio</span>
+                  <span>{getEntertainmentText(language).kioAiLabel}</span>
                   <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-gradient-to-r from-violet-500/20 to-amber-500/20 text-amber-300 border border-amber-400/40">
                     {t.aiChatLabel || 'AI Chatbox'}
                   </span>

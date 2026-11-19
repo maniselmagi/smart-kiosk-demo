@@ -1254,7 +1254,7 @@ const OriginalSudokuGame: React.FC = () => {
 // ============================================================================
 // 4. MULTILINGUAL TODAY'S LIVE NEWSPAPER SECTION
 // ============================================================================
-type NewsLanguage = 'en' | 'ta' | 'hi' | 'te' | 'kn' | 'ml' | 'mr';
+type NewsLanguage = 'en' | 'ta' | 'hi' | 'te' | 'kn' | 'ml' | 'mr' | 'es' | 'fr' | 'ar' | 'ko';
 
 interface NewsItem {
   id: number;
@@ -2315,12 +2315,212 @@ const MULTILINGUAL_NEWS_DATA: Record<NewsLanguage, LanguagePaperConfig> = {
         ]
       }
     ]
+  },
+  ar: {
+    code: 'ar',
+    label: 'العربية',
+    nativeName: 'الصحف العربية اليومية',
+    flag: '🇸🇦',
+    papers: [
+      {
+        name: 'جريدة الأهرام (Al-Ahram)',
+        masthead: 'الأهرام',
+        tagline: 'أعرق الصحف العربية وأكثرها مصداقية • تأسست عام 1875',
+        cityEdition: 'طبعة الشرق الأوسط والخليج • اليوم، 16 أكتوبر 2026',
+        news: [
+          {
+            id: 801,
+            newspaper: 'جريدة الأهرام',
+            headline: 'افتتاح مسار المترو السريع الأخضر لخدمة ملايين الركاب يومياً',
+            summary: 'بدأ المسار الكهربائي الصديق للبيئة عمله رسمياً اليوم بطول 45 كم لربط المراكز الحيوية والتجارية، مقلصاً زمن التنقل بنسبة 40% وسط إشادة واسعة.',
+            category: 'النقل المستدام',
+            readTime: 'قراءة في 45 ثانية',
+            image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
+            timeAgo: 'منذ 15 دقيقة'
+          },
+          {
+            id: 802,
+            newspaper: 'جريدة الأهرام',
+            headline: 'مشروع إقليمي ضخم لتحلية مياه البحر بالطاقة الشمسية النظيفة',
+            summary: 'أطلقت الأكاديميات العلمية محطة تحلية متطورة تعمل بالألواح الشمسية لضخ 100 مليون لتر من المياه العذبة النقية يومياً.',
+            category: 'العلوم والمياه',
+            readTime: 'قراءة في 40 ثانية',
+            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+            timeAgo: 'منذ 40 دقيقة'
+          },
+          {
+            id: 803,
+            newspaper: 'جريدة الأهرام',
+            headline: 'مبادرة التعليم الرقمي والذكاء الاصطناعي تصل إلى آلاف المدارس',
+            summary: 'بدأت مجالس التعليم الوطنية برامج تدريبية رائدة للطلاب في علوم الحاسوب وتقنيات الذكاء الاصطناعي الأخلاقي لتأهيل أجيال المستقبل.',
+            category: 'التعليم والمستقبل',
+            readTime: 'قراءة في 35 ثانية',
+            image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&auto=format&fit=crop&q=80',
+            timeAgo: 'منذ ساعة'
+          }
+        ]
+      },
+      {
+        name: 'الشرق الأوسط (Asharq Al-Awsat)',
+        masthead: 'الشرق الأوسط',
+        tagline: 'جريدة العرب الدولية الأولى • تغطية مستقلة وموثوقة',
+        cityEdition: 'الطبعة الدولية • اليوم، 16 أكتوبر 2026',
+        news: [
+          {
+            id: 804,
+            newspaper: 'الشرق الأوسط',
+            headline: 'قمة الضيافة وفنون الطهي العالمية تحتفي بالأطباق التقليدية العريقة',
+            summary: 'اجتمع نخبة من كبار الطهاة العالميين لاستعراض أرقى ابتكارات الضيافة الفاخرة والمأكولات الأصيلة بتوابلها الطبيعية.',
+            category: 'ثقافة وفنون الطهي',
+            readTime: 'قراءة في 30 ثانية',
+            image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&auto=format&fit=crop&q=80',
+            timeAgo: 'منذ ساعتين'
+          }
+        ]
+      }
+    ]
+  },
+  ko: {
+    code: 'ko',
+    label: '한국어',
+    nativeName: '대한민국 일간지',
+    flag: '🇰🇷',
+    papers: [
+      {
+        name: '조선일보 (Chosun Ilbo)',
+        masthead: '조선일보',
+        tagline: '대한민국 1등 정론지 • 신뢰와 혁신의 100년',
+        cityEdition: '서울 수도권 종합판 • 오늘, 2026년 10월 16일',
+        news: [
+          {
+            id: 901,
+            newspaper: '조선일보',
+            headline: '친환경 고속 메트로 3단계 개통, 수도권 출퇴근 시간 40% 단축',
+            summary: '총 연장 45km에 달하는 첨단 자동화 무공해 메트로 라인이 오늘 본격 운행에 들어갔습니다. 첨단 IT 밸리와 도심 허브를 쾌속 연결합니다.',
+            category: '도시 교통',
+            readTime: '45초 읽기',
+            image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '15분 전'
+          },
+          {
+            id: 902,
+            newspaper: '조선일보',
+            headline: '차세대 친환경 태양광 해수 담수화 기술 성공적 상용화',
+            summary: '국내 연구진이 친환경 태양광 삼투압 방식으로 하루 1억 리터의 맑고 깨끗한 음용수를 안정 공급하는 설비를 가동했습니다.',
+            category: '과학 & 환경',
+            readTime: '35초 읽기',
+            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '45분 전'
+          },
+          {
+            id: 903,
+            newspaper: '조선일보',
+            headline: '전국 1만 2천 개 중고교에 미래형 AI 디지털 교육 인프라 완비',
+            summary: '학생들이 윤리적 인공지능과 실전 소프트웨어를 학습할 수 있는 차세대 디지털 교육 플랫폼이 전국 교육 현장에 전격 보급되었습니다.',
+            category: '미래 교육',
+            readTime: '30초 읽기',
+            image: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '1시간 전'
+          }
+        ]
+      },
+      {
+        name: '동아일보 (Dong-A Ilbo)',
+        masthead: '동아일보',
+        tagline: '시대의 빛을 밝히는 정직한 언론 • 미래를 선도하는 뉴스',
+        cityEdition: '전국 종합판 • 오늘, 2026년 10월 16일',
+        news: [
+          {
+            id: 904,
+            newspaper: '동아일보',
+            headline: '미식 문화와 스마트 다이닝의 만남, 글로벌 푸드 트렌드 선도',
+            summary: '세계 정상급 셰프들이 모여 고품격 다이닝과 스마트 키오스크의 조화를 통해 새로운 고객 감동 외식 문화를 선보였습니다.',
+            category: '라이프 & 다이닝',
+            readTime: '30초 읽기',
+            image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&auto=format&fit=crop&q=80',
+            timeAgo: '2시간 전'
+          }
+        ]
+      }
+    ]
+  },
+  es: {
+    code: 'es',
+    label: 'Español',
+    nativeName: 'Prensa Diaria en Español',
+    flag: '🇪🇸',
+    papers: [
+      {
+        name: 'El País',
+        masthead: 'EL PAÍS',
+        tagline: 'El periódico global • Información independiente y rigurosa',
+        cityEdition: 'Edición General • Hoy, 16 de octubre de 2026',
+        news: [
+          {
+            id: 1001,
+            newspaper: 'El País',
+            headline: 'Inaugurado el corredor de metro ecológico de alta velocidad de 45 km',
+            summary: 'El nuevo trazado ferroviario 100% libre de emisiones conecta los núcleos tecnológicos con el centro histórico reduciendo los tiempos de viaje un 40%.',
+            category: 'Movilidad Urbana',
+            readTime: 'Lectura de 40s',
+            image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
+            timeAgo: 'hace 20m'
+          },
+          {
+            id: 1002,
+            newspaper: 'El País',
+            headline: 'Innovador sistema solar de desalinización garantiza agua limpia a millones',
+            summary: 'Un consorcio científico internacional pone en marcha una red de ósmosis solar capaz de producir 100 millones de litros diarios de agua potable.',
+            category: 'Ciencia y Agua',
+            readTime: 'Lectura de 35s',
+            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+            timeAgo: 'hace 50m'
+          }
+        ]
+      }
+    ]
+  },
+  fr: {
+    code: 'fr',
+    label: 'Français',
+    nativeName: 'Presse Quotidienne Française',
+    flag: '🇫🇷',
+    papers: [
+      {
+        name: 'Le Figaro',
+        masthead: 'LE FIGARO',
+        tagline: "Premier quotidien national • L'information d'excellence depuis 1826",
+        cityEdition: 'Édition Nationale • Aujourd’hui, 16 octobre 2026',
+        news: [
+          {
+            id: 1101,
+            newspaper: 'Le Figaro',
+            headline: 'Mise en service du nouveau métro automatisé zéro émission sur 45 km',
+            summary: 'Le nouveau corridor à grande vitesse relie les pôles d’innovation aux centres historiques, réduisant les temps de trajet de 40%.',
+            category: 'Mobilité Urbaine',
+            readTime: 'Lecture 40s',
+            image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=80',
+            timeAgo: 'il y a 20m'
+          },
+          {
+            id: 1102,
+            newspaper: 'Le Figaro',
+            headline: 'Percée scientifique majeure dans la désalinisation propre à énergie solaire',
+            summary: 'Les chercheurs déploient un réseau innovant fournissant 100 millions de litres d’eau douce potable par jour avec un impact carbone nul.',
+            category: 'Sciences & Écologie',
+            readTime: 'Lecture 35s',
+            image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+            timeAgo: 'il y a 45m'
+          }
+        ]
+      }
+    ]
   }
 };
 
 const MultilingualTodayNewspaper: React.FC = () => {
   const { language = 'en' } = useKiosk();
-  const initialLang: NewsLanguage = (['en', 'ta', 'hi', 'te', 'kn', 'ml', 'mr'].includes(language) ? language : 'en') as NewsLanguage;
+  const initialLang: NewsLanguage = (['en', 'ta', 'hi', 'te', 'kn', 'ml', 'mr', 'es', 'fr', 'ar', 'ko'].includes(language) ? language : 'en') as NewsLanguage;
   const [selectedLang, setSelectedLang] = useState<NewsLanguage>(initialLang);
   const [selectedPaperIdx, setSelectedPaperIdx] = useState(0);
   const [activeShortIdx, setActiveShortIdx] = useState(0);
@@ -2330,7 +2530,7 @@ const MultilingualTodayNewspaper: React.FC = () => {
 
   // Sync newspaper language whenever kiosk language changes
   useEffect(() => {
-    if (['en', 'ta', 'hi', 'te', 'kn', 'ml', 'mr'].includes(language)) {
+    if (['en', 'ta', 'hi', 'te', 'kn', 'ml', 'mr', 'es', 'fr', 'ar', 'ko'].includes(language)) {
       setSelectedLang(language as NewsLanguage);
       setSelectedPaperIdx(0);
       setActiveShortIdx(0);
@@ -2388,6 +2588,10 @@ const MultilingualTodayNewspaper: React.FC = () => {
               <option value="kn">🇮🇳 ಕನ್ನಡ (Kannada - ವಿಜಯ ಕರ್ನಾಟಕ, ಕನ್ನಡ ಪ್ರಭ)</option>
               <option value="ml">🇮🇳 മലയാളം (Malayalam - മലയാള മനോരമ, മാതൃഭൂമി)</option>
               <option value="mr">🇮🇳 मराठी (Marathi - लोकमत, महाराष्ट्र टाइम्स)</option>
+              <option value="ar">🇸🇦 العربية (Arabic - الأهرام, الشرق الأوسط)</option>
+              <option value="ko">🇰🇷 한국어 (Korean - 조선일보, 동아일보)</option>
+              <option value="es">🇪🇸 Español (Spanish - El País, El Mundo)</option>
+              <option value="fr">🇫🇷 Français (French - Le Figaro, Le Monde)</option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-amber-400">
               <ChevronRight className="w-4 h-4 rotate-90" />
@@ -2400,7 +2604,7 @@ const MultilingualTodayNewspaper: React.FC = () => {
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider shrink-0 mr-1">
             {tEnt.quickSwitch}
           </span>
-          {(['en', 'ta', 'hi', 'te', 'kn', 'ml', 'mr'] as NewsLanguage[]).map((langKey) => {
+          {(['en', 'ta', 'hi', 'te', 'kn', 'ml', 'mr', 'ar', 'ko', 'es', 'fr'] as NewsLanguage[]).map((langKey) => {
             const config = MULTILINGUAL_NEWS_DATA[langKey];
             const isSelected = selectedLang === langKey;
             return (
@@ -2430,7 +2634,7 @@ const MultilingualTodayNewspaper: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-center justify-between pb-2 border-b-2 border-slate-800 dark:border-slate-700 gap-2 text-center sm:text-left">
           <div className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-400 font-sans font-bold">
             <Calendar className="w-3.5 h-3.5 text-amber-600" />
-            <span>Today, October 16, 2026</span>
+            <span>{tEnt.todayDateText}</span>
             <span>• Vol. LXIV No. 288</span>
           </div>
 
@@ -2441,7 +2645,7 @@ const MultilingualTodayNewspaper: React.FC = () => {
             </span>
             <div className="flex items-center gap-1 text-[11px] text-slate-600 dark:text-slate-400 font-sans font-semibold">
               <CloudSun className="w-3.5 h-3.5 text-amber-500" />
-              <span>28°C Clear</span>
+              <span>{tEnt.weatherClearText}</span>
             </div>
           </div>
         </div>
@@ -2496,7 +2700,7 @@ const MultilingualTodayNewspaper: React.FC = () => {
       <div className="flex items-center justify-between">
         <span className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
           <Radio className="w-3.5 h-3.5 text-red-500 animate-pulse" />
-          <span>{activePaper.name} Live Stories ({newsList.length} Articles)</span>
+          <span>{tEnt.liveStoriesLabel(activePaper.name, newsList.length)}</span>
         </span>
 
         <div className="flex items-center gap-1 bg-slate-200 dark:bg-slate-800 p-1 rounded-xl">
@@ -2533,7 +2737,7 @@ const MultilingualTodayNewspaper: React.FC = () => {
               <span className="font-bold text-amber-300">• {currentShort.newspaper}</span>
             </div>
             <span className="text-[11px] font-mono text-amber-400 font-bold">
-              {activeShortIdx + 1} of {newsList.length} Shorts
+              {tEnt.shortsCountText(activeShortIdx + 1, newsList.length)}
             </span>
           </div>
 
@@ -2559,7 +2763,7 @@ const MultilingualTodayNewspaper: React.FC = () => {
               <div className="flex items-center justify-between pt-1 text-[11px] text-slate-400">
                 <span>⏱️ {currentShort.timeAgo}</span>
                 <span className="text-amber-400 font-bold cursor-pointer hover:underline">
-                  Full Story Coverage →
+                  {tEnt.fullStoryCoverage}
                 </span>
               </div>
             </div>
@@ -2645,29 +2849,33 @@ const MultilingualTodayNewspaper: React.FC = () => {
 // ============================================================================
 // 5. MUSIC & AMBIENT LOUNGE SECTION
 // ============================================================================
-const AMBIENT_TRACKS = [
-  { id: 1, title: 'Royal Ember Evening Sitar & Tabla', genre: 'Acoustic Indian Classical', duration: '3:45', icon: '🪕' },
-  { id: 2, title: 'Monsoon Chai & Rainy Cafe Lo-Fi', genre: 'Chillhop Lo-Fi Beats', duration: '4:10', icon: '☕' },
-  { id: 3, title: 'Bespoke Dining Jazz & Saxophone', genre: 'Smooth Bistro Jazz', duration: '3:20', icon: '🎷' },
-  { id: 4, title: 'Gentle Himalayan Pine Breeze', genre: 'Nature & Zen Flute', duration: '5:00', icon: '🍃' },
-];
-
 const MusicLoungeSection: React.FC = () => {
+  const { language = 'en' } = useKiosk();
+  const tEnt = getEntertainmentText(language);
+  const tracks = tEnt.ambientTracks;
   const [isPlaying, setIsPlaying] = useState(false);
-  const [activeTrack, setActiveTrack] = useState(AMBIENT_TRACKS[0]);
+  const [activeTrack, setActiveTrack] = useState(tracks[0]);
   const [volume, setVolume] = useState(70);
+
+  // Sync track metadata when language changes
+  useEffect(() => {
+    setActiveTrack(prev => {
+      const match = tracks.find(t => t.id === prev.id);
+      return match || tracks[0];
+    });
+  }, [tracks]);
 
   return (
     <div className="space-y-4">
       <div>
         <h4 className="font-black text-sm md:text-base text-slate-900 dark:text-white flex items-center gap-1.5">
-          <span>🎧 Table-Side Music & Ambient Lounge</span>
+          <span>🎧 {tEnt.musicTitle}</span>
           <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-600 dark:text-purple-400 font-bold">
-            Relaxing Dining Tunes
+            {tEnt.musicBadge}
           </span>
         </h4>
         <p className="text-xs text-slate-500 dark:text-slate-400">
-          Listen to curated acoustics and soothing ambient sounds while your chef prepares your dishes.
+          {tEnt.musicSubtitle}
         </p>
       </div>
 
@@ -2734,7 +2942,7 @@ const MusicLoungeSection: React.FC = () => {
 
       {/* Track Selection List */}
       <div className="divide-y divide-slate-100 dark:divide-slate-800 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden bg-white dark:bg-slate-900">
-        {AMBIENT_TRACKS.map((track) => {
+        {tracks.map((track) => {
           const isSelected = activeTrack.id === track.id;
           return (
             <div 

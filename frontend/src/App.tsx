@@ -151,8 +151,8 @@ const MainAppContent: React.FC = () => {
 
         {kioskSubScreen === 'welcome' && (
           <WelcomeScreen
-            onStart={() => setKioskSubScreen('language')}
-            onOpenLanguage={() => setKioskSubScreen('language')}
+            onStart={() => setKioskSubScreen('allocation')}
+            onOpenLanguage={() => setKioskSubScreen('welcome')}
           />
         )}
 
@@ -165,7 +165,7 @@ const MainAppContent: React.FC = () => {
 
         {kioskSubScreen === 'allocation' && (
           <CustomerTableAllocationScreen
-            onBackToLanguage={() => setKioskSubScreen('language')}
+            onBackToLanguage={() => setKioskSubScreen('welcome')}
             onConfirmAllocation={() => setKioskSubScreen('thankyou')}
           />
         )}
@@ -201,7 +201,7 @@ const MainAppContent: React.FC = () => {
           <LandingHub 
             onStartCustomer={() => {
               setView('kiosk');
-              setKioskSubScreen('language');
+              setKioskSubScreen('welcome');
             }}
             onOpenStaffLogin={handleOpenStaffLogin}
           />
@@ -215,8 +215,8 @@ const MainAppContent: React.FC = () => {
           <div className="flex-1 flex flex-col">
             {kioskSubScreen === 'welcome' && (
               <WelcomeScreen
-                onStart={() => setKioskSubScreen('language')}
-                onOpenLanguage={() => setKioskSubScreen('language')}
+                onStart={() => setKioskSubScreen('menu')}
+                onOpenLanguage={() => setKioskSubScreen('welcome')}
                 onOpenStaffLogin={() => handleOpenStaffLogin('kitchen')}
               />
             )}

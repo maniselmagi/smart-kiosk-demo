@@ -270,7 +270,6 @@ export interface TranslationDictionary {
   tableFeatures: string;
   tableBookedNotice: string;
   changeLanguageBtn: string;
-  proceedToBookingBtn: string;
   todayDateLabel: string;
   tomorrowDateLabel: string;
   guestsCountLabel: string;
@@ -527,7 +526,6 @@ export const translations: Record<Language, TranslationDictionary> = {
     tableFeatures: "Table Highlights & Ambience",
     tableBookedNotice: "Slot Confirmed in Cloud Database",
     changeLanguageBtn: "Change Language",
-    proceedToBookingBtn: "Proceed to Table Booking",
     todayDateLabel: "Today",
     tomorrowDateLabel: "Tomorrow",
     guestsCountLabel: "Guests",
@@ -782,7 +780,6 @@ export const translations: Record<Language, TranslationDictionary> = {
     tableFeatures: "மேஜையின் சிறப்பம்சங்கள் & சூழல்",
     tableBookedNotice: "கிளவுட் தரவுத்தளத்தில் உறுதிசெய்யப்பட்டது",
     changeLanguageBtn: "மொழியை மாற்றுக",
-    proceedToBookingBtn: "மேஜை முன்பதிவுக்குச் செல்லவும்",
     todayDateLabel: "இன்று",
     tomorrowDateLabel: "நாளை",
     guestsCountLabel: "விருந்தினர்கள்",
@@ -1037,7 +1034,6 @@ export const translations: Record<Language, TranslationDictionary> = {
     tableFeatures: "टेबल की विशेषताएं एवं परिवेश",
     tableBookedNotice: "क्लाउड डेटाबेस में सुरक्षित",
     changeLanguageBtn: "भाषा बदलें",
-    proceedToBookingBtn: "टेबल बुकिंग के लिए आगे बढ़ें",
     todayDateLabel: "आज",
     tomorrowDateLabel: "कल",
     guestsCountLabel: "अतिथि",
@@ -1292,7 +1288,6 @@ export const translations: Record<Language, TranslationDictionary> = {
     tableFeatures: "టేబుల్ ముఖ్యాంశాలు & పరిసరాలు",
     tableBookedNotice: "క్లౌడ్ డేటాబేస్‌లో భద్రపరచబడింది",
     changeLanguageBtn: "భాషను మార్చండి",
-    proceedToBookingBtn: "టేబుల్ బుకింగ్ కోసం కొనసాగించండి",
     todayDateLabel: "ఈరోజు",
     tomorrowDateLabel: "రేపు",
     guestsCountLabel: "అతిథులు",
@@ -1547,7 +1542,6 @@ export const translations: Record<Language, TranslationDictionary> = {
     tableFeatures: "Características y Ambiente de la Mesa",
     tableBookedNotice: "Guardado en Base de Datos en la Nube",
     changeLanguageBtn: "Cambiar Idioma",
-    proceedToBookingBtn: "Continuar a Reserva de Mesa",
     todayDateLabel: "Hoy",
     tomorrowDateLabel: "Mañana",
     guestsCountLabel: "Invitados",
@@ -1588,7 +1582,6 @@ translations.ar = {
   howManyGuestsTitle: "2. كم عدد الضيوف اليوم؟",
   confirmedTableTitle: "الطاولة المخصصة المؤكدة",
   proceedToMenuBtn: "الانتقال إلى القائمة الرقمية",
-  proceedToBookingBtn: "المتابعة لحجز الطاولة",
   stepTableAllocation: "الخطوة 2 من 2: تخصيص الطاولة",
   coupleDuo: "1-2 ثنائي",
   standardFamily: "3-4 عائلة",
@@ -1620,7 +1613,6 @@ translations.kn = {
   howManyGuestsTitle: "2. ಇಂದು ಎಷ್ಟು ಅತಿಥಿಗಳು ಊಟ ಮಾಡುತ್ತಿದ್ದಾರೆ?",
   confirmedTableTitle: "ಖಚಿತಪಡಿಸಿದ ಟೇಬಲ್ ಹಂಚಿಕೆ",
   proceedToMenuBtn: "ಡಿಜಿಟಲ್ ಮೆನುಗೆ ಮುಂದುವರಿಯಿರಿ",
-  proceedToBookingBtn: "ಟೇಬಲ್ ಬುಕಿಂಗ್‌ಗೆ ಮುಂದುವರಿಯಿರಿ",
   stepTableAllocation: "ಹಂತ 2 / 2: ಟೇಬಲ್ ಹಂಚಿಕೆ",
   coupleDuo: "1-2 ಜೋಡಿ",
   standardFamily: "3-4 ಕುಟುಂಬ",
@@ -1652,7 +1644,6 @@ translations.ml = {
   howManyGuestsTitle: "2. ഇന്ന് എത്ര പേർ ഭക്ഷണം കഴിക്കുന്നു?",
   confirmedTableTitle: "സ്ഥിരീകരിച്ച ടേബിൾ",
   proceedToMenuBtn: "ഡിജിറ്റൽ മെനുവിലേക്ക് പോകുക",
-  proceedToBookingBtn: "ടേബിൾ ബുക്കിംഗിലേക്ക് തുടരുക",
   stepTableAllocation: "ഘട്ടം 2 / 2: ടേബിൾ അലോക്കേഷൻ",
   coupleDuo: "1-2 ജോഡി",
   standardFamily: "3-4 കുടുംബം",
@@ -1677,7 +1668,6 @@ translations.fr = {
   tableAllocationTitle: "Détails des invités & Attribution de table",
   tableAllocationSubtitle: "Indiquez le nombre de convives pour nous permettre de vous attribuer la table idéale.",
   proceedToMenuBtn: "Accéder au menu digital",
-  proceedToBookingBtn: "Procéder à la réservation",
   stepTableAllocation: "Étape 2 sur 2 : Attribution de table",
 };
 
@@ -1697,7 +1687,6 @@ translations.de = {
   tableAllocationTitle: "Gästedetails & Tischzuweisung",
   tableAllocationSubtitle: "Bitte geben Sie die Gästeanzahl an, damit wir Ihnen den passenden Tisch zuweisen können.",
   proceedToMenuBtn: "Weiter zur digitalen Speisekarte",
-  proceedToBookingBtn: "Zur Tischreservierung fortfahren",
   stepTableAllocation: "Schritt 2 von 2: Tischzuweisung",
 };
 
@@ -1717,7 +1706,6 @@ translations.ko = {
   tableAllocationTitle: "고객 정보 및 스마트 테이블 배정",
   tableAllocationSubtitle: "최적의 좌석과 서비스를 제공해 드릴 수 있도록 인원수를 알려주세요.",
   proceedToMenuBtn: "디지털 메뉴로 이동",
-  proceedToBookingBtn: "테이블 예약 진행하기",
   stepTableAllocation: "2단계 중 2단계: 테이블 배정",
 };
 

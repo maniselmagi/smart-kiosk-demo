@@ -172,6 +172,7 @@ export const KitchenDisplay: React.FC = () => {
   const [selectedStation, setSelectedStation] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<'ALL' | OrderStatus>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [orderSourceFilter, setOrderSourceFilter] = useState<'ALL' | 'ONLINE' | 'DINE_IN'>('ALL');
 
   // Selected Order for Full Ticket Modal
   const [selectedOrderForModal, setSelectedOrderForModal] = useState<Order | null>(null);
@@ -408,6 +409,14 @@ export const KitchenDisplay: React.FC = () => {
         return false;
       }
 
+      if (orderSourceFilter === 'ONLINE' && !order.isOnlineBooking) {
+        return false;
+      }
+
+      if (orderSourceFilter === 'DINE_IN' && order.isOnlineBooking) {
+        return false;
+      }
+
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
         const matchNum = order.orderNumber.toString().includes(q);
@@ -440,7 +449,7 @@ export const KitchenDisplay: React.FC = () => {
 
       return true;
     });
-  }, [displayOrders, statusFilter, searchQuery, selectedStation]);
+  }, [displayOrders, statusFilter, searchQuery, selectedStation, orderSourceFilter, selectedWaiterFilter]);
 
   // Status progression handler
   const handleAdvanceStatus = (orderId: string, currentStatus: OrderStatus, e?: React.MouseEvent) => {
@@ -854,11 +863,58 @@ export const KitchenDisplay: React.FC = () => {
         <div className="pt-6 pb-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             
-            {/* Left: Orders Title & Waiter Zone Filters */}
+            {/* Left: Orders Title & Order Source Filter & Waiter Zone Filters */}
             <div className="flex items-center gap-4 flex-wrap">
               <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
                 Orders
               </h2>
+
+              {/* Order Source Filter: All / 🎟️ Online Pre-Bookings / 🍽️ Dine-in */}
+              <div className="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold">
+                <button
+                  type="button"
+                  onClick={() => setOrderSourceFilter('ALL')}
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                    orderSourceFilter === 'ALL'
+                      ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-black'
+                      : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
+                  }`}
+                >
+                  All ({displayOrders.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOrderSourceFilter('ONLINE')}
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                    orderSourceFilter === 'ONLINE'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black shadow-xs'
+                      : 'text-amber-600 dark:text-amber-400 hover:text-amber-700'
+                  }`}
+                  title="Show only Advance Online Pre-Bookings"
+                >
+                  <span>🎟️ Online Pre-Bookings</span>
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+                    orderSourceFilter === 'ONLINE' ? 'bg-black/20 text-slate-950' : 'bg-amber-500/20 text-amber-500'
+                  }`}>
+                    {displayOrders.filter(o => o.isOnlineBooking).length}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOrderSourceFilter('DINE_IN')}
+                  className={`px-3 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                    orderSourceFilter === 'DINE_IN'
+                      ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs font-black'
+                      : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white'
+                  }`}
+                  title="Show only In-Restaurant Direct Table Orders"
+                >
+                  <span>🍽️ Direct Table</span>
+                  <span className="text-[10px] opacity-70">
+                    ({displayOrders.filter(o => !o.isOnlineBooking).length})
+                  </span>
+                </button>
+              </div>
 
               {/* Waiter Allocation Badges (Configured in Management Dashboard) */}
               <div className="flex items-center gap-1.5 flex-wrap">
@@ -1037,9 +1093,37 @@ export const KitchenDisplay: React.FC = () => {
                         #{order.orderNumber}
                       </td>
 
-                      {/* 2. Customer / Table */}
-                      <td className="py-4 px-3 font-semibold text-slate-900 dark:text-white whitespace-nowrap align-middle">
-                        Table {order.tableNumber}
+                      {/* 2. Customer / Table & Online Pre-Booking Details */}
+                      <td className="py-4 px-3 whitespace-nowrap align-middle">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-slate-900 dark:text-white">
+                            Table {order.tableNumber}
+                          </span>
+                          {order.isOnlineBooking && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/40 shadow-xs">
+                              <span>🎟️ Pre-Booking</span>
+                            </span>
+                          )}
+                        </div>
+                        {order.isOnlineBooking && (
+                          <div className="mt-1 space-y-0.5 text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                            <div className="flex items-center gap-1 font-bold">
+                              <span>🕒 Reserved:</span>
+                              <span className="font-mono bg-amber-500/10 px-1 rounded text-amber-700 dark:text-amber-300">
+                                {order.bookingTimeSlot || '07:45 PM'}
+                              </span>
+                              {order.bookingDate && <span className="text-slate-400">({order.bookingDate})</span>}
+                            </div>
+                            <div className="text-slate-500 dark:text-slate-400">
+                              👤 {order.customerName || 'Guest'} {order.customerPhone ? `(${order.customerPhone})` : ''}
+                            </div>
+                            {order.bookingTicketNumber && (
+                              <div className="font-mono text-[9px] text-slate-400">
+                                🎫 Ticket #{order.bookingTicketNumber}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </td>
 
                       {/* 3. Order Date & Elapsed Time */}
@@ -1230,6 +1314,31 @@ export const KitchenDisplay: React.FC = () => {
             {/* Modal Body */}
             <div className="p-5 space-y-4 max-h-[60vh] overflow-y-auto custom-kds-scrollbar">
               
+              {/* Online Pre-Booking Highlight Banner */}
+              {selectedOrderForModal.isOnlineBooking && (
+                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 border-2 border-amber-500/50 text-amber-300 space-y-1.5 shadow-md">
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[10px] font-black uppercase tracking-wider">
+                      🎟️ ONLINE ADVANCE PRE-BOOKING
+                    </span>
+                    <span className="font-mono text-xs font-bold text-amber-400">
+                      Ticket #{selectedOrderForModal.bookingTicketNumber || 'RE-TB-7241'}
+                    </span>
+                  </div>
+                  <div className="text-xs text-white font-medium">
+                    Reserved Dining Time: <strong className="text-amber-300 font-bold">{selectedOrderForModal.bookingTimeSlot || '07:45 PM'}</strong>
+                    {selectedOrderForModal.bookingDate && <span className="text-slate-300"> ({selectedOrderForModal.bookingDate})</span>}
+                  </div>
+                  <div className="text-xs text-slate-300">
+                    Customer: <strong className="text-white">{selectedOrderForModal.customerName || 'Valued Guest'}</strong>
+                    {selectedOrderForModal.customerPhone && <span> • Phone: {selectedOrderForModal.customerPhone}</span>}
+                  </div>
+                  <p className="text-[10px] text-amber-200/80 italic pt-0.5">
+                    ⚡ Online pre-ordered food. Prepare and keep ready so it is ready the moment customer arrives!
+                  </p>
+                </div>
+              )}
+
               {/* Status & Timing summary */}
               <div className={`p-3.5 rounded-2xl border flex items-center justify-between text-xs ${
                 isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'

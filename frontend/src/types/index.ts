@@ -104,6 +104,14 @@ export interface Order {
     guestCount?: number;
     amountPerGuest?: number;
   };
+  // Online advance pre-booking metadata
+  isOnlineBooking?: boolean;
+  bookingTicketNumber?: string;
+  customerName?: string;
+  customerPhone?: string;
+  bookingTimeSlot?: string;
+  bookingDate?: string;
+  guestCount?: number;
 }
 
 export interface StaffAlert {

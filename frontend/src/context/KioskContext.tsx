@@ -619,6 +619,13 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       paymentMethod,
       estimatedPrepTime: maxPrepTime,
       splitBillDetails,
+      isOnlineBooking: Boolean(bookingTicket || selectedTimeSlot),
+      bookingTicketNumber: bookingTicket,
+      customerName: customerName.trim() || 'Valued Guest',
+      customerPhone: customerPhone.trim(),
+      bookingTimeSlot: selectedTimeSlot,
+      bookingDate: selectedBookingDate,
+      guestCount: 4,
     };
 
     const updated = storageService.addOrder(newOrder);

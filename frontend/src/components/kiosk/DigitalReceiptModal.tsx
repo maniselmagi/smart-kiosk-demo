@@ -111,6 +111,16 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
               <p className="text-xs text-slate-400 mt-0.5">
                 {t.table} {order.tableNumber} • {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {t.paymentMethod || 'Mode'}: {order.paymentMethod}
               </p>
+              {order.isOnlineBooking && (
+                <div className="mt-2 p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs">
+                  <div className="font-black flex items-center justify-center gap-1.5 text-amber-400">
+                    <span>🎟️ PRE-BOOKING TICKET #{order.bookingTicketNumber || 'RE-TB-7241'}</span>
+                  </div>
+                  <div className="text-[11px] text-slate-300 mt-0.5">
+                    Reserved for <strong className="text-amber-300">{order.bookingTimeSlot || '07:45 PM'}</strong> • Food ready upon arrival
+                  </div>
+                </div>
+              )}
               <span className="text-[10px] text-amber-400/80 font-mono block mt-1">
                 Ref ID: {order.id.slice(0, 16).toUpperCase()}
               </span>

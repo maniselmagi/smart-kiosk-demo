@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { KioskProvider, useKiosk } from './context/KioskContext';
 import { DemoNavigation } from './components/common/DemoNavigation';
@@ -39,6 +39,7 @@ const MainAppContent: React.FC = () => {
     completeAllTableOrders,
     isLanguageModalOpen,
     setIsLanguageModalOpen,
+    language,
     t
   } = useKiosk();
 
@@ -118,16 +119,37 @@ const MainAppContent: React.FC = () => {
     setIsReceiptOpen(true);
   };
 
-  // DEDICATED TABLE BOOKING KIOSK APP FLOW (Only 4 Screens: Welcome -> Language -> Table Booking -> Thank You)
+  // Localized helper text for top banner
+  const topBarText = useMemo(() => {
+    const TOP_BAR_LOCALIZED: Record<string, { downloadApk: string; exitToHub: string; bookingTitle: string }> = {
+      en: { downloadApk: 'Download APK (24 MB)', exitToHub: 'Exit to Web Hub', bookingTitle: 'Table Booking & Dining Kiosk' },
+      ta: { downloadApk: 'APK பதிவிறக்கு (24 MB)', exitToHub: 'இணைய மையத்திற்குச் செல்', bookingTitle: 'மேஜை முன்பதிவு & உணவு கியோஸ்க்' },
+      hi: { downloadApk: 'APK डाउनलोड करें (24 MB)', exitToHub: 'वेब हब पर वापस जाएं', bookingTitle: 'टेबल बुकिंग और भोजन कियोस्क' },
+      te: { downloadApk: 'APK డౌన్‌లోడ్ చేయండి (24 MB)', exitToHub: 'వెబ్ హబ్‌కి వెళ్లండి', bookingTitle: 'టేబుల్ బుకింగ్ & డైనింగ్ కియోస్క్' },
+      kn: { downloadApk: 'APK ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ (24 MB)', exitToHub: 'ವೆಬ್ ಹಬ್‌ಗೆ ಹಿಂತಿರುಗಿ', bookingTitle: 'ಟೇಬಲ್ ಬುಕಿಂಗ್ ಮತ್ತು ಡೈನಿಂಗ್ ಕಿಯೋಸ್ಕ್' },
+      ml: { downloadApk: 'APK ഡൗൺലോഡ് ചെയ്യുക (24 MB)', exitToHub: 'വെബ് ഹബ്ബിലേക്ക് പോകുക', bookingTitle: 'ടേബിൾ ബുക്കിംഗ് & ഡൈനിംഗ് കിയോസ്ക്' },
+      mr: { downloadApk: 'APK डाउनलोड करा (24 MB)', exitToHub: 'वेब हबवर परत जा', bookingTitle: 'टेबल बुकिंग आणि डायनिंग कियोस्क' },
+      ar: { downloadApk: 'تحميل APK (24 ميجابايت)', exitToHub: 'العودة إلى مركز الويب', bookingTitle: 'كشك حجز الطاولات وتناول الطعام' },
+      ko: { downloadApk: 'APK 다운로드 (24 MB)', exitToHub: '웹 허브로 이동', bookingTitle: '테이블 예약 & 다이닝 키오스크' },
+      es: { downloadApk: 'Descargar APK (24 MB)', exitToHub: 'Volver al Hub Web', bookingTitle: 'Kiosco de Reserva de Mesas y Comida' },
+      fr: { downloadApk: "Télécharger l'APK (24 MB)", exitToHub: 'Quitter vers le Hub Web', bookingTitle: 'Kiosque de Réservation de Table et Repas' },
+      de: { downloadApk: 'APK herunterladen (24 MB)', exitToHub: 'Zurück zum Web-Hub', bookingTitle: 'Tischreservierung & Dining Kiosk' }
+    };
+    return TOP_BAR_LOCALIZED[language] || TOP_BAR_LOCALIZED['en'];
+  }, [language]);
+
+  // DEDICATED TABLE BOOKING KIOSK APP FLOW: Welcome -> Allocation -> Digital Menu -> Cart -> Pay & Generate Order -> Live Kitchen
   if (isBookingKioskApp) {
     return (
       <div className="min-h-screen flex flex-col bg-[#080B11] text-white relative">
-        {/* Helper bar when previewing in browser */}
+        {/* Helper bar when previewing in browser (hidden on native APK) */}
         {!Capacitor.isNativePlatform() && (
           <div className="bg-slate-950/95 border-b border-amber-500/20 px-4 py-2 flex items-center justify-between text-xs z-50">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="font-bold text-amber-300">{t.brandName || 'Royal Ember'} • {t.tableBookingTitle || 'Table Booking Kiosk'}</span>
+              <span className="font-bold text-amber-300">
+                {t.brandName || 'Royal Ember'} • {topBarText.bookingTitle}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <a
@@ -135,7 +157,7 @@ const MainAppContent: React.FC = () => {
                 download="RoyalEmber-TableBooking-Kiosk.apk"
                 className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black shadow transition-all cursor-pointer"
               >
-                <span>Download APK (6.0 MB)</span>
+                <span>{topBarText.downloadApk}</span>
               </a>
               <button
                 type="button"
@@ -144,7 +166,7 @@ const MainAppContent: React.FC = () => {
                 }}
                 className="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 hover:text-white transition-all cursor-pointer"
               >
-                Exit to Web Hub
+                {topBarText.exitToHub}
               </button>
             </div>
           </div>
@@ -154,6 +176,7 @@ const MainAppContent: React.FC = () => {
           <WelcomeScreen
             onStart={() => setKioskSubScreen('allocation')}
             onOpenLanguage={() => setKioskSubScreen('welcome')}
+            onOpenStaffLogin={() => handleOpenStaffLogin('kitchen')}
           />
         )}
 
@@ -167,8 +190,30 @@ const MainAppContent: React.FC = () => {
         {kioskSubScreen === 'allocation' && (
           <CustomerTableAllocationScreen
             onBackToLanguage={() => setKioskSubScreen('welcome')}
-            onConfirmAllocation={() => setKioskSubScreen('thankyou')}
+            onConfirmAllocation={() => setKioskSubScreen('menu')}
           />
+        )}
+
+        {kioskSubScreen === 'menu' && (
+          <div className="flex-1 flex flex-col">
+            <Header
+              showBack={true}
+              onBackToWelcome={() => setKioskSubScreen('allocation')}
+              onOpenCart={() => setIsCartOpen(true)}
+              onOpenTrackOrder={() => setIsTrackerOpen(true)}
+              onOpenEntertainment={() => setIsEntertainmentOpen(true)}
+              onCallWaiter={() => setIsCallWaiterOpen(true)}
+              onOpenAIChat={() => setIsAIChatOpen(true)}
+            />
+
+            <MenuScreen
+              onSelectItem={(item) => setSelectedItemForDetail(item)}
+              onOpenCart={() => setIsCartOpen(true)}
+              onOpenOrderTracker={() => setIsTrackerOpen(true)}
+              onOpenEntertainment={() => setIsEntertainmentOpen(true)}
+              onOpenAIChat={() => setIsAIChatOpen(true)}
+            />
+          </div>
         )}
 
         {kioskSubScreen === 'thankyou' && (
@@ -186,6 +231,102 @@ const MainAppContent: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Kiosk Interactive Modals Suite for Full Food Ordering & Checkout Flow */}
+        <FoodDetailModal
+          item={selectedItemForDetail}
+          onClose={() => setSelectedItemForDetail(null)}
+        />
+
+        <CartDrawerModal
+          isOpen={isCartOpen}
+          onClose={() => setIsCartOpen(false)}
+          onProceedToCheckout={() => setIsCheckoutOpen(true)}
+        />
+
+        <CheckoutModal
+          isOpen={isCheckoutOpen}
+          onClose={() => setIsCheckoutOpen(false)}
+          onOrderSuccess={handleOrderSuccess}
+        />
+
+        <DigitalReceiptModal
+          order={liveTrackedOrder}
+          isOpen={isReceiptOpen}
+          onClose={() => setIsReceiptOpen(false)}
+          onTrackOrder={() => {
+            if (liveTrackedOrder) {
+              setActiveCompletedOrder(liveTrackedOrder);
+              setCurrentTrackedOrder(liveTrackedOrder);
+            }
+            setIsReceiptOpen(false);
+            setIsTrackerOpen(true);
+          }}
+          onOpenFeedback={() => setIsFinishMealOpen(true)}
+        />
+
+        <OrderTrackerModal
+          order={liveTrackedOrder}
+          orders={allActiveTableOrders}
+          isOpen={isTrackerOpen}
+          onClose={() => setIsTrackerOpen(false)}
+          onOpenReceipt={() => setIsReceiptOpen(true)}
+          onOpenEntertainment={() => setIsEntertainmentOpen(true)}
+          onOpenFinishMeal={() => setIsFinishMealOpen(true)}
+        />
+
+        <CustomerEntertainmentModal
+          isOpen={isEntertainmentOpen}
+          onClose={() => setIsEntertainmentOpen(false)}
+          order={liveTrackedOrder}
+          onOpenTracker={() => setIsTrackerOpen(true)}
+          onFinishMeal={() => setIsFinishMealOpen(true)}
+        />
+
+        <FinishMealModal
+          order={liveTrackedOrder}
+          isOpen={isFinishMealOpen}
+          onClose={() => setIsFinishMealOpen(false)}
+          onFinishDiningSuccess={() => {
+            setIsTrackerOpen(false);
+            setIsReceiptOpen(false);
+            setIsEntertainmentOpen(false);
+            setActiveCompletedOrder(null);
+            completeAllTableOrders(tableNumber);
+            setKioskSubScreen('welcome');
+          }}
+        />
+
+        <FeedbackModal
+          isOpen={isFeedbackOpen}
+          onClose={() => setIsFeedbackOpen(false)}
+        />
+
+        <CallWaiterModal
+          isOpen={isCallWaiterOpen}
+          onClose={() => setIsCallWaiterOpen(false)}
+        />
+
+        <AIChatModal
+          isOpen={isAIChatOpen}
+          onClose={() => setIsAIChatOpen(false)}
+          onOpenItemDetail={(item) => setSelectedItemForDetail(item)}
+          onOpenOrderTracker={() => setIsTrackerOpen(true)}
+          onCallWaiterModal={() => setIsCallWaiterOpen(true)}
+        />
+
+        <LanguageSelectionModal
+          isOpen={isLanguageModalOpen}
+          onClose={() => setIsLanguageModalOpen(false)}
+          onConfirm={() => setIsLanguageModalOpen(false)}
+        />
+
+        <StaffLoginModal
+          isOpen={isStaffLoginOpen}
+          initialRole={staffLoginTargetRole}
+          onClose={() => setIsStaffLoginOpen(false)}
+          onLoginSuccess={handleStaffLoginSuccess}
+        />
       </div>
     );
   }

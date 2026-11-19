@@ -117,7 +117,7 @@ const MainAppContent: React.FC = () => {
     setIsReceiptOpen(true);
   };
 
-  // DEDICATED TABLE BOOKING KIOSK APP FLOW (Only 4 Screens: Welcome -> Language -> Table Booking -> Thank You)
+  // DEDICATED TABLE BOOKING KIOSK APP FLOW (Unified Welcome & Language -> Table Booking -> Thank You)
   if (isBookingKioskApp) {
     return (
       <div className="min-h-screen flex flex-col bg-[#080B11] text-white relative">
@@ -126,7 +126,7 @@ const MainAppContent: React.FC = () => {
           <div className="bg-slate-950/95 border-b border-amber-500/20 px-4 py-2 flex items-center justify-between text-xs z-50">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="font-bold text-amber-300">Royal Ember Table Booking Kiosk (4-Screen Flow Mode)</span>
+              <span className="font-bold text-amber-300">Royal Ember Table Booking Kiosk (Welcome &amp; Language Unified)</span>
             </div>
             <div className="flex items-center gap-2">
               <a
@@ -134,7 +134,7 @@ const MainAppContent: React.FC = () => {
                 download="RoyalEmber-TableBooking-Kiosk.apk"
                 className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black shadow transition-all cursor-pointer"
               >
-                <span>Download APK (6.0 MB)</span>
+                <span>Download APK (25 MB)</span>
               </a>
               <button
                 type="button"
@@ -151,8 +151,10 @@ const MainAppContent: React.FC = () => {
 
         {kioskSubScreen === 'welcome' && (
           <WelcomeScreen
-            onStart={() => setKioskSubScreen('language')}
-            onOpenLanguage={() => setKioskSubScreen('language')}
+            isBookingMode={true}
+            onStart={() => setKioskSubScreen('allocation')}
+            onOpenLanguage={() => setKioskSubScreen('welcome')}
+            onOpenStaffLogin={() => handleOpenStaffLogin('kitchen')}
           />
         )}
 
@@ -165,7 +167,7 @@ const MainAppContent: React.FC = () => {
 
         {kioskSubScreen === 'allocation' && (
           <CustomerTableAllocationScreen
-            onBackToLanguage={() => setKioskSubScreen('language')}
+            onBackToLanguage={() => setKioskSubScreen('welcome')}
             onConfirmAllocation={() => setKioskSubScreen('thankyou')}
           />
         )}
@@ -201,7 +203,7 @@ const MainAppContent: React.FC = () => {
           <LandingHub 
             onStartCustomer={() => {
               setView('kiosk');
-              setKioskSubScreen('language');
+              setKioskSubScreen('welcome');
             }}
             onOpenStaffLogin={handleOpenStaffLogin}
           />
@@ -215,8 +217,9 @@ const MainAppContent: React.FC = () => {
           <div className="flex-1 flex flex-col">
             {kioskSubScreen === 'welcome' && (
               <WelcomeScreen
-                onStart={() => setKioskSubScreen('language')}
-                onOpenLanguage={() => setKioskSubScreen('language')}
+                isBookingMode={false}
+                onStart={() => setKioskSubScreen('menu')}
+                onOpenLanguage={() => setKioskSubScreen('welcome')}
                 onOpenStaffLogin={() => handleOpenStaffLogin('kitchen')}
               />
             )}

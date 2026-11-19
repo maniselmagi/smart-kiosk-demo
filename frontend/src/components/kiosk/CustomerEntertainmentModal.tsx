@@ -33,7 +33,9 @@ import {
   CloudSun
 } from 'lucide-react';
 import { Order } from '../../types';
-import { getAssignedWaiter } from '../../utils/waiterAssignment';
+import { getAssignedWaiter, getLocalizedWaiterName } from '../../utils/waiterAssignment';
+import { useKiosk } from '../../context/KioskContext';
+import { getEntertainmentText, EntertainmentTranslations } from '../../utils/entertainmentTranslations';
 
 interface CustomerEntertainmentModalProps {
   isOpen: boolean;
@@ -128,6 +130,8 @@ interface OriginalLudoGameProps {
 }
 
 const OriginalLudoGame: React.FC<OriginalLudoGameProps> = ({ order }) => {
+  const { language = 'en' } = useKiosk();
+  const tEnt = getEntertainmentText(language);
   // Tokens representation:
   // -1 = In Base Yard
   // 0..50 = On 52-tile circuit track
@@ -416,13 +420,13 @@ const OriginalLudoGame: React.FC<OriginalLudoGameProps> = ({ order }) => {
       <div className="flex items-center justify-between bg-slate-900/60 p-2.5 px-4 rounded-2xl border border-white/5">
         <div>
           <h4 className="font-black text-xs sm:text-sm md:text-base text-white flex items-center gap-2">
-            <span>🎲 Royal Ludo Master</span>
+            <span>🎲 {tEnt.ludoHeader}</span>
             <span className="text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-extrabold border border-amber-400/30">
-              15×15 Board
+              {tEnt.ludoBoardTag}
             </span>
           </h4>
           <p className="text-[11px] sm:text-xs text-slate-400">
-            Roll 6 to leave base. Tap gleaming tokens or use the action buttons to advance!
+            {tEnt.ludoRule}
           </p>
         </div>
 
@@ -431,7 +435,7 @@ const OriginalLudoGame: React.FC<OriginalLudoGameProps> = ({ order }) => {
           className="p-1.5 px-3 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-slate-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer border border-white/10 active:scale-95 transition-all"
         >
           <RotateCcw className="w-3.5 h-3.5" />
-          <span>New Game</span>
+          <span>{tEnt.newGame}</span>
         </button>
       </div>
 
@@ -463,7 +467,7 @@ const OriginalLudoGame: React.FC<OriginalLudoGameProps> = ({ order }) => {
                 className="bg-gradient-to-br from-rose-700 to-rose-900 rounded-lg p-2 flex flex-col justify-between border border-rose-600/50 shadow-inner relative"
               >
                 <span className="text-[10px] font-black uppercase text-rose-200 tracking-wider flex items-center gap-1">
-                  <span>👨‍🍳 Chef Bot</span>
+                  <span>👨‍🍳 {tEnt.chefBot}</span>
                 </span>
 
                 {/* Inner Yard Circle with 2 token pockets */}
@@ -495,7 +499,7 @@ const OriginalLudoGame: React.FC<OriginalLudoGameProps> = ({ order }) => {
                 style={{ gridColumn: '10 / span 6', gridRow: '1 / span 6' }}
                 className="bg-gradient-to-br from-emerald-700 to-emerald-900 rounded-lg p-2 flex flex-col justify-between border border-emerald-600/50 shadow-inner relative"
               >
-                <span className="text-[10px] font-black uppercase text-emerald-200 tracking-wider">Green Yard</span>
+                <span className="text-[10px] font-black uppercase text-emerald-200 tracking-wider">{tEnt.greenYard}</span>
                 <div className="bg-slate-950/80 rounded-lg p-2 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center border border-emerald-500/30">
                   <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-950/60 border border-emerald-500/40 flex items-center justify-center text-[9px] text-emerald-400 font-bold">G1</div>
                   <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-emerald-950/60 border border-emerald-500/40 flex items-center justify-center text-[9px] text-emerald-400 font-bold">G2</div>
@@ -507,7 +511,7 @@ const OriginalLudoGame: React.FC<OriginalLudoGameProps> = ({ order }) => {
                 style={{ gridColumn: '1 / span 6', gridRow: '10 / span 6' }}
                 className="bg-gradient-to-br from-blue-700 to-blue-900 rounded-lg p-2 flex flex-col justify-between border border-blue-600/50 shadow-inner relative"
               >
-                <span className="text-[10px] font-black uppercase text-blue-200 tracking-wider">Blue Yard</span>
+                <span className="text-[10px] font-black uppercase text-blue-200 tracking-wider">{tEnt.blueYard}</span>
                 <div className="bg-slate-950/80 rounded-lg p-2 grid grid-cols-2 gap-2 aspect-square items-center justify-items-center border border-blue-500/30">
                   <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-950/60 border border-blue-500/40 flex items-center justify-center text-[9px] text-blue-400 font-bold">U1</div>
                   <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-950/60 border border-blue-500/40 flex items-center justify-center text-[9px] text-blue-400 font-bold">U2</div>
@@ -520,8 +524,8 @@ const OriginalLudoGame: React.FC<OriginalLudoGameProps> = ({ order }) => {
                 className="bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-600 rounded-lg p-2 flex flex-col justify-between border-2 border-amber-300 shadow-xl relative"
               >
                 <span className="text-[10px] font-black uppercase text-slate-950 tracking-wider flex items-center justify-between">
-                  <span>👑 You (Gold)</span>
-                  <span className="text-[9px] font-mono bg-slate-950 text-amber-400 px-1.5 py-0.5 rounded-full">Base</span>
+                  <span>👑 {tEnt.youGold}</span>
+                  <span className="text-[9px] font-mono bg-slate-950 text-amber-400 px-1.5 py-0.5 rounded-full">{tEnt.base}</span>
                 </span>
 
                 {/* Inner Yard with interactive player tokens */}
@@ -744,18 +748,18 @@ const OriginalLudoGame: React.FC<OriginalLudoGameProps> = ({ order }) => {
             <div className="flex items-center justify-between pb-1.5 border-b border-white/10">
               <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                <span>Active Turn</span>
+                <span>{tEnt.activeTurn}</span>
               </span>
               <div className="flex items-center gap-1.5">
                 {turn === 'player' ? (
                   <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40 text-[10px] font-black animate-pulse">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                    YOUR TURN
+                    {tEnt.yourTurn}
                   </span>
                 ) : (
                   <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10px] font-black">
                     <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping" />
-                    CHEF BOT PLAYING
+                    {tEnt.chefBotPlaying}
                   </span>
                 )}
               </div>
@@ -799,7 +803,7 @@ const OriginalLudoGame: React.FC<OriginalLudoGameProps> = ({ order }) => {
                     }`}
                   >
                     <Dices className="w-4 h-4 text-slate-950" />
-                    <span>{isRolling ? 'Rolling...' : 'Roll Dice 🎲'}</span>
+                    <span>{isRolling ? '...' : `${tEnt.rollDice} 🎲`}</span>
                   </button>
                 ) : (
                   <div className="space-y-1.5 bg-gradient-to-b from-amber-500/15 to-amber-500/5 border border-amber-400/50 p-2 rounded-xl">
@@ -844,6 +848,8 @@ const OriginalLudoGame: React.FC<OriginalLudoGameProps> = ({ order }) => {
 // 2. ORIGINAL SNAKES & LADDERS (AUTHENTIC 100-TILE BOARD / PARAMAPATHAM)
 // ============================================================================
 const OriginalSnakesAndLadders: React.FC = () => {
+  const { language = 'en' } = useKiosk();
+  const tEnt = getEntertainmentText(language);
   const [playerTile, setPlayerTile] = useState(1);
   const [botTile, setBotTile] = useState(1);
   const [lastDice, setLastDice] = useState<number | null>(null);
@@ -1080,7 +1086,7 @@ const OriginalSnakesAndLadders: React.FC = () => {
           }`}
         >
           <Dices className="w-4 h-4" />
-          <span>{isRolling ? 'Rolling...' : 'Roll Dice 🎲'}</span>
+          <span>{isRolling ? '...' : `${tEnt.rollDice} 🎲`}</span>
         </button>
       </div>
 
@@ -2756,6 +2762,8 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
   onOpenTracker,
   onFinishMeal,
 }) => {
+  const { language = 'en' } = useKiosk();
+  const tEnt = getEntertainmentText(language);
   const [activeTab, setActiveTab] = useState<'games' | 'news' | 'music'>('games');
   const [activeGame, setActiveGame] = useState<'ludo' | 'snakes' | 'sudoku'>('ludo');
   const [dismissTimeUp, setDismissTimeUp] = useState(false);
@@ -2804,14 +2812,14 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-black text-sm sm:text-base font-display tracking-tight text-white">
-                  Table-Side Entertainment Lounge
+                  {tEnt.loungeTitle}
                 </h3>
                 <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-black border border-amber-500/40">
-                  Table {order?.tableNumber || 12}
+                  {tEnt.table} {order?.tableNumber || 12}
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 hidden sm:block">
-                Original interactive board games &amp; live multilingual daily newspapers
+                {tEnt.loungeSubtitle}
               </p>
             </div>
           </div>
@@ -2848,7 +2856,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
             <div className="flex items-center gap-2">
               <span className="text-base animate-bounce">🔔</span>
               <span className="font-extrabold text-xs">
-                Your Feast is Fresh &amp; Ready! Waiter {waiter.fullName} is serving Table {order?.tableNumber || 12}.
+                Your Feast is Fresh &amp; Ready! Waiter {waiter.fullName} is serving {tEnt.table} {order?.tableNumber || 12}.
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -2884,7 +2892,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
               }`}
             >
               <Gamepad2 className="w-4 h-4" />
-              <span>Original Games</span>
+              <span>{tEnt.originalGamesTab}</span>
             </button>
 
             <button
@@ -2896,7 +2904,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
               }`}
             >
               <Newspaper className="w-4 h-4" />
-              <span>Today's Live News</span>
+              <span>{tEnt.todaysNewsTab}</span>
             </button>
 
             <button
@@ -2908,7 +2916,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
               }`}
             >
               <Music className="w-4 h-4" />
-              <span>Music Lounge</span>
+              <span>{tEnt.musicLoungeTab}</span>
             </button>
           </div>
         </div>
@@ -2917,7 +2925,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
         {activeTab === 'games' && (
           <div className="px-3 sm:px-6 py-2 bg-slate-950 border-b border-white/10 flex flex-col sm:flex-row items-center justify-between gap-2 shrink-0">
             <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 hidden sm:inline">
-              Choose Arcade Challenge:
+              {tEnt.chooseArcade}
             </span>
 
             <div className="flex items-center justify-center gap-2 w-full sm:w-auto">
@@ -2929,7 +2937,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
                     : 'bg-slate-900/90 text-slate-400 border-white/10 hover:text-white hover:bg-slate-800'
                 }`}
               >
-                🎲 Royal Ludo 15×15
+                🎲 {tEnt.ludoGameTitle}
               </button>
               <button
                 onClick={() => setActiveGame('snakes')}
@@ -2939,7 +2947,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
                     : 'bg-slate-900/90 text-slate-400 border-white/10 hover:text-white hover:bg-slate-800'
                 }`}
               >
-                🐍 Snakes &amp; Ladders
+                🐍 {tEnt.snakesGameTitle}
               </button>
               <button
                 onClick={() => setActiveGame('sudoku')}
@@ -2949,7 +2957,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
                     : 'bg-slate-900/90 text-slate-400 border-white/10 hover:text-white hover:bg-slate-800'
                 }`}
               >
-                🧩 9×9 Sudoku
+                🧩 {tEnt.sudokuGameTitle}
               </button>
             </div>
           </div>
@@ -2974,7 +2982,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
         <div className="p-2.5 sm:p-3 bg-slate-950 border-t border-white/10 flex items-center justify-between text-xs shrink-0">
           <div className="flex items-center gap-2 text-slate-400">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="hidden sm:inline">Real-time games &amp; multilingual live news active</span>
+            <span className="hidden sm:inline">{tEnt.footerText}</span>
             <span className="sm:hidden">Active while waiting</span>
           </div>
 
@@ -2983,7 +2991,7 @@ export const CustomerEntertainmentModal: React.FC<CustomerEntertainmentModalProp
               onClick={onClose}
               className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 font-bold border border-white/10 transition-all cursor-pointer text-xs"
             >
-              Minimize &amp; Keep Playing
+              {tEnt.minimizeKeepPlaying}
             </button>
           </div>
         </div>

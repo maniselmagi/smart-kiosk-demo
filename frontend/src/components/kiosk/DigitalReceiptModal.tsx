@@ -14,7 +14,8 @@ import {
   ShieldCheck,
   UtensilsCrossed
 } from 'lucide-react';
-import { getAssignedWaiter } from '../../utils/waiterAssignment';
+import { getAssignedWaiter, getLocalizedWaiterName } from '../../utils/waiterAssignment';
+import { getKioskModalText } from '../../utils/kioskModalTranslations';
 
 interface DigitalReceiptModalProps {
   order: Order | null;
@@ -38,6 +39,7 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
 
   const waiter = getAssignedWaiter(order.tableNumber);
   const isConfirmed = order.status !== 'NEW';
+  const modalTexts = getKioskModalText(language);
 
   const handleSendReceipt = (e: React.FormEvent) => {
     e.preventDefault();
@@ -206,7 +208,7 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
                     {t.serverLabel || 'Server'}:
                   </span>
                   <span className="text-xs font-black text-white">
-                    {waiter.fullName}
+                    {getLocalizedWaiterName(waiter.name, language)}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-400">
@@ -231,17 +233,9 @@ export const DigitalReceiptModal: React.FC<DigitalReceiptModalProps> = ({
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
             <span>
               {isConfirmed ? (
-                language === 'ta'
-                  ? <>ஆர்டர் சமையலறையில் உறுதி செய்யப்பட்டது! தயாரிப்பு தொடங்குகிறது — <strong>நேரலை முன்னேற்றம்</strong> செயலில் உள்ளது.</>
-                  : language === 'hi'
-                  ? <>रसोई में ऑर्डर की पुष्टि हुई! तैयारी शुरू — <strong>लाइव प्रगति</strong> सक्रिय है।</>
-                  : <>Order confirmed in Kitchen! Moving to Preparing — <strong>Live Kitchen Progress</strong> is active.</>
+                modalTexts.receiptConfirmed
               ) : (
-                language === 'ta'
-                  ? <>டிக்கெட் சமையலறைக்கு அனுப்பப்பட்டது! பணியாளர்: <strong>{waiter.fullName}</strong> • நேரலை சமையலறை டிராக்கர் செயலில் உள்ளது.</>
-                  : language === 'hi'
-                  ? <>टिकट रसोई में भेजा गया! परिचारक: <strong>{waiter.fullName}</strong> • लाइव किचन ट्रैकर सक्रिय है।</>
-                  : <>Ticket dispatched to Kitchen! Attendant: <strong>Waiter {waiter.name}</strong> • Live Kitchen Tracker is active.</>
+                modalTexts.receiptDispatched(getLocalizedWaiterName(waiter.name, language))
               )}
             </span>
           </div>

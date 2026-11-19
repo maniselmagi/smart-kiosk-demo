@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { getAssignedWaiter, getLocalizedWaiterName } from '../../utils/waiterAssignment';
 import { CustomerFeedbackModal } from './CustomerFeedbackModal';
+import { getKioskModalText } from '../../utils/kioskModalTranslations';
 import { getLocalizedCartItemName, getLocalizedSpiceLabel } from '../../utils/translations';
 
 // Feature toggle: Set to true whenever the management wishes to enable the complimentary delay treat feature
@@ -85,6 +86,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
   onOpenFeedback
 }) => {
   const { t, language, callWaiter, updateOrder, showToast } = useKiosk();
+  const modalTexts = getKioskModalText(language);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   // Consolidated multi-orders for this table
@@ -635,10 +637,10 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                   </div>
                   <div>
                     <span className="text-xs font-bold text-white block">
-                      Dishes Delivered • How Was Everything?
+                      {modalTexts.dishesDeliveredTitle}
                     </span>
                     <p className="text-[11px] text-slate-300">
-                      Rate your meal and service by <strong className="text-amber-300 font-medium">{getLocalizedWaiterName(waiter.name, language)}</strong>.
+                      {modalTexts.rateMealPrompt(getLocalizedWaiterName(waiter.name, language))}
                     </p>
                   </div>
                 </div>
@@ -666,7 +668,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                     <Gamepad2 className="w-4 h-4 animate-pulse" />
                   </div>
                   <span className="text-xs font-bold text-slate-200">
-                    {t.boredWaiting || 'Bored waiting? Play Ludo, Sudoku or Read Live News!'}
+                    {modalTexts.boredWaitingText}
                   </span>
                 </div>
 
@@ -678,7 +680,7 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
                   }}
                   className="w-full sm:w-auto py-2 px-4 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs shadow-md shadow-amber-500/25 active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
                 >
-                  <span>{t.playGamesLounge || 'Play Games Lounge'}</span>
+                  <span>{modalTexts.playGamesLoungeBtn}</span>
                   <ArrowRight className="w-3.5 h-3.5 text-slate-950" />
                 </button>
               </div>
@@ -822,13 +824,13 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
           {allOrders.length > 1 && (
             <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 space-y-2">
               <div className="flex items-center justify-between text-xs font-black text-slate-300">
-                <span>Total For All Placed Orders ({t.table} {activeOrder.tableNumber})</span>
+                <span>{modalTexts.totalAllOrders(activeOrder.tableNumber)}</span>
                 <span className="text-amber-400 font-display text-sm">
                   ₹{allOrders.reduce((sum, o) => sum + (o?.total || 0), 0)}
                 </span>
               </div>
               <p className="text-[11px] text-slate-400">
-                You have {allOrders.length} active tickets submitted to the kitchen during this table session.
+                {modalTexts.activeTicketsCount(allOrders.length)}
               </p>
             </div>
           )}

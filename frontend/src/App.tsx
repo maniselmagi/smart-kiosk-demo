@@ -24,6 +24,7 @@ import CallWaiterModal from './components/common/CallWaiterModal';
 import { AIChatModal } from './components/kiosk/AIChatModal';
 import { StaffLoginModal, StaffUser } from './components/auth/StaffLoginModal';
 import { authService } from './services/authService';
+import { googleTranslateService } from './services/googleTranslateService';
 import { MenuItem, Order } from './types';
 
 const MainAppContent: React.FC = () => {
@@ -118,6 +119,14 @@ const MainAppContent: React.FC = () => {
     setIsCheckoutOpen(false);
     setIsReceiptOpen(true);
   };
+
+  // Re-sweep Google Translate when switching between screens or opening modals
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      googleTranslateService.refresh();
+    }, 120);
+    return () => clearTimeout(timer);
+  }, [kioskSubScreen, view, isCartOpen, isCheckoutOpen, isReceiptOpen, isTrackerOpen, isAIChatOpen, isEntertainmentOpen, isStaffLoginOpen]);
 
   // Localized helper text for top banner
   const topBarText = useMemo(() => {

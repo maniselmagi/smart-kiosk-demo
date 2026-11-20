@@ -27,8 +27,44 @@
       })();
     </script>
     <title>Royal Ember | Smart Table-Side Self-Ordering Kiosk</title>
+    <!-- Google Translate Custom Styling & Overrides -->
+    <style>
+      .goog-te-banner-frame,
+      .goog-te-banner-frame.skiptranslate,
+      iframe.goog-te-banner-frame {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+      }
+      body {
+        top: 0px !important;
+        position: static !important;
+      }
+      #google_translate_element,
+      .skiptranslate,
+      .goog-te-gadget,
+      .goog-te-combo {
+        display: none !important;
+        visibility: hidden !important;
+      }
+      .goog-tooltip,
+      .goog-tooltip:hover {
+        display: none !important;
+      }
+      .goog-text-highlight {
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+      font {
+        background-color: transparent !important;
+        box-shadow: none !important;
+      }
+    </style>
   </head>
   <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased selection:bg-brand-500 selection:text-white transition-colors duration-200">
+    <!-- Google Translate Hidden Host Container -->
+    <div id="google_translate_element" style="display:none; position:absolute; top:-9999px; left:-9999px;"></div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

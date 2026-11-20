@@ -12,6 +12,7 @@ import type {
 import { storageService, SyncMessage, STORAGE_KEYS } from '../services/storageService';
 import { INITIAL_MENU_ITEMS } from '../data/initialData';
 import { translations, Language, TranslationDictionary } from '../utils/translations';
+import { googleTranslateService } from '../services/googleTranslateService';
 
 export type ViewType = 'hub' | 'kiosk' | 'kitchen' | 'dashboard';
 
@@ -240,7 +241,7 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, []);
   const [language, setLanguageState] = useState<Language>(() => {
     const saved = storageService.getLanguage();
-    const VALID_LANGS: Language[] = ['en', 'ta', 'hi', 'te', 'es', 'ar', 'fr', 'de', 'ko', 'kn', 'ml'];
+    const VALID_LANGS: Language[] = ['en', 'ta', 'hi', 'te', 'es', 'ar', 'fr', 'de', 'ko', 'kn', 'ml', 'mr'];
     if (saved && VALID_LANGS.includes(saved as Language)) {
       return saved as Language;
     }
@@ -281,7 +282,16 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('orderease_language_selected_v2', 'true');
     }
+    // Dynamically apply real-time Google Translate
+    googleTranslateService.applyLanguage(lang);
   }, []);
+
+  // Synchronize Google Translate whenever language state updates
+  useEffect(() => {
+    if (language) {
+      googleTranslateService.applyLanguage(language);
+    }
+  }, [language]);
 
   const setTheme = useCallback((newTheme: 'light' | 'dark') => {
     setThemeState(newTheme);

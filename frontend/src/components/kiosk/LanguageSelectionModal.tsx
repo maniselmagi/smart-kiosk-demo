@@ -140,8 +140,8 @@ export const LanguageSelectionModal: React.FC<LanguageSelectionModalProps> = ({
           </p>
         </div>
 
-        {/* Language Grid: 5 Touch Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+        {/* Language Grid: Touch Cards (Protected from Google Translate so native names remain intact) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 notranslate" translate="no">
           {AVAILABLE_LANGUAGES.map((lang) => {
             const isSelected = language === lang.code;
             const meta = LANGUAGE_DETAILS[lang.code] || {
@@ -155,7 +155,8 @@ export const LanguageSelectionModal: React.FC<LanguageSelectionModalProps> = ({
               <button
                 key={lang.code}
                 onClick={() => handleSelectLanguage(lang.code)}
-                className={`group relative text-left p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer flex items-start gap-3.5 ${
+                translate="no"
+                className={`group relative text-left p-4 rounded-2xl border-2 transition-all duration-200 cursor-pointer flex items-start gap-3.5 notranslate ${
                   isSelected
                     ? 'border-brand-500 bg-brand-50/70 dark:bg-brand-950/40 shadow-md ring-2 ring-brand-500/20'
                     : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-100/70 dark:hover:bg-slate-800/70'

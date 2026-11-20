@@ -113,11 +113,20 @@ class GoogleTranslateService {
     const hostname = window.location.hostname;
 
     document.cookie = `googtrans=${cookieVal}; path=/;`;
+    if (targetLang === 'en') {
+      document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    }
     if (hostname && hostname !== 'localhost') {
       document.cookie = `googtrans=${cookieVal}; domain=${hostname}; path=/;`;
+      if (targetLang === 'en') {
+        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=${hostname}; path=/;`;
+      }
       const parts = hostname.split('.');
       if (parts.length > 1) {
         document.cookie = `googtrans=${cookieVal}; domain=.${parts.slice(-2).join('.')}; path=/;`;
+        if (targetLang === 'en') {
+          document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.${parts.slice(-2).join('.')}; path=/;`;
+        }
       }
     }
 

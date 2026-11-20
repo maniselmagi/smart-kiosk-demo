@@ -249,7 +249,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             {t.youSelected || 'You Selected'}
           </h3>
           <div 
-            className={`w-full h-15 sm:h-17 px-5 sm:px-6 rounded-2xl flex items-center justify-between border-2 border-[#00c5cd] transition-all shadow-md shadow-cyan-500/10 ${
+            translate="no"
+            className={`w-full h-15 sm:h-17 px-5 sm:px-6 rounded-2xl flex items-center justify-between border-2 border-[#00c5cd] transition-all shadow-md shadow-cyan-500/10 notranslate ${
               theme === 'dark'
                 ? 'bg-[#161d27]'
                 : 'bg-white'
@@ -314,8 +315,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
               )}
             </div>
 
-            {/* Scrollable Language List */}
-            <div className="flex-1 overflow-y-auto max-h-[30vh] sm:max-h-[34vh] md:max-h-[38vh] divide-y divide-slate-100 dark:divide-slate-800/60">
+            {/* Scrollable Language List (Protected from translation so native scripts stay unchanged) */}
+            <div className="flex-1 overflow-y-auto max-h-[30vh] sm:max-h-[34vh] md:max-h-[38vh] divide-y divide-slate-100 dark:divide-slate-800/60 notranslate" translate="no">
               {filteredLanguages.length === 0 ? (
                 <div className="py-10 text-center text-sm text-slate-400">
                   No language found matching "{searchQuery}"
@@ -328,7 +329,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                       key={lang.code}
                       type="button"
                       onClick={() => handleSelectLanguage(lang.code)}
-                      className={`w-full px-5 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between text-left transition-colors cursor-pointer group ${
+                      translate="no"
+                      className={`w-full px-5 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between text-left transition-colors cursor-pointer group notranslate ${
                         isSelected 
                           ? theme === 'dark'
                             ? 'bg-cyan-950/30'

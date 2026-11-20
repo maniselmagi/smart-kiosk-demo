@@ -384,9 +384,9 @@ export const CartDrawerModal: React.FC<CartDrawerModalProps> = ({
           )}
         </div>
 
-        {/* DRAWER FOOTER SUMMARY */}
+        {/* DRAWER FOOTER SUMMARY (Protected from double-translation corruption) */}
         {cart.length > 0 && (
-          <div className="p-5 bg-slate-850/90 border-t border-white/[0.08] space-y-3 shrink-0">
+          <div className="p-5 bg-slate-850/90 border-t border-white/[0.08] space-y-3 shrink-0 notranslate" translate="no">
             <div className="space-y-1.5 text-xs">
               <div className="flex items-center justify-between text-slate-400">
                 <span>{t.subtotal}</span>

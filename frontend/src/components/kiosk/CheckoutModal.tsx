@@ -67,15 +67,15 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         <div className="p-5 sm:p-6 bg-gradient-to-b from-slate-850 to-slate-900 border-b border-white/[0.08] flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-amber-400/15 text-amber-400 text-xs font-black uppercase tracking-wider border border-amber-400/30">
+              <span className="px-2.5 py-0.5 rounded-full bg-amber-400/15 text-amber-400 text-xs font-black uppercase tracking-wider border border-amber-400/30 notranslate" translate="no">
                 {t.table} {tableNumber}
               </span>
               <span className="text-xs text-slate-500">•</span>
-              <span className="text-xs font-semibold text-slate-300">
+              <span className="text-xs font-semibold text-slate-300 notranslate" translate="no">
                 {cart.reduce((a, b) => a + b.quantity, 0)} {t.dishesCountLabel || 'Items'}
               </span>
               <span className="text-xs text-slate-500">•</span>
-              <span className="text-xs font-black text-amber-400 font-display">
+              <span className="text-xs font-black text-amber-400 font-display notranslate" translate="no">
                 {t.total} ₹{cartGrandTotal}
               </span>
             </div>
@@ -130,8 +130,8 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               ))}
             </div>
 
-            {/* Bill Breakdown Voucher Card */}
-            <div className="p-4 rounded-2xl bg-slate-850/70 border border-white/[0.08] space-y-2 text-xs">
+            {/* Bill Breakdown Voucher Card (Protected from double-translation corruption) */}
+            <div className="p-4 rounded-2xl bg-slate-850/70 border border-white/[0.08] space-y-2 text-xs notranslate" translate="no">
               <div className="flex justify-between text-slate-400">
                 <span>{t.subtotal}</span>
                 <span className="font-semibold text-slate-200">₹{cartSubtotal}</span>
@@ -245,7 +245,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 </div>
 
                 <div className="flex-1 text-center sm:text-left space-y-1.5">
-                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 notranslate" translate="no">
                     <span className="text-sm font-black text-white">
                       {t.scanUpiPrompt || 'Scan with PhonePe, GPay, Paytm or CRED'}
                     </span>
@@ -258,7 +258,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     {t.upiScanHelp || `Amount & Table ${tableNumber} is pre-encoded. Point your camera or UPI scanner to complete settlement.`}
                   </p>
 
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[11px] font-bold notranslate" translate="no">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                     <span>{t.instantAutoVerification || 'Instant Auto-Verification'} • {t.table} {tableNumber}</span>
                   </div>
@@ -272,7 +272,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         {/* STICKY PAYMENT BAR */}
         <div className="p-5 sm:p-6 bg-slate-900 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0">
           <div className="w-full sm:w-auto text-center sm:text-left">
-            <div className="flex items-center justify-center sm:justify-start gap-2 text-xs text-slate-400">
+            <div className="flex items-center justify-center sm:justify-start gap-2 text-xs text-slate-400 notranslate" translate="no">
               <span>{t.subtotal} ₹{cartSubtotal}</span>
               <span>+</span>
               <span>{t.taxGst} ₹{cartTax}</span>
@@ -280,7 +280,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
               <span className="font-bold text-slate-200">{t.total} ₹{cartGrandTotal}</span>
             </div>
             
-            <div className="flex items-baseline justify-center sm:justify-start gap-2 mt-0.5">
+            <div className="flex items-baseline justify-center sm:justify-start gap-2 mt-0.5 notranslate" translate="no">
               <span className="text-xs uppercase font-extrabold text-slate-400">
                 {t.total}:
               </span>
@@ -293,18 +293,19 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
           <button
             onClick={handlePay}
             disabled={isProcessing || cartGrandTotal <= 0}
-            className="w-full sm:w-auto min-w-[240px] py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-base shadow-xl shadow-amber-500/25 active:scale-98 transition-all flex items-center justify-center gap-2.5 disabled:opacity-50 cursor-pointer"
+            className="w-full sm:w-auto min-w-[240px] py-4 px-6 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-base shadow-xl shadow-amber-500/25 active:scale-98 transition-all flex items-center justify-center gap-2.5 disabled:opacity-50 cursor-pointer whitespace-nowrap notranslate"
+            translate="no"
           >
             {isProcessing ? (
               <>
-                <Loader2 className="w-5 h-5 animate-spin text-slate-950" />
-                <span>{t.authorizingPayment || 'Authorizing Payment...'}</span>
+                <Loader2 className="w-5 h-5 animate-spin text-slate-950 shrink-0" />
+                <span className="whitespace-nowrap">{t.authorizingPayment || 'Authorizing Payment...'}</span>
               </>
             ) : (
               <>
-                <ShieldCheck className="w-5 h-5 text-slate-950" />
-                <span>{t.payNow} (₹{cartGrandTotal})</span>
-                <ArrowRight className="w-4 h-4 text-slate-950" />
+                <ShieldCheck className="w-5 h-5 text-slate-950 shrink-0" />
+                <span className="whitespace-nowrap">{t.payNow} (₹{cartGrandTotal})</span>
+                <ArrowRight className="w-4 h-4 text-slate-950 shrink-0" />
               </>
             )}
           </button>

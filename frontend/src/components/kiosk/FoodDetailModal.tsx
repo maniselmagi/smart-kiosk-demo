@@ -273,13 +273,13 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
                         <span className="block truncate font-bold text-slate-800 dark:text-slate-100">
                           {getLocalizedCustomizationOption(cleanLabel, language)}
                         </span>
-                        <span className={`text-[11px] font-extrabold inline-block mt-0.5 ${
+                        <span className={`text-[11px] font-extrabold inline-block mt-0.5 notranslate ${
                           price > 0 
                             ? isChecked 
                               ? 'text-brand-600 dark:text-brand-400' 
                               : 'text-amber-700 dark:text-amber-400' 
                             : 'text-slate-400 dark:text-slate-500 font-medium'
-                        }`}>
+                        }`} translate="no">
                           {price > 0 ? `+₹${price}` : (t.free || 'Free')}
                         </span>
                       </div>
@@ -343,7 +343,7 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
               <div className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                 {quantity > 1 ? `${t.unit || 'Unit'} (×${quantity})` : (t.unitPrice || 'Unit Price')}
               </div>
-              <div className="text-sm font-black text-slate-800 dark:text-slate-100 font-display">
+              <div className="text-sm font-black text-slate-800 dark:text-slate-100 font-display notranslate" translate="no">
                 ₹{unitPrice}
               </div>
             </div>
@@ -355,7 +355,7 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
             className="flex-1 py-4 px-6 rounded-2xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white font-extrabold text-sm md:text-base shadow-xl shadow-brand-500/25 active:scale-98 transition-all flex items-center justify-between cursor-pointer"
           >
             <span>{t.addToCart}</span>
-            <div className="flex items-baseline gap-1.5 font-display">
+            <div className="flex items-baseline gap-1.5 font-display notranslate" translate="no">
               <span className="text-xs font-normal opacity-80">{t.total}:</span>
               <span className="font-black text-lg md:text-xl">
                 ₹{totalPrice}

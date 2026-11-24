@@ -12,6 +12,38 @@ export type Category =
   | 'Combo'
   | 'Signature';
 
+export interface NutritionInfo {
+  calories: number;
+  protein_g?: number;
+  iron_mg?: number;
+  zinc_mg?: number;
+  fiber_g?: number;
+  carbohydrate_g?: number;
+  total_fat_g?: number;
+  saturated_fat_g?: number;
+  cholesterol_mg?: number;
+  total_sugar_g?: number;
+  added_sugar_g?: number;
+  calcium_mg?: number;
+}
+
+export type HealthFilterOption =
+  | 'High Protein'
+  | 'Iron Rich'
+  | 'Zinc Rich'
+  | 'High Fiber'
+  | 'Low Carbohydrate'
+  | 'Low Fat'
+  | 'Low Saturated Fat'
+  | 'Low Cholesterol'
+  | 'Sugar-Free'
+  | 'No Added Sugar'
+  | 'Low Sugar'
+  | 'Low Calorie'
+  | 'High Calorie'
+  | 'Diet-Friendly'
+  | 'Calcium Rich';
+
 export interface MenuItem {
   id: string;
   name: string;
@@ -39,7 +71,8 @@ export interface MenuItem {
   isSignature?: boolean; // Hotel Signature specialty dish
   isCombo?: boolean; // Combo meal set
   rating: number;
-  calories: number;
+  calories?: number;
+  nutrition?: NutritionInfo;
   allergens: string[];
   customizationOptions: string[];
 }

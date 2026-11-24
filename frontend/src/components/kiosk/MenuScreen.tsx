@@ -25,12 +25,16 @@ import {
   Heart,
   Sparkles,
   Bot,
-  MessageSquare
+  MessageSquare,
+  HeartPulse,
+  X
 } from 'lucide-react';
 import { PromoAdBanner } from './PromoAdBanner';
 import { getAssignedWaiter } from '../../utils/waiterAssignment';
 import { getEntertainmentText } from '../../utils/entertainmentTranslations';
 import CallWaiterModal from '../common/CallWaiterModal';
+import { HealthNutritionDropdown } from './HealthNutritionDropdown';
+import { matchesAllHealthFilters } from '../../utils/nutritionFilters';
 
 interface MenuScreenProps {
   onSelectItem: (item: MenuItem) => void;
@@ -58,7 +62,10 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
     mealTime,
     activeOrders,
     currentTrackedOrder,
-    staffAlerts
+    staffAlerts,
+    selectedHealthFilters,
+    clearHealthFilters,
+    toggleHealthFilter
   } = useKiosk();
 
   const [isCallWaiterOpen, setIsCallWaiterOpen] = useState(false);
@@ -165,13 +172,22 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
         const matchTelugu = (item.nameTelugu || '').toLowerCase().includes(query);
         const matchSpanish = (item.nameSpanish || '').toLowerCase().includes(query);
         const matchDesc = item.description.toLowerCase().includes(query);
-        return matchName || matchTamil || matchHindi || matchTelugu || matchSpanish || matchDesc;
+        if (!(matchName || matchTamil || matchHindi || matchTelugu || matchSpanish || matchDesc)) {
+          return false;
+        }
+      }
+
+      // 7. Multi-Select Health & Nutrition Filters (Strict AND logic)
+      if (selectedHealthFilters.length > 0) {
+        if (!matchesAllHealthFilters(item, selectedHealthFilters)) {
+          return false;
+        }
       }
 
       return true;
     });
 
-    // 7. Sort signatures first, then combos, then popularity
+    // 8. Sort signatures first, then combos, then popularity
     return list.sort((a, b) => {
       if (a.isSignature && !b.isSignature) return -1;
       if (!a.isSignature && b.isSignature) return 1;
@@ -179,7 +195,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
       if (!a.isCombo && b.isCombo) return 1;
       return (b.orderedTodayCount || 0) - (a.orderedTodayCount || 0);
     });
-  }, [menuItems, mealTime, selectedCategory, dietFilter, ratingFilter, fastPrepFilter, searchQuery]);
+  }, [menuItems, mealTime, selectedCategory, dietFilter, ratingFilter, fastPrepFilter, searchQuery, selectedHealthFilters]);
 
   return (
     <div className={`pb-28 transition-colors duration-300 ${
@@ -282,29 +298,74 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
           </div>
         </section>
 
-        {/* 4. CAPSULE SEARCH BAR & FILTER PILL CHIPS */}
+        {/* 4. CAPSULE SEARCH BAR, HEALTH & NUTRITION DROPDOWN & FILTER PILL CHIPS */}
         <section aria-label="Search and Filter Controls" className="space-y-3">
           
-          {/* Capsule Search Bar */}
-          <div className="relative w-full">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
-            <input
-              type="text"
-              placeholder={t.searchPlaceholderFull || "Search for delicious dishes, curries, tandoors, biryanis..."}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-11 pr-20 py-2.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-sm font-medium text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/25 focus:border-amber-500 shadow-xs transition-all"
-            />
-            {searchQuery && (
-              <button 
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full"
-              >
-                {t.clear || 'Clear'}
-              </button>
-            )}
+          {/* Capsule Search Bar with Inline Health & Nutrition Dropdown */}
+          <div className="flex items-center gap-2.5">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
+              <input
+                type="text"
+                placeholder={t.searchPlaceholderFull || "Search for delicious dishes, curries, tandoors, biryanis..."}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-11 pr-20 py-2.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-sm font-medium text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/25 focus:border-amber-500 shadow-xs transition-all"
+              />
+              {searchQuery && (
+                <button 
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full"
+                >
+                  {t.clear || 'Clear'}
+                </button>
+              )}
+            </div>
+
+            {/* Single Health & Nutrition Dropdown Trigger */}
+            <div className="shrink-0">
+              <HealthNutritionDropdown variant="inline" />
+            </div>
           </div>
+
+          {/* Active Health & Nutrition Filter Removable Chips */}
+          {selectedHealthFilters.length > 0 && (
+            <div className="flex items-center gap-2 flex-wrap p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 animate-in fade-in duration-200">
+              <span className="text-[11px] font-black text-emerald-400 uppercase tracking-wider flex items-center gap-1.5 shrink-0">
+                <HeartPulse className="w-3.5 h-3.5" />
+                <span>Health Filters ({selectedHealthFilters.length}):</span>
+              </span>
+              
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {selectedHealthFilters.map((filter) => (
+                  <span
+                    key={filter}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/25 text-emerald-200 border border-emerald-400/40 text-xs font-bold shadow-xs select-none"
+                  >
+                    <span>{filter}</span>
+                    <button
+                      type="button"
+                      onClick={() => toggleHealthFilter(filter)}
+                      className="w-4 h-4 rounded-full bg-emerald-500/40 hover:bg-emerald-400 hover:text-slate-950 text-white flex items-center justify-center transition-colors cursor-pointer"
+                      title={`Remove ${filter}`}
+                      aria-label={`Remove ${filter}`}
+                    >
+                      <X className="w-2.5 h-2.5 stroke-[3]" />
+                    </button>
+                  </span>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={clearHealthFilters}
+                  className="px-2.5 py-1 rounded-lg text-xs font-bold text-slate-300 hover:text-white bg-white/[0.08] hover:bg-white/[0.15] transition-colors cursor-pointer ml-1"
+                >
+                  Clear All
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Horizontal Scrollable Filter Pill Chips */}
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
@@ -403,19 +464,31 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
             <p className="text-xs text-slate-400 dark:text-slate-500 mb-4 max-w-sm mx-auto">
               {t.noDishesFoundDesc || 'Try adjusting your search query, dietary filter, or choose another category.'}
             </p>
-            <button
-              type="button"
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedCategory('All');
-                setDietFilter('all');
-                setRatingFilter(false);
-                setFastPrepFilter(false);
-              }}
-              className="px-5 py-2.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black transition-colors cursor-pointer shadow-md"
-            >
-              {t.resetFilters || 'Reset All Filters'}
-            </button>
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              {selectedHealthFilters.length > 0 && (
+                <button
+                  type="button"
+                  onClick={clearHealthFilters}
+                  className="px-5 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black transition-colors cursor-pointer shadow-md"
+                >
+                  Clear Health &amp; Nutrition Filters ({selectedHealthFilters.length})
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedCategory('All');
+                  setDietFilter('all');
+                  setRatingFilter(false);
+                  setFastPrepFilter(false);
+                  clearHealthFilters();
+                }}
+                className="px-5 py-2.5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-black transition-colors cursor-pointer shadow-md"
+              >
+                {t.resetFilters || 'Reset All Filters'}
+              </button>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
@@ -513,6 +586,13 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                       </div>
                     )}
 
+                    {/* Bottom-Right: Calorie Value on Image (Calories ONLY per serving, FSSAI compliant) */}
+                    {item.calories && item.calories > 0 ? (
+                      <div className="absolute bottom-2 right-2 px-2.5 py-0.5 sm:py-1 rounded-full bg-slate-950/85 backdrop-blur-md text-amber-300 text-[11px] sm:text-xs font-black border border-amber-400/40 shadow-lg flex items-center gap-1 select-none z-10 notranslate" translate="no">
+                        <span>{item.calories} kcal</span>
+                      </div>
+                    ) : null}
+
                     {/* Sold out overlay if unavailable */}
                     {!item.isAvailable && (
                       <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center">
@@ -556,9 +636,11 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                         <span className="font-sans font-extrabold text-lg sm:text-xl text-slate-950 dark:text-amber-400 leading-none">
                           ₹{item.price}
                         </span>
-                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">
-                          {item.calories} kcal
-                        </span>
+                        {item.calories && item.calories > 0 ? (
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium mt-0.5 notranslate" translate="no">
+                            {item.calories} kcal
+                          </span>
+                        ) : null}
                       </div>
 
                       {/* Trending Yellow Circular '+' Button (or Quantity Modifier Pill when in Cart) */}

@@ -26,10 +26,24 @@ app.add_middleware(
 )
 
 # --- Data Models ---
+class NutritionInfo(BaseModel):
+    calories: int
+    protein_g: Optional[float] = None
+    iron_mg: Optional[float] = None
+    zinc_mg: Optional[float] = None
+    fiber_g: Optional[float] = None
+    carbohydrate_g: Optional[float] = None
+    total_fat_g: Optional[float] = None
+    saturated_fat_g: Optional[float] = None
+    cholesterol_mg: Optional[float] = None
+    total_sugar_g: Optional[float] = None
+    added_sugar_g: Optional[float] = None
+    calcium_mg: Optional[float] = None
+
 class MenuItem(BaseModel):
     id: str
     name: str
-    nameTamil: str
+    nameTamil: Optional[str] = ""
     category: str
     price: float
     costPrice: float
@@ -38,12 +52,13 @@ class MenuItem(BaseModel):
     popularityText: str
     orderedTodayCount: int
     description: str
-    descriptionTamil: str
+    descriptionTamil: Optional[str] = ""
     image: str
     isVeg: bool
     isSpicy: bool
     isAvailable: bool = True
     calories: int
+    nutrition: Optional[NutritionInfo] = None
     allergens: List[str]
     customizationOptions: List[str]
 
@@ -84,6 +99,114 @@ class FeedbackRequest(BaseModel):
     comment: str
 
 # --- In-Memory Seed Storage ---
+menu_items_db: List[Dict[str, Any]] = [
+    {
+        "id": "item-1",
+        "name": "Butter Chicken",
+        "nameTamil": "பட்டர் சிக்கன்",
+        "category": "Main Course",
+        "price": 320.0,
+        "costPrice": 198.0,
+        "marginPercent": 38,
+        "prepTimeMinutes": 12,
+        "popularityText": "Ordered 48x today",
+        "orderedTodayCount": 48,
+        "description": "Tender tandoori chicken simmered in a silky, rich makhani gravy infused with butter and kasuri methi.",
+        "descriptionTamil": "வெண்ணெய் மற்றும் மென்மையான தக்காளி கிரேவியில் சமைக்கப்பட்ட தந்தூரி சிக்கன்.",
+        "image": "https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?auto=format&fit=crop&w=800&q=80",
+        "isVeg": False,
+        "isSpicy": True,
+        "isAvailable": True,
+        "calories": 520,
+        "nutrition": {
+            "calories": 520,
+            "protein_g": 29.0,
+            "iron_mg": 2.9,
+            "zinc_mg": 2.6,
+            "fiber_g": 2.4,
+            "carbohydrate_g": 14.0,
+            "total_fat_g": 32.0,
+            "saturated_fat_g": 14.0,
+            "cholesterol_mg": 85.0,
+            "total_sugar_g": 4.5,
+            "added_sugar_g": 0.0,
+            "calcium_mg": 110.0
+        },
+        "allergens": ["Dairy", "Cashews"],
+        "customizationOptions": ["Extra Gravy", "Boneless Only"]
+    },
+    {
+        "id": "item-2",
+        "name": "Paneer Tikka",
+        "nameTamil": "பன்னீர் டிக்கா",
+        "category": "Starters",
+        "price": 280.0,
+        "costPrice": 162.0,
+        "marginPercent": 42,
+        "prepTimeMinutes": 9,
+        "popularityText": "Ordered 42x today",
+        "orderedTodayCount": 42,
+        "description": "Fresh cottage cheese cubes marinated in spiced yogurt and grilled in traditional clay tandoor with bell peppers.",
+        "descriptionTamil": "தயிர் மசாலா கலவையில் ஊறிய சுவையான தந்தூரி பன்னீர்.",
+        "image": "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=800&q=80",
+        "isVeg": True,
+        "isSpicy": True,
+        "isAvailable": True,
+        "calories": 380,
+        "nutrition": {
+            "calories": 380,
+            "protein_g": 18.5,
+            "iron_mg": 1.8,
+            "zinc_mg": 2.4,
+            "fiber_g": 2.8,
+            "carbohydrate_g": 12.0,
+            "total_fat_g": 22.0,
+            "saturated_fat_g": 11.0,
+            "cholesterol_mg": 35.0,
+            "total_sugar_g": 3.2,
+            "added_sugar_g": 0.0,
+            "calcium_mg": 290.0
+        },
+        "allergens": ["Dairy"],
+        "customizationOptions": ["Extra Mint Chutney", "Lemon Squeeze"]
+    },
+    {
+        "id": "item-4",
+        "name": "Steamed Idli with Sambar",
+        "nameTamil": "இட்லி சாம்பார்",
+        "category": "Starters",
+        "price": 120.0,
+        "costPrice": 42.0,
+        "marginPercent": 65,
+        "prepTimeMinutes": 5,
+        "popularityText": "Ordered 84x today",
+        "orderedTodayCount": 84,
+        "description": "Fluffy steamed rice & lentil cakes served with home-style lentil vegetable sambar.",
+        "descriptionTamil": "மிருதுவான சுடச்சுட இட்லி மற்றும் சாம்பார்.",
+        "image": "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=800&q=80",
+        "isVeg": True,
+        "isSpicy": False,
+        "isAvailable": True,
+        "calories": 130,
+        "nutrition": {
+            "calories": 130,
+            "protein_g": 5.2,
+            "iron_mg": 1.8,
+            "zinc_mg": 1.1,
+            "fiber_g": 3.2,
+            "carbohydrate_g": 24.0,
+            "total_fat_g": 1.2,
+            "saturated_fat_g": 0.3,
+            "cholesterol_mg": 0.0,
+            "total_sugar_g": 0.4,
+            "added_sugar_g": 0.0,
+            "calcium_mg": 35.0
+        },
+        "allergens": [],
+        "customizationOptions": ["Extra Sambar"]
+    }
+]
+
 orders_db: List[Dict[str, Any]] = [
     {
         "id": "ORD-1022",
@@ -157,6 +280,66 @@ feedback_db: List[Dict[str, Any]] = [
 ]
 
 # --- Endpoints ---
+@app.get("/api/menu")
+def get_menu(health_filters: Optional[str] = None):
+    """
+    Fetch menu items with optional FSSAI-compliant Health & Nutrition filtering.
+    Multiple filters are evaluated using strict AND logic.
+    """
+    if not health_filters:
+        return {"items": menu_items_db, "count": len(menu_items_db)}
+
+    filter_list = [f.strip() for f in health_filters.split(",") if f.strip()]
+    if not filter_list:
+        return {"items": menu_items_db, "count": len(menu_items_db)}
+
+    filtered = []
+    for item in menu_items_db:
+        n = item.get("nutrition") or {}
+        cals = item.get("calories", n.get("calories", 0))
+
+        matches_all = True
+        for f in filter_list:
+            fl = f.lower()
+            if fl == "high protein" and (n.get("protein_g") or 0) < 12.0:
+                matches_all = False; break
+            elif fl == "iron rich" and (n.get("iron_mg") or 0) < 3.0:
+                matches_all = False; break
+            elif fl == "zinc rich" and (n.get("zinc_mg") or 0) < 2.0:
+                matches_all = False; break
+            elif fl == "high fiber" and (n.get("fiber_g") or 0) < 6.0:
+                matches_all = False; break
+            elif fl == "low carbohydrate" and (n.get("carbohydrate_g") is None or n.get("carbohydrate_g", 999) > 15.0):
+                matches_all = False; break
+            elif fl == "low fat" and (n.get("total_fat_g") is None or n.get("total_fat_g", 999) > 3.0):
+                matches_all = False; break
+            elif fl == "low saturated fat" and (n.get("saturated_fat_g") is None or n.get("saturated_fat_g", 999) > 1.5):
+                matches_all = False; break
+            elif fl == "low cholesterol" and (n.get("cholesterol_mg") is None or n.get("cholesterol_mg", 999) > 20.0):
+                matches_all = False; break
+            elif fl == "sugar-free" and (n.get("total_sugar_g") is None or n.get("total_sugar_g", 999) > 0.5):
+                matches_all = False; break
+            elif fl == "no added sugar" and (n.get("added_sugar_g") is None or n.get("added_sugar_g", 999) > 0.0):
+                matches_all = False; break
+            elif fl == "low sugar" and (n.get("total_sugar_g") is None or n.get("total_sugar_g", 999) > 5.0):
+                matches_all = False; break
+            elif fl == "low calorie" and (cals <= 0 or cals > 150):
+                matches_all = False; break
+            elif fl == "high calorie" and cals < 450:
+                matches_all = False; break
+            elif fl == "diet-friendly":
+                is_df = (cals > 0 and cals <= 250 and (n.get("total_fat_g", 999) <= 6.0) and
+                         ((n.get("protein_g") or 0) >= 5.0 or (n.get("fiber_g") or 0) >= 3.0))
+                if not is_df:
+                    matches_all = False; break
+            elif fl == "calcium rich" and (n.get("calcium_mg") or 0) < 150.0:
+                matches_all = False; break
+
+        if matches_all:
+            filtered.append(item)
+
+    return {"items": filtered, "count": len(filtered), "applied_filters": filter_list}
+
 @app.get("/")
 def root():
     return {

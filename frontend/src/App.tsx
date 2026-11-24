@@ -204,8 +204,9 @@ const MainAppContent: React.FC = () => {
         )}
 
         {kioskSubScreen === 'menu' && (
-          <div className="flex-1 flex flex-col">
+          <div key={`booking-menu-container-${language}`} className="flex-1 flex flex-col">
             <Header
+              key={`booking-header-${language}`}
               showBack={true}
               onBackToWelcome={() => setKioskSubScreen('allocation')}
               onOpenCart={() => setIsCartOpen(true)}
@@ -216,6 +217,7 @@ const MainAppContent: React.FC = () => {
             />
 
             <MenuScreen
+              key={`booking-menu-${language}`}
               onSelectItem={(item) => setSelectedItemForDetail(item)}
               onOpenCart={() => setIsCartOpen(true)}
               onOpenOrderTracker={() => setIsTrackerOpen(true)}
@@ -380,8 +382,9 @@ const MainAppContent: React.FC = () => {
             )}
 
             {kioskSubScreen === 'menu' && (
-              <div className="flex-1 flex flex-col">
+              <div key={`std-menu-container-${language}`} className="flex-1 flex flex-col">
                 <Header
+                  key={`std-header-${language}`}
                   showBack={true}
                   onBackToWelcome={() => setKioskSubScreen('welcome')}
                   onOpenCart={() => setIsCartOpen(true)}
@@ -392,6 +395,7 @@ const MainAppContent: React.FC = () => {
                 />
 
                 <MenuScreen
+                  key={`std-menu-${language}`}
                   onSelectItem={(item) => setSelectedItemForDetail(item)}
                   onOpenCart={() => setIsCartOpen(true)}
                   onOpenOrderTracker={() => setIsTrackerOpen(true)}

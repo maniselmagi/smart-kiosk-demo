@@ -108,25 +108,80 @@ class GoogleTranslateService {
     if (typeof window === 'undefined') return;
     this.currentLanguage = targetLang;
 
-    // Cookie configuration for Google Translate: /en/${targetLang}
-    const cookieVal = targetLang === 'en' ? '/en/en' : `/en/${targetLang}`;
     const hostname = window.location.hostname;
-
-    document.cookie = `googtrans=${cookieVal}; path=/;`;
-    if (targetLang === 'en') {
-      document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    const paths = ['/', '/kiosk', '/kiosk/', '/smart-kiosk-demo', '/smart-kiosk-demo/', window.location.pathname];
+    const domains = [
+      '',
+      hostname,
+      `.${hostname}`
+    ];
+    const parts = hostname.split('.');
+    if (parts.length > 1) {
+      domains.push(`.${parts.slice(-2).join('.')}`);
     }
+
+    if (targetLang === 'en') {
+      // 1. Completely clear all googtrans cookies across all domains and paths
+      domains.forEach((d) => {
+        paths.forEach((p) => {
+          document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=${p};${d ? ` domain=${d};` : ''}`;
+          document.cookie = `googtrans=; Max-Age=-99999999; path=${p};${d ? ` domain=${d};` : ''}`;
+        });
+      });
+      // Also write /en/en fallback cookie
+      document.cookie = 'googtrans=/en/en; path=/;';
+
+      // 2. Remove Google Translate classes and attributes from html & body
+      document.documentElement.classList.remove('translated-ltr', 'translated-rtl');
+      document.body.classList.remove('translated-ltr', 'translated-rtl');
+      document.documentElement.removeAttribute('lang');
+      document.documentElement.removeAttribute('dir');
+
+      // 3. Reset Google Translate select element (.goog-te-combo)
+      const triggerResetCombo = () => {
+        const combo = document.querySelector<HTMLSelectElement>('.goog-te-combo');
+        if (combo) {
+          // Check if an option with 'en' exists, otherwise empty string '' restores original page language
+          const hasEn = Array.from(combo.options).some(o => o.value === 'en');
+          combo.value = hasEn ? 'en' : '';
+          combo.dispatchEvent(new Event('change', { bubbles: true }));
+          return true;
+        }
+        return false;
+      };
+
+      // 4. Try clicking the "Show original" button inside the Google Translate iframe if open
+      try {
+        const iframes = document.querySelectorAll<HTMLIFrameElement>('.goog-te-banner-frame, iframe[class*="goog"]');
+        iframes.forEach((iframe) => {
+          try {
+            const doc = iframe.contentDocument || iframe.contentWindow?.document;
+            const btn = doc?.querySelector<HTMLElement>('.goog-te-button button, [id*="restore"]');
+            if (btn) btn.click();
+          } catch {}
+        });
+      } catch {}
+
+      if (!triggerResetCombo()) {
+        let attempts = 0;
+        const interval = setInterval(() => {
+          attempts++;
+          if (triggerResetCombo() || attempts > 20) {
+            clearInterval(interval);
+          }
+        }, 150);
+      }
+
+      return;
+    }
+
+    // For non-English target language:
+    const cookieVal = `/en/${targetLang}`;
+    document.cookie = `googtrans=${cookieVal}; path=/;`;
     if (hostname && hostname !== 'localhost') {
       document.cookie = `googtrans=${cookieVal}; domain=${hostname}; path=/;`;
-      if (targetLang === 'en') {
-        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=${hostname}; path=/;`;
-      }
-      const parts = hostname.split('.');
       if (parts.length > 1) {
         document.cookie = `googtrans=${cookieVal}; domain=.${parts.slice(-2).join('.')}; path=/;`;
-        if (targetLang === 'en') {
-          document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.${parts.slice(-2).join('.')}; path=/;`;
-        }
       }
     }
 
@@ -142,7 +197,6 @@ class GoogleTranslateService {
     };
 
     if (!triggerCombo()) {
-      // Poll briefly if combo is still rendering
       let attempts = 0;
       const interval = setInterval(() => {
         attempts++;

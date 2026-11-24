@@ -108,7 +108,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* TABLE NUMBER CAPSULE (Ultra-refined luxury glass badge) */}
-          <div className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 border border-amber-500/30 text-amber-300 shadow-sm select-none">
+          <div className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-slate-900/80 border border-amber-500/30 text-amber-300 shadow-sm select-none notranslate" translate="no">
             <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-amber-400/80">{t.table}</span>
             <span className="text-xs sm:text-sm font-black text-amber-300 leading-none">{tableNumber}</span>
             <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)] animate-pulse" />
@@ -119,17 +119,20 @@ export const Header: React.FC<HeaderProps> = ({
         {/* RIGHT: Live Clock, Assigned Server, Language Switcher, Cart & Theme Toggle */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           
-          {/* Live Dynamic Clock */}
-          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/80 border border-white/10 text-slate-300 font-mono text-xs shadow-xs">
+          {/* Live Dynamic Clock (Protected from Google Translate to prevent periodic flickering/blinking) */}
+          <div 
+            className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/80 border border-white/10 text-slate-300 font-mono text-xs shadow-xs notranslate"
+            translate="no"
+          >
             <Clock className="w-3.5 h-3.5 text-amber-400" />
-            <span>{currentTime || '--:--'}</span>
+            <span className="notranslate" translate="no">{currentTime || '--:--'}</span>
           </div>
 
           {/* Assigned Server Badge (Luxury Concierge Bell with Gold Name) */}
           <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/80 border border-white/10 text-slate-200 shadow-xs hover:border-amber-500/30 transition-colors">
             <ConciergeBell className="w-3.5 h-3.5 text-amber-400 shrink-0" />
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 hidden md:inline">{t.serverLabel || 'Server'}:</span>
-            <span className="text-xs font-black text-amber-300">{getLocalizedWaiterName(assignedWaiter.name, language)}</span>
+            <span className="text-xs font-black text-amber-300 notranslate" translate="no">{getLocalizedWaiterName(assignedWaiter.name, language)}</span>
           </div>
 
           {/* Customer Language Switcher Button (Directly on Food Order Page) */}

@@ -547,7 +547,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
 
                     {/* Top-Right: Favorite Heart Toggle + Prep Time */}
                     <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-10">
-                      <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-md text-white text-[10px] font-semibold border border-white/10">
+                      <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-md text-white text-[10px] font-semibold border border-white/10 notranslate" translate="no">
                         <Clock className="w-2.5 h-2.5 text-amber-300" />
                         <span>{item.prepTimeMinutes}m</span>
                       </div>

@@ -2919,7 +2919,7 @@ const MusicLoungeSection: React.FC = () => {
           <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
             <div className={`h-full bg-gradient-to-r from-purple-400 to-amber-400 transition-all ${isPlaying ? 'w-2/5 animate-pulse' : 'w-1/12'}`} />
           </div>
-          <div className="flex justify-between text-[10px] text-slate-400 font-mono">
+          <div className="flex justify-between text-[10px] text-slate-400 font-mono notranslate" translate="no">
             <span>{isPlaying ? '01:14' : '00:00'}</span>
             <span>{activeTrack.duration}</span>
           </div>

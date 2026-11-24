@@ -744,7 +744,7 @@ export const KitchenDisplay: React.FC = () => {
         {/* --------------------------------------------------------- */}
         {/* SUB-HEADER: DATE GREETING                                 */}
         {/* --------------------------------------------------------- */}
-        <div className="pt-6 pb-2 text-xs font-semibold text-slate-800 dark:text-slate-200">
+        <div className="pt-6 pb-2 text-xs font-semibold text-slate-800 dark:text-slate-200 notranslate" translate="no">
           <span>{formattedDate}</span>
         </div>
 

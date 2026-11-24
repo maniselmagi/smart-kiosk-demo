@@ -106,7 +106,6 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
               modelUrl={foodModelMeta.modelUrl}
               fallbackImage={item.image}
               foodName={item.name}
-              proceduralType={foodModelMeta.proceduralType}
               scale={foodModelMeta.scale}
               cameraDistance={foodModelMeta.cameraDistance}
               showTopBadge={false}

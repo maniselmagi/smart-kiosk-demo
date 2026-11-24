@@ -76,13 +76,13 @@ const SPECIFIC_ITEM_MODELS: Record<string, FoodModel3DMeta> = {
     scale: 1.5,
     cameraDistance: 2.2
   },
-  // Butter Chicken & Curries
+  // Butter Chicken (Verified Realistic 3D Model)
   'item-1': {
-    modelUrl: 'models/food/curry.glb',
-    title: 'Butter Chicken Gourmet Curry 3D',
+    modelUrl: 'models/food/butter_chicken.glb',
+    title: 'Butter Chicken 3D',
     proceduralType: 'curry',
-    scale: 1.4,
-    cameraDistance: 2.4
+    scale: 1.5,
+    cameraDistance: 2.2
   },
   'item-12': {
     modelUrl: 'models/food/curry.glb',

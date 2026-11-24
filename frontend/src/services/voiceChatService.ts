@@ -236,7 +236,42 @@ export const VOICE_LANG_MAP: Record<string, VoiceLangConfig> = {
       '영업시간 알려주세요'
     ]
   },
+  de: {
+    code: 'de-DE',
+    name: 'German',
+    nativeName: 'Deutsch',
+    flag: '🇩🇪',
+    listeningText: 'Höre auf Deutsch zu... Sprechen Sie jetzt',
+    speakingPrompt: 'Jetzt sprechen (z. B. "Was sind Spezialitäten?", "Kellner rufen")',
+    tapToStop: 'Sprachanfrage senden',
+    speakToKio: 'Sprach-Chat (Mit Kio sprechen)',
+    unsupportedText: 'Spracherkennung in diesem Browser nicht unterstützt.',
+    micDeniedText: 'Mikrofonzugriff verweigert.',
+    speechHeardText: 'Erkannt:',
+    voiceSamplePrompts: [
+      'Was sind Spezialitäten?',
+      'Kellner rufen',
+      'Bestbewertete Gerichte',
+      'Gerichte für Kinder?',
+      'Öffnungszeiten?'
+    ]
+  }
 };
+
+export const AVAILABLE_VOICE_LANGUAGES = [
+  { key: 'ta', code: 'ta-IN', name: 'Tamil', nativeName: 'தமிழ்', flag: '🇮🇳' },
+  { key: 'en', code: 'en-IN', name: 'English', nativeName: 'English', flag: '🇬🇧' },
+  { key: 'hi', code: 'hi-IN', name: 'Hindi', nativeName: 'हिन्दी', flag: '🇮🇳' },
+  { key: 'te', code: 'te-IN', name: 'Telugu', nativeName: 'తెలుగు', flag: '🇮🇳' },
+  { key: 'kn', code: 'kn-IN', name: 'Kannada', nativeName: 'ಕನ್ನಡ', flag: '🇮🇳' },
+  { key: 'ml', code: 'ml-IN', name: 'Malayalam', nativeName: 'മലയാളം', flag: '🇮🇳' },
+  { key: 'mr', code: 'mr-IN', name: 'Marathi', nativeName: 'मराठी', flag: '🇮🇳' },
+  { key: 'es', code: 'es-ES', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
+  { key: 'fr', code: 'fr-FR', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
+  { key: 'de', code: 'de-DE', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪' },
+  { key: 'ar', code: 'ar-SA', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦' },
+  { key: 'ko', code: 'ko-KR', name: 'Korean', nativeName: '한국어', flag: '🇰🇷' }
+];
 
 export const getVoiceConfig = (lang: string = 'en'): VoiceLangConfig => {
   return VOICE_LANG_MAP[lang] || VOICE_LANG_MAP['en'];

@@ -40,7 +40,8 @@ import {
   stopSpeech,
   requestMicPermission,
   isSpeechRecognitionSupported,
-  IBrowserSpeechRecognition
+  IBrowserSpeechRecognition,
+  AVAILABLE_VOICE_LANGUAGES
 } from '../../services/voiceChatService';
 
 interface AIChatModalProps {
@@ -80,11 +81,19 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
   // Voice Chat State
   const [isVoiceOverlayOpen, setIsVoiceOverlayOpen] = useState(false);
   const [isListening, setIsListening] = useState(false);
+  const [voiceLanguage, setVoiceLanguage] = useState<string>(language);
   const [interimSpeechText, setInterimSpeechText] = useState('');
   const [autoVoiceReply, setAutoVoiceReply] = useState(true);
   const recognitionRef = useRef<IBrowserSpeechRecognition | null>(null);
+  const silenceTimerRef = useRef<any>(null);
+  const latestTranscriptRef = useRef<string>('');
 
-  const voiceConfig = useMemo(() => getVoiceConfig(language), [language]);
+  const voiceConfig = useMemo(() => getVoiceConfig(voiceLanguage), [voiceLanguage]);
+
+  // Keep voice language in sync when global kiosk language updates
+  useEffect(() => {
+    setVoiceLanguage(language);
+  }, [language]);
 
   // Localized welcome greeting factory
   const initialGreeting = useMemo<AIResponse>(() => {
@@ -116,6 +125,11 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
       prevLangRef.current = language;
       setMessages([initialGreeting]);
       stopSpeech();
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
+      latestTranscriptRef.current = '';
       if (recognitionRef.current) {
         recognitionRef.current.abort();
         setIsListening(false);
@@ -134,6 +148,11 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
   useEffect(() => {
     return () => {
       stopSpeech();
+      if (silenceTimerRef.current) {
+        clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = null;
+      }
+      latestTranscriptRef.current = '';
       if (recognitionRef.current) {
         try {
           recognitionRef.current.abort();
@@ -155,9 +174,45 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
     }
   }, [messages, isTyping, isOpen]);
 
-  // Voice Chat: Start Speech Recognition with explicit mic permission check
-  const startListening = async () => {
+  // Submit recognized speech cleanly
+  const submitSpokenQuery = (spoken: string, langKey: string = voiceLanguage) => {
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+    const cleanSpoken = spoken.trim();
+    if (!cleanSpoken) return;
+
+    latestTranscriptRef.current = '';
+    setIsListening(false);
+    setIsVoiceOverlayOpen(false);
+    setInterimSpeechText('');
+
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+      } catch {
+        // ignore
+      }
+    }
+
+    handleSendMessage(cleanSpoken, true, langKey);
+  };
+
+  // Voice Chat: Start Speech Recognition with language and silence debounce
+  const startListening = async (targetLang?: string) => {
+    const activeLang = targetLang || voiceLanguage;
+    if (targetLang && targetLang !== voiceLanguage) {
+      setVoiceLanguage(targetLang);
+    }
+
     stopSpeech();
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+    latestTranscriptRef.current = '';
+    setInterimSpeechText('');
 
     // 1. Explicitly request microphone permission
     await requestMicPermission();
@@ -177,7 +232,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
         }
       }
 
-      const rec = createSpeechRecognition(language);
+      const rec = createSpeechRecognition(activeLang);
       if (!rec) {
         setIsVoiceOverlayOpen(true);
         return;
@@ -204,20 +259,26 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
 
         const currentText = (finalTranscript || interimTranscript).trim();
         if (currentText) {
+          latestTranscriptRef.current = currentText;
           setInterimSpeechText(currentText);
-        }
 
-        if (finalTranscript.trim()) {
-          const spoken = finalTranscript.trim();
-          setIsListening(false);
-          setIsVoiceOverlayOpen(false);
-          setInterimSpeechText('');
-          try {
-            rec.stop();
-          } catch {
-            // ignore
+          if (silenceTimerRef.current) {
+            clearTimeout(silenceTimerRef.current);
           }
-          handleSendMessage(spoken, true);
+
+          if (finalTranscript.trim()) {
+            silenceTimerRef.current = setTimeout(() => {
+              submitSpokenQuery(finalTranscript.trim(), activeLang);
+            }, 350);
+          } else {
+            // For Tamil, Hindi, and non-English where Chrome/WebView often delays isFinal,
+            // automatically submit after 1.3 seconds of pause
+            silenceTimerRef.current = setTimeout(() => {
+              if (latestTranscriptRef.current.trim()) {
+                submitSpokenQuery(latestTranscriptRef.current.trim(), activeLang);
+              }
+            }, 1300);
+          }
         }
       };
 
@@ -231,6 +292,12 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
 
       rec.onend = () => {
         setIsListening(false);
+        // If recognition closed and we have captured speech, submit it
+        if (latestTranscriptRef.current.trim()) {
+          const captured = latestTranscriptRef.current.trim();
+          latestTranscriptRef.current = '';
+          submitSpokenQuery(captured, activeLang);
+        }
       };
 
       recognitionRef.current = rec;
@@ -244,11 +311,22 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
     }
   };
 
+  // Switch voice language and restart recognition seamlessly
+  const handleSwitchVoiceLanguage = (newLangKey: string) => {
+    setVoiceLanguage(newLangKey);
+    startListening(newLangKey);
+  };
+
   // Voice Chat: Stop Speech Recognition
   const stopListening = () => {
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+    latestTranscriptRef.current = '';
     if (recognitionRef.current) {
       try {
-        recognitionRef.current.stop();
+        recognitionRef.current.abort();
       } catch {
         // ignore
       }
@@ -257,11 +335,13 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
   };
 
   const handleSendVoiceQuery = () => {
+    const textToSend = (latestTranscriptRef.current || interimSpeechText).trim();
     stopListening();
     setIsVoiceOverlayOpen(false);
-    if (interimSpeechText.trim()) {
-      handleSendMessage(interimSpeechText.trim(), true);
+    if (textToSend) {
+      handleSendMessage(textToSend, true, voiceLanguage);
       setInterimSpeechText('');
+      latestTranscriptRef.current = '';
     }
   };
 
@@ -269,13 +349,14 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
     stopListening();
     setIsVoiceOverlayOpen(false);
     setInterimSpeechText('');
-    handleSendMessage(prompt, true);
+    latestTranscriptRef.current = '';
+    handleSendMessage(prompt, true, voiceLanguage);
   };
 
   if (!isOpen) return null;
 
   // Handle sending a message
-  const handleSendMessage = (textToSend?: string, wasVoiceInput: boolean = false) => {
+  const handleSendMessage = (textToSend?: string, wasVoiceInput: boolean = false, replyLang: string = voiceLanguage) => {
     const query = (textToSend || inputMessage).trim();
     if (!query) return;
 
@@ -292,20 +373,21 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
 
     // Natural assistant thinking delay (350ms - 550ms)
     setTimeout(() => {
+      const effectiveLang = (wasVoiceInput ? replyLang : language) as any;
       const response = processCustomerQuery(
         query,
         menuItems,
         tableNumber,
-        getLocalizedWaiterName(assignedWaiter.name, language),
+        getLocalizedWaiterName(assignedWaiter.name, effectiveLang),
         activeOrder,
-        language
+        effectiveLang
       );
       setMessages(prev => [...prev, response]);
       setIsTyping(false);
 
       // Auto Speak Response if Voice Reply is enabled or user spoke query
       if (autoVoiceReply || wasVoiceInput) {
-        speakWithVoice(response.text, language);
+        speakWithVoice(response.text, effectiveLang);
       }
     }, 450);
   };
@@ -698,15 +780,18 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
           }}
           className="p-3 sm:p-4 bg-slate-950/90 border-t border-white/[0.08] flex items-center gap-2.5 shrink-0"
         >
-          {/* Dedicated Voice Chat Button */}
+          {/* Dedicated Voice Chat Button with Language Badge */}
           <button
             type="button"
-            onClick={startListening}
-            className="w-11 h-11 rounded-2xl flex items-center justify-center transition-all cursor-pointer shrink-0 active:scale-95 bg-gradient-to-tr from-amber-500 to-yellow-400 text-slate-950 font-black shadow-lg shadow-amber-500/25 border border-amber-300 hover:brightness-110"
-            title={voiceConfig.speakToKio}
+            onClick={() => startListening(voiceLanguage)}
+            className="relative w-11 h-11 rounded-2xl flex items-center justify-center transition-all cursor-pointer shrink-0 active:scale-95 bg-gradient-to-tr from-amber-500 to-yellow-400 text-slate-950 font-black shadow-lg shadow-amber-500/25 border border-amber-300 hover:brightness-110"
+            title={`${voiceConfig.speakToKio} (${voiceConfig.nativeName})`}
             aria-label="Voice Chat"
           >
             <Mic className="w-5 h-5 stroke-[2.5]" />
+            <span className="absolute -bottom-1 -right-1 px-1 rounded-sm bg-slate-950 border border-amber-400/50 text-[9px] font-black text-amber-300 uppercase leading-none py-0.5">
+              {voiceLanguage}
+            </span>
           </button>
 
           {/* Text Input */}
@@ -735,33 +820,59 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
 
         {/* 5. FULL VOICE ASSISTANT MODAL OVERLAY (SIRI / GOOGLE ASSISTANT STYLE) */}
         {isVoiceOverlayOpen && (
-          <div className="absolute inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex flex-col justify-between p-5 animate-in fade-in zoom-in-95 duration-200">
-            {/* Top Bar */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-                <span className="text-xs font-bold text-amber-300 uppercase tracking-widest flex items-center gap-1.5">
-                  <AudioLines className="w-4 h-4 text-amber-400" />
-                  {voiceConfig.flag} {voiceConfig.nativeName} ({voiceConfig.code})
-                </span>
+          <div className="absolute inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex flex-col justify-between p-4 sm:p-5 animate-in fade-in zoom-in-95 duration-200">
+            {/* Top Bar with Language Selector & Close */}
+            <div className="space-y-2.5 shrink-0">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                  <span className="text-xs font-bold text-amber-300 uppercase tracking-widest flex items-center gap-1.5">
+                    <AudioLines className="w-4 h-4 text-amber-400" />
+                    {voiceConfig.flag} {voiceConfig.nativeName} ({voiceConfig.code})
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    stopListening();
+                    setIsVoiceOverlayOpen(false);
+                  }}
+                  className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white cursor-pointer transition-colors"
+                  title="Close Voice Assistant"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  stopListening();
-                  setIsVoiceOverlayOpen(false);
-                }}
-                className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white cursor-pointer transition-colors"
-                title="Close Voice Assistant"
-              >
-                <X className="w-5 h-5" />
-              </button>
+
+              {/* Horizontal Language Switcher Pills */}
+              <div className="w-full overflow-x-auto no-scrollbar py-1">
+                <div className="flex items-center gap-1.5 min-w-max px-0.5">
+                  {AVAILABLE_VOICE_LANGUAGES.map((langItem) => {
+                    const isSelected = voiceLanguage === langItem.key;
+                    return (
+                      <button
+                        key={langItem.key}
+                        type="button"
+                        onClick={() => handleSwitchVoiceLanguage(langItem.key)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 border ${
+                          isSelected
+                            ? 'bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 border-amber-300 shadow-md shadow-amber-500/30'
+                            : 'bg-slate-900/90 text-slate-300 border-white/10 hover:border-amber-400/50 hover:text-white'
+                        }`}
+                      >
+                        <span>{langItem.flag}</span>
+                        <span>{langItem.nativeName}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
 
             {/* Center: Pulsating Microphone & Soundwaves */}
-            <div className="flex flex-col items-center justify-center text-center space-y-6 my-auto">
+            <div className="flex flex-col items-center justify-center text-center space-y-4 my-auto overflow-y-auto max-h-[60vh] py-2">
               {/* Pulsing Mic Ring */}
-              <div className="relative flex items-center justify-center">
+              <div className="relative flex items-center justify-center shrink-0">
                 <div className={`absolute -inset-6 rounded-full bg-gradient-to-r from-amber-500/30 via-yellow-400/20 to-amber-600/30 blur-xl ${isListening ? 'animate-pulse' : ''}`} />
                 <div className={`absolute -inset-3 rounded-full border-2 border-amber-400/40 ${isListening ? 'animate-ping duration-1000' : ''}`} />
                 <button
@@ -770,7 +881,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
                     if (isListening) {
                       stopListening();
                     } else {
-                      startListening();
+                      startListening(voiceLanguage);
                     }
                   }}
                   className={`relative w-24 h-24 rounded-full flex items-center justify-center shadow-2xl transition-all cursor-pointer active:scale-95 border-2 ${
@@ -784,17 +895,14 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
               </div>
 
               {/* Status Header */}
-              <div className="space-y-1.5 max-w-md">
+              <div className="space-y-1 max-w-md shrink-0">
                 <h3 className="font-display font-black text-lg sm:text-xl text-white">
                   {isListening ? voiceConfig.listeningText : voiceConfig.speakingPrompt}
                 </h3>
-                <p className="text-xs text-slate-400">
-                  {voiceConfig.speakingPrompt}
-                </p>
               </div>
 
               {/* Live Speech Recognition Transcript Box */}
-              <div className="w-full max-w-lg min-h-16 p-4 rounded-2xl bg-slate-900/90 border border-amber-400/30 text-center shadow-inner flex items-center justify-center">
+              <div className="w-full max-w-lg min-h-16 p-4 rounded-2xl bg-slate-900/90 border border-amber-400/30 text-center shadow-inner flex items-center justify-center shrink-0">
                 {interimSpeechText ? (
                   <p className="text-base sm:text-lg font-bold text-amber-300 animate-in fade-in">
                     "{interimSpeechText}"
@@ -807,7 +915,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({
               </div>
 
               {/* Quick Spoken Question Prompts in Active Language */}
-              <div className="w-full max-w-lg space-y-2">
+              <div className="w-full max-w-lg space-y-2 shrink-0">
                 <span className="text-[11px] font-bold text-amber-400/80 uppercase tracking-wider block">
                   💡 {t.recommendedForYou || 'Tap to ask instantly in'} {voiceConfig.nativeName}:
                 </span>

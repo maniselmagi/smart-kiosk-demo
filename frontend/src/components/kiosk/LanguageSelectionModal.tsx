@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useKiosk } from '../../context/KioskContext';
-import { AVAILABLE_LANGUAGES, Language } from '../../utils/translations';
+import { AVAILABLE_LANGUAGES, Language, translations } from '../../utils/translations';
 import { Globe, Check, ArrowRight, Sparkles, X } from 'lucide-react';
 
 interface LanguageSelectionModalProps {
@@ -82,6 +82,12 @@ const LANGUAGE_DETAILS: Record<string, LanguageMeta> = {
     greeting: 'സ്വാഗതം!',
     sub: 'മലയാളം (Malayalam)',
     description: 'രുചികരമായ വിഭവങ്ങൾ മലയാളത്തിൽ കണ്ട് ഓർഡർ ചെയ്യൂ'
+  },
+  mr: {
+    code: 'mr',
+    greeting: 'स्वागत आहे!',
+    sub: 'मराठी (Marathi)',
+    description: 'तुमच्या पसंतीच्या भाषेत जेवण ऑर्डर करा'
   }
 };
 
@@ -91,14 +97,24 @@ export const LanguageSelectionModal: React.FC<LanguageSelectionModalProps> = ({
   onConfirm
 }) => {
   const { language, setLanguage, t, isAccessibilityMode } = useKiosk();
+  const [selectedLang, setSelectedLang] = useState<Language>(language || 'en');
+
+  // Synchronize local selection with kiosk language state on open/change
+  useEffect(() => {
+    if (language) {
+      setSelectedLang(language);
+    }
+  }, [language, isOpen]);
 
   if (!isOpen) return null;
 
   const handleSelectLanguage = (langCode: Language) => {
+    setSelectedLang(langCode);
     setLanguage(langCode);
   };
 
   const handleContinue = () => {
+    setLanguage(selectedLang);
     if (onConfirm) {
       onConfirm();
     } else {
@@ -106,19 +122,26 @@ export const LanguageSelectionModal: React.FC<LanguageSelectionModalProps> = ({
     }
   };
 
+  const currentT = translations[selectedLang] || t;
+  const currentLangObj = AVAILABLE_LANGUAGES.find(l => l.code === selectedLang) || AVAILABLE_LANGUAGES[0];
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in overflow-y-auto">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in overflow-y-auto notranslate"
+      translate="no"
+    >
       <div 
-        className={`relative w-full max-w-2xl rounded-3xl p-6 md:p-8 shadow-2xl border transition-all duration-300 ${
+        className={`relative w-full max-w-2xl rounded-3xl p-6 md:p-8 shadow-2xl border transition-all duration-300 notranslate ${
           isAccessibilityMode
             ? 'bg-slate-900 border-amber-400 text-white'
             : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-slate-100 shadow-brand-500/10'
         }`}
+        translate="no"
       >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-2xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          className="absolute top-5 right-5 p-2 rounded-2xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           title="Close / மூடு"
           aria-label="Close"
         >
@@ -126,24 +149,24 @@ export const LanguageSelectionModal: React.FC<LanguageSelectionModalProps> = ({
         </button>
 
         {/* Modal Header */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-6 notranslate" translate="no">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-600 to-amber-500 text-white shadow-lg shadow-brand-500/25 mb-3 animate-pulse">
             <Globe className="w-7 h-7" />
           </div>
           
           <h2 className="text-2xl md:text-3xl font-black font-display tracking-tight text-slate-900 dark:text-white">
-            {t.selectLanguageTitle}
+            {currentT.selectLanguageTitle || t.selectLanguageTitle}
           </h2>
           
           <p className="text-sm md:text-base text-slate-600 dark:text-slate-400 mt-1 max-w-md mx-auto">
-            {t.chooseLanguagePrompt}
+            {currentT.chooseLanguagePrompt || t.chooseLanguagePrompt}
           </p>
         </div>
 
         {/* Language Grid: Touch Cards (Protected from Google Translate so native names remain intact) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 notranslate" translate="no">
           {AVAILABLE_LANGUAGES.map((lang) => {
-            const isSelected = language === lang.code;
+            const isSelected = selectedLang === lang.code;
             const meta = LANGUAGE_DETAILS[lang.code] || {
               code: lang.code,
               greeting: 'Welcome!',
@@ -193,8 +216,8 @@ export const LanguageSelectionModal: React.FC<LanguageSelectionModalProps> = ({
         </div>
 
         {/* Selected Language Preview & Proceed Action */}
-        <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+        <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 notranslate" translate="no">
+          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 notranslate" translate="no">
             <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
             <span>
               UI updates instantly across all dishes & ordering steps.
@@ -203,9 +226,12 @@ export const LanguageSelectionModal: React.FC<LanguageSelectionModalProps> = ({
 
           <button
             onClick={handleContinue}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-brand-600 to-amber-500 text-white font-black text-base shadow-lg shadow-brand-500/25 hover:shadow-brand-500/35 active:scale-95 transition-all cursor-pointer"
+            translate="no"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-brand-600 to-amber-500 text-white font-black text-base shadow-lg shadow-brand-500/25 hover:shadow-brand-500/35 active:scale-95 transition-all cursor-pointer notranslate"
           >
-            <span>{t.continueInLanguage} ({AVAILABLE_LANGUAGES.find(l => l.code === language)?.nativeLabel})</span>
+            <span className="notranslate" translate="no">
+              {currentT.continueInLanguage || 'Continue'} ({currentLangObj.nativeLabel})
+            </span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

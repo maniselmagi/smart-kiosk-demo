@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useKiosk } from '../../context/KioskContext';
-import { AVAILABLE_LANGUAGES, Language } from '../../utils/translations';
+import { AVAILABLE_LANGUAGES, Language, translations } from '../../utils/translations';
 import { LanguageFlagBadge } from '../common/LanguageFlagBadge';
 import { 
   ChevronLeft, 
@@ -47,6 +47,8 @@ export const LanguageEntryScreen: React.FC<LanguageEntryScreenProps> = ({
   const currentSelectedObj = useMemo(() => {
     return AVAILABLE_LANGUAGES.find((l) => l.code === selectedLang) || AVAILABLE_LANGUAGES[0];
   }, [selectedLang]);
+
+  const currentT = translations[selectedLang] || t;
 
   const handleSelectLanguage = (code: Language) => {
     setSelectedLang(code);
@@ -250,13 +252,16 @@ export const LanguageEntryScreen: React.FC<LanguageEntryScreenProps> = ({
       </main>
 
       {/* 3. BOTTOM ACTION BUTTON (Full Width Across Tablet: max-w-4xl / lg:max-w-5xl) */}
-      <footer className="w-full max-w-4xl lg:max-w-5xl mx-auto px-6 sm:px-10 md:px-12 pb-6 sm:pb-10 pt-2 shrink-0">
+      <footer className="w-full max-w-4xl lg:max-w-5xl mx-auto px-6 sm:px-10 md:px-12 pb-6 sm:pb-10 pt-2 shrink-0 notranslate" translate="no">
         <button
           type="button"
           onClick={handleContinue}
-          className="w-full h-14 sm:h-16 rounded-full bg-[#00c5cd] hover:bg-[#00b4bc] text-white font-black text-base sm:text-lg tracking-wide shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center"
+          translate="no"
+          className="w-full h-14 sm:h-16 rounded-full bg-[#00c5cd] hover:bg-[#00b4bc] text-white font-black text-base sm:text-lg tracking-wide shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40 active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center notranslate"
         >
-          {t.continueBtn || 'Continue'}
+          <span className="notranslate" translate="no">
+            {currentT.continueBtn || 'Continue'}
+          </span>
         </button>
       </footer>
     </div>

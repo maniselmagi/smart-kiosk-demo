@@ -128,29 +128,35 @@ class GoogleTranslateService {
           document.cookie = `googtrans=; Max-Age=-99999999; path=${p};${d ? ` domain=${d};` : ''}`;
         });
       });
-      // Also write /en/en fallback cookie
-      document.cookie = 'googtrans=/en/en; path=/;';
 
-      // 2. Remove Google Translate classes and attributes from html & body
+      // 2. Clear sessionStorage and localStorage for Google Translate
+      try {
+        sessionStorage.removeItem('googtrans');
+        localStorage.removeItem('googtrans');
+      } catch {}
+
+      // 3. Remove Google Translate classes and attributes from html & body
       document.documentElement.classList.remove('translated-ltr', 'translated-rtl');
       document.body.classList.remove('translated-ltr', 'translated-rtl');
       document.documentElement.removeAttribute('lang');
       document.documentElement.removeAttribute('dir');
+      document.documentElement.setAttribute('lang', 'en');
 
-      // 3. Reset Google Translate select element (.goog-te-combo)
+      // 4. Reset Google Translate select element (.goog-te-combo)
       const triggerResetCombo = () => {
         const combo = document.querySelector<HTMLSelectElement>('.goog-te-combo');
         if (combo) {
-          // Check if an option with 'en' exists, otherwise empty string '' restores original page language
-          const hasEn = Array.from(combo.options).some(o => o.value === 'en');
-          combo.value = hasEn ? 'en' : '';
+          combo.value = '';
+          if (typeof (combo as any).onchange === 'function') {
+            try { (combo as any).onchange(); } catch {}
+          }
           combo.dispatchEvent(new Event('change', { bubbles: true }));
           return true;
         }
         return false;
       };
 
-      // 4. Try clicking the "Show original" button inside the Google Translate iframe if open
+      // 5. Try clicking the "Show original" button inside the Google Translate iframe if open
       try {
         const iframes = document.querySelectorAll<HTMLIFrameElement>('.goog-te-banner-frame, iframe[class*="goog"]');
         iframes.forEach((iframe) => {
@@ -159,6 +165,20 @@ class GoogleTranslateService {
             const btn = doc?.querySelector<HTMLElement>('.goog-te-button button, [id*="restore"]');
             if (btn) btn.click();
           } catch {}
+        });
+      } catch {}
+
+      // 6. Strip any leftover <font> wrapper tags inserted into the DOM by Google Translate
+      try {
+        const fonts = document.querySelectorAll('font');
+        fonts.forEach((font) => {
+          const parent = font.parentNode;
+          if (parent) {
+            while (font.firstChild) {
+              parent.insertBefore(font.firstChild, font);
+            }
+            parent.removeChild(font);
+          }
         });
       } catch {}
 

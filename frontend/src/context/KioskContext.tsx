@@ -418,7 +418,9 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       else path = '/';
 
       const currentUrl = new URL(window.location.href);
-      currentUrl.pathname = path;
+      const isGitHubPages = currentUrl.hostname.includes('github.io');
+      const basePath = isGitHubPages ? '/smart-kiosk-demo' : '';
+      currentUrl.pathname = `${basePath}${path}`;
       // remove query param view/role if path matches
       currentUrl.searchParams.delete('view');
       currentUrl.searchParams.delete('role');

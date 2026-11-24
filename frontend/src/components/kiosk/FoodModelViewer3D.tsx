@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { RotateCw, Play, Pause, RefreshCw, Box, AlertCircle } from 'lucide-react';
-import { resolveModelAssetUrl } from '../../utils/foodModels3D';
+import { getModelCandidateUrls } from '../../utils/foodModels3D';
 
 interface FoodModelViewer3DProps {
   modelUrl: string;
@@ -123,17 +123,27 @@ export const FoodModelViewer3D: React.FC<FoodModelViewer3DProps> = ({
     scene.add(pivot);
     modelPivotRef.current = pivot;
 
-    // 6. Asynchronous GLTF/GLB Loading for Verified Photorealistic Food Models
+    // 6. Asynchronous GLTF/GLB Loading with Multi-Candidate Progressive Fallback
     const loader = new GLTFLoader();
     let isDisposed = false;
-    const resolvedUrl = resolveModelAssetUrl(modelUrl);
+    const candidates = getModelCandidateUrls(modelUrl);
 
-    if (resolvedUrl) {
+    const tryLoadCandidate = (idx: number) => {
+      if (isDisposed) return;
+      if (!candidates || idx >= candidates.length) {
+        console.warn(`[FoodModelViewer3D] All candidates failed for model: ${modelUrl}`);
+        setIsLoading(false);
+        setHasError(true);
+        return;
+      }
+
+      const currentUrl = candidates[idx];
       loader.load(
-        resolvedUrl,
+        currentUrl,
         (gltf) => {
           if (isDisposed) return;
           setIsLoading(false);
+          setHasError(false);
 
           const model = gltf.scene;
 
@@ -166,13 +176,15 @@ export const FoodModelViewer3D: React.FC<FoodModelViewer3DProps> = ({
         },
         undefined,
         (err) => {
-          console.warn(`[FoodModelViewer3D] Error loading 3D model ${resolvedUrl}:`, err);
-          if (!isDisposed) {
-            setIsLoading(false);
-            setHasError(true);
-          }
+          console.warn(`[FoodModelViewer3D] Candidate ${idx} (${currentUrl}) failed:`, err);
+          // Try next candidate URL
+          tryLoadCandidate(idx + 1);
         }
       );
+    };
+
+    if (candidates.length > 0) {
+      tryLoadCandidate(0);
     } else {
       setIsLoading(false);
       setHasError(true);

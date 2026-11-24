@@ -27,35 +27,67 @@ export interface FoodModel3DMeta {
 }
 
 /**
- * Robust Asset URL Resolver
- * Works seamlessly on local dev (http://localhost:5173),
- * GitHub Pages (https://maniselmagi.github.io/kiosk/ or /smart-kiosk-demo/),
+ * Robust Multi-Candidate Asset URL Resolver
+ * Guarantees asset resolution across GitHub Pages (/smart-kiosk-demo/),
+ * custom routes (/kiosk), local dev (http://localhost:5173),
  * and Android Capacitor (https://localhost/ or capacitor://localhost/).
  */
-export const resolveModelAssetUrl = (rawPath: string): string => {
-  if (!rawPath) return '';
+export const getModelCandidateUrls = (rawPath: string): string[] => {
+  if (!rawPath) return [];
   if (rawPath.startsWith('http://') || rawPath.startsWith('https://') || rawPath.startsWith('data:')) {
-    return rawPath;
+    return [rawPath];
   }
   const cleanPath = rawPath.replace(/^\/+/, '');
+  const candidates: string[] = [];
+
+  // 1. Direct GitHub Pages repository URL if on github.io
   try {
     if (typeof window !== 'undefined' && window.location) {
       const loc = window.location;
-      let path = loc.pathname || '/';
-      // If path doesn't end with a slash, ensure it points to the containing directory
-      if (!path.endsWith('/')) {
-        if (path.includes('.')) {
-          path = path.substring(0, path.lastIndexOf('/') + 1);
-        } else {
-          path = path + '/';
-        }
+      if (loc.hostname.includes('github.io')) {
+        candidates.push(`${loc.origin}/smart-kiosk-demo/${cleanPath}`);
       }
-      return `${loc.origin}${path}${cleanPath}`;
     }
-  } catch (e) {
-    console.warn('[3D Asset Resolver] Error:', e);
-  }
-  return cleanPath;
+  } catch (e) {}
+
+  // 2. Relative to import.meta.url (most reliable for bundled web assets)
+  try {
+    const metaUrl = import.meta.url;
+    if (metaUrl) {
+      // Production: JS is in assets/*.js, models in models/*
+      candidates.push(new URL('../' + cleanPath, metaUrl).href);
+      // Dev: models in public/models/*
+      candidates.push(new URL('../../' + cleanPath, metaUrl).href);
+    }
+  } catch (e) {}
+
+  // 3. Document baseURI or current location directory
+  try {
+    if (typeof document !== 'undefined' && document.baseURI) {
+      candidates.push(new URL(cleanPath, document.baseURI).href);
+    }
+    if (typeof window !== 'undefined' && window.location) {
+      const loc = window.location;
+      let path = loc.pathname || '/';
+      if (!path.endsWith('/')) {
+        path = path.includes('.') ? path.substring(0, path.lastIndexOf('/') + 1) : path + '/';
+      }
+      candidates.push(`${loc.origin}${path}${cleanPath}`);
+      candidates.push(`${loc.origin}/${cleanPath}`);
+    }
+  } catch (e) {}
+
+  // 4. Relative paths
+  candidates.push(cleanPath);
+  candidates.push('/' + cleanPath);
+
+  // Return unique non-empty candidates
+  return Array.from(new Set(candidates.filter(Boolean)));
+};
+
+export const resolveModelAssetUrl = (rawPath: string): string => {
+  const candidates = getModelCandidateUrls(rawPath);
+  return candidates[0] || rawPath;
 };
 
 // Direct mappings for specific menu item IDs

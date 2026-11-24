@@ -12,9 +12,11 @@
   "dependencies": {
     "@capacitor/core": "^8.6.2",
     "@supabase/supabase-js": "^2.118.0",
+    "@types/three": "^0.187.0",
     "lucide-react": "^1.52.0",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "three": "^0.187.0"
   },
   "devDependencies": {
     "@capacitor/android": "^8.6.2",

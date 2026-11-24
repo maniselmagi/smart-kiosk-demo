@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useKiosk } from '../../context/KioskContext';
 import { MenuItem, SpiceLevel } from '../../types';
+import { FoodModelViewer3D } from './FoodModelViewer3D';
+import { getFoodModel3D } from '../../utils/foodModels3D';
 import { 
   getLocalizedItemName, 
   getLocalizedItemDescription, 
@@ -21,7 +23,9 @@ import {
   Plus, 
   Minus, 
   Check,
-  Sparkles
+  Sparkles,
+  Box,
+  Camera
 } from 'lucide-react';
 
 interface FoodDetailModalProps {
@@ -32,12 +36,19 @@ interface FoodDetailModalProps {
 export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose }) => {
   const { addToCart, language, t } = useKiosk();
 
+  const [viewMode, setViewMode] = useState<'3d' | 'photo'>('3d');
   const [spiceLevel, setSpiceLevel] = useState<SpiceLevel>('Medium');
   const [selectedCustomizations, setSelectedCustomizations] = useState<string[]>([]);
   const [specialInstructions, setSpecialInstructions] = useState('');
   const [quantity, setQuantity] = useState(1);
 
   if (!item) return null;
+
+  const foodModelMeta = getFoodModel3D({
+    id: item.id,
+    name: item.name,
+    category: item.category
+  });
 
   const spiceOptions: SpiceLevel[] = ['Mild', 'Medium', 'Hot', 'Extra Hot'];
 
@@ -88,25 +99,73 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
         onClick={(e) => e.stopPropagation()}
       >
         
-        {/* Header Image Container */}
-        <div className="relative aspect-[16/9] w-full bg-slate-100 dark:bg-slate-800 overflow-hidden shrink-0">
-          <img
-            src={item.image}
-            alt={item.name}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/30" />
+        {/* Header Image / Genuine 3D Model Container */}
+        <div className="relative aspect-[16/9] w-full bg-slate-950 overflow-hidden shrink-0">
+          {viewMode === '3d' ? (
+            <FoodModelViewer3D
+              modelUrl={foodModelMeta.modelUrl}
+              fallbackImage={item.image}
+              foodName={item.name}
+              scale={foodModelMeta.scale}
+              cameraDistance={foodModelMeta.cameraDistance}
+              showTopBadge={false}
+              controlsPosition="top-right"
+              className="w-full h-full"
+            />
+          ) : (
+            <>
+              <img
+                src={item.image}
+                alt={item.name}
+                className="w-full h-full object-cover animate-in fade-in duration-200"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/30 pointer-events-none" />
+            </>
+          )}
+
+          {/* View Mode Toggle Pill (3D View vs Photo) */}
+          <div className="absolute top-4 left-4 z-20 flex items-center bg-slate-950/80 backdrop-blur-md p-1 rounded-full border border-amber-400/40 shadow-xl">
+            <button
+              type="button"
+              onClick={() => setViewMode('3d')}
+              className={`px-3 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
+                viewMode === '3d'
+                  ? 'bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 shadow-md ring-1 ring-amber-300'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              <Box className="w-3.5 h-3.5" />
+              <span>3D View</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('photo')}
+              className={`px-3 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 transition-all cursor-pointer ${
+                viewMode === 'photo'
+                  ? 'bg-white/25 text-white shadow-md'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Camera className="w-3.5 h-3.5" />
+              <span>Photo</span>
+            </button>
+          </div>
 
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors shadow-lg active:scale-95 cursor-pointer"
+            className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors shadow-lg active:scale-95 cursor-pointer backdrop-blur-md border border-white/10"
+            title="Close"
           >
             <X className="w-5 h-5" />
           </button>
 
+          {/* Gradient Overlay for Title & Price readability */}
+          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-slate-950/95 via-slate-950/50 to-transparent pointer-events-none z-10" />
+
           {/* Dish Title & Price over Image with dynamic live breakdown */}
-          <div className="absolute bottom-4 left-6 right-6 flex items-end justify-between text-white">
+          <div className="absolute bottom-4 left-6 right-6 flex items-end justify-between text-white pointer-events-none z-10">
             <div className="pr-4 min-w-0">
               <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                 <span className={`w-5 h-5 rounded-md flex items-center justify-center p-0.5 border bg-white ${

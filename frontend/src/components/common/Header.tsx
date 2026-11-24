@@ -15,7 +15,6 @@ import {
 import royalEmberLogo from '../../assets/royal_ember_logo.jpg';
 import { getAssignedWaiter, getLocalizedWaiterName } from '../../utils/waiterAssignment';
 import { AVAILABLE_LANGUAGES } from '../../utils/translations';
-import { HealthNutritionDropdown } from '../kiosk/HealthNutritionDropdown';
 
 interface HeaderProps {
   onBackToWelcome?: () => void;
@@ -132,9 +131,6 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 hidden md:inline">{t.serverLabel || 'Server'}:</span>
             <span className="text-xs font-black text-amber-300">{getLocalizedWaiterName(assignedWaiter.name, language)}</span>
           </div>
-
-          {/* Health & Nutrition Single Dropdown in Header Area */}
-          <HealthNutritionDropdown variant="header" />
 
           {/* Customer Language Switcher Button (Directly on Food Order Page) */}
           <button

@@ -301,32 +301,25 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
         {/* 4. CAPSULE SEARCH BAR, HEALTH & NUTRITION DROPDOWN & FILTER PILL CHIPS */}
         <section aria-label="Search and Filter Controls" className="space-y-3">
           
-          {/* Capsule Search Bar with Inline Health & Nutrition Dropdown */}
-          <div className="flex items-center gap-2.5">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
-              <input
-                type="text"
-                placeholder={t.searchPlaceholderFull || "Search for delicious dishes, curries, tandoors, biryanis..."}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-11 pr-20 py-2.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-sm font-medium text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/25 focus:border-amber-500 shadow-xs transition-all"
-              />
-              {searchQuery && (
-                <button 
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full"
-                >
-                  {t.clear || 'Clear'}
-                </button>
-              )}
-            </div>
-
-            {/* Single Health & Nutrition Dropdown Trigger */}
-            <div className="shrink-0">
-              <HealthNutritionDropdown variant="inline" />
-            </div>
+          {/* Capsule Search Bar (Full Width) */}
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
+            <input
+              type="text"
+              placeholder={t.searchPlaceholderFull || "Search for delicious dishes, curries, tandoors, biryanis..."}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-11 pr-20 py-2.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 text-sm font-medium text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/25 focus:border-amber-500 shadow-xs transition-all"
+            />
+            {searchQuery && (
+              <button 
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full"
+              >
+                {t.clear || 'Clear'}
+              </button>
+            )}
           </div>
 
           {/* Active Health & Nutrition Filter Removable Chips */}
@@ -432,6 +425,9 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
               <Zap className="w-3.5 h-3.5 text-cyan-500" />
               <span>{t.fastPrepFilter || 'Fast Prep (<15m)'}</span>
             </button>
+
+            {/* Health & Nutrition Single Dropdown (Directly in Filter Row) */}
+            <HealthNutritionDropdown />
           </div>
         </section>
 

@@ -35,9 +35,15 @@ export const FoodModelViewer3D: React.FC<FoodModelViewer3DProps> = ({
   const currentPanRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const animFrameRef = useRef<number | null>(null);
 
-  // Candidate resolution for local / bundled animated GIFs
-  const resolvedGif = animatedGifUrl ? getModelCandidateUrls(animatedGifUrl)[0] || animatedGifUrl : undefined;
-  const activeImageSrc = resolvedGif || fallbackImage;
+  // Multi-candidate resolution for local / bundled animated GIFs
+  const candidates = animatedGifUrl ? getModelCandidateUrls(animatedGifUrl) : [];
+  const [candidateIdx, setCandidateIdx] = useState<number>(0);
+
+  useEffect(() => {
+    setCandidateIdx(0);
+  }, [animatedGifUrl]);
+
+  const activeImageSrc = (candidates.length > candidateIdx ? candidates[candidateIdx] : null) || fallbackImage;
 
   // Real-time culinary steam particle animation
   useEffect(() => {
@@ -163,6 +169,11 @@ export const FoodModelViewer3D: React.FC<FoodModelViewer3DProps> = ({
         <img
           src={activeImageSrc}
           alt={foodName}
+          onError={() => {
+            if (candidateIdx + 1 < candidates.length) {
+              setCandidateIdx((prev) => prev + 1);
+            }
+          }}
           className="w-full h-full object-cover object-center filter saturate-[1.14] contrast-[1.06]"
           draggable={false}
         />

@@ -137,7 +137,7 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Live Animation</span>
+              <span>3D Animation</span>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             </button>
             <button

@@ -101,13 +101,12 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
       >
         
         {/* Header Image / Genuine 3D Model Container */}
-        <div className="relative aspect-[16/9] w-full bg-slate-950 overflow-hidden shrink-0">
+        <div className="relative h-72 sm:h-80 md:h-[350px] w-full bg-slate-950 overflow-hidden shrink-0">
           {viewMode === '3d' ? (
             <FoodModelViewer3D
               modelUrl={foodModelMeta.modelUrl}
               fallbackImage={item.image}
               animatedGifUrl={foodModelMeta.animatedGifUrl}
-              videoUrl={foodModelMeta.videoUrl}
               foodName={item.name}
               scale={foodModelMeta.scale}
               cameraDistance={foodModelMeta.cameraDistance}
@@ -116,14 +115,14 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
               className="w-full h-full"
             />
           ) : (
-            <>
+            <div className="w-full h-full flex items-center justify-center bg-slate-950 relative">
               <img
                 src={item.image}
                 alt={item.name}
-                className="w-full h-full object-cover animate-in fade-in duration-200"
+                className="max-h-full max-w-full object-contain animate-in fade-in duration-200 drop-shadow-xl"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/30 pointer-events-none" />
-            </>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none" />
+            </div>
           )}
 
           {/* View Mode Toggle Pill (Live Animation vs Photo) */}

@@ -127,7 +127,7 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
             </div>
           )}
 
-          {/* View Mode Toggle Pill (Live Food Video vs Photo) */}
+          {/* View Mode Toggle Pill (3D View vs Photo) */}
           <div className="absolute top-4 left-4 z-20 flex items-center bg-slate-950/80 backdrop-blur-md p-1 rounded-full border border-amber-400/40 shadow-xl">
             <button
               type="button"
@@ -138,8 +138,8 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
                   : 'text-slate-300 hover:text-white'
               }`}
             >
-              <Video className="w-3.5 h-3.5" />
-              <span>Food Video</span>
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>3D View</span>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             </button>
             <button

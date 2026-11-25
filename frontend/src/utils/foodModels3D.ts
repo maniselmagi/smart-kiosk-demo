@@ -17,7 +17,8 @@ export type ProceduralDishType =
   | 'platter';
 
 export interface FoodModel3DMeta {
-  modelUrl: string;
+  modelUrl?: string;
+  animatedGifUrl?: string;
   title: string;
   proceduralType: ProceduralDishType;
   scale?: number;
@@ -108,40 +109,38 @@ const SPECIFIC_ITEM_MODELS: Record<string, FoodModel3DMeta> = {
     scale: 1.5,
     cameraDistance: 2.2
   },
-  // Butter Chicken (Verified Realistic 3D Model)
+  // Butter Chicken (Verified Realistic Mouth-Watering Food Visual from reference)
   'item-1': {
-    modelUrl: 'models/food/butter_chicken.glb',
-    title: 'Butter Chicken 3D',
+    animatedGifUrl: 'images/butter_chicken_gif_sample.png',
+    title: 'Butter Chicken Culinary Visual',
     proceduralType: 'curry',
     scale: 1.5,
     cameraDistance: 2.2
   },
   'item-12': {
-    modelUrl: 'models/food/curry.glb',
-    title: 'Kashmiri Mutton Rogan Josh 3D',
+    title: 'Kashmiri Mutton Rogan Josh Culinary Visual',
     proceduralType: 'curry',
     scale: 1.4,
     cameraDistance: 2.4
   },
   // Paneer Tikka & Tandoori
   'item-2': {
-    modelUrl: 'models/food/tandoori_kebab.glb',
-    title: 'Paneer Tikka Platter 3D',
+    title: 'Paneer Tikka Platter Culinary Visual',
     proceduralType: 'kebab',
     scale: 1.3,
     cameraDistance: 2.5
   },
   // Biryani & Rice
   'item-3': {
-    modelUrl: 'models/food/biryani_rice.glb',
-    title: 'Royal Veg Dum Biryani 3D',
+    animatedGifUrl: 'https://media1.giphy.com/media/Gr2Uug0CDTlrd5dDqS/giphy.gif',
+    title: 'Royal Veg Dum Biryani Culinary Visual',
     proceduralType: 'biryani',
     scale: 1.6,
     cameraDistance: 2.3
   },
   'item-7': {
-    modelUrl: 'models/food/biryani_rice.glb',
-    title: 'Awadhi Slow-Dum Chicken Biryani 3D',
+    animatedGifUrl: 'https://media1.giphy.com/media/Gr2Uug0CDTlrd5dDqS/giphy.gif',
+    title: 'Awadhi Slow-Dum Chicken Biryani Culinary Visual',
     proceduralType: 'biryani',
     scale: 1.6,
     cameraDistance: 2.3

@@ -548,7 +548,7 @@ export const MenuScreen: React.FC<MenuScreenProps> = ({
                     {/* Top-Right: 3D Preview Badge + Favorite Heart Toggle + Prep Time */}
                     <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 z-10">
                       <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 text-slate-950 text-[10px] font-black border border-amber-300/80 shadow-md group-hover:scale-105 transition-transform select-none">
-                        <span>✨ 3D Animation</span>
+                        <span>📹 Food Video</span>
                       </div>
 
                       <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-md text-white text-[10px] font-semibold border border-white/10 notranslate" translate="no">

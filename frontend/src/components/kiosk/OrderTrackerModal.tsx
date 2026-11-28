@@ -782,42 +782,146 @@ export const OrderTrackerModal: React.FC<OrderTrackerModalProps> = ({
             </div>
           </div>
 
-          {/* ORDERED DISHES MINIATURES FOR THIS TICKET */}
+          {/* ORDERED DISHES & PER-FOOD DELIVERY TIMELINE */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-wider text-slate-400">
-                {t.dishesInOrder || 'Dishes in Order'} #{activeOrder.orderNumber} ({(activeOrder.items || []).length})
-              </span>
-              <span className="text-xs font-bold text-amber-400 font-display">
-                {t.total} ₹{activeOrder.total}
-              </span>
-            </div>
+            {(() => {
+              const sortedItems = [...(activeOrder.items || [])].sort(
+                (a, b) => (a.servingPriority || 99) - (b.servingPriority || 99)
+              );
+              const deliveredCount = sortedItems.filter(
+                (i) => i.deliveryStatus === 'DELIVERED' || activeOrder.status === 'COMPLETED'
+              ).length;
 
-            <div className="divide-y divide-white/[0.06] border border-white/[0.08] rounded-2xl overflow-hidden bg-slate-850/50">
-              {(activeOrder.items || []).map((item) => (
-                <div key={item.cartItemId} className="p-3 flex items-center justify-between text-xs hover:bg-white/[0.02] transition-colors">
-                  <div className="flex items-center gap-3">
-                    <img src={item.image} alt={item.name} className="w-11 h-11 rounded-xl object-cover border border-white/10" />
-                    <div>
-                      <span className="font-bold text-slate-200 block">
-                        {item.quantity}× {getLocalizedCartItemName(item, language)}
+              return (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black uppercase tracking-wider text-slate-400">
+                        {t.dishesInOrder || 'Dishes in Order'} #{activeOrder.orderNumber} ({sortedItems.length})
                       </span>
-                      <p className="text-[11px] text-slate-400">
-                        {getLocalizedSpiceLabel(item.spiceLevel, t)} {item.customizations && item.customizations.length > 0 && `• ${item.customizations.join(', ')}`}
-                      </p>
-                      {item.price === 0 && (
-                        <span className="text-[10px] font-extrabold text-emerald-400 bg-emerald-500/20 px-1.5 py-0.2 rounded mt-0.5 inline-block">
-                          ₹0 Free Delay Apology
+                      {deliveredCount > 0 && (
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] font-black">
+                          {deliveredCount}/{sortedItems.length} Delivered
                         </span>
                       )}
                     </div>
+                    <span className="text-xs font-bold text-amber-400 font-display">
+                      {t.total} ₹{activeOrder.total}
+                    </span>
                   </div>
-                  <span className="font-black text-amber-400 font-display text-sm">
-                    {item.price === 0 ? (t.free || 'FREE') : `₹${item.price * item.quantity}`}
-                  </span>
-                </div>
-              ))}
-            </div>
+
+                  <div className="divide-y divide-white/[0.06] border border-white/[0.08] rounded-2xl overflow-hidden bg-slate-850/50">
+                    {sortedItems.map((item, idx) => {
+                      const seq = item.servingPriority || idx + 1;
+                      const isDelivered = item.deliveryStatus === 'DELIVERED' || activeOrder.status === 'COMPLETED';
+                      const effectiveStatus = isDelivered
+                        ? 'DELIVERED'
+                        : item.deliveryStatus && item.deliveryStatus !== 'PENDING'
+                        ? item.deliveryStatus
+                        : activeOrder.status === 'READY'
+                        ? 'READY'
+                        : activeOrder.status === 'PREPARING'
+                        ? 'PREPARING'
+                        : 'PENDING';
+
+                      const stepIdx =
+                        effectiveStatus === 'DELIVERED'
+                          ? 4
+                          : effectiveStatus === 'READY'
+                          ? 3
+                          : effectiveStatus === 'PREPARING'
+                          ? 2
+                          : 1;
+
+                      return (
+                        <div
+                          key={item.cartItemId || `${item.menuItemId}-${idx}`}
+                          className={`p-3.5 transition-colors space-y-2.5 ${
+                            isDelivered ? 'bg-emerald-500/[0.06]' : 'hover:bg-white/[0.02]'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between text-xs gap-3">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black shrink-0 ${
+                                isDelivered
+                                  ? 'bg-emerald-500 text-white'
+                                  : 'bg-amber-400 text-slate-950'
+                              }`}>
+                                #{seq}{seq === 1 ? ' First' : ''}
+                              </span>
+                              <img src={item.image} alt={item.name} className="w-11 h-11 rounded-xl object-cover border border-white/10 shrink-0" />
+                              <div className="min-w-0">
+                                <span className="font-bold text-slate-200 block truncate">
+                                  {item.quantity}× {getLocalizedCartItemName(item, language)}
+                                </span>
+                                <p className="text-[11px] text-slate-400 truncate">
+                                  {getLocalizedSpiceLabel(item.spiceLevel, t)} {item.customizations && item.customizations.length > 0 && `• ${item.customizations.join(', ')}`}
+                                </p>
+                                {item.price === 0 && (
+                                  <span className="text-[10px] font-extrabold text-emerald-400 bg-emerald-500/20 px-1.5 py-0.2 rounded mt-0.5 inline-block">
+                                    ₹0 Free Delay Apology
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="text-right shrink-0 space-y-1">
+                              <span className="font-black text-amber-400 font-display text-sm block">
+                                {item.price === 0 ? (t.free || 'FREE') : `₹${item.price * item.quantity}`}
+                              </span>
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black border ${
+                                effectiveStatus === 'DELIVERED'
+                                  ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+                                  : effectiveStatus === 'READY'
+                                  ? 'bg-amber-400/20 text-amber-300 border-amber-400/40 animate-pulse'
+                                  : effectiveStatus === 'PREPARING'
+                                  ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+                                  : 'bg-slate-800 text-slate-400 border-white/10'
+                              }`}>
+                                {effectiveStatus === 'DELIVERED'
+                                  ? '✓ Delivered'
+                                  : effectiveStatus === 'READY'
+                                  ? 'Ready to Serve'
+                                  : effectiveStatus === 'PREPARING'
+                                  ? 'Chef Preparing'
+                                  : 'Queued'}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Per-Food 4-Step Mini Timeline */}
+                          <div className="grid grid-cols-4 gap-1.5 pt-1">
+                            {['Ordered', 'Cooking', 'Ready', 'Delivered'].map((stageLabel, sIdx) => {
+                              const active = stepIdx >= sIdx + 1;
+                              return (
+                                <div key={stageLabel} className="space-y-1">
+                                  <div className={`h-1.5 rounded-full transition-all duration-500 ${
+                                    isDelivered
+                                      ? 'bg-emerald-500'
+                                      : active
+                                      ? 'bg-amber-400'
+                                      : 'bg-slate-800'
+                                  }`} />
+                                  <span className={`text-[9px] font-bold block text-center ${
+                                    isDelivered
+                                      ? 'text-emerald-400'
+                                      : active
+                                      ? 'text-amber-300'
+                                      : 'text-slate-500'
+                                  }`}>
+                                    {stageLabel}
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              );
+            })()}
           </div>
 
           {/* ALL ORDERS SUMMARY IF MULTIPLE EXIST */}

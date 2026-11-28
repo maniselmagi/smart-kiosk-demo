@@ -95,6 +95,8 @@ export interface CartItem {
   image: string;
   isVeg: boolean;
   servingPriority?: number; // 1, 2, 3... order serving sequence
+  deliveryStatus?: 'PENDING' | 'PREPARING' | 'READY' | 'DELIVERED';
+  deliveredAt?: string;
 }
 
 export type OrderStatus = 'NEW' | 'PREPARING' | 'READY' | 'COMPLETED';

@@ -143,6 +143,7 @@ export const KitchenDisplay: React.FC = () => {
   const { 
     activeOrders, 
     updateOrderStatus, 
+    deliverOrderItem,
     menuItems, 
     toggleItemAvailability, 
     staffAlerts, 
@@ -468,6 +469,29 @@ export const KitchenDisplay: React.FC = () => {
       if (selectedOrderForModal && selectedOrderForModal.id === orderId) {
         setSelectedOrderForModal({ ...selectedOrderForModal, status: next });
       }
+    }
+  };
+
+  // One-by-one per-dish delivery handler (follows customer's serving priority sequence)
+  const handleDeliverSingleItem = (
+    orderId: string,
+    cartItemId: string,
+    itemName: string,
+    e?: React.MouseEvent
+  ) => {
+    if (e) e.stopPropagation();
+    deliverOrderItem(orderId, cartItemId);
+    const refreshed = storageService.getOrders();
+    setLiveOrders(refreshed);
+    const updatedOrder = refreshed.find((o) => o.id === orderId);
+    if (selectedOrderForModal && selectedOrderForModal.id === orderId && updatedOrder) {
+      setSelectedOrderForModal(updatedOrder);
+    }
+    if (isAudioEnabled) playKitchenChime();
+    if (updatedOrder?.status === 'COMPLETED') {
+      showToast(`All dishes in #${updatedOrder.orderNumber} delivered!`);
+    } else {
+      showToast(`Delivered: ${itemName}`);
     }
   };
 
@@ -1152,46 +1176,99 @@ export const KitchenDisplay: React.FC = () => {
                         {paymentBadge}
                       </td>
 
-                      {/* 6. Item Count & Dish Breakdown (Clean, airy, non-dumped) */}
+                      {/* 6. Item Count & Dish Breakdown (Order-wise One-by-One Delivery) */}
                       <td className="py-4 px-3 align-middle max-w-xs sm:max-w-md">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-slate-900 dark:text-white">
-                            {totalItemsCount}
-                          </span>
-                          <span className="text-slate-400 text-[11px]">
-                            ({order.items.length} {order.items.length === 1 ? 'dish' : 'dishes'})
-                          </span>
-                        </div>
-
-                        {/* Dish preview snippets */}
-                        <div className="mt-1 space-y-1">
-                          {order.items.slice(0, 2).map((item, idx) => {
-                            const isVeg = /veg|paneer|dosa|idli|coffee|vada|kesari|papad|poori/i.test(item.name);
-                            const isTreat = item.name.toLowerCase().includes('complimentary') || item.name.toLowerCase().includes('delay');
-                            return (
-                              <div key={idx} className="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-slate-300">
-                                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isVeg ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                                <span className="font-medium truncate">{item.quantity}× {item.name}</span>
-                                {item.spiceLevel && (
-                                  <span className="text-[10px] text-slate-400 shrink-0">({item.spiceLevel})</span>
-                                )}
-                                {isTreat && (
-                                  <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-1 rounded shrink-0">Treat</span>
+                        {(() => {
+                          const sortedItems = [...order.items].sort(
+                            (a, b) => (a.servingPriority || 99) - (b.servingPriority || 99)
+                          );
+                          const deliveredCount = sortedItems.filter(
+                            (it) => it.deliveryStatus === 'DELIVERED' || order.status === 'COMPLETED'
+                          ).length;
+                          const nextUndelivered = sortedItems.find(
+                            (it) => it.deliveryStatus !== 'DELIVERED' && order.status !== 'COMPLETED'
+                          );
+                          return (
+                            <>
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-slate-900 dark:text-white">
+                                  {totalItemsCount}
+                                </span>
+                                <span className="text-slate-400 text-[11px]">
+                                  ({order.items.length} {order.items.length === 1 ? 'dish' : 'dishes'})
+                                </span>
+                                {deliveredCount > 0 && order.status !== 'COMPLETED' && (
+                                  <span className="px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
+                                    {deliveredCount}/{sortedItems.length} Served
+                                  </span>
                                 )}
                               </div>
-                            );
-                          })}
-                          {order.items.length > 2 && (
-                            <div className="text-[10px] text-slate-400 italic">
-                              +{order.items.length - 2} more items...
-                            </div>
-                          )}
-                          {customerNote && (
-                            <div className="text-[10px] text-blue-600 dark:text-blue-400 italic truncate max-w-xs">
-                              Note: "{customerNote}"
-                            </div>
-                          )}
-                        </div>
+
+                              {/* Dish list in customer's serving priority order */}
+                              <div className="mt-1.5 space-y-1.5">
+                                {sortedItems.map((item, idx) => {
+                                  const isVeg = /veg|paneer|dosa|idli|coffee|vada|kesari|papad|poori/i.test(item.name);
+                                  const isTreat = item.name.toLowerCase().includes('complimentary') || item.name.toLowerCase().includes('delay');
+                                  const seq = item.servingPriority || idx + 1;
+                                  const itemKey = item.cartItemId || `${item.menuItemId}-${idx}`;
+                                  const isItemDelivered = item.deliveryStatus === 'DELIVERED' || order.status === 'COMPLETED';
+                                  const isNext = nextUndelivered && (nextUndelivered.cartItemId || `${nextUndelivered.menuItemId}-${sortedItems.indexOf(nextUndelivered)}`) === itemKey;
+
+                                  return (
+                                    <div key={itemKey} className="flex items-center justify-between gap-2 text-[11px]">
+                                      <div className={`flex items-center gap-1.5 min-w-0 ${isItemDelivered ? 'text-emerald-400/90' : 'text-slate-600 dark:text-slate-200'}`}>
+                                        <span className={`px-1.5 py-0.2 rounded text-[9px] font-black shrink-0 ${
+                                          isItemDelivered
+                                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                            : isNext && order.status === 'READY'
+                                            ? 'bg-amber-400 text-slate-950'
+                                            : 'bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                                        }`}>
+                                          #{seq}
+                                        </span>
+                                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isVeg ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                                        <span className={`font-medium truncate ${isItemDelivered ? 'line-through opacity-80' : ''}`}>
+                                          {item.quantity}× {item.name}
+                                        </span>
+                                        {item.spiceLevel && (
+                                          <span className="text-[10px] text-slate-400 shrink-0">({item.spiceLevel})</span>
+                                        )}
+                                        {isTreat && (
+                                          <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-1 rounded shrink-0">Treat</span>
+                                        )}
+                                      </div>
+
+                                      {isItemDelivered ? (
+                                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 text-[10px] font-bold shrink-0 border border-emerald-500/30">
+                                          <Check className="w-2.5 h-2.5" />
+                                          <span>Delivered</span>
+                                        </span>
+                                      ) : order.status === 'READY' ? (
+                                        <button
+                                          type="button"
+                                          onClick={(e) => handleDeliverSingleItem(order.id, itemKey, item.name, e)}
+                                          className={`px-2 py-0.5 rounded text-[10px] font-bold shrink-0 cursor-pointer transition-all active:scale-95 ${
+                                            isNext
+                                              ? 'bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-xs'
+                                              : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-white/10'
+                                          }`}
+                                          title={`Deliver #${seq} ${item.name}`}
+                                        >
+                                          Deliver #{seq}
+                                        </button>
+                                      ) : null}
+                                    </div>
+                                  );
+                                })}
+                                {customerNote && (
+                                  <div className="text-[10px] text-blue-600 dark:text-blue-400 italic truncate max-w-xs">
+                                    Note: "{customerNote}"
+                                  </div>
+                                )}
+                              </div>
+                            </>
+                          );
+                        })()}
                       </td>
 
                       {/* 7. Total Value */}
@@ -1241,14 +1318,25 @@ export const KitchenDisplay: React.FC = () => {
                             </button>
                           )}
 
-                          {order.status === 'READY' && (
-                            <button
-                              onClick={(e) => handleAdvanceStatus(order.id, 'READY', e)}
-                              className="px-2.5 py-1 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-semibold cursor-pointer transition-colors shadow-xs"
-                            >
-                              Deliver
-                            </button>
-                          )}
+                          {order.status === 'READY' && (() => {
+                            const sortedItems = [...order.items].sort(
+                              (a, b) => (a.servingPriority || 99) - (b.servingPriority || 99)
+                            );
+                            const nextIdx = sortedItems.findIndex((it) => it.deliveryStatus !== 'DELIVERED');
+                            const nextItem = nextIdx >= 0 ? sortedItems[nextIdx] : null;
+                            if (!nextItem) return null;
+                            const nextKey = nextItem.cartItemId || `${nextItem.menuItemId}-${nextIdx}`;
+                            const nextSeq = nextItem.servingPriority || nextIdx + 1;
+                            return (
+                              <button
+                                onClick={(e) => handleDeliverSingleItem(order.id, nextKey, nextItem.name, e)}
+                                className="px-2.5 py-1 rounded-md bg-amber-500 hover:bg-amber-400 text-slate-950 text-[11px] font-bold cursor-pointer transition-colors shadow-xs"
+                                title={`Deliver #${nextSeq}: ${nextItem.name}`}
+                              >
+                                Deliver #{nextSeq}
+                              </button>
+                            );
+                          })()}
 
                           {order.status === 'COMPLETED' && (
                             <span className="text-[11px] font-medium text-slate-400 flex items-center gap-1">
@@ -1355,29 +1443,43 @@ export const KitchenDisplay: React.FC = () => {
                 </div>
               </div>
 
-              {/* Items List */}
+              {/* Items List (Sorted by Customer Serving Priority) */}
               <div className="space-y-2">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
-                  Dishes &amp; Preparation Details ({selectedOrderForModal.items.length})
+                  Dishes &amp; Order-Wise Delivery ({selectedOrderForModal.items.filter(i => i.deliveryStatus === 'DELIVERED').length}/{selectedOrderForModal.items.length} Delivered)
                 </span>
 
-                {selectedOrderForModal.items.map((item, idx) => {
+                {[...selectedOrderForModal.items]
+                  .sort((a, b) => (a.servingPriority || 99) - (b.servingPriority || 99))
+                  .map((item, idx) => {
                   const isVeg = /veg|paneer|dosa|idli|coffee|vada|kesari|papad|poori/i.test(item.name);
+                  const seq = item.servingPriority || idx + 1;
+                  const itemKey = item.cartItemId || `${item.menuItemId}-${idx}`;
+                  const isItemDelivered = item.deliveryStatus === 'DELIVERED' || selectedOrderForModal.status === 'COMPLETED';
                   return (
                     <div 
-                      key={idx}
-                      className={`p-3 rounded-xl border flex items-start justify-between gap-3 text-xs ${
-                        isDark ? 'bg-slate-800/40 border-slate-800' : 'bg-slate-50 border-slate-200'
+                      key={itemKey}
+                      className={`p-3 rounded-xl border flex items-center justify-between gap-3 text-xs ${
+                        isItemDelivered
+                          ? 'bg-emerald-500/10 border-emerald-500/30'
+                          : isDark ? 'bg-slate-800/40 border-slate-800' : 'bg-slate-50 border-slate-200'
                       }`}
                     >
                       <div className="flex items-start gap-2.5">
+                        <span className={`px-2 py-0.5 rounded-md font-black text-[10px] shrink-0 mt-0.5 ${
+                          isItemDelivered
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-amber-400 text-slate-950'
+                        }`}>
+                          #{seq}
+                        </span>
                         <span className="w-6 h-6 rounded-md bg-amber-500/10 text-amber-500 font-black text-xs flex items-center justify-center shrink-0">
                           {item.quantity}×
                         </span>
                         <div>
                           <div className="flex items-center gap-1.5 font-bold">
                             <span className={`w-1.5 h-1.5 rounded-full ${isVeg ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                            <span>{item.name}</span>
+                            <span className={isItemDelivered ? 'line-through opacity-75' : ''}>{item.name}</span>
                           </div>
                           {item.spiceLevel && (
                             <span className="text-[10px] text-slate-400 block mt-0.5">
@@ -1392,9 +1494,25 @@ export const KitchenDisplay: React.FC = () => {
                         </div>
                       </div>
 
-                      <span className="font-black text-xs text-slate-400">
-                        ₹{item.price * item.quantity}
-                      </span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="font-black text-xs text-slate-400">
+                          ₹{item.price * item.quantity}
+                        </span>
+                        {isItemDelivered ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-[10px] font-bold border border-emerald-500/30">
+                            <Check className="w-3 h-3" />
+                            Delivered
+                          </span>
+                        ) : selectedOrderForModal.status !== 'NEW' ? (
+                          <button
+                            type="button"
+                            onClick={() => handleDeliverSingleItem(selectedOrderForModal.id, itemKey, item.name)}
+                            className="px-2.5 py-1 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 text-[10px] font-black cursor-pointer transition-all active:scale-95"
+                          >
+                            Deliver #{seq}
+                          </button>
+                        ) : null}
+                      </div>
                     </div>
                   );
                 })}

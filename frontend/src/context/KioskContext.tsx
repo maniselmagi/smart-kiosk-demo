@@ -91,6 +91,7 @@ interface KioskContextType {
     splitBillDetails?: Order['splitBillDetails']
   ) => Order;
   updateOrderStatus: (orderId: string, status: OrderStatus) => void;
+  deliverOrderItem: (orderId: string, cartItemId: string) => void;
   updateOrder: (orderId: string, updates: Partial<Order>) => void;
   completeAllTableOrders: (tableNum: number) => void;
   toggleItemAvailability: (itemId: string) => void;
@@ -640,7 +641,11 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       id: `ORD-${nextOrderNumber}`,
       orderNumber: nextOrderNumber,
       tableNumber,
-      items: cart.map((c, i) => ({ ...c, servingPriority: c.servingPriority || i + 1 })),
+      items: cart.map((c, i) => ({
+        ...c,
+        servingPriority: c.servingPriority || i + 1,
+        deliveryStatus: 'PENDING'
+      })),
       subtotal: cartSubtotal,
       tax: cartTax,
       tip: tipAmount,
@@ -670,8 +675,60 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const updateOrderStatus = (orderId: string, status: OrderStatus) => {
+    const targetOrder = activeOrders.find((o) => o.id === orderId);
+    if (targetOrder) {
+      const now = new Date().toISOString();
+      const updatedItems = targetOrder.items.map((item) => {
+        if (item.deliveryStatus === 'DELIVERED') return item;
+        if (status === 'COMPLETED') {
+          return { ...item, deliveryStatus: 'DELIVERED' as const, deliveredAt: now };
+        }
+        if (status === 'READY') {
+          return { ...item, deliveryStatus: 'READY' as const };
+        }
+        if (status === 'PREPARING') {
+          return { ...item, deliveryStatus: 'PREPARING' as const };
+        }
+        return item;
+      });
+      storageService.updateOrder(orderId, { status, items: updatedItems });
+    }
     const updated = storageService.updateOrderStatus(orderId, status);
     setActiveOrders(updated);
+  };
+
+  const deliverOrderItem = (orderId: string, cartItemId: string) => {
+    const targetOrder = activeOrders.find((o) => o.id === orderId);
+    if (!targetOrder) return;
+    const now = new Date().toISOString();
+    const updatedItems = targetOrder.items.map((item, idx) => {
+      const itemKey = item.cartItemId || `${item.menuItemId}-${idx}`;
+      if (itemKey === cartItemId || item.cartItemId === cartItemId) {
+        return {
+          ...item,
+          deliveryStatus: 'DELIVERED' as const,
+          deliveredAt: now
+        };
+      }
+      return item;
+    });
+
+    const allDelivered = updatedItems.every((item) => item.deliveryStatus === 'DELIVERED');
+    const nextOrderStatus: OrderStatus = allDelivered
+      ? 'COMPLETED'
+      : targetOrder.status === 'NEW' || targetOrder.status === 'PREPARING'
+      ? 'READY'
+      : targetOrder.status;
+
+    const updated = storageService.updateOrder(orderId, {
+      items: updatedItems,
+      status: nextOrderStatus
+    });
+    setActiveOrders(updated);
+
+    if (allDelivered) {
+      storageService.updateOrderStatus(orderId, 'COMPLETED');
+    }
   };
 
   const updateOrder = (orderId: string, updates: Partial<Order>) => {
@@ -785,6 +842,7 @@ export const KioskProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setCurrentTrackedOrder: (order) => setCurrentTrackedOrderId(order ? order.id : null),
         placeOrder,
         updateOrderStatus,
+        deliverOrderItem,
         updateOrder,
         completeAllTableOrders,
         toggleItemAvailability,

@@ -45,7 +45,22 @@ const MainAppContent: React.FC = () => {
   } = useKiosk();
 
   // Kiosk inner sub-screen state: Step 1 (welcome) -> Step 2 (language) -> Step 3 (allocation) -> Step 4 (thankyou / menu)
-  const [kioskSubScreen, setKioskSubScreen] = useState<'welcome' | 'language' | 'allocation' | 'menu' | 'thankyou'>('welcome');
+  const [kioskSubScreen, setKioskSubScreen] = useState<'welcome' | 'language' | 'allocation' | 'menu' | 'thankyou'>(() => {
+    if (typeof window !== 'undefined') {
+      const restore = sessionStorage.getItem('orderease_restore_subscreen');
+      if (restore && ['welcome', 'language', 'allocation', 'menu', 'thankyou'].includes(restore)) {
+        sessionStorage.removeItem('orderease_restore_subscreen');
+        return restore as 'welcome' | 'language' | 'allocation' | 'menu' | 'thankyou';
+      }
+    }
+    return 'welcome';
+  });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('orderease_active_subscreen', kioskSubScreen);
+    }
+  }, [kioskSubScreen]);
 
   // Check if running in dedicated 4-screen Table Booking Kiosk mode (APK or ?mode=booking)
   const isBookingKioskApp = React.useMemo(() => {

@@ -34,7 +34,16 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
     t
   } = useKiosk();
 
-  const [isOpenAnimated, setIsOpenAnimated] = useState(false);
+  const [isOpenAnimated, setIsOpenAnimated] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const restoreOpen = sessionStorage.getItem('orderease_restore_welcome_open');
+      if (restoreOpen === 'true') {
+        sessionStorage.removeItem('orderease_restore_welcome_open');
+        return true;
+      }
+    }
+    return false;
+  });
   const [selectedLang, setSelectedLang] = useState<Language>(language || 'en');
   const [searchQuery, setSearchQuery] = useState('');
 

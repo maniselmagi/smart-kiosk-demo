@@ -8,6 +8,7 @@
 class GoogleTranslateService {
   private currentLanguage: string = 'en';
   private isInitialized: boolean = false;
+  private hasTranslatedNonEnglish: boolean = false;
   private cache: Map<string, string> = new Map();
 
   constructor() {
@@ -121,6 +122,18 @@ class GoogleTranslateService {
     }
 
     if (targetLang === 'en') {
+      const comboEl = document.querySelector<HTMLSelectElement>('.goog-te-combo');
+      const wasTranslated =
+        this.hasTranslatedNonEnglish ||
+        document.documentElement.classList.contains('translated-ltr') ||
+        document.documentElement.classList.contains('translated-rtl') ||
+        document.body.classList.contains('translated-ltr') ||
+        document.body.classList.contains('translated-rtl') ||
+        Boolean(comboEl && comboEl.value && comboEl.value !== 'en') ||
+        document.cookie.includes('googtrans=/en/');
+
+      this.hasTranslatedNonEnglish = false;
+
       // 1. Completely clear all googtrans cookies across all domains and paths
       domains.forEach((d) => {
         paths.forEach((p) => {
@@ -142,60 +155,34 @@ class GoogleTranslateService {
       document.documentElement.removeAttribute('dir');
       document.documentElement.setAttribute('lang', 'en');
 
-      // 4. Reset Google Translate select element (.goog-te-combo)
-      const triggerResetCombo = () => {
-        const combo = document.querySelector<HTMLSelectElement>('.goog-te-combo');
-        if (combo) {
-          combo.value = '';
-          if (typeof (combo as any).onchange === 'function') {
-            try { (combo as any).onchange(); } catch {}
+      // 4. If Google Translate already mutated the React DOM, reload cleanly while preserving the active screen
+      if (wasTranslated) {
+        try {
+          const activeSubscreen = sessionStorage.getItem('orderease_active_subscreen');
+          if (activeSubscreen) {
+            sessionStorage.setItem('orderease_restore_subscreen', activeSubscreen);
           }
-          combo.dispatchEvent(new Event('change', { bubbles: true }));
-          return true;
+          sessionStorage.setItem('orderease_restore_welcome_open', 'true');
+        } catch {}
+        window.location.reload();
+        return;
+      }
+
+      // 5. Reset Google Translate select element (.goog-te-combo) if present
+      const combo = document.querySelector<HTMLSelectElement>('.goog-te-combo');
+      if (combo) {
+        combo.value = '';
+        if (typeof (combo as any).onchange === 'function') {
+          try { (combo as any).onchange(); } catch {}
         }
-        return false;
-      };
-
-      // 5. Try clicking the "Show original" button inside the Google Translate iframe if open
-      try {
-        const iframes = document.querySelectorAll<HTMLIFrameElement>('.goog-te-banner-frame, iframe[class*="goog"]');
-        iframes.forEach((iframe) => {
-          try {
-            const doc = iframe.contentDocument || iframe.contentWindow?.document;
-            const btn = doc?.querySelector<HTMLElement>('.goog-te-button button, [id*="restore"]');
-            if (btn) btn.click();
-          } catch {}
-        });
-      } catch {}
-
-      // 6. Strip any leftover <font> wrapper tags inserted into the DOM by Google Translate
-      try {
-        const fonts = document.querySelectorAll('font');
-        fonts.forEach((font) => {
-          const parent = font.parentNode;
-          if (parent) {
-            while (font.firstChild) {
-              parent.insertBefore(font.firstChild, font);
-            }
-            parent.removeChild(font);
-          }
-        });
-      } catch {}
-
-      if (!triggerResetCombo()) {
-        let attempts = 0;
-        const interval = setInterval(() => {
-          attempts++;
-          if (triggerResetCombo() || attempts > 20) {
-            clearInterval(interval);
-          }
-        }, 150);
+        combo.dispatchEvent(new Event('change', { bubbles: true }));
       }
 
       return;
     }
 
     // For non-English target language:
+    this.hasTranslatedNonEnglish = true;
     const cookieVal = `/en/${targetLang}`;
     document.cookie = `googtrans=${cookieVal}; path=/;`;
     if (hostname && hostname !== 'localhost') {

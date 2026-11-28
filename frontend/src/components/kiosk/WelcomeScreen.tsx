@@ -81,50 +81,86 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             : 'bg-gradient-to-b from-amber-50/40 via-white to-slate-100 text-slate-900'
       }`}
     >
-      {/* GRAND DINING DOUBLE-DOOR CINEMATIC OPENING EFFECT */}
+      {/* GRAND DINING 3D DOUBLE-DOOR CINEMATIC OPENING EFFECT */}
       <div 
         className={`fixed inset-0 z-50 overflow-hidden transition-opacity duration-1000 ${
           isOpenAnimated ? 'opacity-0 delay-700 pointer-events-none' : 'opacity-100 pointer-events-auto'
         }`}
+        style={{ perspective: '1500px', perspectiveOrigin: '50% 50%', transformStyle: 'preserve-3d' }}
       >
-        {/* Left Luxury Door Panel */}
-        <div 
-          className={`absolute top-0 bottom-0 left-0 w-1/2 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border-r border-amber-500/40 shadow-2xl transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-end ${
-            isOpenAnimated ? '-translate-x-full' : 'translate-x-0'
+        {/* Golden Light Burst Radiating from Center Seam on Open */}
+        <div
+          className={`absolute inset-y-0 left-1/2 -translate-x-1/2 w-64 bg-gradient-to-r from-transparent via-amber-400/40 to-transparent blur-3xl transition-all duration-700 pointer-events-none ${
+            isOpenAnimated ? 'opacity-100 scale-x-150' : 'opacity-0 scale-x-50'
           }`}
+        />
+
+        {/* Left Luxury 3D Swinging Door Panel (Hinged at Left Edge) */}
+        <div 
+          className="absolute top-0 bottom-0 left-0 w-1/2 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border-r border-amber-500/50 shadow-[20px_0_60px_rgba(0,0,0,0.9)] transition-transform duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)] flex items-center justify-end"
+          style={{
+            transformOrigin: 'left center',
+            transformStyle: 'preserve-3d',
+            transform: isOpenAnimated
+              ? 'rotateY(98deg) translateZ(30px)'
+              : 'rotateY(0deg) translateZ(0px)'
+          }}
         >
+          {/* 3D Recessed Door Panel Trim */}
+          <div className="absolute inset-y-8 left-6 right-6 rounded-2xl border border-amber-500/15 bg-gradient-to-br from-white/[0.02] to-black/30 shadow-inner pointer-events-none" />
           {/* Subtle vertical luxury gold border accents */}
-          <div className="h-full w-1 bg-gradient-to-b from-transparent via-amber-400 to-transparent opacity-60" />
+          <div className="h-full w-1 bg-gradient-to-b from-transparent via-amber-400 to-transparent opacity-75" />
         </div>
 
-        {/* Right Luxury Door Panel */}
+        {/* Right Luxury 3D Swinging Door Panel (Hinged at Right Edge) */}
         <div 
-          className={`absolute top-0 bottom-0 right-0 w-1/2 bg-gradient-to-l from-slate-950 via-slate-900 to-slate-950 border-l border-amber-500/40 shadow-2xl transition-transform duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-start ${
-            isOpenAnimated ? 'translate-x-full' : 'translate-x-0'
-          }`}
+          className="absolute top-0 bottom-0 right-0 w-1/2 bg-gradient-to-l from-slate-950 via-slate-900 to-slate-950 border-l border-amber-500/50 shadow-[-20px_0_60px_rgba(0,0,0,0.9)] transition-transform duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)] flex items-center justify-start"
+          style={{
+            transformOrigin: 'right center',
+            transformStyle: 'preserve-3d',
+            transform: isOpenAnimated
+              ? 'rotateY(-98deg) translateZ(30px)'
+              : 'rotateY(0deg) translateZ(0px)'
+          }}
         >
-          <div className="h-full w-1 bg-gradient-to-b from-transparent via-amber-400 to-transparent opacity-60" />
+          {/* 3D Recessed Door Panel Trim */}
+          <div className="absolute inset-y-8 left-6 right-6 rounded-2xl border border-amber-500/15 bg-gradient-to-bl from-white/[0.02] to-black/30 shadow-inner pointer-events-none" />
+          <div className="h-full w-1 bg-gradient-to-b from-transparent via-amber-400 to-transparent opacity-75" />
         </div>
 
-        {/* Center Golden Medallion Crest (Stays closed until customer clicks the Royal Ember logo) */}
+        {/* Center 3D Golden Medallion Crest (Spins & Zooms in 3D on Click) */}
         <div 
           className={`absolute inset-0 flex items-center justify-center transition-all duration-700 ease-out ${
-            isOpenAnimated ? 'scale-125 opacity-0 pointer-events-none' : 'scale-100 opacity-100'
+            isOpenAnimated ? 'opacity-0 pointer-events-none' : 'opacity-100'
           }`}
+          style={{
+            transformStyle: 'preserve-3d',
+            transform: isOpenAnimated
+              ? 'translateZ(160px) rotateY(180deg) scale(1.45)'
+              : 'translateZ(20px) rotateY(0deg) scale(1)'
+          }}
         >
           <button
             type="button"
             onClick={() => setIsOpenAnimated(true)}
             aria-label="Tap Royal Ember logo to enter"
             className="relative flex flex-col items-center cursor-pointer group focus:outline-none transition-transform duration-300 hover:scale-105 active:scale-95"
+            style={{ transformStyle: 'preserve-3d' }}
           >
             {/* Ambient Golden Halo Glow */}
-            <div className="absolute -inset-6 rounded-full bg-amber-500/30 blur-2xl animate-pulse group-hover:bg-amber-400/45 transition-colors" />
-            
-            {/* Medallion Badge */}
-            <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-yellow-600 p-0.5 shadow-[0_0_40px_rgba(245,158,11,0.7)] group-hover:shadow-[0_0_55px_rgba(245,158,11,0.95)] transition-shadow">
-              <div className="w-full h-full rounded-full bg-slate-950 flex flex-col items-center justify-center border border-amber-300/40 text-amber-300">
-                <Crown className="w-8 h-8 text-amber-400 animate-pulse group-hover:scale-110 transition-transform" />
+            <div className="absolute -inset-8 rounded-full bg-amber-500/30 blur-2xl animate-pulse group-hover:bg-amber-400/50 transition-colors" />
+
+            {/* Outer 3D Orbiting Golden Ring */}
+            <div className="relative w-24 h-24 flex items-center justify-center">
+              <div
+                className="absolute inset-0 rounded-full border border-dashed border-amber-400/50 animate-spin"
+                style={{ animationDuration: '12s' }}
+              />
+              {/* Medallion Badge */}
+              <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-yellow-600 p-0.5 shadow-[0_0_45px_rgba(245,158,11,0.75)] group-hover:shadow-[0_0_65px_rgba(245,158,11,1)] transition-shadow">
+                <div className="w-full h-full rounded-full bg-slate-950 flex flex-col items-center justify-center border border-amber-300/40 text-amber-300 shadow-inner">
+                  <Crown className="w-8 h-8 text-amber-400 animate-pulse group-hover:scale-110 transition-transform drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]" />
+                </div>
               </div>
             </div>
 

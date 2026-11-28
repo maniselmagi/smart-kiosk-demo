@@ -107,8 +107,6 @@ export const FoodDetailModal: React.FC<FoodDetailModalProps> = ({ item, onClose 
             <FoodModelViewer3D
               modelUrl={foodModelMeta.modelUrl}
               fallbackImage={item.image}
-              videoUrl={foodModelMeta.videoUrl}
-              animatedGifUrl={foodModelMeta.animatedGifUrl}
               foodName={item.name}
               scale={foodModelMeta.scale}
               cameraDistance={foodModelMeta.cameraDistance}

@@ -1,37 +1,32 @@
 /**
- * 3D Rotating Food Models & Visual Inventory Mapping
- * Maps every restaurant kiosk menu item to its authentic 3D rotating food GIF matching
- * the reference standard (high quality rotating 360° food GIF from r/lovethissmug / GIPHY),
- * complete with wide-angle uncropped framing, manual touch drag rotation, zoom, and live steam.
+ * 3D Food Models Inventory & Mapping Utility
+ * Maps every restaurant kiosk menu item to its genuine GLB 3D food model
+ * for interactive Lenskart-style 360° WebGL inspection.
  */
 
-export type ProceduralDishType = 
-  | 'coffee' 
-  | 'biryani' 
-  | 'curry' 
-  | 'kebab' 
-  | 'dessert' 
-  | 'crispy' 
-  | 'burger' 
-  | 'cupcake' 
-  | 'starters' 
+export type ProceduralDishType =
+  | 'coffee'
+  | 'biryani'
+  | 'curry'
+  | 'kebab'
+  | 'dessert'
+  | 'crispy'
+  | 'burger'
+  | 'cupcake'
+  | 'starters'
   | 'platter';
 
 export interface FoodModel3DMeta {
-  modelUrl?: string;
-  animatedGifUrl?: string;
-  videoUrl?: string;
+  modelUrl: string;
   title: string;
   proceduralType: ProceduralDishType;
   scale?: number;
-  rotationSpeed?: number;
-  defaultYOffset?: number;
   cameraDistance?: number;
 }
 
 /**
  * Robust Multi-Candidate Asset URL Resolver
- * Guarantees asset resolution across GitHub Pages (/smart-kiosk-demo/),
+ * Guarantees GLB asset resolution across GitHub Pages (/smart-kiosk-demo/),
  * custom routes (/kiosk), local dev (http://localhost:5173),
  * and Android Capacitor (https://localhost/ or capacitor://localhost/).
  */
@@ -43,7 +38,6 @@ export const getModelCandidateUrls = (rawPath: string): string[] => {
   const cleanPath = rawPath.replace(/^\/+/, '');
   const candidates: string[] = [];
 
-  // 1. Direct GitHub Pages repository URL if on github.io
   try {
     if (typeof window !== 'undefined' && window.location) {
       const loc = window.location;
@@ -51,18 +45,16 @@ export const getModelCandidateUrls = (rawPath: string): string[] => {
         candidates.push(`${loc.origin}/smart-kiosk-demo/${cleanPath}`);
       }
     }
-  } catch (e) {}
+  } catch {}
 
-  // 2. Relative to import.meta.url (most reliable for bundled web assets)
   try {
     const metaUrl = import.meta.url;
     if (metaUrl) {
       candidates.push(new URL('../' + cleanPath, metaUrl).href);
       candidates.push(new URL('../../' + cleanPath, metaUrl).href);
     }
-  } catch (e) {}
+  } catch {}
 
-  // 3. Document baseURI or current location directory
   try {
     if (typeof document !== 'undefined' && document.baseURI) {
       candidates.push(new URL(cleanPath, document.baseURI).href);
@@ -76,13 +68,11 @@ export const getModelCandidateUrls = (rawPath: string): string[] => {
       candidates.push(`${loc.origin}${path}${cleanPath}`);
       candidates.push(`${loc.origin}/${cleanPath}`);
     }
-  } catch (e) {}
+  } catch {}
 
-  // 4. Relative paths
   candidates.push(cleanPath);
   candidates.push('/' + cleanPath);
 
-  // Return unique non-empty candidates
   return Array.from(new Set(candidates.filter(Boolean)));
 };
 
@@ -91,131 +81,98 @@ export const resolveModelAssetUrl = (rawPath: string): string => {
   return candidates[0] || rawPath;
 };
 
-// High-Quality 3D Rotating Food GIFs (Matching Reddit r/lovethissmug reference standard)
-export const FOOD_GIF_ASSETS = {
-  // Curries & Simmering Bowls
-  butterChicken: 'images/food_gifs/butter_chicken.gif',
-  dalMakhani: 'images/food_gifs/dal_makhani.gif',
-  bowlMeal: 'images/food_gifs/rotating_bowl_meal.gif',
-  ramenBowl: 'images/food_gifs/rotating_ramen.gif',
-
-  // Rice & Biryanis
-  biryani: 'images/food_gifs/biryani.gif',
-
-  // Breads & Tandoor
-  rotiNaan: 'images/food_gifs/roti_naan.gif',
-
-  // Starters & Kebabs
-  paneerTikka: 'images/food_gifs/paneer_tikka.gif',
-  kebab: 'images/food_gifs/rotating_kebab.gif',
-  crispyRoll: 'images/food_gifs/rotating_spring_roll.gif',
-
-  // Burgers & Pizzas
-  burger: 'images/food_gifs/rotating_burger.gif',
-  pizza: 'images/food_gifs/rotating_pizza.gif',
-
-  // Desserts & Sweets
-  sizzlingBrownie: 'images/food_gifs/rotating_brownie.gif',
-  dessertPastry: 'images/food_gifs/rotating_pastry.gif',
-  iceCream: 'images/food_gifs/rotating_icecream.gif',
-  cheesecake: 'images/food_gifs/rotating_cheesecake.gif',
-
-  // Beverages
-  coffee: 'images/food_gifs/coffee.gif',
+const GLB_MODELS = {
+  butterChicken: 'models/food/butter_chicken.glb',
+  curry: 'models/food/curry.glb',
+  biryani: 'models/food/biryani_rice.glb',
+  kebab: 'models/food/tandoori_kebab.glb',
+  pakora: 'models/food/takoyaki_pakora.glb',
+  dumplings: 'models/food/dumplings_starters.glb',
+  burger: 'models/food/burger.glb',
+  parfait: 'models/food/dessert_parfait.glb',
+  icecream: 'models/food/icecream.glb',
+  cupcake: 'models/food/cupcake.glb',
+  dish: 'models/food/dish.glb',
 } as const;
 
-// Direct mappings for all specific menu item IDs
 const SPECIFIC_ITEM_MODELS: Record<string, FoodModel3DMeta> = {
-  // Main Courses & Curries
-  'item-1': { animatedGifUrl: FOOD_GIF_ASSETS.butterChicken, title: 'Butter Chicken 3D', proceduralType: 'curry' },
-  'item-12': { animatedGifUrl: FOOD_GIF_ASSETS.butterChicken, title: 'Kashmiri Mutton Rogan Josh 3D', proceduralType: 'curry' },
-  'item-24': { animatedGifUrl: FOOD_GIF_ASSETS.butterChicken, title: 'Paneer Butter Masala 3D', proceduralType: 'curry' },
-  'item-25': { animatedGifUrl: FOOD_GIF_ASSETS.dalMakhani, title: 'Dal Makhani Slow-Simmered 3D', proceduralType: 'curry' },
-  'item-26': { animatedGifUrl: FOOD_GIF_ASSETS.butterChicken, title: 'Kadai Chicken Gravy 3D', proceduralType: 'curry' },
-  'item-49': { animatedGifUrl: FOOD_GIF_ASSETS.bowlMeal, title: 'Palak Paneer 3D', proceduralType: 'curry' },
-  'item-50': { animatedGifUrl: FOOD_GIF_ASSETS.butterChicken, title: 'Kadai Chicken Masala 3D', proceduralType: 'curry' },
-  'item-51': { animatedGifUrl: FOOD_GIF_ASSETS.dalMakhani, title: 'Yellow Dal Tadka 3D', proceduralType: 'curry' },
-  'item-52': { animatedGifUrl: FOOD_GIF_ASSETS.butterChicken, title: 'Chettinad Pepper Chicken 3D', proceduralType: 'curry' },
-  'item-53': { animatedGifUrl: FOOD_GIF_ASSETS.bowlMeal, title: 'Malai Kofta Royale 3D', proceduralType: 'curry' },
-
-  // Starters & Kebabs
-  'item-2': { animatedGifUrl: FOOD_GIF_ASSETS.paneerTikka, title: 'Paneer Tikka 3D', proceduralType: 'kebab' },
-  'item-8': { animatedGifUrl: FOOD_GIF_ASSETS.crispyRoll, title: 'Crispy Baby Corn Fry 3D', proceduralType: 'crispy' },
-  'item-14': { animatedGifUrl: FOOD_GIF_ASSETS.crispyRoll, title: 'Ghee Podi Idli & Medu Vada 3D', proceduralType: 'crispy' },
-  'item-18': { animatedGifUrl: FOOD_GIF_ASSETS.crispyRoll, title: 'Crispy Medu Vada 3D', proceduralType: 'crispy' },
-  'item-19': { animatedGifUrl: FOOD_GIF_ASSETS.crispyRoll, title: 'Golden Veg Spring Rolls 3D', proceduralType: 'crispy' },
-  'item-20': { animatedGifUrl: FOOD_GIF_ASSETS.crispyRoll, title: 'Gobi Manchurian Dry 3D', proceduralType: 'crispy' },
-  'item-21': { animatedGifUrl: FOOD_GIF_ASSETS.kebab, title: 'Royal Chicken 65 3D', proceduralType: 'kebab' },
-  'item-22': { animatedGifUrl: FOOD_GIF_ASSETS.crispyRoll, title: 'Crispy French Fries 3D', proceduralType: 'crispy' },
-  'item-43': { animatedGifUrl: FOOD_GIF_ASSETS.crispyRoll, title: 'Chilli Paneer Dry 3D', proceduralType: 'crispy' },
-  'item-44': { animatedGifUrl: FOOD_GIF_ASSETS.crispyRoll, title: 'Crispy Corn Salt & Pepper 3D', proceduralType: 'crispy' },
-  'item-45': { animatedGifUrl: FOOD_GIF_ASSETS.kebab, title: 'Tandoori Murgh Wings 3D', proceduralType: 'kebab' },
-  'item-46': { animatedGifUrl: FOOD_GIF_ASSETS.kebab, title: 'Hara Bhara Kebab 3D', proceduralType: 'kebab' },
-  'item-47': { animatedGifUrl: FOOD_GIF_ASSETS.kebab, title: 'Andhra Chicken Pakoda 3D', proceduralType: 'kebab' },
-  'item-48': { animatedGifUrl: FOOD_GIF_ASSETS.crispyRoll, title: 'Golden Medu Vada 3D', proceduralType: 'crispy' },
-
-  // Biryanis, Rice & Thali
-  'item-3': { animatedGifUrl: FOOD_GIF_ASSETS.biryani, title: 'Veg Dum Biryani 3D', proceduralType: 'biryani' },
-  'item-7': { animatedGifUrl: FOOD_GIF_ASSETS.biryani, title: 'Chicken Dum Biryani 3D', proceduralType: 'biryani' },
-  'item-13': { animatedGifUrl: FOOD_GIF_ASSETS.bowlMeal, title: 'South Indian Grand Meals Thali 3D', proceduralType: 'biryani' },
-  'item-16': { animatedGifUrl: FOOD_GIF_ASSETS.bowlMeal, title: 'Royal Ghee Pongal 3D', proceduralType: 'biryani' },
-  'item-31': { animatedGifUrl: FOOD_GIF_ASSETS.bowlMeal, title: 'Traditional Curd Rice 3D', proceduralType: 'biryani' },
-  'item-32': { animatedGifUrl: FOOD_GIF_ASSETS.dalMakhani, title: 'Jeera Rice & Tadka Dal 3D', proceduralType: 'biryani' },
-  'item-57': { animatedGifUrl: FOOD_GIF_ASSETS.bowlMeal, title: 'Wok Veg Fried Rice 3D', proceduralType: 'biryani' },
-  'item-58': { animatedGifUrl: FOOD_GIF_ASSETS.ramenBowl, title: 'Chicken Hakka Noodles 3D', proceduralType: 'starters' },
-  'item-61': { animatedGifUrl: FOOD_GIF_ASSETS.biryani, title: 'Steamed Jeera Basmati Rice 3D', proceduralType: 'biryani' },
-  'item-62': { animatedGifUrl: FOOD_GIF_ASSETS.bowlMeal, title: 'Curd Rice with Pomegranate 3D', proceduralType: 'biryani' },
-
-  // Breads, Naan & Roti
-  'item-6': { animatedGifUrl: FOOD_GIF_ASSETS.rotiNaan, title: 'Garlic Butter Naan 3D', proceduralType: 'kebab' },
-  'item-27': { animatedGifUrl: FOOD_GIF_ASSETS.rotiNaan, title: 'Chole Bhature 3D', proceduralType: 'kebab' },
-  'item-28': { animatedGifUrl: FOOD_GIF_ASSETS.rotiNaan, title: 'Fluffy Poori Bhaji 3D', proceduralType: 'kebab' },
-  'item-29': { animatedGifUrl: FOOD_GIF_ASSETS.rotiNaan, title: 'Butter Tandoori Roti 3D', proceduralType: 'kebab' },
-  'item-30': { animatedGifUrl: FOOD_GIF_ASSETS.rotiNaan, title: 'Stuffed Aloo Paratha 3D', proceduralType: 'kebab' },
-  'item-56': { animatedGifUrl: FOOD_GIF_ASSETS.rotiNaan, title: 'Hot Fluffy Poori Masala 3D', proceduralType: 'kebab' },
-  'item-59': { animatedGifUrl: FOOD_GIF_ASSETS.rotiNaan, title: 'Flaky Malabar Parotta 3D', proceduralType: 'kebab' },
-  'item-60': { animatedGifUrl: FOOD_GIF_ASSETS.rotiNaan, title: 'Tandoori Butter Roti 3D', proceduralType: 'kebab' },
-
-  // Dosas
-  'item-4': { animatedGifUrl: FOOD_GIF_ASSETS.crispyRoll, title: 'Crispy Masala Dosa 3D', proceduralType: 'crispy' },
-  'item-23': { animatedGifUrl: FOOD_GIF_ASSETS.crispyRoll, title: 'Plain Ghee Roast Dosa 3D', proceduralType: 'crispy' },
-  'item-54': { animatedGifUrl: FOOD_GIF_ASSETS.crispyRoll, title: 'Crispy Onion Rava Dosa 3D', proceduralType: 'crispy' },
-  'item-55': { animatedGifUrl: FOOD_GIF_ASSETS.crispyRoll, title: 'Mysore Masala Dosa 3D', proceduralType: 'crispy' },
-
-  // Desserts
-  'item-10': { animatedGifUrl: FOOD_GIF_ASSETS.iceCream, title: 'Gulab Jamun with Ice Cream 3D', proceduralType: 'dessert' },
-  'item-11': { animatedGifUrl: FOOD_GIF_ASSETS.sizzlingBrownie, title: 'Sizzling Brownie with Fudge 3D', proceduralType: 'dessert' },
-  'item-17': { animatedGifUrl: FOOD_GIF_ASSETS.dessertPastry, title: 'Royal Kesari with Golden Cashews 3D', proceduralType: 'dessert' },
-  'item-38': { animatedGifUrl: FOOD_GIF_ASSETS.dessertPastry, title: 'Bengali Rasgulla 3D', proceduralType: 'dessert' },
-  'item-39': { animatedGifUrl: FOOD_GIF_ASSETS.dessertPastry, title: 'Hot Desi Ghee Badam Halwa 3D', proceduralType: 'dessert' },
-  'item-40': { animatedGifUrl: FOOD_GIF_ASSETS.dessertPastry, title: 'Creamy Rasmalai with Pistachio 3D', proceduralType: 'dessert' },
-  'item-41': { animatedGifUrl: FOOD_GIF_ASSETS.iceCream, title: 'Madagascar Vanilla Bean Ice Cream 3D', proceduralType: 'dessert' },
-  'item-42': { animatedGifUrl: FOOD_GIF_ASSETS.iceCream, title: 'Royal Mango Kulfi 3D', proceduralType: 'dessert' },
-  'item-69': { animatedGifUrl: FOOD_GIF_ASSETS.dessertPastry, title: 'Warm Gajar Ka Halwa 3D', proceduralType: 'dessert' },
-  'item-70': { animatedGifUrl: FOOD_GIF_ASSETS.dessertPastry, title: 'Royal Shahi Tukda 3D', proceduralType: 'dessert' },
-  'item-71': { animatedGifUrl: FOOD_GIF_ASSETS.dessertPastry, title: 'Saffron Rasmalai 3D', proceduralType: 'dessert' },
-  'item-72': { animatedGifUrl: FOOD_GIF_ASSETS.dessertPastry, title: 'Tender Coconut Payasam 3D', proceduralType: 'dessert' },
-  'item-73': { animatedGifUrl: FOOD_GIF_ASSETS.sizzlingBrownie, title: 'Sizzling Hot Chocolate Brownie 3D', proceduralType: 'dessert' },
-
-  // Beverages
-  'item-5': { animatedGifUrl: FOOD_GIF_ASSETS.coffee, title: 'Cold Coffee Frappé 3D', proceduralType: 'coffee' },
-  'item-9': { animatedGifUrl: FOOD_GIF_ASSETS.coffee, title: 'Royal Mango Lassi 3D', proceduralType: 'coffee' },
-  'item-15': { animatedGifUrl: FOOD_GIF_ASSETS.coffee, title: 'Kumbakonam Degree Filter Coffee 3D', proceduralType: 'coffee' },
-  'item-33': { animatedGifUrl: FOOD_GIF_ASSETS.coffee, title: 'Masala Ginger Cutting Chai 3D', proceduralType: 'coffee' },
-  'item-34': { animatedGifUrl: FOOD_GIF_ASSETS.coffee, title: 'Fresh Lime Soda 3D', proceduralType: 'coffee' },
-  'item-35': { animatedGifUrl: FOOD_GIF_ASSETS.coffee, title: 'Sweet Punjabi Lassi 3D', proceduralType: 'coffee' },
-  'item-36': { animatedGifUrl: FOOD_GIF_ASSETS.coffee, title: 'Fresh Tender Coconut Water 3D', proceduralType: 'coffee' },
-  'item-37': { animatedGifUrl: FOOD_GIF_ASSETS.coffee, title: 'Chilled Badam Milk with Saffron 3D', proceduralType: 'coffee' },
-  'item-63': { animatedGifUrl: FOOD_GIF_ASSETS.coffee, title: 'Fresh Mint Virgin Mojito 3D', proceduralType: 'coffee' },
-  'item-64': { animatedGifUrl: FOOD_GIF_ASSETS.coffee, title: 'Watermelon Basil Cooler 3D', proceduralType: 'coffee' },
-  'item-65': { animatedGifUrl: FOOD_GIF_ASSETS.coffee, title: 'Spiced Masala Buttermilk 3D', proceduralType: 'coffee' },
-  'item-66': { animatedGifUrl: FOOD_GIF_ASSETS.coffee, title: 'Rich Chocolate Brownie Shake 3D', proceduralType: 'coffee' },
-  'item-67': { animatedGifUrl: FOOD_GIF_ASSETS.coffee, title: 'Fresh Mosambi Juice 3D', proceduralType: 'coffee' },
-  'item-68': { animatedGifUrl: FOOD_GIF_ASSETS.coffee, title: 'Warm Royal Badam Milk 3D', proceduralType: 'coffee' }
+  'item-1': { modelUrl: GLB_MODELS.butterChicken, title: 'Butter Chicken 360°', proceduralType: 'curry' },
+  'item-2': { modelUrl: GLB_MODELS.kebab, title: 'Paneer Tikka 360°', proceduralType: 'kebab' },
+  'item-3': { modelUrl: GLB_MODELS.biryani, title: 'Veg Dum Biryani 360°', proceduralType: 'biryani' },
+  'item-4': { modelUrl: GLB_MODELS.dish, title: 'Crispy Masala Dosa 360°', proceduralType: 'crispy' },
+  'item-5': { modelUrl: GLB_MODELS.parfait, title: 'Cold Coffee Frappé 360°', proceduralType: 'coffee' },
+  'item-6': { modelUrl: GLB_MODELS.dish, title: 'Garlic Butter Naan 360°', proceduralType: 'kebab' },
+  'item-7': { modelUrl: GLB_MODELS.biryani, title: 'Chicken Dum Biryani 360°', proceduralType: 'biryani' },
+  'item-8': { modelUrl: GLB_MODELS.pakora, title: 'Crispy Baby Corn Fry 360°', proceduralType: 'crispy' },
+  'item-9': { modelUrl: GLB_MODELS.parfait, title: 'Royal Mango Lassi 360°', proceduralType: 'coffee' },
+  'item-10': { modelUrl: GLB_MODELS.icecream, title: 'Gulab Jamun with Ice Cream 360°', proceduralType: 'dessert' },
+  'item-11': { modelUrl: GLB_MODELS.cupcake, title: 'Sizzling Brownie with Fudge 360°', proceduralType: 'dessert' },
+  'item-12': { modelUrl: GLB_MODELS.curry, title: 'Kashmiri Mutton Rogan Josh 360°', proceduralType: 'curry' },
+  'item-13': { modelUrl: GLB_MODELS.dish, title: 'South Indian Grand Meals Thali 360°', proceduralType: 'platter' },
+  'item-14': { modelUrl: GLB_MODELS.pakora, title: 'Ghee Podi Idli & Medu Vada 360°', proceduralType: 'crispy' },
+  'item-15': { modelUrl: GLB_MODELS.cupcake, title: 'Kumbakonam Degree Filter Coffee 360°', proceduralType: 'coffee' },
+  'item-16': { modelUrl: GLB_MODELS.biryani, title: 'Royal Ghee Pongal 360°', proceduralType: 'biryani' },
+  'item-17': { modelUrl: GLB_MODELS.parfait, title: 'Royal Kesari with Golden Cashews 360°', proceduralType: 'dessert' },
+  'item-18': { modelUrl: GLB_MODELS.pakora, title: 'Crispy Medu Vada 360°', proceduralType: 'crispy' },
+  'item-19': { modelUrl: GLB_MODELS.dumplings, title: 'Golden Veg Spring Rolls 360°', proceduralType: 'starters' },
+  'item-20': { modelUrl: GLB_MODELS.pakora, title: 'Gobi Manchurian Dry 360°', proceduralType: 'crispy' },
+  'item-21': { modelUrl: GLB_MODELS.kebab, title: 'Royal Chicken 65 360°', proceduralType: 'kebab' },
+  'item-22': { modelUrl: GLB_MODELS.pakora, title: 'Crispy French Fries 360°', proceduralType: 'crispy' },
+  'item-23': { modelUrl: GLB_MODELS.dish, title: 'Plain Ghee Roast Dosa 360°', proceduralType: 'crispy' },
+  'item-24': { modelUrl: GLB_MODELS.curry, title: 'Paneer Butter Masala 360°', proceduralType: 'curry' },
+  'item-25': { modelUrl: GLB_MODELS.curry, title: 'Dal Makhani Slow-Simmered 360°', proceduralType: 'curry' },
+  'item-26': { modelUrl: GLB_MODELS.curry, title: 'Kadai Chicken Gravy 360°', proceduralType: 'curry' },
+  'item-27': { modelUrl: GLB_MODELS.dish, title: 'Chole Bhature 360°', proceduralType: 'platter' },
+  'item-28': { modelUrl: GLB_MODELS.dish, title: 'Fluffy Poori Bhaji 360°', proceduralType: 'platter' },
+  'item-29': { modelUrl: GLB_MODELS.dish, title: 'Butter Tandoori Roti 360°', proceduralType: 'kebab' },
+  'item-30': { modelUrl: GLB_MODELS.dish, title: 'Stuffed Aloo Paratha 360°', proceduralType: 'kebab' },
+  'item-31': { modelUrl: GLB_MODELS.biryani, title: 'Traditional Curd Rice 360°', proceduralType: 'biryani' },
+  'item-32': { modelUrl: GLB_MODELS.biryani, title: 'Jeera Rice & Tadka Dal 360°', proceduralType: 'biryani' },
+  'item-33': { modelUrl: GLB_MODELS.cupcake, title: 'Masala Ginger Cutting Chai 360°', proceduralType: 'coffee' },
+  'item-34': { modelUrl: GLB_MODELS.parfait, title: 'Fresh Lime Soda 360°', proceduralType: 'coffee' },
+  'item-35': { modelUrl: GLB_MODELS.parfait, title: 'Sweet Punjabi Lassi 360°', proceduralType: 'coffee' },
+  'item-36': { modelUrl: GLB_MODELS.parfait, title: 'Fresh Tender Coconut Water 360°', proceduralType: 'coffee' },
+  'item-37': { modelUrl: GLB_MODELS.parfait, title: 'Chilled Badam Milk with Saffron 360°', proceduralType: 'coffee' },
+  'item-38': { modelUrl: GLB_MODELS.parfait, title: 'Bengali Rasgulla 360°', proceduralType: 'dessert' },
+  'item-39': { modelUrl: GLB_MODELS.parfait, title: 'Hot Desi Ghee Badam Halwa 360°', proceduralType: 'dessert' },
+  'item-40': { modelUrl: GLB_MODELS.parfait, title: 'Creamy Rasmalai with Pistachio 360°', proceduralType: 'dessert' },
+  'item-41': { modelUrl: GLB_MODELS.icecream, title: 'Madagascar Vanilla Bean Ice Cream 360°', proceduralType: 'dessert' },
+  'item-42': { modelUrl: GLB_MODELS.icecream, title: 'Royal Mango Kulfi 360°', proceduralType: 'dessert' },
+  'item-43': { modelUrl: GLB_MODELS.dumplings, title: 'Chilli Paneer Dry 360°', proceduralType: 'starters' },
+  'item-44': { modelUrl: GLB_MODELS.pakora, title: 'Crispy Corn Salt & Pepper 360°', proceduralType: 'crispy' },
+  'item-45': { modelUrl: GLB_MODELS.kebab, title: 'Tandoori Murgh Wings 360°', proceduralType: 'kebab' },
+  'item-46': { modelUrl: GLB_MODELS.kebab, title: 'Hara Bhara Kebab 360°', proceduralType: 'kebab' },
+  'item-47': { modelUrl: GLB_MODELS.kebab, title: 'Andhra Chicken Pakoda 360°', proceduralType: 'kebab' },
+  'item-48': { modelUrl: GLB_MODELS.pakora, title: 'Golden Medu Vada 360°', proceduralType: 'crispy' },
+  'item-49': { modelUrl: GLB_MODELS.curry, title: 'Palak Paneer 360°', proceduralType: 'curry' },
+  'item-50': { modelUrl: GLB_MODELS.curry, title: 'Kadai Chicken Masala 360°', proceduralType: 'curry' },
+  'item-51': { modelUrl: GLB_MODELS.curry, title: 'Yellow Dal Tadka 360°', proceduralType: 'curry' },
+  'item-52': { modelUrl: GLB_MODELS.curry, title: 'Chettinad Pepper Chicken 360°', proceduralType: 'curry' },
+  'item-53': { modelUrl: GLB_MODELS.curry, title: 'Malai Kofta Royale 360°', proceduralType: 'curry' },
+  'item-54': { modelUrl: GLB_MODELS.dish, title: 'Crispy Onion Rava Dosa 360°', proceduralType: 'crispy' },
+  'item-55': { modelUrl: GLB_MODELS.dish, title: 'Mysore Masala Dosa 360°', proceduralType: 'crispy' },
+  'item-56': { modelUrl: GLB_MODELS.dish, title: 'Hot Fluffy Poori Masala 360°', proceduralType: 'platter' },
+  'item-57': { modelUrl: GLB_MODELS.biryani, title: 'Wok Veg Fried Rice 360°', proceduralType: 'biryani' },
+  'item-58': { modelUrl: GLB_MODELS.biryani, title: 'Chicken Hakka Noodles 360°', proceduralType: 'biryani' },
+  'item-59': { modelUrl: GLB_MODELS.dish, title: 'Flaky Malabar Parotta 360°', proceduralType: 'kebab' },
+  'item-60': { modelUrl: GLB_MODELS.dish, title: 'Tandoori Butter Roti 360°', proceduralType: 'kebab' },
+  'item-61': { modelUrl: GLB_MODELS.biryani, title: 'Steamed Jeera Basmati Rice 360°', proceduralType: 'biryani' },
+  'item-62': { modelUrl: GLB_MODELS.biryani, title: 'Curd Rice with Pomegranate 360°', proceduralType: 'biryani' },
+  'item-63': { modelUrl: GLB_MODELS.parfait, title: 'Fresh Mint Virgin Mojito 360°', proceduralType: 'coffee' },
+  'item-64': { modelUrl: GLB_MODELS.parfait, title: 'Watermelon Basil Cooler 360°', proceduralType: 'coffee' },
+  'item-65': { modelUrl: GLB_MODELS.parfait, title: 'Spiced Masala Buttermilk 360°', proceduralType: 'coffee' },
+  'item-66': { modelUrl: GLB_MODELS.parfait, title: 'Rich Chocolate Brownie Shake 360°', proceduralType: 'coffee' },
+  'item-67': { modelUrl: GLB_MODELS.parfait, title: 'Fresh Mosambi Juice 360°', proceduralType: 'coffee' },
+  'item-68': { modelUrl: GLB_MODELS.parfait, title: 'Warm Royal Badam Milk 360°', proceduralType: 'coffee' },
+  'item-69': { modelUrl: GLB_MODELS.parfait, title: 'Warm Gajar Ka Halwa 360°', proceduralType: 'dessert' },
+  'item-70': { modelUrl: GLB_MODELS.parfait, title: 'Royal Shahi Tukda 360°', proceduralType: 'dessert' },
+  'item-71': { modelUrl: GLB_MODELS.parfait, title: 'Saffron Rasmalai 360°', proceduralType: 'dessert' },
+  'item-72': { modelUrl: GLB_MODELS.parfait, title: 'Tender Coconut Payasam 360°', proceduralType: 'dessert' },
+  'item-73': { modelUrl: GLB_MODELS.cupcake, title: 'Sizzling Hot Chocolate Brownie 360°', proceduralType: 'dessert' },
 };
 
 /**
- * Resolves the 3D rotating food visual asset for any menu item in the catalog.
+ * Resolves the genuine GLB 3D food model for any menu item in the catalog.
  */
 export const getFoodModel3D = (
   itemOrId: string | { id: string; category?: string; name?: string },
@@ -236,52 +193,49 @@ export const getFoodModel3D = (
     itemName = itemNameParam || '';
   }
 
-  // 1. Direct ID match from verified inventory
   if (SPECIFIC_ITEM_MODELS[itemId]) {
     return SPECIFIC_ITEM_MODELS[itemId];
   }
 
   const nameLower = itemName.toLowerCase();
 
-  // 2. Keyword fallback
   if (nameLower.includes('burger') || nameLower.includes('sandwich')) {
-    return { animatedGifUrl: FOOD_GIF_ASSETS.burger, title: `${itemName} 3D`, proceduralType: 'burger' };
+    return { modelUrl: GLB_MODELS.burger, title: `${itemName} 360°`, proceduralType: 'burger' };
   }
-  if (nameLower.includes('pizza')) {
-    return { animatedGifUrl: FOOD_GIF_ASSETS.pizza, title: `${itemName} 3D`, proceduralType: 'starters' };
+  if (nameLower.includes('butter chicken')) {
+    return { modelUrl: GLB_MODELS.butterChicken, title: `${itemName} 360°`, proceduralType: 'curry' };
   }
-  if (nameLower.includes('noodle') || nameLower.includes('ramen') || nameLower.includes('hakka')) {
-    return { animatedGifUrl: FOOD_GIF_ASSETS.ramenBowl, title: `${itemName} 3D`, proceduralType: 'starters' };
-  }
-  if (nameLower.includes('roti') || nameLower.includes('naan') || nameLower.includes('paratha')) {
-    return { animatedGifUrl: FOOD_GIF_ASSETS.rotiNaan, title: `${itemName} 3D`, proceduralType: 'kebab' };
-  }
-  if (nameLower.includes('biryani') || nameLower.includes('rice')) {
-    return { animatedGifUrl: FOOD_GIF_ASSETS.biryani, title: `${itemName} 3D`, proceduralType: 'biryani' };
+  if (nameLower.includes('biryani') || nameLower.includes('rice') || nameLower.includes('pulao')) {
+    return { modelUrl: GLB_MODELS.biryani, title: `${itemName} 360°`, proceduralType: 'biryani' };
   }
   if (nameLower.includes('kebab') || nameLower.includes('tikka') || nameLower.includes('tandoori')) {
-    return { animatedGifUrl: FOOD_GIF_ASSETS.kebab, title: `${itemName} 3D`, proceduralType: 'kebab' };
+    return { modelUrl: GLB_MODELS.kebab, title: `${itemName} 360°`, proceduralType: 'kebab' };
   }
-  if (nameLower.includes('curry') || nameLower.includes('chicken') || nameLower.includes('makhani')) {
-    return { animatedGifUrl: FOOD_GIF_ASSETS.butterChicken, title: `${itemName} 3D`, proceduralType: 'curry' };
+  if (nameLower.includes('curry') || nameLower.includes('dal') || nameLower.includes('masala') || nameLower.includes('paneer')) {
+    return { modelUrl: GLB_MODELS.curry, title: `${itemName} 360°`, proceduralType: 'curry' };
   }
-  if (nameLower.includes('dessert') || nameLower.includes('sweet') || nameLower.includes('cake') || nameLower.includes('halwa')) {
-    return { animatedGifUrl: FOOD_GIF_ASSETS.dessertPastry, title: `${itemName} 3D`, proceduralType: 'dessert' };
+  if (nameLower.includes('ice cream') || nameLower.includes('kulfi')) {
+    return { modelUrl: GLB_MODELS.icecream, title: `${itemName} 360°`, proceduralType: 'dessert' };
+  }
+  if (nameLower.includes('brownie') || nameLower.includes('cake') || nameLower.includes('coffee') || nameLower.includes('chai')) {
+    return { modelUrl: GLB_MODELS.cupcake, title: `${itemName} 360°`, proceduralType: 'dessert' };
+  }
+  if (nameLower.includes('vada') || nameLower.includes('pakora') || nameLower.includes('fry') || nameLower.includes('crispy')) {
+    return { modelUrl: GLB_MODELS.pakora, title: `${itemName} 360°`, proceduralType: 'crispy' };
   }
 
-  // 3. Category Fallback
   switch (category) {
     case 'Main Course':
-      return { animatedGifUrl: FOOD_GIF_ASSETS.butterChicken, title: `${itemName} 3D`, proceduralType: 'curry' };
+      return { modelUrl: GLB_MODELS.curry, title: `${itemName} 360°`, proceduralType: 'curry' };
     case 'Breads & Rice':
-      return { animatedGifUrl: FOOD_GIF_ASSETS.biryani, title: `${itemName} 3D`, proceduralType: 'biryani' };
+      return { modelUrl: GLB_MODELS.biryani, title: `${itemName} 360°`, proceduralType: 'biryani' };
     case 'Desserts':
-      return { animatedGifUrl: FOOD_GIF_ASSETS.dessertPastry, title: `${itemName} 3D`, proceduralType: 'dessert' };
+      return { modelUrl: GLB_MODELS.parfait, title: `${itemName} 360°`, proceduralType: 'dessert' };
     case 'Starters':
-      return { animatedGifUrl: FOOD_GIF_ASSETS.kebab, title: `${itemName} 3D`, proceduralType: 'kebab' };
+      return { modelUrl: GLB_MODELS.kebab, title: `${itemName} 360°`, proceduralType: 'kebab' };
     case 'Beverages':
-      return { animatedGifUrl: FOOD_GIF_ASSETS.coffee, title: `${itemName} 3D`, proceduralType: 'coffee' };
+      return { modelUrl: GLB_MODELS.parfait, title: `${itemName} 360°`, proceduralType: 'coffee' };
     default:
-      return { animatedGifUrl: FOOD_GIF_ASSETS.bowlMeal, title: `${itemName} 3D`, proceduralType: 'curry' };
+      return { modelUrl: GLB_MODELS.dish, title: `${itemName} 360°`, proceduralType: 'platter' };
   }
 };

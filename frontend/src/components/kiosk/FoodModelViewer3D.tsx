@@ -1,13 +1,14 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { ZoomIn, ZoomOut, RefreshCw, Rotate3d } from 'lucide-react';
-import { parseGIF, decompressFrames } from 'gifuct-js';
+import React, { useEffect, useRef, useState } from 'react';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { ZoomIn, ZoomOut, RefreshCw, Rotate3d, Loader2 } from 'lucide-react';
 import { getModelCandidateUrls } from '../../utils/foodModels3D';
 
 interface FoodModelViewer3DProps {
   modelUrl?: string;
   fallbackImage?: string;
-  animatedGifUrl?: string;
-  videoUrl?: string;
   foodName: string;
   scale?: number;
   cameraDistance?: number;
@@ -16,394 +17,295 @@ interface FoodModelViewer3DProps {
   controlsPosition?: 'bottom' | 'top-right' | 'none';
 }
 
-// Global in-memory frame cache so re-opening any dish is instant (0ms)
-const decodedGifFramesCache = new Map<string, HTMLCanvasElement[]>();
-
 export const FoodModelViewer3D: React.FC<FoodModelViewer3DProps> = ({
+  modelUrl,
   fallbackImage,
-  animatedGifUrl,
   foodName,
   className = '',
   controlsPosition = 'top-right'
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const displayCanvasRef = useRef<HTMLCanvasElement>(null);
-  const steamCanvasRef = useRef<HTMLCanvasElement>(null);
+  const mountRef = useRef<HTMLDivElement>(null);
+  const controlsRef = useRef<OrbitControls | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const defaultCamPosRef = useRef<THREE.Vector3>(new THREE.Vector3(0, 1.35, 2.8));
 
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState<boolean>(false);
   const [isZoomed, setIsZoomed] = useState<boolean>(false);
   const [hasInteracted, setHasInteracted] = useState<boolean>(false);
-  const [framesReady, setFramesReady] = useState<boolean>(false);
-  const [currentAngleDeg, setCurrentAngleDeg] = useState<number>(0);
-  const [fallbackRotY, setFallbackRotY] = useState<number>(0);
+  const [angleDeg, setAngleDeg] = useState<number>(0);
 
-  // Refs for smooth 60fps 360° scrubbing without React re-render lag
-  const framesRef = useRef<HTMLCanvasElement[]>([]);
-  const frameIndexRef = useRef<number>(0);
-  const isDraggingRef = useRef<boolean>(false);
-  const isAutoRotatingRef = useRef<boolean>(true);
-  const dragStartXRef = useRef<number>(0);
-  const dragStartFrameRef = useRef<number>(0);
-  const dragStartFallbackRotRef = useRef<number>(0);
-  const resumeTimerRef = useRef<number | null>(null);
-
-  // GIF candidate URLs
-  const gifCandidates = animatedGifUrl ? getModelCandidateUrls(animatedGifUrl) : [];
-  const [gifCandidateIdx, setGifCandidateIdx] = useState<number>(0);
-
-  const activeGifSrc = gifCandidates.length > gifCandidateIdx ? gifCandidates[gifCandidateIdx] : null;
-  const activeMediaSrc = activeGifSrc || fallbackImage;
-
-  // Draw a specific frame index onto the visible display canvas
-  const drawFrame = useCallback((idx: number) => {
-    const frames = framesRef.current;
-    const canvas = displayCanvasRef.current;
-    if (!canvas || frames.length === 0) return;
-
-    const safeIdx = ((idx % frames.length) + frames.length) % frames.length;
-    const srcCanvas = frames[safeIdx];
-    if (!srcCanvas) return;
-
-    if (canvas.width !== srcCanvas.width || canvas.height !== srcCanvas.height) {
-      canvas.width = srcCanvas.width;
-      canvas.height = srcCanvas.height;
-    }
-
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(srcCanvas, 0, 0);
-    }
-
-    frameIndexRef.current = safeIdx;
-    setCurrentAngleDeg(Math.round((safeIdx / frames.length) * 360));
-  }, []);
-
-  // Decode GIF into interactive 360° frames
   useEffect(() => {
-    let cancelled = false;
-    setFramesReady(false);
-    framesRef.current = [];
-    frameIndexRef.current = 0;
-    setCurrentAngleDeg(0);
-    setFallbackRotY(0);
+    const container = mountRef.current;
+    if (!container) return;
+
+    let isDisposed = false;
+    setIsLoading(true);
+    setLoadError(false);
     setIsZoomed(false);
-    isAutoRotatingRef.current = true;
 
-    const loadFrames = async () => {
-      if (!activeGifSrc) return;
+    const width = container.clientWidth || 600;
+    const height = container.clientHeight || 340;
 
-      if (decodedGifFramesCache.has(activeGifSrc)) {
-        const cached = decodedGifFramesCache.get(activeGifSrc)!;
-        if (!cancelled && cached.length > 0) {
-          framesRef.current = cached;
-          setFramesReady(true);
-          drawFrame(0);
+    // 1. Scene & Renderer (Lenskart-style clean studio WebGL)
+    const scene = new THREE.Scene();
+
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      powerPreference: 'high-performance'
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(width, height);
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    container.innerHTML = '';
+    container.appendChild(renderer.domElement);
+
+    // Studio Environment Lighting
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    const envTexture = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
+    scene.environment = envTexture;
+
+    // Camera
+    const camera = new THREE.PerspectiveCamera(36, width / height, 0.1, 100);
+    camera.position.copy(defaultCamPosRef.current);
+    cameraRef.current = camera;
+
+    // 2. OrbitControls for true Lenskart 360° drag-to-rotate
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.enablePan = false;
+    controls.enableZoom = true;
+    controls.minDistance = 1.5;
+    controls.maxDistance = 4.6;
+    controls.minPolarAngle = 0.25;
+    controls.maxPolarAngle = Math.PI / 2 - 0.05;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 1.8;
+    controls.target.set(0, 0.1, 0);
+    controlsRef.current = controls;
+
+    let resumeTimer: number | null = null;
+    const onControlStart = () => {
+      setHasInteracted(true);
+      controls.autoRotate = false;
+      if (resumeTimer) {
+        window.clearTimeout(resumeTimer);
+        resumeTimer = null;
+      }
+    };
+    const onControlEnd = () => {
+      if (resumeTimer) window.clearTimeout(resumeTimer);
+      resumeTimer = window.setTimeout(() => {
+        if (!isDisposed) {
+          controls.autoRotate = true;
         }
+      }, 2000);
+    };
+    controls.addEventListener('start', onControlStart);
+    controls.addEventListener('end', onControlEnd);
+
+    // 3. Studio 3-Point Lighting + Grounded Pedestal Shadow
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+    scene.add(ambientLight);
+
+    const keyLight = new THREE.DirectionalLight(0xfff5e6, 1.8);
+    keyLight.position.set(3, 5, 3);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.width = 1024;
+    keyLight.shadow.mapSize.height = 1024;
+    keyLight.shadow.bias = -0.0005;
+    scene.add(keyLight);
+
+    const fillLight = new THREE.DirectionalLight(0xe0f2fe, 0.7);
+    fillLight.position.set(-4, 2, -2);
+    scene.add(fillLight);
+
+    // Soft studio pedestal disc
+    const pedestalGeo = new THREE.CylinderGeometry(1.15, 1.25, 0.06, 64);
+    const pedestalMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      roughness: 0.35,
+      metalness: 0.25
+    });
+    const pedestal = new THREE.Mesh(pedestalGeo, pedestalMat);
+    pedestal.position.y = -0.38;
+    pedestal.receiveShadow = true;
+    scene.add(pedestal);
+
+    const shadowPlaneGeo = new THREE.PlaneGeometry(3, 3);
+    const shadowPlaneMat = new THREE.ShadowMaterial({ opacity: 0.4 });
+    const shadowPlane = new THREE.Mesh(shadowPlaneGeo, shadowPlaneMat);
+    shadowPlane.rotation.x = -Math.PI / 2;
+    shadowPlane.position.y = -0.345;
+    shadowPlane.receiveShadow = true;
+    scene.add(shadowPlane);
+
+    // 4. Load GLB 3D Food Model with multi-candidate fallback
+    const loader = new GLTFLoader();
+    const candidates = modelUrl ? getModelCandidateUrls(modelUrl) : [];
+
+    const loadCandidate = (idx: number) => {
+      if (isDisposed) return;
+      if (idx >= candidates.length) {
+        setIsLoading(false);
+        setLoadError(true);
         return;
       }
 
-      try {
-        const response = await fetch(activeGifSrc);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const buffer = await response.arrayBuffer();
-        if (cancelled) return;
+      loader.load(
+        candidates[idx],
+        (gltf) => {
+          if (isDisposed) return;
+          const model = gltf.scene;
 
-        const gif = parseGIF(buffer);
-        const decompressed = decompressFrames(gif, true);
-        if (!decompressed || decompressed.length === 0) return;
+          // Auto-center and normalize scale so every dish fits Lenskart-style framing
+          const box = new THREE.Box3().setFromObject(model);
+          const size = box.getSize(new THREE.Vector3());
+          const center = box.getCenter(new THREE.Vector3());
+          const maxDim = Math.max(size.x, size.y, size.z) || 1;
+          const targetSize = 1.65;
+          const normScale = targetSize / maxDim;
 
-        const width = gif.lsd.width;
-        const height = gif.lsd.height;
+          model.scale.setScalar(normScale);
+          model.position.set(
+            -center.x * normScale,
+            -box.min.y * normScale - 0.34,
+            -center.z * normScale
+          );
 
-        const compCanvas = document.createElement('canvas');
-        compCanvas.width = width;
-        compCanvas.height = height;
-        const compCtx = compCanvas.getContext('2d');
-        if (!compCtx) return;
+          model.traverse((child) => {
+            if ((child as THREE.Mesh).isMesh) {
+              child.castShadow = true;
+              child.receiveShadow = true;
+            }
+          });
 
-        const patchCanvas = document.createElement('canvas');
-        const patchCtx = patchCanvas.getContext('2d');
-        if (!patchCtx) return;
-
-        const builtFrames: HTMLCanvasElement[] = [];
-
-        for (let i = 0; i < decompressed.length; i++) {
-          const frame = decompressed[i];
-          const { dims, patch, disposalType } = frame;
-
-          let savedBefore: ImageData | null = null;
-          if (disposalType === 3) {
-            savedBefore = compCtx.getImageData(0, 0, width, height);
-          }
-
-          patchCanvas.width = dims.width;
-          patchCanvas.height = dims.height;
-          const imgData = patchCtx.createImageData(dims.width, dims.height);
-          imgData.data.set(patch);
-          patchCtx.putImageData(imgData, 0, 0);
-
-          compCtx.drawImage(patchCanvas, dims.left, dims.top);
-
-          const snapshot = document.createElement('canvas');
-          snapshot.width = width;
-          snapshot.height = height;
-          const snapCtx = snapshot.getContext('2d');
-          if (snapCtx) {
-            snapCtx.drawImage(compCanvas, 0, 0);
-          }
-          builtFrames.push(snapshot);
-
-          if (disposalType === 2) {
-            compCtx.clearRect(dims.left, dims.top, dims.width, dims.height);
-          } else if (disposalType === 3 && savedBefore) {
-            compCtx.putImageData(savedBefore, 0, 0);
-          }
+          scene.add(model);
+          setIsLoading(false);
+          setLoadError(false);
+        },
+        undefined,
+        () => {
+          loadCandidate(idx + 1);
         }
-
-        if (!cancelled && builtFrames.length > 0) {
-          decodedGifFramesCache.set(activeGifSrc, builtFrames);
-          framesRef.current = builtFrames;
-          setFramesReady(true);
-          drawFrame(0);
-        }
-      } catch {
-        // Fallback cleanly to next candidate or 3D CSS rotation on img
-        if (!cancelled && gifCandidateIdx + 1 < gifCandidates.length) {
-          setGifCandidateIdx((prev) => prev + 1);
-        }
-      }
+      );
     };
 
-    loadFrames();
+    loadCandidate(0);
 
-    return () => {
-      cancelled = true;
+    // 5. Render Loop + Live 0°–360° Azimuth Readout
+    let animId = 0;
+    const animate = () => {
+      if (isDisposed) return;
+      animId = requestAnimationFrame(animate);
+      controls.update();
+
+      const az = controls.getAzimuthalAngle(); // -PI to +PI
+      const deg = Math.round((((az * 180) / Math.PI) + 360) % 360);
+      setAngleDeg(deg);
+
+      renderer.render(scene, camera);
     };
-  }, [activeGifSrc, drawFrame, gifCandidateIdx, gifCandidates.length]);
+    animate();
 
-  // Draw initial frame as soon as the display canvas mounts
-  useEffect(() => {
-    if (framesReady && framesRef.current.length > 0) {
-      drawFrame(frameIndexRef.current);
-    }
-  }, [framesReady, drawFrame]);
-
-  // Smooth Auto-Rotation Loop (pauses while dragging, resumes after interaction)
-  useEffect(() => {
-    const interval = window.setInterval(() => {
-      if (!isAutoRotatingRef.current || isDraggingRef.current) return;
-
-      if (framesRef.current.length > 1) {
-        drawFrame(frameIndexRef.current + 1);
-      } else {
-        setFallbackRotY((prev) => (prev + 2) % 360);
-      }
-    }, 75);
-
-    return () => window.clearInterval(interval);
-  }, [drawFrame]);
-
-  // Real-time culinary steam particle animation
-  useEffect(() => {
-    const canvas = steamCanvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let width = (canvas.width = canvas.clientWidth || 600);
-    let height = (canvas.height = canvas.clientHeight || 340);
-
-    const particleCount = 20;
-    const particles = Array.from({ length: particleCount }, () => ({
-      x: width * 0.28 + Math.random() * (width * 0.44),
-      y: height * 0.45 + Math.random() * (height * 0.4),
-      radius: 10 + Math.random() * 18,
-      opacity: 0.04 + Math.random() * 0.16,
-      speedY: 0.35 + Math.random() * 0.6,
-      speedX: (Math.random() - 0.5) * 0.3,
-      growth: 0.09 + Math.random() * 0.12
-    }));
-
-    let steamFrameId: number;
-
-    const renderSteam = () => {
-      ctx.clearRect(0, 0, width, height);
-
-      particles.forEach((p) => {
-        p.y -= p.speedY;
-        p.x += p.speedX;
-        p.radius += p.growth;
-        p.opacity -= 0.0016;
-
-        if (p.opacity <= 0 || p.y < height * 0.06 || p.radius > 46) {
-          p.x = width * 0.28 + Math.random() * (width * 0.44);
-          p.y = height * 0.7 + Math.random() * (height * 0.18);
-          p.radius = 10 + Math.random() * 14;
-          p.opacity = 0.05 + Math.random() * 0.18;
-          p.speedY = 0.35 + Math.random() * 0.6;
-        }
-
-        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
-        grad.addColorStop(0, `rgba(255, 248, 235, ${p.opacity})`);
-        grad.addColorStop(0.5, `rgba(255, 230, 190, ${p.opacity * 0.3})`);
-        grad.addColorStop(1, 'rgba(255, 230, 190, 0)');
-
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      steamFrameId = requestAnimationFrame(renderSteam);
-    };
-
-    steamFrameId = requestAnimationFrame(renderSteam);
-
+    // Responsive Resize
     const handleResize = () => {
-      if (!canvas) return;
-      width = canvas.width = canvas.clientWidth || 600;
-      height = canvas.height = canvas.clientHeight || 340;
+      if (!container || isDisposed) return;
+      const w = container.clientWidth || 600;
+      const h = container.clientHeight || 340;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
     };
-
     window.addEventListener('resize', handleResize);
 
     return () => {
-      cancelAnimationFrame(steamFrameId);
+      isDisposed = true;
+      if (resumeTimer) window.clearTimeout(resumeTimer);
+      cancelAnimationFrame(animId);
       window.removeEventListener('resize', handleResize);
+      controls.removeEventListener('start', onControlStart);
+      controls.removeEventListener('end', onControlEnd);
+      controls.dispose();
+      pmremGenerator.dispose();
+      envTexture.dispose();
+      renderer.dispose();
     };
-  }, []);
+  }, [modelUrl]);
 
-  // Lenskart-style 360° Touch & Mouse Horizontal Drag Rotation
-  const handlePointerDown = (e: React.PointerEvent) => {
-    isDraggingRef.current = true;
-    isAutoRotatingRef.current = false;
-    dragStartXRef.current = e.clientX;
-    dragStartFrameRef.current = frameIndexRef.current;
-    dragStartFallbackRotRef.current = fallbackRotY;
-    setHasInteracted(true);
+  // Toggle Zoom via camera distance
+  const handleToggleZoom = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const camera = cameraRef.current;
+    const controls = controlsRef.current;
+    if (!camera || !controls) return;
 
-    if (resumeTimerRef.current) {
-      window.clearTimeout(resumeTimerRef.current);
-      resumeTimerRef.current = null;
-    }
+    const nextZoomed = !isZoomed;
+    setIsZoomed(nextZoomed);
 
-    (e.target as HTMLElement)?.setPointerCapture?.(e.pointerId);
+    const dir = camera.position.clone().sub(controls.target).normalize();
+    const targetDist = nextZoomed ? 1.85 : 3.05;
+    camera.position.copy(controls.target.clone().add(dir.multiplyScalar(targetDist)));
+    controls.update();
   };
 
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDraggingRef.current) return;
-    const deltaX = e.clientX - dragStartXRef.current;
-
-    const totalFrames = framesRef.current.length;
-    if (totalFrames > 1) {
-      // 240px horizontal drag = full 360° rotation across all frames
-      const frameDelta = Math.round((deltaX / 240) * totalFrames);
-      drawFrame(dragStartFrameRef.current + frameDelta);
-    } else {
-      const nextRot = (dragStartFallbackRotRef.current + deltaX * 1.2) % 360;
-      setFallbackRotY(nextRot);
-      setCurrentAngleDeg(Math.round(((nextRot % 360) + 360) % 360));
-    }
-  };
-
-  const handlePointerUp = (e: React.PointerEvent) => {
-    if (!isDraggingRef.current) return;
-    isDraggingRef.current = false;
-
-    try {
-      (e.target as HTMLElement)?.releasePointerCapture?.(e.pointerId);
-    } catch {}
-
-    // Resume slow auto-rotation 1.8s after customer stops dragging
-    if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
-    resumeTimerRef.current = window.setTimeout(() => {
-      isAutoRotatingRef.current = true;
-    }, 1800);
-  };
-
-  const handleResetView = () => {
+  const handleResetView = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const camera = cameraRef.current;
+    const controls = controlsRef.current;
+    if (!camera || !controls) return;
     setIsZoomed(false);
-    if (framesRef.current.length > 0) {
-      drawFrame(0);
-    } else {
-      setFallbackRotY(0);
-      setCurrentAngleDeg(0);
-    }
-    isAutoRotatingRef.current = true;
+    camera.position.copy(defaultCamPosRef.current);
+    controls.target.set(0, 0.1, 0);
+    controls.autoRotate = true;
+    controls.update();
   };
 
   return (
     <div
-      ref={containerRef}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerUp}
-      className={`relative w-full h-full overflow-hidden select-none touch-none bg-gradient-to-b from-slate-900 via-slate-950 to-black cursor-grab active:cursor-grabbing flex items-center justify-center p-3 ${className}`}
+      className={`relative w-full h-full overflow-hidden select-none touch-none bg-[radial-gradient(ellipse_at_50%_40%,#1e293b_0%,#0f172a_55%,#020617_100%)] ${className}`}
       style={{ touchAction: 'none' }}
     >
-      {/* 1. Ambient Warm Diffused Spotlight Backdrop */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_45%,rgba(245,158,11,0.15)_0%,rgba(15,23,42,0.65)_65%,rgba(2,6,23,0.98)_100%)] pointer-events-none" />
-
-      {/* 2. Foreground 360° Interactive Food Canvas / Turntable */}
+      {/* Three.js WebGL 360° Interactive Mount */}
       <div
-        className="relative z-10 w-full h-full flex flex-col items-center justify-center transition-transform duration-300 ease-out pointer-events-none"
-        style={{
-          perspective: '1200px',
-          transform: `scale(${isZoomed ? 1.3 : 1.0})`
-        }}
-      >
-        <div className="relative flex items-center justify-center max-w-[92%] max-h-[290px] sm:max-h-[320px]">
-          {framesReady ? (
-            <canvas
-              ref={displayCanvasRef}
-              aria-label={`${foodName} 360 degree view`}
-              className="max-h-[270px] sm:max-h-[300px] w-auto max-w-full object-contain rounded-2xl drop-shadow-[0_24px_45px_rgba(0,0,0,0.85)] filter saturate-[1.12] contrast-[1.05]"
-            />
-          ) : (
-            <img
-              src={activeMediaSrc}
-              alt={foodName}
-              onError={() => {
-                if (gifCandidateIdx + 1 < gifCandidates.length) {
-                  setGifCandidateIdx((prev) => prev + 1);
-                }
-              }}
-              style={{
-                transform: `rotateY(${fallbackRotY}deg)`
-              }}
-              className="max-h-[270px] sm:max-h-[300px] w-auto max-w-full object-contain rounded-2xl drop-shadow-[0_24px_45px_rgba(0,0,0,0.85)] filter saturate-[1.12] contrast-[1.05]"
-              draggable={false}
-            />
-          )}
-        </div>
-
-        {/* 3D Circular Pedestal Platter Reflection & Shadow Beneath Dish */}
-        <div
-          className="w-56 sm:w-72 h-14 mt-[-16px] rounded-full pointer-events-none"
-          style={{
-            background: 'radial-gradient(ellipse at center, rgba(245,158,11,0.28) 0%, rgba(0,0,0,0.75) 55%, transparent 75%)',
-            transform: 'rotateX(75deg)',
-            filter: 'blur(3px)'
-          }}
-        />
-      </div>
-
-      {/* 3. Live Rising Steam Particle Canvas */}
-      <canvas
-        ref={steamCanvasRef}
-        className="absolute inset-0 w-full h-full pointer-events-none z-20"
+        ref={mountRef}
+        className="w-full h-full cursor-grab active:cursor-grabbing"
       />
 
-      {/* 4. Top-Right Floating Controls (Zoom & Reset) */}
+      {/* Loading Indicator */}
+      {isLoading && (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-slate-950/60 backdrop-blur-xs pointer-events-none">
+          <Loader2 className="w-8 h-8 text-amber-400 animate-spin" />
+          <span className="mt-2 text-xs font-bold text-amber-300 tracking-wide">
+            Loading 360° 3D Model...
+          </span>
+        </div>
+      )}
+
+      {/* Fallback State if GLB unavailable */}
+      {loadError && fallbackImage && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center p-4">
+          <img
+            src={fallbackImage}
+            alt={foodName}
+            className="max-h-full max-w-full object-contain rounded-2xl shadow-2xl"
+          />
+        </div>
+      )}
+
+      {/* Top-Right Controls (Zoom & Reset) */}
       {controlsPosition === 'top-right' && (
         <div className="absolute top-4 right-16 z-30 flex items-center gap-1.5 pointer-events-auto">
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsZoomed((prev) => !prev);
-            }}
+            onClick={handleToggleZoom}
             className={`px-2.5 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 shadow-lg backdrop-blur-md border ${
               isZoomed
                 ? 'bg-amber-500 text-slate-950 border-amber-300 font-black'
@@ -418,12 +320,9 @@ export const FoodModelViewer3D: React.FC<FoodModelViewer3DProps> = ({
           {isZoomed && (
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleResetView();
-              }}
+              onClick={handleResetView}
               className="w-8 h-8 rounded-full bg-slate-900/80 hover:bg-slate-800 text-slate-200 hover:text-white border border-white/15 transition-all flex items-center justify-center cursor-pointer active:scale-95 shadow-lg backdrop-blur-md"
-              title="Reset View"
+              title="Reset 360° Angle"
             >
               <RefreshCw className="w-3.5 h-3.5" />
             </button>
@@ -431,15 +330,15 @@ export const FoodModelViewer3D: React.FC<FoodModelViewer3DProps> = ({
         </div>
       )}
 
-      {/* 5. Lenskart-Style 360° Interactive Scrubbing Pill */}
+      {/* Lenskart-Style 360° Interactive Badge */}
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
         <div className="flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-950/85 backdrop-blur-md border border-amber-400/40 text-amber-300 text-[11px] font-bold shadow-lg">
           <Rotate3d className="w-4 h-4 text-amber-400" />
           <span>360°</span>
           <span className="text-slate-500">•</span>
-          <span className="font-mono text-white text-[10px] w-8 text-center">{currentAngleDeg}°</span>
+          <span className="font-mono text-white text-[10px] w-8 text-center">{angleDeg}°</span>
           {!hasInteracted && (
-            <span className="text-[10px] text-amber-200/80 hidden sm:inline">Drag left/right to rotate</span>
+            <span className="text-[10px] text-amber-200/80 hidden sm:inline">Drag to rotate 360°</span>
           )}
         </div>
       </div>

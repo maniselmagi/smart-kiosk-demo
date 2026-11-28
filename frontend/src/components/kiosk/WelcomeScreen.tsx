@@ -38,12 +38,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   const [selectedLang, setSelectedLang] = useState<Language>(language || 'en');
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    // 250ms initial pause so the customer sees the glowing golden royal crest before doors glide apart
-    const timer = setTimeout(() => setIsOpenAnimated(true), 250);
-    return () => clearTimeout(timer);
-  }, []);
-
   // Sync internal selected language when context language updates
   useEffect(() => {
     if (language) {
@@ -89,8 +83,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
     >
       {/* GRAND DINING DOUBLE-DOOR CINEMATIC OPENING EFFECT */}
       <div 
-        className={`fixed inset-0 z-50 pointer-events-none overflow-hidden transition-opacity duration-1000 ${
-          isOpenAnimated ? 'opacity-0 delay-700 pointer-events-none' : 'opacity-100'
+        className={`fixed inset-0 z-50 overflow-hidden transition-opacity duration-1000 ${
+          isOpenAnimated ? 'opacity-0 delay-700 pointer-events-none' : 'opacity-100 pointer-events-auto'
         }`}
       >
         {/* Left Luxury Door Panel */}
@@ -112,27 +106,35 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           <div className="h-full w-1 bg-gradient-to-b from-transparent via-amber-400 to-transparent opacity-60" />
         </div>
 
-        {/* Center Golden Medallion Crest (Scales gently and dissolves as doors glide open) */}
+        {/* Center Golden Medallion Crest (Stays closed until customer clicks the Royal Ember logo) */}
         <div 
           className={`absolute inset-0 flex items-center justify-center transition-all duration-700 ease-out ${
             isOpenAnimated ? 'scale-125 opacity-0 pointer-events-none' : 'scale-100 opacity-100'
           }`}
         >
-          <div className="relative flex flex-col items-center">
+          <button
+            type="button"
+            onClick={() => setIsOpenAnimated(true)}
+            aria-label="Tap Royal Ember logo to enter"
+            className="relative flex flex-col items-center cursor-pointer group focus:outline-none transition-transform duration-300 hover:scale-105 active:scale-95"
+          >
             {/* Ambient Golden Halo Glow */}
-            <div className="absolute w-44 h-44 rounded-full bg-amber-500/30 blur-2xl animate-pulse" />
+            <div className="absolute -inset-6 rounded-full bg-amber-500/30 blur-2xl animate-pulse group-hover:bg-amber-400/45 transition-colors" />
             
             {/* Medallion Badge */}
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-yellow-600 p-0.5 shadow-[0_0_40px_rgba(245,158,11,0.7)]">
+            <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-yellow-600 p-0.5 shadow-[0_0_40px_rgba(245,158,11,0.7)] group-hover:shadow-[0_0_55px_rgba(245,158,11,0.95)] transition-shadow">
               <div className="w-full h-full rounded-full bg-slate-950 flex flex-col items-center justify-center border border-amber-300/40 text-amber-300">
-                <Crown className="w-8 h-8 text-amber-400 animate-pulse" />
+                <Crown className="w-8 h-8 text-amber-400 animate-pulse group-hover:scale-110 transition-transform" />
               </div>
             </div>
 
-            <p className="font-royal text-xs font-black uppercase tracking-[0.3em] text-amber-400 mt-3 drop-shadow-md">
+            <p className="relative font-royal text-xs font-black uppercase tracking-[0.3em] text-amber-400 mt-3 drop-shadow-md">
               {t.brandName || 'Royal Ember'}
             </p>
-          </div>
+            <span className="relative mt-2 text-[10px] font-medium uppercase tracking-[0.25em] text-amber-200/70 group-hover:text-amber-200 transition-colors animate-pulse">
+              Tap Logo to Enter
+            </span>
+          </button>
         </div>
       </div>
 
